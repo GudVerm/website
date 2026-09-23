@@ -1,1 +1,1 @@
-window.GUDELIUS_CMS_API = window.GUDELIUS_CMS_API || localStorage.getItem("gudelius-cms-api") || "";
+window.GUDELIUS_CMS_API = "https://gudelius-cms.gudeliusvermessung.workers.dev";
