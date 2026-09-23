@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name:'BBSOFT', detail:'Tiefbau, Vermessung & DGM', image:'https://www.bbsoft.de/assets/images/uberuns/bbsoft-planung-computer.webp', mediaKey:'equipment/bbsoft', source:'https://www.bbsoft.de/', sourceLabel:'BBSoft' },
         { name:'Trimble RealWorks', detail:'Punktwolken-Auswertung', image:'https://images.ctfassets.net/citn2sn5tdjr/2qHLMpxFWko4vex8bZItdi/f3295ad93a3fd7aaaa384a895ab3e13e/trimble-realworks-pipes-office-laptop-2880x1440.jpg?f=right&fit=fill&fm=webp&h=810&q=85&w=1920', mediaKey:'equipment/realworks', source:'https://www.trimble.com/de/products/building-construction-field-systems/trimble-realworks', sourceLabel:'Trimble' },
         { name:'Agisoft Metashape', detail:'Photogrammetrie', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/metashape', source:'https://www.agisoft.com/', sourceLabel:'Agisoft' },
-        { name:'Mobiler Büroarbeitsplatz', detail:'Auswertung direkt im Projektumfeld', image:'https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' }
+        { name:'Mobiler Büroarbeitsplatz', detail:'Auswertung direkt im Projektumfeld', image:'https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg', mediaKey:'equipment/mobile-arbeitsplatz', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' }
       ]
     }
   };
