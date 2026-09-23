@@ -115,16 +115,50 @@ const saveProjectTitles=document.getElementById("saveProjectTitles");
 const reloadProjectTitles=document.getElementById("reloadProjectTitles");
 const projectTitleStatus=document.getElementById("projectTitleStatus");
 const contactTextFields={
+  "kontakt/eyebrow":document.getElementById("contactEyebrow"),
   "kontakt/title":document.getElementById("contactTitle"),
   "kontakt/lead":document.getElementById("contactLead"),
+  "kontakt/telefon-label":document.getElementById("contactPhoneLabel"),
   "kontakt/telefon-1":document.getElementById("contactPhone1"),
   "kontakt/telefon-2":document.getElementById("contactPhone2"),
+  "kontakt/email-label":document.getElementById("contactEmailLabel"),
   "kontakt/email":document.getElementById("contactEmail"),
-  "kontakt/adresse":document.getElementById("contactAddress")
+  "kontakt/adresse-label":document.getElementById("contactAddressLabel"),
+  "kontakt/adresse":document.getElementById("contactAddress"),
+  "kontakt/form-title":document.getElementById("contactFormTitle"),
+  "kontakt/form-lead":document.getElementById("contactFormLead"),
+  "kontakt/name-label":document.getElementById("contactNameLabel"),
+  "kontakt/name-placeholder":document.getElementById("contactNamePlaceholder"),
+  "kontakt/email-field-label":document.getElementById("contactEmailFieldLabel"),
+  "kontakt/email-placeholder":document.getElementById("contactEmailPlaceholder"),
+  "kontakt/subject-label":document.getElementById("contactSubjectLabel"),
+  "kontakt/subject-placeholder":document.getElementById("contactSubjectPlaceholder"),
+  "kontakt/message-label":document.getElementById("contactMessageLabel"),
+  "kontakt/message-placeholder":document.getElementById("contactMessagePlaceholder"),
+  "kontakt/button":document.getElementById("contactButtonText"),
+  "kontakt/form-note":document.getElementById("contactFormNote")
 };
 const saveContactTexts=document.getElementById("saveContactTexts");
 const reloadContactTexts=document.getElementById("reloadContactTexts");
 const contactTextStatus=document.getElementById("contactTextStatus");
+
+const serviceContactTextFields={
+  "kontakt/ingenieurvermessung/title":document.getElementById("contactEngineerTitle"),
+  "kontakt/ingenieurvermessung/lead":document.getElementById("contactEngineerLead"),
+  "kontakt/ingenieurvermessung/subject":document.getElementById("contactEngineerSubject"),
+  "kontakt/gis-bauvermessung/title":document.getElementById("contactGisTitle"),
+  "kontakt/gis-bauvermessung/lead":document.getElementById("contactGisLead"),
+  "kontakt/gis-bauvermessung/subject":document.getElementById("contactGisSubject"),
+  "kontakt/3d-laserscanning/title":document.getElementById("contactScanTitle"),
+  "kontakt/3d-laserscanning/lead":document.getElementById("contactScanLead"),
+  "kontakt/3d-laserscanning/subject":document.getElementById("contactScanSubject"),
+  "kontakt/drohnenvermessung/title":document.getElementById("contactDroneTitle"),
+  "kontakt/drohnenvermessung/lead":document.getElementById("contactDroneLead"),
+  "kontakt/drohnenvermessung/subject":document.getElementById("contactDroneSubject")
+};
+const saveServiceContactTexts=document.getElementById("saveServiceContactTexts");
+const reloadServiceContactTexts=document.getElementById("reloadServiceContactTexts");
+const serviceContactTextStatus=document.getElementById("serviceContactTextStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -379,12 +413,43 @@ if(saveProjectTitles){
 if(reloadProjectTitles) reloadProjectTitles.addEventListener("click",loadProjectTitles);
 
 const contactTextDefaults={
+  "kontakt/eyebrow":"Kontakt",
   "kontakt/title":"Welches Projekt dürfen wir vermessen?",
   "kontakt/lead":"Kurze Eckdaten genügen für den ersten Austausch.",
+  "kontakt/telefon-label":"Telefon",
   "kontakt/telefon-1":"08043 / 9187958",
   "kontakt/telefon-2":"01511 / 5653694",
-  "kontakt/email":"jost@gudeliusvermessung.de",
-  "kontakt/adresse":"Bäcker 25 · 83676 Jachenau"
+  "kontakt/email-label":"E-Mail",
+  "kontakt/email":"gudeliusvermessung@web.de",
+  "kontakt/adresse-label":"Adresse",
+  "kontakt/adresse":"Bäcker 25 · 83676 Jachenau",
+  "kontakt/form-title":"Projektanfrage",
+  "kontakt/form-lead":"Was soll vermessen werden?",
+  "kontakt/name-label":"Name",
+  "kontakt/name-placeholder":"Vor- und Nachname",
+  "kontakt/email-field-label":"E-Mail",
+  "kontakt/email-placeholder":"name@firma.de",
+  "kontakt/subject-label":"Projekt / Betreff",
+  "kontakt/subject-placeholder":"z. B. Bauvermessung Mehrfamilienhaus",
+  "kontakt/message-label":"Nachricht",
+  "kontakt/message-placeholder":"Projekt, Ort und gewünschte Leistung",
+  "kontakt/button":"Anfrage senden →",
+  "kontakt/form-note":"Die Anfrage wird direkt und ohne Öffnen eines E-Mail-Programms übermittelt."
+};
+
+const serviceContactTextDefaults={
+  "kontakt/ingenieurvermessung/title":"Ingenieurvermessung für Ihr Projekt anfragen.",
+  "kontakt/ingenieurvermessung/lead":"Kurze Eckdaten zu Projekt, Ort und gewünschter Leistung reichen für den ersten Austausch.",
+  "kontakt/ingenieurvermessung/subject":"Anfrage Ingenieurvermessung",
+  "kontakt/gis-bauvermessung/title":"Bau- oder Infrastrukturprojekt besprechen.",
+  "kontakt/gis-bauvermessung/lead":"Kurze Eckdaten zu Projekt, Ort und gewünschter Leistung reichen für den ersten Austausch.",
+  "kontakt/gis-bauvermessung/subject":"Anfrage GIS & Bauvermessung",
+  "kontakt/3d-laserscanning/title":"Bestand digital erfassen lassen.",
+  "kontakt/3d-laserscanning/lead":"Kurze Eckdaten zu Projekt, Ort und gewünschter Leistung reichen für den ersten Austausch.",
+  "kontakt/3d-laserscanning/subject":"Anfrage 3D-Laserscanning",
+  "kontakt/drohnenvermessung/title":"Drohnenvermessung für Ihr Projekt anfragen.",
+  "kontakt/drohnenvermessung/lead":"Kurze Eckdaten zu Projekt, Ort und gewünschter Leistung reichen für den ersten Austausch.",
+  "kontakt/drohnenvermessung/subject":"Anfrage Drohnenvermessung"
 };
 
 async function loadContactTexts(){
@@ -426,6 +491,46 @@ if(saveContactTexts){
 }
 
 if(reloadContactTexts) reloadContactTexts.addEventListener("click",loadContactTexts);
+
+async function loadServiceContactTexts(){
+  if(!getApi()) return setStatus(serviceContactTextStatus,"Worker-URL fehlt.",false);
+  setStatus(serviceContactTextStatus,"Lade Leistungs-Kontakttexte …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(serviceContactTextFields).forEach(([key,field])=>{
+      if(field) field.value=typeof content[key]==="string" ? content[key] : serviceContactTextDefaults[key];
+    });
+    setStatus(serviceContactTextStatus,"Leistungs-Kontakttexte geladen.",true);
+  }catch(error){
+    Object.entries(serviceContactTextFields).forEach(([key,field])=>{
+      if(field) field.value=serviceContactTextDefaults[key];
+    });
+    setStatus(serviceContactTextStatus,"Leistungs-Kontakttexte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveServiceContactTexts){
+  saveServiceContactTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(serviceContactTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveServiceContactTexts.disabled=true;
+    setStatus(serviceContactTextStatus,"Speichere Leistungs-Kontakttexte …");
+    try{
+      await Promise.all(Object.entries(serviceContactTextFields).map(([key,field])=>
+        saveHeroText(key,field.value.trim())
+      ));
+      setStatus(serviceContactTextStatus,"Leistungs-Kontakttexte erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(serviceContactTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveServiceContactTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadServiceContactTexts) reloadServiceContactTexts.addEventListener("click",loadServiceContactTexts);
 
 function setStatus(el,text,ok){
   el.textContent=text;
@@ -528,6 +633,7 @@ loadServiceTexts();
 loadCompanyTexts();
 loadProjectTitles();
 loadContactTexts();
+loadServiceContactTexts();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
