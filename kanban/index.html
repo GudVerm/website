@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GudeliusVermessung – Kanban · GitHub synchronisiert</title>
+  <style>
+    :root{
+      --bg:#f4f5f2;--paper:#fff;--ink:#172027;--muted:#6d777c;--line:#dce1df;
+      --yellow:#e5c533;--yellow-soft:#fff7cf;--blue:#eaf3f8;--orange:#fff1dd;--green:#eaf6ee;
+      --shadow:0 14px 38px rgba(22,32,39,.08);--radius:20px
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .wrap{width:min(1500px,calc(100% - 36px));margin:auto}
+    header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+    .header-inner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .title-wrap{display:flex;align-items:center;gap:14px}
+    .mark{width:42px;height:42px;border-radius:12px;background:var(--yellow);display:grid;place-items:center;font-weight:900}
+    h1{font-size:1.16rem;margin:0;letter-spacing:-.02em}.sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:.8rem;font-weight:800;cursor:pointer}
+    .btn:hover{border-color:#b8c0bd}.btn.primary{background:var(--yellow);border-color:#d2b328}.btn.dark{background:#172027;color:#fff;border-color:#172027}
+    main{padding:34px 0 56px}
+    .intro{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:24px}
+    .intro h2{font-size:clamp(2rem,4vw,3.7rem);line-height:.98;letter-spacing:-.055em;margin:0 0 12px}
+    .intro p{margin:0;color:var(--muted);max-width:780px;line-height:1.6}
+    .syncbox{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px 16px;min-width:245px}
+    .syncbox small{display:block;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+    .syncbox strong{display:flex;align-items:center;gap:8px;margin-top:4px}.syncdot{width:8px;height:8px;border-radius:50%;background:#5a9a6a}
+    .board{display:grid;grid-template-columns:repeat(4,minmax(260px,1fr));gap:16px;align-items:start}
+    .column{background:#edf0ee;border:1px solid var(--line);border-radius:var(--radius);padding:14px;min-height:490px}
+    .column-head{display:flex;justify-content:space-between;align-items:center;padding:3px 3px 13px}
+    .column-head h3{font-size:.94rem;margin:0}.count{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--line);font-size:.72rem;font-weight:900}
+    .cards{display:grid;gap:11px}.empty{padding:24px 12px;text-align:center;color:#98a1a4;font-size:.78rem;border:1px dashed #ccd3d0;border-radius:14px}
+    .card{display:block;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 16px rgba(22,32,39,.035);transition:.18s}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#c5ceca}
+    .card.open{border-left:4px solid #c8b03a}.card.doing{border-left:4px solid #4f8fb0}.card.waiting{border-left:4px solid #d7a64a}.card.done{border-left:4px solid #5a9a6a;opacity:.78}
+    .card.done h4{text-decoration:line-through}
+    .card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:11px}
+    .issue{font-size:.68rem;font-weight:900;letter-spacing:.08em;color:#7a858a}.owner{font-size:.67rem;font-weight:900;padding:5px 8px;border-radius:999px;white-space:nowrap}
+    .owner.basti{background:#e9f5ee;color:#365b45}.owner.jost{background:#e9f1f5;color:#395665}.owner.none{background:#f0f1ef;color:#737d80}
+    .card h4{margin:0 0 8px;font-size:1rem;line-height:1.3;letter-spacing:-.018em}.card p{font-size:.83rem;line-height:1.5;color:var(--muted);margin:0}
+    .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid #edf0ef}
+    .chip{font-size:.68rem;font-weight:800;padding:5px 8px;border-radius:8px;background:#f4f6f5;color:#667177}.chip.due{background:var(--yellow-soft);color:#76631c}
+    .github-link{display:inline-flex;margin-top:13px;font-size:.72rem;font-weight:850;color:#4b5d65}
+    .loading{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;text-align:center;color:var(--muted)}
+    .error{background:#fff0f0;color:#8a4141;border-color:#e8c4c4}
+    footer{padding:0 0 30px;color:#818b8f;font-size:.75rem}
+    @media(max-width:1100px){.board{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.wrap{width:min(calc(100% - 22px),1500px)}.header-inner{padding:13px 0;align-items:flex-start;flex-direction:column}.intro{display:block}.syncbox{margin-top:16px}.board{grid-template-columns:1fr}.column{min-height:160px}}
+  
+    .btn.connected{background:#eaf6ee;border-color:#b9d8c3;color:#315e40}
+    .column{transition:.16s ease}
+    .column.drag-over{background:#e8ecdF;border-color:#c5ad37;box-shadow:inset 0 0 0 2px rgba(229,197,51,.28)}
+    .card{cursor:grab}
+    .card:active{cursor:grabbing}
+    .card.dragging{opacity:.35;transform:rotate(1deg) scale(.98)}
+    .writehint{font-size:.72rem;color:#8a9498;margin:9px 3px 0}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:120;background:#172027;color:#fff;padding:12px 15px;border-radius:12px;box-shadow:var(--shadow);font-size:.8rem;font-weight:750;display:none}
+    .toast.show{display:block}.toast.error{background:#8a4141}
+    .auth-backdrop{position:fixed;inset:0;z-index:100;background:rgba(14,21,25,.55);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px}
+    .auth-backdrop.open{display:flex}
+    .auth-modal{width:min(570px,100%);background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:0 28px 90px rgba(15,25,30,.25);overflow:hidden}
+    .auth-head{display:flex;justify-content:space-between;gap:20px;padding:22px 24px 16px;border-bottom:1px solid var(--line)}
+    .auth-head h3{margin:0 0 5px;font-size:1.25rem}.auth-head p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.5}
+    .auth-close{width:36px;height:36px;border:0;border-radius:50%;background:#f0f2f1;cursor:pointer;font-size:1.1rem}
+    .auth-body{padding:20px 24px 24px}.auth-body ol{margin:0 0 18px;padding-left:20px;color:#59656a;font-size:.82rem;line-height:1.6}
+    .auth-body code{font-size:.78rem;background:#f3f5f4;padding:2px 5px;border-radius:5px}
+    .token-field{display:grid;gap:7px}.token-field label{font-size:.78rem;font-weight:850}
+    .token-field input{width:100%;border:1px solid #ccd4d1;border-radius:11px;padding:12px 13px;font:inherit;outline:none}
+    .token-field input:focus{border-color:#c4a929;box-shadow:0 0 0 3px rgba(229,197,51,.16)}
+    .auth-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:15px;flex-wrap:wrap}
+    .auth-note{font-size:.71rem;color:#889296;line-height:1.45;max-width:330px}
+    @media(max-width:700px){.card{cursor:default}.writehint{display:none}}
+
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap header-inner">
+    <div class="title-wrap">
+      <div class="mark">G</div>
+      <div>
+        <h1>GudeliusVermessung · Kanban</h1>
+        <div class="sub">Version 3 Beta · zentral über GitHub Issues gespeichert</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn dark" href="../index.html">← Beta-Website</a>
+      <a class="btn primary" id="newTicket" target="_blank" rel="noopener">+ Ticket erstellen</a>
+      <button class="btn" id="githubAuth" type="button">GitHub verbinden</button>
+      <button class="btn" id="refresh" type="button">↻ Aktualisieren</button>
+      <a class="btn" href="https://github.com/SebMut/Smartwerk-Presentation/issues?q=is%3Aissue%20label%3A%22gudelius-beta%22" target="_blank" rel="noopener">GitHub Issues ↗</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="intro">
+      <div>
+        <h2>Ein Stand. Auf jedem Gerät.</h2>
+        <p>Dieses Board liest den aktuellen Stand direkt aus GitHub. Nach einmaligem Verbinden mit GitHub kannst du die Kacheln per Drag & Drop zwischen Offen, In Arbeit, Wartet und Erledigt verschieben. Der Status wird direkt im GitHub-Issue gespeichert und ist dadurch auf jedem Gerät identisch.</p>
+      </div>
+      <div class="syncbox">
+        <small>Synchronisierung</small>
+        <strong><span class="syncdot"></span><span id="syncText">GitHub wird geladen …</span></strong>
+      </div>
+    </section>
+
+    <section class="board" id="board">
+      <div class="loading" id="loading">Tickets werden aus GitHub geladen …</div>
+      <div class="column" data-status="open"><div class="column-head"><h3>Offen</h3><span class="count">0</span></div><div class="cards"></div><div class="writehint">Ticket hierher ziehen → Status wird in GitHub gespeichert.</div></div>
+      <div class="column" data-status="doing"><div class="column-head"><h3>In Arbeit</h3><span class="count">0</span></div><div class="cards"></div><div class="writehint">Ticket hierher ziehen → Status wird in GitHub gespeichert.</div></div>
+      <div class="column" data-status="waiting"><div class="column-head"><h3>Wartet</h3><span class="count">0</span></div><div class="cards"></div><div class="writehint">Ticket hierher ziehen → Status wird in GitHub gespeichert.</div></div>
+      <div class="column" data-status="done"><div class="column-head"><h3>Erledigt</h3><span class="count">0</span></div><div class="cards"></div><div class="writehint">Ticket hierher ziehen → Issue wird geschlossen.</div></div>
+    </section>
+  </div>
+</main>
+
+
+<div class="auth-backdrop" id="authModal" aria-hidden="true">
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-head">
+      <div>
+        <h3 id="authTitle">GitHub für Drag & Drop verbinden</h3>
+        <p>Damit diese statische GitHub-Pages-Seite den Status eines Issues ändern kann, braucht sie eine Schreibberechtigung für genau dieses Repository.</p>
+      </div>
+      <button class="auth-close" id="authClose" type="button" aria-label="Schließen">×</button>
+    </div>
+    <div class="auth-body">
+      <ol>
+        <li>Erstelle bei GitHub einen <strong>Fine-grained personal access token</strong>.</li>
+        <li>Repository access: nur <code>SebMut/Smartwerk-Presentation</code>.</li>
+        <li>Repository permissions → <strong>Issues: Read and write</strong>. Weitere Schreibrechte sind nicht nötig.</li>
+        <li>Token unten einfügen. Er wird nur in <strong>sessionStorage</strong> dieses Browser-Tabs gespeichert.</li>
+      </ol>
+      <div class="token-field">
+        <label for="githubToken">GitHub-Token</label>
+        <input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      </div>
+      <div class="auth-actions">
+        <div class="auth-note">Den Token niemals in GitHub-Dateien eintragen und auch nicht im Chat teilen.</div>
+        <div>
+          <a class="btn" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Token erstellen ↗</a>
+          <button class="btn primary" id="authSave" type="button">Verbinden</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<footer><div class="wrap">Interne Projektübersicht · Datenquelle: GitHub Issues · GudeliusVermessung Version 3 Beta</div></footer>
+
+<script>
+(() => {
+  const OWNER = 'SebMut';
+  const REPO = 'Smartwerk-Presentation';
+  const API_BASE = 'https://api.github.com/repos/' + OWNER + '/' + REPO;
+  const DATA_URL = './data.json';
+  const TOKEN_KEY = 'gudelius-kanban-github-token';
+  const STATUS_LABELS = ['status: offen','status: in-arbeit','status: wartet','status: erledigt'];
+  const STATUS_TO_LABEL = {
+    open: 'status: offen',
+    doing: 'status: in-arbeit',
+    waiting: 'status: wartet',
+    done: 'status: erledigt'
+  };
+  const NEW = 'https://github.com/' + OWNER + '/' + REPO + '/issues/new?title=' +
+    encodeURIComponent('[Gudelius Beta] ') +
+    '&body=' + encodeURIComponent('## Aufgabe\n\nBeschreibung hier eintragen.\n\n**Status:** Offen  \n**Verantwortlich:** Basti  \n**Bereich:** \n\nVerknüpft mit: Version 3 Beta');
+
+  document.getElementById('newTicket').href = NEW;
+
+  const loading = document.getElementById('loading');
+  const syncText = document.getElementById('syncText');
+  const refresh = document.getElementById('refresh');
+  const columns = [...document.querySelectorAll('.column')];
+  const authButton = document.getElementById('githubAuth');
+  const authModal = document.getElementById('authModal');
+  const authClose = document.getElementById('authClose');
+  const authSave = document.getElementById('authSave');
+  const tokenInput = document.getElementById('githubToken');
+  const toast = document.getElementById('toast');
+
+  let issuesByNumber = new Map();
+  let dragged = null;
+  let busy = false;
+
+  const esc = (s='') => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+
+  function getToken() {
+    return sessionStorage.getItem(TOKEN_KEY) || '';
+  }
+
+  function apiHeaders(write = false) {
+    const h = {
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+    const token = getToken();
+    if (token) h['Authorization'] = 'Bearer ' + token;
+    if (write) h['Content-Type'] = 'application/json';
+    return h;
+  }
+
+  function updateAuthButton() {
+    const connected = !!getToken();
+    authButton.textContent = connected ? '✓ GitHub verbunden' : 'GitHub verbinden';
+    authButton.classList.toggle('connected', connected);
+  }
+
+  function showToast(message, isError = false) {
+    toast.textContent = message;
+    toast.classList.toggle('error', isError);
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+
+  function openAuth() {
+    tokenInput.value = getToken();
+    authModal.classList.add('open');
+    authModal.setAttribute('aria-hidden','false');
+    setTimeout(() => tokenInput.focus(), 40);
+  }
+
+  function closeAuth() {
+    authModal.classList.remove('open');
+    authModal.setAttribute('aria-hidden','true');
+    tokenInput.value = '';
+  }
+
+  async function validateAndSaveToken() {
+    const token = tokenInput.value.trim();
+    if (!token) return;
+    authSave.disabled = true;
+    authSave.textContent = 'Prüfe …';
+    try {
+      const res = await fetch(API_BASE, { headers: {
+        'Accept':'application/vnd.github+json',
+        'X-GitHub-Api-Version':'2022-11-28',
+        'Authorization':'Bearer ' + token
+      }});
+      if (!res.ok) throw new Error('GitHub hat den Token abgelehnt (' + res.status + ').');
+      sessionStorage.setItem(TOKEN_KEY, token);
+      updateAuthButton();
+      closeAuth();
+      showToast('GitHub verbunden – Drag & Drop ist aktiv.');
+      await load();
+    } catch (e) {
+      showToast(e.message || 'Verbindung fehlgeschlagen.', true);
+    } finally {
+      authSave.disabled = false;
+      authSave.textContent = 'Verbinden';
+    }
+  }
+
+  function labelNames(issue) {
+    return (issue.labels || []).map(l => typeof l === 'string' ? l : l.name);
+  }
+
+  function statusOf(issue) {
+    if (issue.state === 'closed') return 'done';
+    const labels = labelNames(issue);
+    if (labels.includes('status: in-arbeit')) return 'doing';
+    if (labels.includes('status: wartet')) return 'waiting';
+    if (labels.includes('status: erledigt')) return 'done';
+    return 'open';
+  }
+
+  function ownerOf(issue) {
+    const labels = labelNames(issue);
+    if (labels.includes('verantwortlich: jost')) return ['Jost','jost'];
+    if (labels.includes('verantwortlich: basti')) return ['Basti','basti'];
+    return ['–','none'];
+  }
+
+  function descriptionOf(body='') {
+    const lines = body.split('\n').map(x => x.trim()).filter(Boolean);
+    return lines.find(x => !x.startsWith('#') && !x.startsWith('**') && !x.startsWith('Verknüpft mit:')) || '';
+  }
+
+  function dueOf(body='') {
+    const m = body.match(/\*\*(?:Fällig|Ziel):\*\*\s*([^\n]+)/i);
+    return m ? m[1].trim() : '';
+  }
+
+  function areaOf(body='') {
+    const m = body.match(/\*\*Bereich:\*\*\s*([^\n]+)/i);
+    return m ? m[1].trim() : '';
+  }
+
+  function cleanTitle(title='') {
+    return title.replace(/^\[Gudelius Beta\]\s*/,'');
+  }
+
+  function card(issue) {
+    const status = statusOf(issue);
+    const [owner, ownerClass] = ownerOf(issue);
+    const due = dueOf(issue.body || '');
+    const area = areaOf(issue.body || '');
+    const node = document.createElement('div');
+    node.className = 'card ' + status;
+    node.draggable = true;
+    node.dataset.issueNumber = issue.number;
+    node.dataset.status = status;
+    node.innerHTML = `
+      <div class="card-top">
+        <span class="issue">#${issue.number}</span>
+        <span class="owner ${ownerClass}">${esc(owner)}</span>
+      </div>
+      <h4>${esc(cleanTitle(issue.title))}</h4>
+      <p>${esc(descriptionOf(issue.body || ''))}</p>
+      <div class="meta">
+        ${due ? '<span class="chip due">' + esc(due) + '</span>' : ''}
+        ${area ? '<span class="chip">' + esc(area) + '</span>' : ''}
+      </div>
+      <a class="github-link" href="${issue.html_url}" target="_blank" rel="noopener">In GitHub öffnen →</a>
+    `;
+    return [status,node];
+  }
+
+  function emptyColumns() {
+    columns.forEach(c => {
+      c.querySelector('.cards').innerHTML = '';
+      c.querySelector('.count').textContent = '0';
+    });
+  }
+
+  function addEmptyMessages() {
+    columns.forEach(c => {
+      const cards = c.querySelector('.cards');
+      if (!cards.children.length) cards.innerHTML = '<div class="empty">Keine Tickets</div>';
+    });
+  }
+
+  function renderIssues(issues) {
+    issuesByNumber = new Map(issues.map(i => [String(i.number), i]));
+    emptyColumns();
+
+    const counts = {open:0,doing:0,waiting:0,done:0};
+    issues.forEach(issue => {
+      const [status, node] = card(issue);
+      document.querySelector('.column[data-status="' + status + '"] .cards').appendChild(node);
+      counts[status]++;
+    });
+
+    columns.forEach(c => c.querySelector('.count').textContent = counts[c.dataset.status]);
+    addEmptyMessages();
+  }
+
+  async function load() {
+    refresh.disabled = true;
+    syncText.textContent = 'Kanban-Daten werden geladen …';
+    loading.style.display = 'block';
+    loading.classList.remove('error');
+    try {
+      const res = await fetch(DATA_URL + '?t=' + Date.now(), {cache:'no-store'});
+      if (!res.ok) throw new Error('data.json: ' + res.status);
+      const payload = await res.json();
+      const issues = Array.isArray(payload) ? payload : (payload.issues || []);
+      renderIssues(issues);
+      loading.style.display = 'none';
+      const updated = payload.generated_at ? new Date(payload.generated_at) : new Date();
+      syncText.textContent = 'GitHub-Stand · ' + updated.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    } catch (err) {
+      loading.style.display = 'block';
+      loading.classList.add('error');
+      loading.textContent = 'Kanban-Daten konnten nicht geladen werden. Bitte die Seite einmal neu laden.';
+      syncText.textContent = 'Fehler beim Laden';
+      console.error(err);
+    } finally {
+      refresh.disabled = false;
+    }
+  }
+
+  async function writeStatus(issueNumber, newStatus) {
+    if (!getToken()) {
+      openAuth();
+      throw new Error('Bitte zuerst GitHub verbinden.');
+    }
+    if (busy) throw new Error('Eine Änderung läuft bereits.');
+
+    const issue = issuesByNumber.get(String(issueNumber));
+    if (!issue) throw new Error('Ticket nicht gefunden.');
+
+    const oldStatus = statusOf(issue);
+    if (oldStatus === newStatus) return;
+
+    busy = true;
+    const labels = labelNames(issue).filter(l => !STATUS_LABELS.includes(l));
+    labels.push(STATUS_TO_LABEL[newStatus]);
+
+    try {
+      const body = {
+        labels,
+        state: newStatus === 'done' ? 'closed' : 'open'
+      };
+      if (newStatus === 'done') body.state_reason = 'completed';
+
+      const res = await fetch(API_BASE + '/issues/' + issueNumber, {
+        method: 'PATCH',
+        headers: apiHeaders(true),
+        body: JSON.stringify(body)
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        updateAuthButton();
+        throw new Error('GitHub-Schreibrecht fehlt oder der Token ist abgelaufen.');
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || ('GitHub API: ' + res.status));
+      }
+
+      const updatedIssue = await res.json();
+      issuesByNumber.set(String(issueNumber), updatedIssue);
+      renderIssues([...issuesByNumber.values()].sort((a,b) => a.number - b.number));
+      showToast('Status in GitHub gespeichert. Die gemeinsame Ansicht wird automatisch synchronisiert.');
+    } finally {
+      busy = false;
+    }
+  }
+
+  document.getElementById('board').addEventListener('dragstart', e => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    dragged = card;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', card.dataset.issueNumber);
+  });
+
+  document.getElementById('board').addEventListener('dragend', e => {
+    const card = e.target.closest('.card');
+    if (card) card.classList.remove('dragging');
+    columns.forEach(c => c.classList.remove('drag-over'));
+    dragged = null;
+  });
+
+  columns.forEach(column => {
+    column.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      column.classList.add('drag-over');
+    });
+
+    column.addEventListener('dragleave', e => {
+      if (!column.contains(e.relatedTarget)) column.classList.remove('drag-over');
+    });
+
+    column.addEventListener('drop', async e => {
+      e.preventDefault();
+      column.classList.remove('drag-over');
+      const issueNumber = e.dataTransfer.getData('text/plain') || dragged?.dataset.issueNumber;
+      if (!issueNumber) return;
+
+      const targetStatus = column.dataset.status;
+      const card = document.querySelector('.card[data-issue-number="' + CSS.escape(issueNumber) + '"]');
+      const oldColumn = card?.closest('.column');
+      const oldStatus = card?.dataset.status;
+
+      if (card && oldStatus !== targetStatus) {
+        const empty = column.querySelector('.empty');
+        if (empty) empty.remove();
+        column.querySelector('.cards').appendChild(card);
+        card.dataset.status = targetStatus;
+        card.className = 'card ' + targetStatus;
+      }
+
+      try {
+        await writeStatus(issueNumber, targetStatus);
+      } catch (err) {
+        showToast(err.message || 'Status konnte nicht gespeichert werden.', true);
+        if (oldColumn && card && oldStatus !== targetStatus) {
+          const empty = oldColumn.querySelector('.empty');
+          if (empty) empty.remove();
+          oldColumn.querySelector('.cards').appendChild(card);
+          card.dataset.status = oldStatus;
+          card.className = 'card ' + oldStatus;
+        }
+        addEmptyMessages();
+      }
+    });
+  });
+
+  authButton.addEventListener('click', () => {
+    if (getToken()) {
+      if (confirm('GitHub-Verbindung für diesen Browser-Tab trennen?')) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        updateAuthButton();
+        showToast('GitHub-Verbindung getrennt.');
+      }
+    } else {
+      openAuth();
+    }
+  });
+  authClose.addEventListener('click', closeAuth);
+  authSave.addEventListener('click', validateAndSaveToken);
+  authModal.addEventListener('click', e => { if (e.target === authModal) closeAuth(); });
+  tokenInput.addEventListener('keydown', e => { if (e.key === 'Enter') validateAndSaveToken(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && authModal.classList.contains('open')) closeAuth(); });
+
+  refresh.addEventListener('click', load);
+  updateAuthButton();
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+</body>
+</html>
