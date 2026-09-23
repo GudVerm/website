@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-3">
+  <link rel="stylesheet" href="./admin.css?v=20260923-4">
 </head>
 <body>
   <header class="admin-header">
@@ -16,8 +16,16 @@
     <a class="ghost" href="../">Website öffnen ↗</a>
   </header>
 
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link active" href="#verbindung">Verbindung</a>
+      <a class="admin-nav-link" href="#technik">Technik</a>
+      <a class="admin-nav-link" href="#projekte">Projekte</a>
+    </div>
+  </nav>
+
   <main class="wrap">
-    <section class="panel connect-panel">
+    <section class="panel connect-panel admin-section" id="verbindung">
       <div>
         <span class="kicker">Verbindung</span>
         <h2>Cloudflare CMS verbinden</h2>
@@ -38,6 +46,7 @@
       </div>
     </section>
 
+    <section class="admin-section" id="technik">
     <section class="section-head">
       <div>
         <span class="kicker">Technik</span>
@@ -47,7 +56,9 @@
     </section>
 
     <section id="equipmentGrid" class="equipment-grid" aria-live="polite"></section>
+  </section>
 
+    <section class="admin-section" id="projekte">
     <section class="section-head">
       <div>
         <span class="kicker">Projekte</span>
@@ -57,6 +68,7 @@
     </section>
 
     <section id="projectGrid" class="equipment-grid" aria-live="polite"></section>
+  </section>
   </main>
 
   <template id="equipmentTemplate">
@@ -81,7 +93,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-3"></script>
-  <script src="./admin.js?v=20260923-3"></script>
+  <script src="./config.js?v=20260923-4"></script>
+  <script src="./admin.js?v=20260923-4"></script>
 </body>
 </html>
