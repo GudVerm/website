@@ -982,6 +982,201 @@ if(reloadEngineerPageTexts){
   reloadEngineerPageTexts.addEventListener("click",loadEngineerPageTexts);
 }
 
+
+const gisPageFields = [
+  ["leistungsseiten/gis-bauvermessung/text/hero-eyebrow","gisHeroEyebrow","Tiefbau · Infrastruktur · Gelände"],
+  ["leistungsseiten/gis-bauvermessung/text/hero-title","gisHeroTitle","GIS & Bauvermessung"],
+  ["leistungsseiten/gis-bauvermessung/text/hero-lead","gisHeroLead","Vermessungsdaten für Tiefbau, Leitungen, Straßenbau und digitale Geländemodelle – projektbezogen und weiterverwendbar."],
+  ["leistungsseiten/gis-bauvermessung/text/hero-primary","gisHeroPrimary","Projekt anfragen →"],
+  ["leistungsseiten/gis-bauvermessung/text/hero-secondary","gisHeroSecondary","Leistung ansehen"],
+
+  ["leistungsseiten/gis-bauvermessung/text/overview-eyebrow","gisOverviewEyebrow","Im Überblick"],
+  ["leistungsseiten/gis-bauvermessung/text/overview-title","gisOverviewTitle","Geodaten für Bau und Infrastruktur."],
+  ["leistungsseiten/gis-bauvermessung/text/overview-text-1","gisOverviewText1","Bei Infrastruktur- und Tiefbauprojekten müssen Gelände, Leitungen und Bauzustände zuverlässig erfasst und weiterverarbeitet werden können."],
+  ["leistungsseiten/gis-bauvermessung/text/overview-text-2","gisOverviewText2","GudeliusVermessung verbindet klassische Bauvermessung mit digitalen Geländedaten und unterstützt damit Planung, Ausführung und Mengenermittlung."],
+  ["leistungsseiten/gis-bauvermessung/text/overview-back","gisOverviewBack","← Alle Leistungsfelder"],
+  ["leistungsseiten/gis-bauvermessung/text/tasks-eyebrow","gisTasksEyebrow","Leistungsumfang"],
+  ["leistungsseiten/gis-bauvermessung/text/tasks-title","gisTasksTitle","Typische Aufgaben"],
+
+  ["leistungsseiten/gis-bauvermessung/text/scope-eyebrow","gisScopeEyebrow","Vollständiger Leistungsumfang"],
+  ["leistungsseiten/gis-bauvermessung/text/scope-title","gisScopeTitle","Alle Leistungen im Überblick."],
+  ["leistungsseiten/gis-bauvermessung/text/scope-lead","gisScopeLead","Für GIS & Bauvermessung nennt Gudelius aktuell diese konkreten Leistungen:"],
+  ["leistungsseiten/gis-bauvermessung/text/scope-note","gisScopeNote","Inhaltliche Basis: aktueller Leistungsumfang von GudeliusVermessung."],
+
+  ["leistungsseiten/gis-bauvermessung/text/detail-eyebrow","gisDetailEyebrow","Leistung im Detail"],
+  ["leistungsseiten/gis-bauvermessung/text/detail-title","gisDetailTitle","Gelände und Infrastruktur digital erfassen."],
+  ["leistungsseiten/gis-bauvermessung/text/detail-lead","gisDetailLead","Von der örtlichen Aufnahme bis zur digitalen Grundlage für Planung und Bauausführung."],
+  ["leistungsseiten/gis-bauvermessung/text/detail-01-title","gisDetail1Title","Geländemodelle"],
+  ["leistungsseiten/gis-bauvermessung/text/detail-01-text","gisDetail1Text","Gelände und Höheninformationen werden erfasst und als digitale Grundlage aufbereitet."],
+  ["leistungsseiten/gis-bauvermessung/text/detail-02-title","gisDetail2Title","Bauvermessung"],
+  ["leistungsseiten/gis-bauvermessung/text/detail-02-text","gisDetail2Text","Vermessungsarbeiten begleiten Tiefbau-, Leitungs- und Straßenbauaufgaben."],
+  ["leistungsseiten/gis-bauvermessung/text/detail-03-title","gisDetail3Title","Mengen & Steuerung"],
+  ["leistungsseiten/gis-bauvermessung/text/detail-03-text","gisDetail3Text","Vermessungsdaten können für Mengenbetrachtungen und Maschinensteuerung genutzt werden."],
+
+  ["leistungsseiten/gis-bauvermessung/text/results-eyebrow","gisResultsEyebrow","Ergebnisse"],
+  ["leistungsseiten/gis-bauvermessung/text/results-title","gisResultsTitle","Vom Messwert zur nutzbaren Grundlage."],
+  ["leistungsseiten/gis-bauvermessung/text/results-lead","gisResultsLead","Die Ergebnisse werden so aufbereitet, dass sie in den weiteren Projektablauf übernommen werden können."],
+  ["leistungsseiten/gis-bauvermessung/text/result-01-title","gisResult1Title","Digitale Geländemodelle"],
+  ["leistungsseiten/gis-bauvermessung/text/result-01-text","gisResult1Text","Aufbereitete Gelände- und Höhendaten für Planung und Ausführung."],
+  ["leistungsseiten/gis-bauvermessung/text/result-02-title","gisResult2Title","CAD & PDF"],
+  ["leistungsseiten/gis-bauvermessung/text/result-02-text","gisResult2Text","Planbare und nachvollziehbare Ergebnisse für die Projektbeteiligten."],
+  ["leistungsseiten/gis-bauvermessung/text/result-03-title","gisResult3Title","Mengengrundlagen"],
+  ["leistungsseiten/gis-bauvermessung/text/result-03-text","gisResult3Text","Messdaten als Basis für projektbezogene Mengenbetrachtungen."],
+  ["leistungsseiten/gis-bauvermessung/text/result-04-title","gisResult4Title","Geodaten"],
+  ["leistungsseiten/gis-bauvermessung/text/result-04-text","gisResult4Text","Strukturierte Daten für GIS- und Bauprozesse."],
+
+  ["leistungsseiten/gis-bauvermessung/text/process-eyebrow","gisProcessEyebrow","Projektablauf"],
+  ["leistungsseiten/gis-bauvermessung/text/process-title","gisProcessTitle","Klare Schritte. Direkte Abstimmung."],
+  ["leistungsseiten/gis-bauvermessung/text/process-01-title","gisProcess1Title","Anforderung klären"],
+  ["leistungsseiten/gis-bauvermessung/text/process-01-text","gisProcess1Text","Projekt, Ort und gewünschtes Ergebnis gemeinsam festlegen."],
+  ["leistungsseiten/gis-bauvermessung/text/process-02-title","gisProcess2Title","Vermessung"],
+  ["leistungsseiten/gis-bauvermessung/text/process-02-text","gisProcess2Text","Passende Methode und Technik für die Aufgabe einsetzen."],
+  ["leistungsseiten/gis-bauvermessung/text/process-03-title","gisProcess3Title","Auswertung"],
+  ["leistungsseiten/gis-bauvermessung/text/process-03-text","gisProcess3Text","Messdaten prüfen, aufbereiten und projektbezogen auswerten."],
+  ["leistungsseiten/gis-bauvermessung/text/process-04-title","gisProcess4Title","Übergabe"],
+  ["leistungsseiten/gis-bauvermessung/text/process-04-text","gisProcess4Text","Ergebnisse nachvollziehbar und in nutzbarer Form bereitstellen."],
+
+  ["leistungsseiten/gis-bauvermessung/text/related-eyebrow","gisRelatedEyebrow","Weitere Leistungen"],
+  ["leistungsseiten/gis-bauvermessung/text/related-title","gisRelatedTitle","Passende Ergänzungen für Ihr Projekt."],
+  ["leistungsseiten/gis-bauvermessung/text/related-link-label","gisRelatedLinkLabel","Mehr erfahren →"],
+  ["leistungsseiten/gis-bauvermessung/text/related-01-title","gisRelated1Title","Ingenieurvermessung"],
+  ["leistungsseiten/gis-bauvermessung/text/related-01-text","gisRelated1Text","Absteckung, Kontrollen und Gebäudeaufmaß für Bauprojekte."],
+  ["leistungsseiten/gis-bauvermessung/text/related-02-title","gisRelated2Title","3D-Laserscanning"],
+  ["leistungsseiten/gis-bauvermessung/text/related-02-text","gisRelated2Text","Detaillierte Bestandsaufnahme mit Punktwolken."],
+  ["leistungsseiten/gis-bauvermessung/text/related-03-title","gisRelated3Title","Drohnenvermessung"],
+  ["leistungsseiten/gis-bauvermessung/text/related-03-text","gisRelated3Text","Flächen, Orthophotos und Massenermittlung aus der Luft."]
+];
+
+const gisTaskDefaults = [
+  "Leitungsdokumentation",
+  "Tief- & Straßenbau",
+  "Digitale Geländemodelle",
+  "Maschinensteuerung",
+  "Massen & Abrechnung"
+];
+
+const gisScopeDefaults = [
+  "Breitband-Leitungsdokumentation im offenen Graben, RIWA-GIS-fähig",
+  "Absteckung vorhandener Sparten aus behördlicher GIS-Planauskunft",
+  "Kommunale Leitungsdokumentation: Wasser, Fernwärme, Regen-/Schmutzwasser",
+  "Grobabsteckung für Tiefbau: Gelände-, Hochwasser-, Lawinen-/Murenmaßnahmen",
+  "Massenermittlung per DGM für Bauabrechnung",
+  "Massenermittlung für Kiesgruben zur Finanzamt-Vorlage",
+  "Maschinensteuerung: Festpunktfeld sowie Lage-/Höhenkontrollpunkte",
+  "Aushubpläne mit DGM; Übergabe: DXF, DG1, XML, REB",
+  "Absteckung: Verbauachsen, Bohrpfähle, Spritzbetonwände, Bermen, Ankeransatzpunkte",
+  "Straßenbau: Trassierung, Böschungsschablonen, 3D-Feinabsteckung, Neubestand"
+];
+
+const gisTasksInput=document.getElementById("gisTasksItems");
+const gisScopeInput=document.getElementById("gisScopeItems");
+const saveGisPageTexts=document.getElementById("saveGisPageTexts");
+const reloadGisPageTexts=document.getElementById("reloadGisPageTexts");
+const gisPageTextStatus=document.getElementById("gisPageTextStatus");
+
+async function loadGisPageTexts(){
+  if(!gisPageTextStatus) return;
+  if(!getApi()) return setStatus(gisPageTextStatus,"Worker-URL fehlt.",false);
+
+  setStatus(gisPageTextStatus,"Lade GIS & Bauvermessung …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+
+    gisPageFields.forEach(([key,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=typeof content[key]==="string" ? content[key] : fallback;
+    });
+
+    if(gisTasksInput){
+      gisTasksInput.value=engineerListValue(
+        content,
+        "leistungsseiten/gis-bauvermessung/text/task-",
+        gisTaskDefaults
+      );
+    }
+
+    if(gisScopeInput){
+      gisScopeInput.value=engineerListValue(
+        content,
+        "leistungsseiten/gis-bauvermessung/text/scope-",
+        gisScopeDefaults
+      );
+    }
+
+    setStatus(gisPageTextStatus,"GIS & Bauvermessung geladen.",true);
+  }catch(error){
+    gisPageFields.forEach(([,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=fallback;
+    });
+    if(gisTasksInput) gisTasksInput.value=gisTaskDefaults.join("\n");
+    if(gisScopeInput) gisScopeInput.value=gisScopeDefaults.join("\n");
+    setStatus(gisPageTextStatus,"Texte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveGisPageTexts){
+  saveGisPageTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()){
+      return setStatus(gisPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    }
+
+    const taskLines=(gisTasksInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    const scopeLines=(gisScopeInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    if(taskLines.length!==5){
+      return setStatus(gisPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 5 Zeilen verwenden.",false);
+    }
+    if(scopeLines.length!==10){
+      return setStatus(gisPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 10 Zeilen verwenden.",false);
+    }
+
+    const entries=gisPageFields.map(([key,id])=>[
+      key,
+      document.getElementById(id)?.value.trim()||""
+    ]);
+
+    taskLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/gis-bauvermessung/text/task-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    scopeLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/gis-bauvermessung/text/scope-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    saveGisPageTexts.disabled=true;
+    setStatus(gisPageTextStatus,"Speichere GIS & Bauvermessung …");
+    try{
+      await saveCmsEntriesInBatches(entries);
+      setStatus(gisPageTextStatus,"GIS & Bauvermessung erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(gisPageTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveGisPageTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadGisPageTexts){
+  reloadGisPageTexts.addEventListener("click",loadGisPageTexts);
+}
+
 function setStatus(el,text,ok){
   if(!el) return;
   el.textContent=text;
@@ -1086,6 +1281,7 @@ loadProjectTitles();
 loadContactTexts();
 loadServiceContactTexts();
 loadEngineerPageTexts();
+loadGisPageTexts();
 loadInquiries();
 
 
