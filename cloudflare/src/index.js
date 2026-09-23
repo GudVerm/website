@@ -32,6 +32,68 @@ export default {
         return json({ content }, 200, cors);
       }
 
+
+      if (url.pathname === "/api/contact") {
+        if (request.method === "POST") {
+          let payload;
+          try {
+            payload = await request.json();
+          } catch {
+            return json({ error: "Ungültige Anfrage." }, 400, cors);
+          }
+
+          const website = cleanText(payload.website, 200);
+          if (website) {
+            return json({ ok: true }, 200, cors);
+          }
+
+          const name = cleanText(payload.name, 160);
+          const email = cleanText(payload.email, 240);
+          const subject = cleanText(payload.subject, 240);
+          const message = cleanText(payload.message, 5000);
+          const source = cleanText(payload.source, 300) || "/";
+
+          if (!name || !email || !subject || !message) {
+            return json({ error: "Bitte alle Pflichtfelder ausfüllen." }, 400, cors);
+          }
+
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return json({ error: "Bitte eine gültige E-Mail-Adresse angeben." }, 400, cors);
+          }
+
+          await ensureContactTable(env);
+          const id = crypto.randomUUID();
+
+          await env.DB.prepare(
+            `INSERT INTO contact_requests
+              (id, name, email, subject, message, source, status, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, 'neu', CURRENT_TIMESTAMP)`
+          ).bind(id, name, email, subject, message, source).run();
+
+          return json({
+            ok: true,
+            id,
+            message: "Vielen Dank. Ihre Anfrage wurde übermittelt."
+          }, 201, cors);
+        }
+
+        if (request.method === "GET") {
+          if (!isAuthorized(request, env)) {
+            return json({ error: "Unauthorized" }, 401, cors);
+          }
+
+          await ensureContactTable(env);
+          const { results = [] } = await env.DB.prepare(
+            `SELECT id, name, email, subject, message, source, status, created_at
+             FROM contact_requests
+             ORDER BY created_at DESC
+             LIMIT 100`
+          ).all();
+
+          return json({ inquiries: results }, 200, cors);
+        }
+      }
+
       if (url.pathname.startsWith("/api/content/")) {
         const key = decodeKey(url.pathname, "/api/content/");
         if (!key) return json({ error: "Missing content key" }, 400, cors);
@@ -148,6 +210,31 @@ export default {
   }
 };
 
+async function ensureContactTable(env) {
+  await env.DB.batch([
+    env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS contact_requests (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        source TEXT NOT NULL DEFAULT '/',
+        status TEXT NOT NULL DEFAULT 'neu',
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`
+    ),
+    env.DB.prepare(
+      "CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at ON contact_requests(created_at)"
+    )
+  ]);
+}
+
+function cleanText(value, maxLength) {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, maxLength);
+}
+
 function isAuthorized(request, env) {
   if (!env.CMS_ADMIN_TOKEN) return false;
   return request.headers.get("authorization") === `Bearer ${env.CMS_ADMIN_TOKEN}`;
@@ -170,7 +257,7 @@ function corsHeaders(request, env) {
 
   return {
     "access-control-allow-origin": allowOrigin,
-    "access-control-allow-methods": "GET,PUT,DELETE,OPTIONS",
+    "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
     "access-control-allow-headers": "authorization,content-type,x-file-name",
     "access-control-max-age": "86400",
     "vary": "Origin"
