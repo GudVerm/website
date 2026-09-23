@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-18">
+  <link rel="stylesheet" href="./admin.css?v=20260923-19">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -233,6 +233,122 @@
           <div id="engineerPageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
         </div>
       </section>
+
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">05</span>
+          <div>
+            <span class="kicker">Unterseite · GIS & Bauvermessung</span>
+            <h3>Komplette Seitentexte</h3>
+            <p>Alle sichtbaren Inhalte der Leistungsseite – ausgenommen Navigation, Footer und der zentral gepflegte Kontaktbereich.</p>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisHeroEyebrow" type="text" maxlength="140"></label>
+            <label>Hauptüberschrift<input id="gisHeroTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="gisHeroLead" rows="3" maxlength="500"></textarea></label>
+            <label>Primärer Button<input id="gisHeroPrimary" type="text" maxlength="100"></label>
+            <label>Sekundärer Button<input id="gisHeroSecondary" type="text" maxlength="100"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Überblick</strong><span>Einführung und typische Aufgaben</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisOverviewEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="gisOverviewTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Absatz 1<textarea id="gisOverviewText1" rows="3" maxlength="700"></textarea></label>
+            <label class="text-editor-wide">Absatz 2<textarea id="gisOverviewText2" rows="3" maxlength="700"></textarea></label>
+            <label>Zurück-Link<input id="gisOverviewBack" type="text" maxlength="120"></label>
+            <label>Aufgaben · Eyebrow<input id="gisTasksEyebrow" type="text" maxlength="120"></label>
+            <label>Aufgaben · Überschrift<input id="gisTasksTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Typische Aufgaben · eine Zeile pro Punkt
+              <textarea id="gisTasksItems" rows="7" maxlength="1400"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Vollständiger Leistungsumfang</strong><span>10 Einzelleistungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisScopeEyebrow" type="text" maxlength="140"></label>
+            <label>Überschrift<input id="gisScopeTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="gisScopeLead" rows="3" maxlength="600"></textarea></label>
+            <label class="text-editor-wide">Leistungen · exakt eine Zeile pro Punkt
+              <textarea id="gisScopeItems" rows="12" maxlength="5000"></textarea>
+            </label>
+            <label class="text-editor-wide">Hinweis unter der Liste
+              <input id="gisScopeNote" type="text" maxlength="300">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Leistung im Detail</strong><span>Drei Detailkarten</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisDetailEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="gisDetailTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="gisDetailLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>01 · Geländemodelle</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisDetail1Title" type="text" maxlength="120"></label><label>Text<textarea id="gisDetail1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>02 · Bauvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisDetail2Title" type="text" maxlength="120"></label><label>Text<textarea id="gisDetail2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>03 · Mengen & Steuerung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisDetail3Title" type="text" maxlength="120"></label><label>Text<textarea id="gisDetail3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Ergebnisse</strong><span>Ausgabe und Projektgrundlagen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisResultsEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="gisResultsTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="gisResultsLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 1</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisResult1Title" type="text" maxlength="120"></label><label>Text<textarea id="gisResult1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 2</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisResult2Title" type="text" maxlength="120"></label><label>Text<textarea id="gisResult2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 3</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisResult3Title" type="text" maxlength="120"></label><label>Text<textarea id="gisResult3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 4</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisResult4Title" type="text" maxlength="120"></label><label>Text<textarea id="gisResult4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Projektablauf</strong><span>Vier Schritte</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisProcessEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="gisProcessTitle" type="text" maxlength="180"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 01</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisProcess1Title" type="text" maxlength="120"></label><label>Text<textarea id="gisProcess1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 02</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisProcess2Title" type="text" maxlength="120"></label><label>Text<textarea id="gisProcess2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 03</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisProcess3Title" type="text" maxlength="120"></label><label>Text<textarea id="gisProcess3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 04</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisProcess4Title" type="text" maxlength="120"></label><label>Text<textarea id="gisProcess4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Weitere Leistungen</strong><span>Verlinkte Ergänzungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="gisRelatedEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="gisRelatedTitle" type="text" maxlength="180"></label>
+            <label>Linktext<input id="gisRelatedLinkLabel" type="text" maxlength="100"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ingenieurvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisRelated1Title" type="text" maxlength="120"></label><label>Text<textarea id="gisRelated1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>3D-Laserscanning</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisRelated2Title" type="text" maxlength="120"></label><label>Text<textarea id="gisRelated2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Drohnenvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="gisRelated3Title" type="text" maxlength="120"></label><label>Text<textarea id="gisRelated3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveGisPageTexts" type="button">GIS & Bauvermessung speichern</button>
+          <button id="reloadGisPageTexts" class="secondary" type="button">Neu laden</button>
+          <div id="gisPageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -258,7 +374,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-18"></script>
-  <script src="./admin.js?v=20260923-18"></script>
+  <script src="./config.js?v=20260923-19"></script>
+  <script src="./admin.js?v=20260923-19"></script>
 </body>
 </html>
