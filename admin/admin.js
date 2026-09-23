@@ -14,12 +14,22 @@ const equipment = [
   { key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", detail:"Auswertung direkt im Projektumfeld", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" }
 ];
 
+const projects = [
+  { key:"projects/ingenieur-bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg" },
+  { key:"projects/3d-laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png" },
+  { key:"projects/rtk-drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg" },
+  { key:"projects/gelaende-gewaesser", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png/v1/fill/w_980%2Ch_723%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png" },
+  { key:"projects/mobiler-einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" },
+  { key:"projects/bestand-planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg" }
+];
+
 const apiUrlInput=document.getElementById("apiUrl");
 const tokenInput=document.getElementById("adminToken");
 const saveButton=document.getElementById("saveConnection");
 const testButton=document.getElementById("testConnection");
 const connectionStatus=document.getElementById("connectionStatus");
 const grid=document.getElementById("equipmentGrid");
+const projectGrid=document.getElementById("projectGrid");
 const template=document.getElementById("equipmentTemplate");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
@@ -63,9 +73,10 @@ function setStatus(el,text,ok){
   if(ok===false) el.classList.add("bad");
 }
 
-function render(){
-  grid.innerHTML="";
-  for(const item of equipment){
+function renderCollection(target, items){
+  if(!target) return;
+  target.innerHTML="";
+  for(const item of items){
     const node=template.content.cloneNode(true);
     const card=node.querySelector(".equipment-card");
     const img=node.querySelector("img");
@@ -137,8 +148,13 @@ function render(){
       }
     });
 
-    grid.appendChild(node);
+    target.appendChild(node);
   }
+}
+
+function render(){
+  renderCollection(grid, equipment);
+  renderCollection(projectGrid, projects);
 }
 
 render();
