@@ -40,6 +40,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyCmsMedia();
 
+  async function applyCmsText(root = document) {
+    if (!cmsApi) return;
+    const elements = [...root.querySelectorAll("[data-cms-text]")];
+    if (!elements.length) return;
+
+    try {
+      const response = await fetch(cmsApi + "/api/site");
+      if (!response.ok) return;
+      const data = await response.json();
+      const content = data.content || {};
+
+      elements.forEach((element) => {
+        const value = content[element.dataset.cmsText];
+        if (typeof value === "string" && value.trim()) {
+          element.textContent = value;
+        }
+      });
+    } catch (error) {
+      console.warn("CMS-Texte konnten nicht geladen werden.", error);
+    }
+  }
+
+  applyCmsText();
+
   const lazyBackgrounds = document.querySelectorAll('.lazy-bg[data-bg]');
 
   const loadBackground = (element) => {
