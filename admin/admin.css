@@ -186,3 +186,87 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
     margin-top:4px;
   }
 }
+
+/* Einheitliche Kartenstruktur für alle Admin-Bereiche */
+.admin-section{
+  padding:10px 0 34px;
+  border-bottom:1px solid rgba(23,32,38,.08);
+}
+.admin-section:last-of-type{
+  border-bottom:0;
+}
+.admin-section-head{
+  margin-top:36px;
+}
+.admin-section:first-child .admin-section-head{
+  margin-top:0;
+}
+.admin-section > .cms-subpanel + .cms-subpanel{
+  margin-top:18px;
+}
+.compact-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.text-editor-grid.single-column{
+  grid-template-columns:1fr;
+}
+.service-text-card-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.timeline-editor-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.project-title-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.project-title-grid label{
+  display:grid;
+  gap:6px;
+}
+.project-title-grid input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:12px 13px;
+  font:inherit;
+  background:#fff;
+  color:var(--ink);
+}
+#verbindung .connection-form{
+  max-width:760px;
+}
+#verbindung .connection-form input{
+  background:#fff;
+}
+#startseite .cms-group-grid,
+#unternehmen .cms-group-grid{
+  align-items:start;
+}
+#technik .cms-subpanel,
+#projekte .cms-subpanel,
+#leistungen .cms-subpanel{
+  overflow:hidden;
+}
+@media(max-width:1000px){
+  .timeline-editor-grid,
+  .project-title-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:760px){
+  .service-text-card-grid,
+  .timeline-editor-grid,
+  .project-title-grid,
+  .compact-grid{
+    grid-template-columns:1fr;
+  }
+  .admin-section{
+    padding-bottom:26px;
+  }
+}
