@@ -29,6 +29,13 @@ export default {
           }
         }
 
+        if (content["kontakt/email"] === "jost@gudeliusvermessung.de") {
+          content["kontakt/email"] = "gudeliusvermessung@web.de";
+          await env.DB.prepare(
+            "UPDATE content SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?"
+          ).bind(JSON.stringify("gudeliusvermessung@web.de"), "kontakt/email").run();
+        }
+
         return json({ content }, 200, cors);
       }
 
