@@ -23,7 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
       element.dataset.cmsApplied = "1";
       const image = new Image();
       image.onload = () => {
-        element.style.setProperty("--hero-image", `url("${cmsMediaUrl(element.dataset.cmsBg)}")`);
+        const url = cmsMediaUrl(element.dataset.cmsBg);
+        if (element.classList.contains("hero")) {
+          element.style.setProperty("--hero-image", `url("${url}")`);
+        } else {
+          element.style.backgroundImage = `url("${url}")`;
+          element.removeAttribute("data-bg");
+          element.classList.remove("lazy-bg");
+        }
       };
       image.src = cmsMediaUrl(element.dataset.cmsBg);
     });
