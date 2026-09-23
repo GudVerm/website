@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" role="img" aria-labelledby="t d">
+  <title id="t">BricsCAD</title>
+  <desc id="d">Platzhalterbild für BricsCAD</desc>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d2c36"/>
+      <stop offset="1" stop-color="#35566b"/>
+    </linearGradient>
+    <pattern id="p" width="36" height="36" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
+      <path d="M36 0H0V36" fill="none" stroke="#ffffff" stroke-opacity=".055"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="620" fill="url(#g)"/>
+  <rect width="900" height="620" fill="url(#p)"/>
+  <circle cx="735" cy="105" r="145" fill="#e5c533" opacity=".16"/>
+  <circle cx="770" cy="535" r="210" fill="#ffffff" opacity=".045"/>
+  <g transform="translate(64 68)">
+    <rect width="126" height="30" rx="15" fill="#e5c533"/>
+    <text x="63" y="20" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="800" fill="#172026">PLATZHALTER</text>
+    <text x="0" y="168" font-family="Arial,sans-serif" font-size="94" font-weight="700" fill="#ffffff">⌘</text>
+    <text x="0" y="270" font-family="Arial,sans-serif" font-size="45" font-weight="700" fill="#ffffff">BricsCAD</text>
+    <text x="0" y="315" font-family="Arial,sans-serif" font-size="21" fill="#d4dde1">CAD-Bearbeitung</text>
+    <line x1="0" y1="350" x2="500" y2="350" stroke="#e5c533" stroke-width="4"/>
+    <text x="0" y="402" font-family="Arial,sans-serif" font-size="18" fill="#afbbc0">Später: echtes Gerätefoto von Jost</text>
+  </g>
+</svg>
