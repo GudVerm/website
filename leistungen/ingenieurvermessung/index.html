@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ingenieurvermessung – GudeliusVermessung</title>
   <meta name="description" content="Ingenieurvermessung von GudeliusVermessung: Absteckung, Schnurgerüst, Kontrollen, Gebäudeaufmaß und Bescheinigungen.">
-  <link rel="stylesheet" href="../../assets/gudelius-site.css?v=20260923-15">
+  <link rel="stylesheet" href="../../assets/gudelius-site.css?v=20260923-16">
   <link rel="stylesheet" href="../../assets/service-pages.css?v=20260923-5">
 </head>
 <body class="site theme-projects service-page">
@@ -176,13 +176,13 @@
         <div class="contact-form">
           <h3>Anfrage vorbereiten</h3>
           <p>Worum geht es bei Ihrem Projekt?</p>
-          <form onsubmit="sendMail(event)">
+          <form onsubmit="sendMail(event)"><div class="hp-field" aria-hidden="true"><label>Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
             <div class="field"><label for="name">Name</label><input id="name" required placeholder="Vor- und Nachname"></div>
             <div class="field"><label for="email">E-Mail</label><input id="email" type="email" required placeholder="name@firma.de"></div>
             <div class="field"><label for="subject">Projekt / Betreff</label><input id="subject" required value="Anfrage Ingenieurvermessung"></div>
             <div class="field"><label for="message">Nachricht</label><textarea id="message" required placeholder="Projekt, Ort und gewünschte Leistung"></textarea></div>
-            <button class="btn btn-primary" type="submit">Anfrage vorbereiten →</button>
-            <div class="form-note">Der Entwurf öffnet das E-Mail-Programm mit vorausgefüllter Nachricht.</div>
+            <button class="btn btn-primary" type="submit">Anfrage senden →</button>
+            <div class="form-note">Die Anfrage wird direkt und ohne Öffnen eines E-Mail-Programms übermittelt.</div>
           </form>
         </div>
       </div>
@@ -201,6 +201,6 @@
   </footer>
   <div class="concept-badge">VERSION 3 · BETA</div>
   <script src="../../assets/cms-config.js?v=20260923-1"></script>
-  <script src="../../assets/gudelius-site.js?v=20260923-19"></script>
+  <script src="../../assets/gudelius-site.js?v=20260923-25"></script>
 </body>
 </html>
