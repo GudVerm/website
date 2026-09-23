@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-4">
+  <link rel="stylesheet" href="./admin.css?v=20260923-5">
 </head>
 <body>
   <header class="admin-header">
@@ -19,6 +19,8 @@
   <nav class="admin-nav" aria-label="Admin-Bereiche">
     <div class="admin-nav-inner">
       <a class="admin-nav-link active" href="#verbindung">Verbindung</a>
+      <a class="admin-nav-link" href="#startseite">Startseite</a>
+      <a class="admin-nav-link" href="#unternehmen">Unternehmen</a>
       <a class="admin-nav-link" href="#technik">Technik</a>
       <a class="admin-nav-link" href="#projekte">Projekte</a>
     </div>
@@ -44,6 +46,28 @@
         </div>
         <div id="connectionStatus" class="status">Noch nicht verbunden.</div>
       </div>
+    </section>
+
+    <section class="admin-section" id="startseite">
+      <section class="section-head">
+        <div>
+          <span class="kicker">Startseite</span>
+          <h2>Hero-Bild austauschen</h2>
+        </div>
+        <p>Dieses Bild erscheint groß im Kopfbereich der Startseite. Das bisherige Bild bleibt als Fallback erhalten.</p>
+      </section>
+      <section id="startPageGrid" class="equipment-grid" aria-live="polite"></section>
+    </section>
+
+    <section class="admin-section" id="unternehmen">
+      <section class="section-head">
+        <div>
+          <span class="kicker">Unternehmen</span>
+          <h2>Unternehmensbilder austauschen</h2>
+        </div>
+        <p>Hier können das Foto von Jost und das Prüf-/Kammerbild unabhängig voneinander ersetzt werden.</p>
+      </section>
+      <section id="companyGrid" class="equipment-grid" aria-live="polite"></section>
     </section>
 
     <section class="admin-section" id="technik">
@@ -93,7 +117,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-4"></script>
-  <script src="./admin.js?v=20260923-4"></script>
+  <script src="./config.js?v=20260923-5"></script>
+  <script src="./admin.js?v=20260923-5"></script>
 </body>
 </html>
