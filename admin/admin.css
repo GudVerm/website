@@ -476,3 +476,16 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
     width:100%;
   }
 }
+
+.nested-editor-grid{
+  margin-top:14px;
+}
+#leistungen .cms-subpanel .form-editor-block .form-editor-block{
+  box-shadow:none;
+  background:#fbfbf8;
+}
+#leistungen #engTasksItems,
+#leistungen #engScopeItems{
+  line-height:1.55;
+  font-family:inherit;
+}
