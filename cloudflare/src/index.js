@@ -107,7 +107,7 @@ export default {
 
           await ensureContactTable(env);
           const { results = [] } = await env.DB.prepare(
-            `SELECT id, name, email, subject, message, source, status, created_at
+            `SELECT id, name, email, subject, message, source, status, internal_note, created_at
              FROM contact_requests
              ORDER BY created_at DESC
              LIMIT 100`
@@ -132,22 +132,28 @@ export default {
           return json({ error: "Ungültige Anfrage." }, 400, cors);
         }
 
-        const status = cleanText(payload.status, 30);
-        const allowedStatuses = new Set(["neu", "in-arbeit", "erledigt"]);
-        if (!allowedStatuses.has(status)) {
-          return json({ error: "Ungültiger Status." }, 400, cors);
-        }
+        const hasStatus = Object.prototype.hasOwnProperty.call(payload, "status");
+        const hasNote = Object.prototype.hasOwnProperty.call(payload, "internal_note");
+        if (!hasStatus && !hasNote) return json({ error: "Keine Änderung übermittelt." }, 400, cors);
+
+        const status = hasStatus ? cleanText(payload.status, 30) : "";
+        const internalNote = hasNote ? cleanText(payload.internal_note, 2000) : "";
+        const allowedStatuses = new Set(["neu", "in-arbeit", "erledigt", "archiviert", "spam"]);
+        if (hasStatus && !allowedStatuses.has(status)) return json({ error: "Ungültiger Status." }, 400, cors);
 
         await ensureContactTable(env);
+        const fields = [];
+        const values = [];
+        if (hasStatus) { fields.push("status = ?"); values.push(status); }
+        if (hasNote) { fields.push("internal_note = ?"); values.push(internalNote); }
+        values.push(id);
+
         const result = await env.DB.prepare(
-          "UPDATE contact_requests SET status = ? WHERE id = ?"
-        ).bind(status, id).run();
+          "UPDATE contact_requests SET " + fields.join(", ") + " WHERE id = ?"
+        ).bind(...values).run();
 
-        if (!result.meta?.changes) {
-          return json({ error: "Anfrage nicht gefunden." }, 404, cors);
-        }
-
-        return json({ ok: true, id, status }, 200, cors);
+        if (!result.meta?.changes) return json({ error: "Anfrage nicht gefunden." }, 404, cors);
+        return json({ ok: true, id }, 200, cors);
       }
 
       if (url.pathname.startsWith("/api/content/")) {
@@ -339,23 +345,25 @@ function escapeHtml(value) {
 }
 
 async function ensureContactTable(env) {
-  await env.DB.batch([
-    env.DB.prepare(
-      `CREATE TABLE IF NOT EXISTS contact_requests (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        subject TEXT NOT NULL,
-        message TEXT NOT NULL,
-        source TEXT NOT NULL DEFAULT '/',
-        status TEXT NOT NULL DEFAULT 'neu',
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )`
-    ),
-    env.DB.prepare(
-      "CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at ON contact_requests(created_at)"
-    )
-  ]);
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS contact_requests (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      message TEXT NOT NULL,
+      source TEXT NOT NULL DEFAULT '/',
+      status TEXT NOT NULL DEFAULT 'neu',
+      internal_note TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )`
+  ).run();
+
+  const { results = [] } = await env.DB.prepare("PRAGMA table_info(contact_requests)").all();
+  if (!results.some(column => column.name === "internal_note")) {
+    await env.DB.prepare("ALTER TABLE contact_requests ADD COLUMN internal_note TEXT NOT NULL DEFAULT ''").run();
+  }
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at ON contact_requests(created_at)").run();
 }
 
 function cleanText(value, maxLength) {
