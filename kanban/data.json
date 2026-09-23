@@ -1,5 +1,126 @@
 {
-  "generated_at": "2026-09-23T15:50:39.979Z",
+  "generated_at": "2026-09-23T15:51:13.180Z",
   "source": "GitHub Issues",
-  "issues": []
+  "issues": [
+    {
+      "number": 1,
+      "title": "[Gudelius Beta] Bilder zusammensuchen",
+      "body": "## Aufgabe\nJost stellt die Bilder zusammen, die auf der neuen Website verwendet werden sollen.\n\n**Status:** Wartet  \n**Verantwortlich:** Jost  \n**Fällig:** 03.10.2026  \n**Bereich:** Bilder\n\nVerknüpft mit: Version 3 Beta",
+      "state": "open",
+      "html_url": "https://github.com/GudVerm/website/issues/1",
+      "labels": [
+        {
+          "name": "status: wartet",
+          "color": "D7A64A",
+          "description": "Wartet auf Zuarbeit oder Abhängigkeit"
+        },
+        {
+          "name": "verantwortlich: jost",
+          "color": "8FB5C7",
+          "description": "Verantwortlich: Jost"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "[Gudelius Beta] Leistungs-Unterseiten erstellen",
+      "body": "## Aufgabe\nUnterseiten für Ingenieurvermessung, GIS & Bauvermessung, 3D-Laserscanning und Drohnenvermessung erstellen.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Ziel:** 03.10.2026  \n**Bereich:** Unterseiten\n\n## Umsetzung\n\nDie vier Leistungs-Unterseiten wurden in der Beta-Version umgesetzt und auf der Startseite verlinkt:\n\n- Ingenieurvermessung: https://gudverm.github.io/website/leistungen/ingenieurvermessung/\n- GIS & Bauvermessung: https://gudverm.github.io/website/leistungen/gis-bauvermessung/\n- 3D-Laserscanning: https://gudverm.github.io/website/leistungen/3d-laserscanning/\n- Drohnenvermessung: https://gudverm.github.io/website/leistungen/drohnenvermessung/\n\nDie Leistungs-Kacheln der Beta-Startseite führen jetzt jeweils über „Mehr erfahren“ auf die passende Unterseite.\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/GudVerm/website/issues/2",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "[Gudelius Beta] Leistungsfelder nach oben verschieben",
+      "body": "## Aufgabe\nDen Bereich „Leistungsfelder“ auf der Startseite weiter nach oben verschieben, damit Leistungen früher sichtbar werden.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Startseite  \n**Priorität:** Hoch\n\n## Umsetzung\n\n- „Leistungsfelder“ steht jetzt direkt unter dem Hero.\n- „Leistungen“ steht im Hauptmenü vor „Projekte“.\n- Der primäre Hero-Button führt jetzt auf „Leistungen ansehen“.\n- Die vier Leistungs-Kacheln bleiben direkt mit ihren Unterseiten verknüpft.\n\nBeta:\nhttps://gudverm.github.io/website/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/GudVerm/website/issues/3",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "[Gudelius Beta] „Arbeit, die man sehen kann.“ nach unten verschieben",
+      "body": "## Aufgabe\nDen Projekt-/Bildbereich „Arbeit, die man sehen kann.“ auf der Startseite weiter nach unten verschieben.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Startseite\n\n## Umsetzung\n\nDer Bereich „Arbeit, die man sehen kann.“ wurde deutlich nach unten verschoben.\n\nNeue Reihenfolge der Startseite:\n1. Hero\n2. Leistungsfelder\n3. Projektbegleitung\n4. Unternehmen\n5. Ausstattung\n6. Arbeit, die man sehen kann.\n7. Kontakt\n\nBeta:\nhttps://gudverm.github.io/website/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/GudVerm/website/issues/4",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "[Gudelius Beta] Komplette Ausstattung auflisten",
+      "body": "## Aufgabe\nJost liefert eine vollständige Liste der Geräte, Software und weiteren Ausstattung.\n\n**Status:** Wartet  \n**Verantwortlich:** Jost  \n**Bereich:** Ausstattung\n\nVerknüpft mit: Version 3 Beta",
+      "state": "open",
+      "html_url": "https://github.com/GudVerm/website/issues/5",
+      "labels": [
+        {
+          "name": "status: wartet",
+          "color": "D7A64A",
+          "description": "Wartet auf Zuarbeit oder Abhängigkeit"
+        },
+        {
+          "name": "verantwortlich: jost",
+          "color": "8FB5C7",
+          "description": "Verantwortlich: Jost"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    }
+  ]
 }
