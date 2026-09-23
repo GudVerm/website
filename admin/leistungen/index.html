@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-20">
+  <link rel="stylesheet" href="./admin.css?v=20260923-21">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -40,93 +40,41 @@
           <span class="kicker">Leistungen</span>
           <h2>Leistungsbereich</h2>
         </div>
-        <p>Startseiten-Kacheln und Bilder der Leistungs-Unterseiten sind in eigene Pflegebereiche gegliedert.</p>
+        <p>Jede Leistung ist als eigene Abteilung aufgebaut. Bilder und zugehörige Texte liegen direkt zusammen.</p>
       </section>
 
-      <section class="cms-subpanel">
+      <section class="cms-subpanel cms-subpanel-form service-department">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">01</span>
           <div>
-            <span class="kicker">Startseite</span>
-            <h3>Bilder der Leistungs-Kacheln</h3>
-            <p>Die vier Bilder der Leistungsübersicht auf der Startseite.</p>
-          </div>
-        </div>
-        <section id="serviceGrid" class="equipment-grid" aria-live="polite"></section>
-      </section>
-
-      <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">02</span>
-          <div>
-            <span class="kicker">Startseite</span>
-            <h3>Titel & Beschreibungen</h3>
-            <p>Die Nummern und Links bleiben fest; Titel und Kurztexte sind editierbar.</p>
+            <span class="kicker">Leistung 01</span>
+            <h3>Ingenieurvermessung</h3>
+            <p>Startseiten-Kachel, Unterseitenbilder und komplette Seitentexte an einer Stelle.</p>
           </div>
         </div>
 
-        <div class="service-text-card-grid">
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>01 · Ingenieurvermessung</strong><span>Startseiten-Kachel</span></div>
-            <div class="text-editor-grid single-column">
+        <div class="service-department-media">
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
+            <section id="service1Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
+            <div class="text-editor-grid single-column service-tile-text">
               <label>Titel<input id="service1Title" type="text" maxlength="120"></label>
               <label>Beschreibung<textarea id="service1Text" rows="3" maxlength="400"></textarea></label>
             </div>
-          </div>
-
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>02 · GIS & Bauvermessung</strong><span>Startseiten-Kachel</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Titel<input id="service2Title" type="text" maxlength="120"></label>
-              <label>Beschreibung<textarea id="service2Text" rows="3" maxlength="400"></textarea></label>
+            <div class="text-editor-actions">
+              <button id="saveService1Texts" type="button">Kacheltext speichern</button>
+              <button id="reloadService1Texts" class="secondary" type="button">Neu laden</button>
+              <div id="service1TextStatus" class="status">Noch keine CMS-Texte geladen.</div>
             </div>
           </div>
 
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>03 · 3D-Laserscanning</strong><span>Startseiten-Kachel</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Titel<input id="service3Title" type="text" maxlength="120"></label>
-              <label>Beschreibung<textarea id="service3Text" rows="3" maxlength="400"></textarea></label>
-            </div>
-          </div>
-
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>04 · Drohnenvermessung</strong><span>Startseiten-Kachel</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Titel<input id="service4Title" type="text" maxlength="120"></label>
-              <label>Beschreibung<textarea id="service4Text" rows="3" maxlength="400"></textarea></label>
-            </div>
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Unterseitenbilder</strong><span>Hero & Ergebnisse</span></div>
+            <section id="servicePage1Grid" class="equipment-grid service-page-media-grid" aria-live="polite"></section>
           </div>
         </div>
 
-        <div class="text-editor-actions contact-save-actions">
-          <button id="saveServiceTexts" type="button">Leistungstexte speichern</button>
-          <button id="reloadServiceTexts" class="secondary" type="button">Neu laden</button>
-          <div id="serviceTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
-        </div>
-      </section>
-
-      <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">03</span>
-          <div>
-            <span class="kicker">Unterseiten</span>
-            <h3>Bilder der Leistungs-Unterseiten</h3>
-            <p>Hero-Bild und Ergebnisbilder jeder Leistungsseite.</p>
-          </div>
-        </div>
-        <section id="servicePageGrid" class="equipment-grid" aria-live="polite"></section>
-      </section>
-
-      <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">04</span>
-          <div>
-            <span class="kicker">Unterseite · Ingenieurvermessung</span>
-            <h3>Komplette Seitentexte</h3>
-            <p>Alle sichtbaren Inhalte der Leistungsseite – ausgenommen Navigation, Footer und der zentral gepflegte Kontaktbereich.</p>
-          </div>
-        </div>
+        <div class="service-department-divider"><span>Seitentexte</span></div>
 
         <div class="form-editor-block">
           <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
@@ -234,15 +182,38 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form">
+      <section class="cms-subpanel cms-subpanel-form service-department">
         <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">05</span>
+          <span class="cms-subpanel-icon">02</span>
           <div>
-            <span class="kicker">Unterseite · GIS & Bauvermessung</span>
-            <h3>Komplette Seitentexte</h3>
-            <p>Alle sichtbaren Inhalte der Leistungsseite – ausgenommen Navigation, Footer und der zentral gepflegte Kontaktbereich.</p>
+            <span class="kicker">Leistung 02</span>
+            <h3>GIS & Bauvermessung</h3>
+            <p>Startseiten-Kachel, Unterseitenbilder und komplette Seitentexte an einer Stelle.</p>
           </div>
         </div>
+
+        <div class="service-department-media">
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
+            <section id="service2Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
+            <div class="text-editor-grid single-column service-tile-text">
+              <label>Titel<input id="service2Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service2Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+            <div class="text-editor-actions">
+              <button id="saveService2Texts" type="button">Kacheltext speichern</button>
+              <button id="reloadService2Texts" class="secondary" type="button">Neu laden</button>
+              <div id="service2TextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+            </div>
+          </div>
+
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Unterseitenbilder</strong><span>Hero & Ergebnisse</span></div>
+            <section id="servicePage2Grid" class="equipment-grid service-page-media-grid" aria-live="polite"></section>
+          </div>
+        </div>
+
+        <div class="service-department-divider"><span>Seitentexte</span></div>
 
         <div class="form-editor-block">
           <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
@@ -348,6 +319,80 @@
           <button id="reloadGisPageTexts" class="secondary" type="button">Neu laden</button>
           <div id="gisPageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
         </div>
+
+      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Leistung 03</span>
+            <h3>3D-Laserscanning</h3>
+            <p>Startseiten-Kachel und Unterseitenbilder sind hier gebündelt. Die vollständigen Seitentexte ergänzen wir als nächsten Teil von Schritt 13.</p>
+          </div>
+        </div>
+
+        <div class="service-department-media">
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
+            <section id="service3Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
+            <div class="text-editor-grid single-column service-tile-text">
+              <label>Titel<input id="service3Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service3Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+            <div class="text-editor-actions">
+              <button id="saveService3Texts" type="button">Kacheltext speichern</button>
+              <button id="reloadService3Texts" class="secondary" type="button">Neu laden</button>
+              <div id="service3TextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+            </div>
+          </div>
+
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Unterseitenbilder</strong><span>Hero & Ergebnisse</span></div>
+            <section id="servicePage3Grid" class="equipment-grid service-page-media-grid" aria-live="polite"></section>
+          </div>
+        </div>
+
+        <div class="service-department-next">
+          <span class="kicker">Schritt 13</span>
+          <strong>Seitentexte folgen in dieser Abteilung.</strong>
+        </div>
+      </section>
+
+      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">04</span>
+          <div>
+            <span class="kicker">Leistung 04</span>
+            <h3>Drohnenvermessung</h3>
+            <p>Startseiten-Kachel und Unterseitenbilder sind hier gebündelt. Die vollständigen Seitentexte ergänzen wir als nächsten Teil von Schritt 13.</p>
+          </div>
+        </div>
+
+        <div class="service-department-media">
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
+            <section id="service4Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
+            <div class="text-editor-grid single-column service-tile-text">
+              <label>Titel<input id="service4Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service4Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+            <div class="text-editor-actions">
+              <button id="saveService4Texts" type="button">Kacheltext speichern</button>
+              <button id="reloadService4Texts" class="secondary" type="button">Neu laden</button>
+              <div id="service4TextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+            </div>
+          </div>
+
+          <div class="form-editor-block service-media-card">
+            <div class="form-editor-block-head"><strong>Unterseitenbilder</strong><span>Hero & Ergebnisse</span></div>
+            <section id="servicePage4Grid" class="equipment-grid service-page-media-grid" aria-live="polite"></section>
+          </div>
+        </div>
+
+        <div class="service-department-next">
+          <span class="kicker">Schritt 13</span>
+          <strong>Seitentexte folgen in dieser Abteilung.</strong>
+        </div>
+      </section>
       </section>
     </section>
   </main>
@@ -374,7 +419,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-20"></script>
-  <script src="./admin.js?v=20260923-20"></script>
+  <script src="./config.js?v=20260923-21"></script>
+  <script src="./admin.js?v=20260923-21"></script>
 </body>
 </html>
