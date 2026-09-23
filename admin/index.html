@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-9">
+  <link rel="stylesheet" href="./admin.css?v=20260923-10">
 </head>
 <body>
   <header class="admin-header">
@@ -161,6 +161,59 @@
         <p>Hier können das Foto von Jost und das Prüf-/Kammerbild unabhängig voneinander ersetzt werden.</p>
       </section>
       <section id="companyGrid" class="equipment-grid" aria-live="polite"></section>
+
+      <section class="section-head">
+        <div>
+          <span class="kicker">Unternehmenstexte</span>
+          <h2>Unternehmensbereich bearbeiten</h2>
+        </div>
+        <p>Überschrift, Vorstellung und beruflicher Werdegang werden in Cloudflare D1 gespeichert.</p>
+      </section>
+
+      <section class="panel text-editor-panel">
+        <div class="text-editor-grid">
+          <label>Eyebrow
+            <input id="companyEyebrow" type="text" maxlength="120">
+          </label>
+          <label>Überschrift
+            <input id="companyTitle" type="text" maxlength="180">
+          </label>
+
+          <label>Name / Qualifikation
+            <input id="companyName" type="text" maxlength="160">
+          </label>
+          <label>Beschreibung
+            <textarea id="companyLead" rows="4" maxlength="700"></textarea>
+          </label>
+
+          <label>Timeline 1 · Zeitraum
+            <input id="companyTimeline1Year" type="text" maxlength="80">
+          </label>
+          <label>Timeline 1 · Text
+            <input id="companyTimeline1Text" type="text" maxlength="220">
+          </label>
+
+          <label>Timeline 2 · Zeitraum
+            <input id="companyTimeline2Year" type="text" maxlength="80">
+          </label>
+          <label>Timeline 2 · Text
+            <input id="companyTimeline2Text" type="text" maxlength="220">
+          </label>
+
+          <label>Timeline 3 · Zeitraum
+            <input id="companyTimeline3Year" type="text" maxlength="80">
+          </label>
+          <label>Timeline 3 · Text
+            <input id="companyTimeline3Text" type="text" maxlength="220">
+          </label>
+        </div>
+
+        <div class="text-editor-actions">
+          <button id="saveCompanyTexts" type="button">Unternehmenstexte speichern</button>
+          <button id="reloadCompanyTexts" class="secondary" type="button">Neu laden</button>
+          <div id="companyTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
+      </section>
     </section>
 
     <section class="admin-section" id="technik">
@@ -210,7 +263,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-9"></script>
-  <script src="./admin.js?v=20260923-9"></script>
+  <script src="./config.js?v=20260923-10"></script>
+  <script src="./admin.js?v=20260923-10"></script>
 </body>
 </html>
