@@ -58,6 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
         else if(container.classList.contains("scope-grid")){container.innerHTML="";cleaned.forEach((value,index)=>{const item=document.createElement("div");item.className="scope-item";const no=document.createElement("span");no.className="scope-no";no.textContent=String(index+1).padStart(2,"0");const strong=document.createElement("strong");strong.textContent=value;item.append(no,strong);container.appendChild(item)})}
       });
 
+
+      root.querySelectorAll("[data-cms-timeline]").forEach((container)=>{
+        const items=content[container.dataset.cmsTimeline];if(!Array.isArray(items))return;
+        const visible=items.filter(item=>item&&item.visible!==false&&(item.period||item.text||item.description));
+        container.innerHTML="";
+        visible.forEach(item=>{
+          const row=document.createElement("div");
+          const period=document.createElement("b");period.textContent=String(item.period||"");
+          const title=document.createElement("span");title.textContent=String(item.text||"");
+          row.append(period,title);
+          if(item.description){const description=document.createElement("small");description.textContent=String(item.description);row.appendChild(description)}
+          container.appendChild(row);
+        });
+      });
+
       elements.forEach((element) => {
         const value = content[element.dataset.cmsText];
         if (typeof value === "string" && value.trim()) {

@@ -149,16 +149,16 @@ const companyTextFields={
   "unternehmen/title":document.getElementById("companyTitle"),
   "unternehmen/name":document.getElementById("companyName"),
   "unternehmen/lead":document.getElementById("companyLead"),
-  "unternehmen/timeline-1-year":document.getElementById("companyTimeline1Year"),
-  "unternehmen/timeline-1-text":document.getElementById("companyTimeline1Text"),
-  "unternehmen/timeline-2-year":document.getElementById("companyTimeline2Year"),
-  "unternehmen/timeline-2-text":document.getElementById("companyTimeline2Text"),
-  "unternehmen/timeline-3-year":document.getElementById("companyTimeline3Year"),
-  "unternehmen/timeline-3-text":document.getElementById("companyTimeline3Text")
 };
 const saveCompanyTexts=document.getElementById("saveCompanyTexts");
 const reloadCompanyTexts=document.getElementById("reloadCompanyTexts");
 const companyTextStatus=document.getElementById("companyTextStatus");
+const companyTimelineEditor=document.getElementById("companyTimelineEditor");
+const addCompanyTimeline=document.getElementById("addCompanyTimeline");
+const saveCompanyTimeline=document.getElementById("saveCompanyTimeline");
+const reloadCompanyTimeline=document.getElementById("reloadCompanyTimeline");
+const companyTimelineStatus=document.getElementById("companyTimelineStatus");
+let companyTimelineItems=[];
 const projectSelect=document.getElementById("projectSelect");
 const projectEditor=document.getElementById("projectEditor");
 const projectEditorTemplate=document.getElementById("projectEditorTemplate");
@@ -454,6 +454,76 @@ if(saveCompanyTexts){
 }
 
 if(reloadCompanyTexts) reloadCompanyTexts.addEventListener("click",loadCompanyTexts);
+
+
+const companyTimelineDefaults=[
+  {id:"station-1",period:"Seit 2020",text:"GudeliusVermessung",description:"",visible:true},
+  {id:"station-2",period:"2013 – 2020",text:"Projektleitende Tätigkeit als Vermessungsingenieur",description:"",visible:true},
+  {id:"station-3",period:"2013",text:"Geoinformatik und Satellitenpositionierung · FH München",description:"",visible:true}
+];
+function normalizeCompanyTimeline(value,content={}){
+  if(Array.isArray(value)){
+    return value.filter(item=>item&&typeof item==="object").map((item,index)=>({
+      id:typeof item.id==="string"&&item.id?item.id:"station-"+(index+1),
+      period:String(item.period||"").slice(0,80),text:String(item.text||"").slice(0,220),description:String(item.description||"").slice(0,500),visible:item.visible!==false
+    }));
+  }
+  return companyTimelineDefaults.map((fallback,index)=>({
+    ...fallback,
+    period:typeof content["unternehmen/timeline-"+(index+1)+"-year"]==="string"?content["unternehmen/timeline-"+(index+1)+"-year"]:fallback.period,
+    text:typeof content["unternehmen/timeline-"+(index+1)+"-text"]==="string"?content["unternehmen/timeline-"+(index+1)+"-text"]:fallback.text
+  }));
+}
+function renderCompanyTimeline(){
+  if(!companyTimelineEditor)return;companyTimelineEditor.innerHTML="";
+  companyTimelineItems.forEach((item,index)=>{
+    const card=document.createElement("div");card.className="timeline-dynamic-card form-editor-block";
+    const head=document.createElement("div");head.className="form-editor-block-head";
+    const strong=document.createElement("strong");strong.textContent="Station "+(index+1);
+    const controls=document.createElement("div");controls.className="timeline-row-controls";
+    const up=document.createElement("button");up.type="button";up.className="secondary";up.textContent="↑";up.disabled=index===0;
+    const down=document.createElement("button");down.type="button";down.className="secondary";down.textContent="↓";down.disabled=index===companyTimelineItems.length-1;
+    const remove=document.createElement("button");remove.type="button";remove.className="danger-soft";remove.textContent="Entfernen";
+    up.addEventListener("click",()=>{[companyTimelineItems[index-1],companyTimelineItems[index]]=[companyTimelineItems[index],companyTimelineItems[index-1]];renderCompanyTimeline()});
+    down.addEventListener("click",()=>{[companyTimelineItems[index+1],companyTimelineItems[index]]=[companyTimelineItems[index],companyTimelineItems[index+1]];renderCompanyTimeline()});
+    remove.addEventListener("click",()=>{companyTimelineItems.splice(index,1);renderCompanyTimeline()});controls.append(up,down,remove);head.append(strong,controls);
+    const grid=document.createElement("div");grid.className="text-editor-grid";
+    const makeField=(label,value,max,area=false)=>{
+      const wrap=document.createElement("label");wrap.textContent=label;const field=document.createElement(area?"textarea":"input");if(area)field.rows=2;field.maxLength=max;field.value=value;wrap.appendChild(field);return [wrap,field];
+    };
+    const [periodWrap,period]=makeField("Zeitraum / Jahr",item.period,80),[textWrap,text]=makeField("Titel / Station",item.text,220),[descWrap,description]=makeField("Zusatzbeschreibung",item.description,500,true);
+    descWrap.classList.add("text-editor-wide");
+    const visibleWrap=document.createElement("label");visibleWrap.className="check-option text-editor-wide";const visible=document.createElement("input");visible.type="checkbox";visible.checked=item.visible!==false;visibleWrap.append(visible,document.createTextNode(" Auf der Website anzeigen"));
+    period.addEventListener("input",()=>item.period=period.value);text.addEventListener("input",()=>item.text=text.value);description.addEventListener("input",()=>item.description=description.value);visible.addEventListener("change",()=>item.visible=visible.checked);
+    grid.append(periodWrap,textWrap,descWrap,visibleWrap);card.append(head,grid);companyTimelineEditor.appendChild(card);
+  });
+  if(!companyTimelineItems.length){companyTimelineEditor.innerHTML='<div class="service-list-empty">Noch keine Timeline-Stationen vorhanden.</div>'}
+}
+async function loadCompanyTimeline(){
+  if(!companyTimelineEditor)return;
+  if(!getApi()){companyTimelineItems=normalizeCompanyTimeline(null);renderCompanyTimeline();return setStatus(companyTimelineStatus,"Worker-URL fehlt; Fallback-Timeline aktiv.",false)}
+  setStatus(companyTimelineStatus,"Lade Timeline …");
+  try{const r=await fetch(getApi()+"/api/site");if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json(),content=data.content||{};companyTimelineItems=normalizeCompanyTimeline(content["unternehmen/timeline"],content);renderCompanyTimeline();setStatus(companyTimelineStatus,Array.isArray(content["unternehmen/timeline"])?"Timeline geladen.":"Legacy-Timeline geladen; beim Speichern wird sie dynamisch.",true)}
+  catch(error){companyTimelineItems=normalizeCompanyTimeline(null);renderCompanyTimeline();setStatus(companyTimelineStatus,"Timeline konnte nicht geladen werden; Fallback aktiv: "+error.message,false)}
+}
+async function persistCompanyTimeline(){
+  if(!getApi()||!getToken())return setStatus(companyTimelineStatus,"Worker-URL und Admin-Token fehlen.",false);
+  saveCompanyTimeline.disabled=true;setStatus(companyTimelineStatus,"Speichere Timeline …");
+  try{
+    const normalized=companyTimelineItems.map((item,index)=>({id:item.id||"station-"+(index+1),period:item.period.trim(),text:item.text.trim(),description:item.description.trim(),visible:item.visible!==false}));
+    await saveHeroText("unternehmen/timeline",normalized);
+    for(let index=0;index<3;index++){
+      const item=normalized[index]||{period:"",text:""};
+      await saveHeroText("unternehmen/timeline-"+(index+1)+"-year",item.period);
+      await saveHeroText("unternehmen/timeline-"+(index+1)+"-text",item.text);
+    }
+    companyTimelineItems=normalized;renderCompanyTimeline();setStatus(companyTimelineStatus,"Timeline erfolgreich gespeichert.",true);
+  }catch(error){setStatus(companyTimelineStatus,"Speichern fehlgeschlagen: "+error.message,false)}finally{saveCompanyTimeline.disabled=false}
+}
+addCompanyTimeline?.addEventListener("click",()=>{companyTimelineItems.push({id:"station-"+Date.now(),period:"",text:"",description:"",visible:true});renderCompanyTimeline();companyTimelineEditor.lastElementChild?.scrollIntoView({block:"nearest"})});
+saveCompanyTimeline?.addEventListener("click",persistCompanyTimeline);
+reloadCompanyTimeline?.addEventListener("click",loadCompanyTimeline);
+
 
 const projectManifestKey="projekte/index";
 const projectFields=["title","description","location","year","services"];
@@ -2334,6 +2404,7 @@ setupServiceFlyover();
 loadHeroTexts();
 loadServiceTexts();
 loadCompanyTexts();
+loadCompanyTimeline();
 loadContactTexts();
 loadServiceContactTexts();
 loadEngineerPageTexts();

@@ -1017,3 +1017,9 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .service-list-editor{display:grid;gap:8px}.service-list-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px;border:1px solid #e1e5e1;border-radius:11px;background:#fff}.service-list-no{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#172026;color:#fff;font-size:.65rem;font-weight:900}
 .service-list-row input{width:100%;border:0;background:transparent;padding:8px;font:inherit;color:var(--ink);outline:none}.service-list-row input:focus{box-shadow:0 0 0 2px rgba(229,197,51,.3);border-radius:7px}.service-list-controls{display:flex;gap:5px}.service-list-controls button{padding:7px 9px;min-width:34px}.service-list-empty{padding:16px;text-align:center;color:var(--muted);font-size:.78rem}
 @media(max-width:620px){.service-list-row{grid-template-columns:30px minmax(0,1fr)}.service-list-controls{grid-column:2;justify-content:flex-end}.service-list-editor-head{align-items:flex-start;flex-direction:column}.service-list-editor-head button{width:100%}}
+
+
+/* Schritt 18: dynamische Unternehmens-Timeline */
+.timeline-collection-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}.timeline-collection-toolbar span{color:var(--muted);font-size:.75rem}
+.timeline-dynamic-editor{display:grid;gap:12px}.timeline-dynamic-card{margin:0!important}.timeline-row-controls{display:flex;gap:6px}.timeline-row-controls button{padding:7px 9px;font-size:.7rem}
+@media(max-width:620px){.timeline-collection-toolbar{align-items:stretch;flex-direction:column}.timeline-collection-toolbar button{width:100%}.timeline-row-controls{margin-top:8px}}

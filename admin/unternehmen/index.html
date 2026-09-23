@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Unternehmen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-20">
+  <link rel="stylesheet" href="./admin.css?v=20260924-18">
 </head>
 <body data-admin-page="unternehmen">
   <header class="admin-header">
@@ -75,44 +75,10 @@
       </div>
 
       <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">03</span>
-          <div>
-            <span class="kicker">Werdegang</span>
-            <h3>Timeline</h3>
-            <p>Die drei Stationen des beruflichen Werdegangs.</p>
-          </div>
-        </div>
-
-        <div class="timeline-editor-grid">
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>Station 1</strong><span>Aktuell</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Zeitraum<input id="companyTimeline1Year" type="text" maxlength="80"></label>
-              <label>Text<input id="companyTimeline1Text" type="text" maxlength="220"></label>
-            </div>
-          </div>
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>Station 2</strong><span>Berufserfahrung</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Zeitraum<input id="companyTimeline2Year" type="text" maxlength="80"></label>
-              <label>Text<input id="companyTimeline2Text" type="text" maxlength="220"></label>
-            </div>
-          </div>
-          <div class="form-editor-block">
-            <div class="form-editor-block-head"><strong>Station 3</strong><span>Ausbildung</span></div>
-            <div class="text-editor-grid single-column">
-              <label>Zeitraum<input id="companyTimeline3Year" type="text" maxlength="80"></label>
-              <label>Text<input id="companyTimeline3Text" type="text" maxlength="220"></label>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-editor-actions contact-save-actions">
-          <button id="saveCompanyTexts" type="button">Unternehmenstexte speichern</button>
-          <button id="reloadCompanyTexts" class="secondary" type="button">Neu laden</button>
-          <div id="companyTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
-        </div>
+        <div class="cms-subpanel-head"><span class="cms-subpanel-icon">03</span><div><span class="kicker">Werdegang</span><h3>Timeline</h3><p>Berufliche Stationen, Qualifikationen und Meilensteine frei ergänzen und sortieren.</p></div></div>
+        <div class="timeline-collection-toolbar"><button id="addCompanyTimeline" type="button">+ Station hinzufügen</button><span>Reihenfolge und Sichtbarkeit werden pro Station gepflegt.</span></div>
+        <div id="companyTimelineEditor" class="timeline-dynamic-editor" aria-live="polite"></div>
+        <div class="text-editor-actions contact-save-actions"><button id="saveCompanyTimeline" type="button">Timeline speichern</button><button id="reloadCompanyTimeline" class="secondary" type="button">Neu laden</button><div id="companyTimelineStatus" class="status">Fallback-Timeline wird angezeigt.</div></div>
       </section>
     </section>
   </main>
@@ -140,6 +106,6 @@
   </template>
 
   <script src="./config.js?v=20260923-20"></script>
-  <script src="./admin.js?v=20260923-20"></script>
+  <script src="./admin.js?v=20260924-18"></script>
 </body>
 </html>
