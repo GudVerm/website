@@ -182,10 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
       lead: 'Die Außendienst-Ausstattung folgt der Technikliste der aktuellen Gudelius-Seite. Hersteller- und Produktbilder dienen in der Beta nur als vorläufige Bildmotive.',
       summary: 'Die eigenen Gerätefotos von Jost ersetzen später diese Hersteller-/Produktbilder eins zu eins.',
       devices: [
-        { name:'Trimble SX12', detail:'Scanning-Totalstation', image:'https://images.ctfassets.net/1nvkn1423yot/7bouK6GUtWnVuxunCfxZML/4bd3307e16c06e17b898f32965eec7db/geo-sx12-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-sx12', source:'https://geospatial.trimble.com/de/products/hardware/trimble-sx12', sourceLabel:'Trimble' },
-        { name:'Trimble S6', detail:'Robotik-Totalstation', image:'assets/equipment-trimble-s6.svg', mediaKey:'equipment/trimble-s6', source:'https://help.fieldsystems.trimble.com/trimble-access/latest/de/equipment-supported.htm', sourceLabel:'Trimble · S6 Support' },
-        { name:'Trimble R2 GNSS-Empfänger', detail:'GNSS-Positionierung', image:'https://www.allnav.com/wp-content/uploads/2020/04/R2_4.jpg', mediaKey:'equipment/trimble-r2', source:'https://www.allnav.com/produkte/gnss-systeme/r2/', sourceLabel:'Trimble-Partner ALLNAV' },
-        { name:'Trimble DiNi 07 Ingenieurnivellier', detail:'Digitalnivellement', image:'https://images.ctfassets.net/1nvkn1423yot/64MgxNSI4ha3AwrJajbI1D/bc2639be1307bec5571be1197bd07a1b/geo-dinilevel-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-dini07', source:'https://geospatial.trimble.com/de/products/hardware/trimble-dini-level', sourceLabel:'Trimble' }
+        { slug:'trimble-sx12', name:'Trimble SX12', category:'Scanning-Totalstation', manufacturer:'Trimble', model:'SX12', description:'Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.', details:'Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.', image:'https://images.ctfassets.net/1nvkn1423yot/7bouK6GUtWnVuxunCfxZML/4bd3307e16c06e17b898f32965eec7db/geo-sx12-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-sx12', source:'https://geospatial.trimble.com/de/products/hardware/trimble-sx12', sourceLabel:'Trimble' },
+        { slug:'trimble-s6', name:'Trimble S6', category:'Robotik-Totalstation', manufacturer:'Trimble', model:'S6', description:'Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.', details:'Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.', image:'assets/equipment-trimble-s6.svg', mediaKey:'equipment/trimble-s6', source:'https://help.fieldsystems.trimble.com/trimble-access/latest/de/equipment-supported.htm', sourceLabel:'Trimble · S6 Support' },
+        { slug:'trimble-r2', name:'Trimble R2 GNSS-Empfänger', category:'GNSS-Positionierung', manufacturer:'Trimble', model:'R2', description:'GNSS-Empfänger für präzise Positionsbestimmung bei Aufnahme und Absteckung.', details:'RTK- und GNSS-gestützte Vermessung für flexible Punktaufnahme im Projektumfeld.', image:'https://www.allnav.com/wp-content/uploads/2020/04/R2_4.jpg', mediaKey:'equipment/trimble-r2', source:'https://www.allnav.com/produkte/gnss-systeme/r2/', sourceLabel:'Trimble-Partner ALLNAV' },
+        { slug:'trimble-dini07', name:'Trimble DiNi 07 Ingenieurnivellier', category:'Digitalnivellement', manufacturer:'Trimble', model:'DiNi 07', description:'Digitales Ingenieurnivellier für präzise Höhenmessungen und Höhenübertragungen.', details:'Geeignet für Nivellements, Kontrollmessungen und die nachvollziehbare Bestimmung von Höhenunterschieden.', image:'https://images.ctfassets.net/1nvkn1423yot/64MgxNSI4ha3AwrJajbI1D/bc2639be1307bec5571be1197bd07a1b/geo-dinilevel-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-dini07', source:'https://geospatial.trimble.com/de/products/hardware/trimble-dini-level', sourceLabel:'Trimble' }
       ]
     },
     digital: {
@@ -194,10 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
       lead: 'Laserscanning, RTK-Drohne, Wärmebild und photogrammetrische Auswertung bilden den digitalen Technikblock.',
       summary: 'TX8 und die Drohnenbilder werden später durch die tatsächlich verwendeten Geräteaufnahmen ersetzt.',
       devices: [
-        { name:'Trimble TX8 3D-Laserscanner', detail:'Terrestrisches 3D-Laserscanning', image:'assets/equipment-trimble-tx8.svg', mediaKey:'equipment/trimble-tx8', source:'https://geospatial.trimble.com/de/support/discontinued-products-technical-support', sourceLabel:'Trimble · TX8 Support' },
-        { name:'RTK-Drohne', detail:'Vermessung & Orthophoto', image:'https://www1.djicdn.com/cms/uploads/3185f8d17b7211aad1a326f604fc0022.png', mediaKey:'equipment/rtk-drohne', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
-        { name:'RTK-Drohne mit Infrarotkamera', detail:'Thermische Bildaufnahme', image:'https://www1.djicdn.com/cms/uploads/6a4fe5870d86bb43d58dcc1f364895da.png', mediaKey:'equipment/infrarotkamera', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
-        { name:'Punktwolken & Photogrammetrie', detail:'Workflow / Ergebnisdarstellung', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/photogrammetrie', source:'https://www.agisoft.com/', sourceLabel:'Agisoft · Platzhalter' }
+        { slug:'trimble-tx8', name:'Trimble TX8 3D-Laserscanner', category:'Terrestrisches 3D-Laserscanning', manufacturer:'Trimble', model:'TX8', description:'Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.', details:'Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.', image:'assets/equipment-trimble-tx8.svg', mediaKey:'equipment/trimble-tx8', source:'https://geospatial.trimble.com/de/support/discontinued-products-technical-support', sourceLabel:'Trimble · TX8 Support' },
+        { slug:'rtk-drohne', name:'RTK-Drohne', category:'Vermessung & Orthophoto', manufacturer:'DJI Enterprise', model:'RTK-Drohne', description:'RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.', details:'Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.', image:'https://www1.djicdn.com/cms/uploads/3185f8d17b7211aad1a326f604fc0022.png', mediaKey:'equipment/rtk-drohne', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
+        { slug:'infrarotkamera', name:'RTK-Drohne mit Infrarotkamera', category:'Thermische Bildaufnahme', manufacturer:'DJI Enterprise', model:'RTK-Drohne mit Infrarotkamera', description:'Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.', details:'Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.', image:'https://www1.djicdn.com/cms/uploads/6a4fe5870d86bb43d58dcc1f364895da.png', mediaKey:'equipment/infrarotkamera', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
+        { slug:'photogrammetrie', name:'Punktwolken & Photogrammetrie', category:'Workflow / Ergebnisdarstellung', manufacturer:'–', model:'Punktwolken & Photogrammetrie', description:'Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.', details:'Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/photogrammetrie', source:'https://www.agisoft.com/', sourceLabel:'Agisoft · Platzhalter' }
       ]
     },
     software: {
@@ -206,11 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
       lead: 'CAD, Tiefbauplanung, Punktwolken und Photogrammetrie werden mit den auf der Originalseite genannten Programmen abgedeckt.',
       summary: 'Bei Software zeigen die Platzhalter Hersteller- bzw. Produktmotive. Der mobile Büroarbeitsplatz bleibt als eigener visueller Eintrag erhalten.',
       devices: [
-        { name:'BricsCAD', detail:'CAD-Bearbeitung', image:'https://www.bbsoft.de/assets/logo/extern/octave_weiss.webp', mediaKey:'equipment/bricscad', source:'https://bricscad.octave.com/de', sourceLabel:'Octave / BricsCAD' },
-        { name:'BBSOFT', detail:'Tiefbau, Vermessung & DGM', image:'https://www.bbsoft.de/assets/images/uberuns/bbsoft-planung-computer.webp', mediaKey:'equipment/bbsoft', source:'https://www.bbsoft.de/', sourceLabel:'BBSoft' },
-        { name:'Trimble RealWorks', detail:'Punktwolken-Auswertung', image:'https://images.ctfassets.net/citn2sn5tdjr/2qHLMpxFWko4vex8bZItdi/f3295ad93a3fd7aaaa384a895ab3e13e/trimble-realworks-pipes-office-laptop-2880x1440.jpg?f=right&fit=fill&fm=webp&h=810&q=85&w=1920', mediaKey:'equipment/realworks', source:'https://www.trimble.com/de/products/building-construction-field-systems/trimble-realworks', sourceLabel:'Trimble' },
-        { name:'Agisoft Metashape', detail:'Photogrammetrie', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/metashape', source:'https://www.agisoft.com/', sourceLabel:'Agisoft' },
-        { name:'Mobiler Büroarbeitsplatz', detail:'Auswertung direkt im Projektumfeld', image:'https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg', mediaKey:'equipment/mobile-arbeitsplatz', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' }
+        { slug:'bricscad', name:'BricsCAD', category:'CAD-Bearbeitung', manufacturer:'Bricsys', model:'BricsCAD', description:'CAD-Software für die zeichnerische Aufbereitung und Weiterbearbeitung von Vermessungsdaten.', details:'Für 2D-/3D-CAD, Bestandspläne und projektbezogene Planbearbeitung.', image:'https://www.bbsoft.de/assets/logo/extern/octave_weiss.webp', mediaKey:'equipment/bricscad', source:'https://bricscad.octave.com/de', sourceLabel:'Octave / BricsCAD' },
+        { slug:'bbsoft', name:'BBSOFT', category:'Tiefbau, Vermessung & DGM', manufacturer:'BBSOFT', model:'BBSOFT', description:'Fachsoftware für vermessungsnahe Tiefbauplanung, Geländemodelle und Massenermittlung.', details:'Unterstützt die Bearbeitung von Vermessungsdaten, DGM und projektbezogenen Tiefbauaufgaben.', image:'https://www.bbsoft.de/assets/images/uberuns/bbsoft-planung-computer.webp', mediaKey:'equipment/bbsoft', source:'https://www.bbsoft.de/', sourceLabel:'BBSoft' },
+        { slug:'realworks', name:'Trimble RealWorks', category:'Punktwolken-Auswertung', manufacturer:'Trimble', model:'RealWorks', description:'Software zur Registrierung, Auswertung und Aufbereitung terrestrischer Punktwolken.', details:'Für Scanregistrierung, Punktwolkenanalyse und die Ableitung weiterverwendbarer 2D-/3D-Ergebnisse.', image:'https://images.ctfassets.net/citn2sn5tdjr/2qHLMpxFWko4vex8bZItdi/f3295ad93a3fd7aaaa384a895ab3e13e/trimble-realworks-pipes-office-laptop-2880x1440.jpg?f=right&fit=fill&fm=webp&h=810&q=85&w=1920', mediaKey:'equipment/realworks', source:'https://www.trimble.com/de/products/building-construction-field-systems/trimble-realworks', sourceLabel:'Trimble' },
+        { slug:'metashape', name:'Agisoft Metashape', category:'Photogrammetrie', manufacturer:'Agisoft', model:'Metashape', description:'Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.', details:'Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/metashape', source:'https://www.agisoft.com/', sourceLabel:'Agisoft' },
+        { slug:'mobile-arbeitsplatz', name:'Mobiler Büroarbeitsplatz', category:'Auswertung direkt im Projektumfeld', manufacturer:'GudeliusVermessung', model:'Mobiler Büroarbeitsplatz', description:'Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.', details:'Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.', image:'https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg', mediaKey:'equipment/mobile-arbeitsplatz', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' }
       ]
     }
   };
@@ -223,16 +223,25 @@ document.addEventListener('DOMContentLoaded', () => {
     equipmentLead.textContent = data.lead;
     equipmentSummary.textContent = data.summary;
     equipmentGallery.innerHTML = data.devices
-      .map((device) => `
-        <article class="equipment-device-card">
-          <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${device.name} Platzhalterbild" loading="lazy" decoding="async" fetchpriority="low">
-          <div class="equipment-device-copy">
-            <strong>${device.name}</strong>
-            <span>${device.detail}</span>
-            <a class="equipment-source" href="${device.source}" target="_blank" rel="noopener">Bildquelle: ${device.sourceLabel} ↗</a>
-          </div>
-        </article>
-      `)
+      .map((device) => {
+        const cmsBase = 'technik/' + device.slug;
+        return `
+          <article class="equipment-device-card" data-technique="${device.slug}">
+            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${device.name} Platzhalterbild" loading="lazy" decoding="async" fetchpriority="low">
+            <div class="equipment-device-copy">
+              <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${device.category}</span>
+              <strong data-cms-text="${cmsBase}/name">${device.name}</strong>
+              <dl class="equipment-device-meta">
+                <div><dt>Hersteller</dt><dd data-cms-text="${cmsBase}/manufacturer">${device.manufacturer}</dd></div>
+                <div><dt>Modell</dt><dd data-cms-text="${cmsBase}/model">${device.model}</dd></div>
+              </dl>
+              <p class="equipment-device-description" data-cms-text="${cmsBase}/description">${device.description}</p>
+              <p class="equipment-device-details"><b>Besonderheiten</b><span data-cms-text="${cmsBase}/details">${device.details}</span></p>
+              <a class="equipment-source" href="${device.source}" target="_blank" rel="noopener">Bildquelle: ${device.sourceLabel} ↗</a>
+            </div>
+          </article>
+        `;
+      })
       .join('');
     applyCmsMedia(equipmentGallery);
 

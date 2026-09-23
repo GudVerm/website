@@ -663,3 +663,70 @@ body.modal-open{overflow:hidden}
 .hp-field{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
 .form-note.success{color:#2f7d4c}
 .form-note.error{color:#a4443c}
+
+
+/* Technik: CMS-faehige Detaildaten je Eintrag */
+.equipment-device-category{
+  display:block;
+  margin-bottom:6px;
+  color:#9b8320!important;
+  font-size:.68rem!important;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.equipment-device-meta{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:14px 0 12px;
+}
+.equipment-device-meta div{
+  padding:9px 10px;
+  border:1px solid #e3e7e3;
+  border-radius:10px;
+  background:#fafaf7;
+}
+.equipment-device-meta dt{
+  margin:0 0 3px;
+  color:#7a858a;
+  font-size:.62rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.equipment-device-meta dd{
+  margin:0;
+  color:#263239;
+  font-size:.78rem;
+  font-weight:800;
+}
+.equipment-device-description{
+  margin:0 0 11px;
+  color:#526067;
+  font-size:.82rem;
+  line-height:1.55;
+}
+.equipment-device-details{
+  margin:0;
+  padding-top:11px;
+  border-top:1px solid #e8ebe7;
+  color:#68757a;
+  font-size:.77rem;
+  line-height:1.5;
+}
+.equipment-device-details b{
+  display:block;
+  margin-bottom:4px;
+  color:#263239;
+  font-size:.68rem;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.equipment-device-details span{
+  color:inherit;
+  font-size:inherit;
+}
+@media(max-width:520px){
+  .equipment-device-meta{grid-template-columns:1fr}
+}
