@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-16">
+  <link rel="stylesheet" href="./admin.css?v=20260923-17">
 </head>
 <body>
   <header class="admin-header">
@@ -199,6 +199,122 @@
           </div>
         </div>
         <section id="servicePageGrid" class="equipment-grid" aria-live="polite"></section>
+      </section>
+
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">04</span>
+          <div>
+            <span class="kicker">Unterseite · Ingenieurvermessung</span>
+            <h3>Komplette Seitentexte</h3>
+            <p>Alle sichtbaren Inhalte der Leistungsseite – ausgenommen Navigation, Footer und der zentral gepflegte Kontaktbereich.</p>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engHeroEyebrow" type="text" maxlength="140"></label>
+            <label>Hauptüberschrift<input id="engHeroTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="engHeroLead" rows="3" maxlength="500"></textarea></label>
+            <label>Primärer Button<input id="engHeroPrimary" type="text" maxlength="100"></label>
+            <label>Sekundärer Button<input id="engHeroSecondary" type="text" maxlength="100"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Überblick</strong><span>Einführung und typische Aufgaben</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engOverviewEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="engOverviewTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Absatz 1<textarea id="engOverviewText1" rows="3" maxlength="700"></textarea></label>
+            <label class="text-editor-wide">Absatz 2<textarea id="engOverviewText2" rows="3" maxlength="700"></textarea></label>
+            <label>Zurück-Link<input id="engOverviewBack" type="text" maxlength="120"></label>
+            <label>Aufgaben · Eyebrow<input id="engTasksEyebrow" type="text" maxlength="120"></label>
+            <label>Aufgaben · Überschrift<input id="engTasksTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Typische Aufgaben · eine Zeile pro Punkt
+              <textarea id="engTasksItems" rows="7" maxlength="1400"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Vollständiger Leistungsumfang</strong><span>11 Einzelleistungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engScopeEyebrow" type="text" maxlength="140"></label>
+            <label>Überschrift<input id="engScopeTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="engScopeLead" rows="3" maxlength="600"></textarea></label>
+            <label class="text-editor-wide">Leistungen · exakt eine Zeile pro Punkt
+              <textarea id="engScopeItems" rows="13" maxlength="5000"></textarea>
+            </label>
+            <label class="text-editor-wide">Hinweis unter der Liste
+              <input id="engScopeNote" type="text" maxlength="300">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Leistung im Detail</strong><span>Drei Detailkarten</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engDetailEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="engDetailTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="engDetailLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>01 · Absteckung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engDetail1Title" type="text" maxlength="120"></label><label>Text<textarea id="engDetail1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>02 · Kontrolle</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engDetail2Title" type="text" maxlength="120"></label><label>Text<textarea id="engDetail2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>03 · Bestand</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engDetail3Title" type="text" maxlength="120"></label><label>Text<textarea id="engDetail3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Ergebnisse</strong><span>Ausgabe und Projektgrundlagen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engResultsEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="engResultsTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="engResultsLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 1</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engResult1Title" type="text" maxlength="120"></label><label>Text<textarea id="engResult1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 2</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engResult2Title" type="text" maxlength="120"></label><label>Text<textarea id="engResult2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 3</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engResult3Title" type="text" maxlength="120"></label><label>Text<textarea id="engResult3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 4</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engResult4Title" type="text" maxlength="120"></label><label>Text<textarea id="engResult4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Projektablauf</strong><span>Vier Schritte</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engProcessEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="engProcessTitle" type="text" maxlength="180"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 01</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engProcess1Title" type="text" maxlength="120"></label><label>Text<textarea id="engProcess1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 02</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engProcess2Title" type="text" maxlength="120"></label><label>Text<textarea id="engProcess2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 03</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engProcess3Title" type="text" maxlength="120"></label><label>Text<textarea id="engProcess3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 04</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engProcess4Title" type="text" maxlength="120"></label><label>Text<textarea id="engProcess4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Weitere Leistungen</strong><span>Verlinkte Ergänzungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="engRelatedEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="engRelatedTitle" type="text" maxlength="180"></label>
+            <label>Linktext<input id="engRelatedLinkLabel" type="text" maxlength="100"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>GIS & Bauvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engRelated1Title" type="text" maxlength="120"></label><label>Text<textarea id="engRelated1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>3D-Laserscanning</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engRelated2Title" type="text" maxlength="120"></label><label>Text<textarea id="engRelated2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Drohnenvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="engRelated3Title" type="text" maxlength="120"></label><label>Text<textarea id="engRelated3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveEngineerPageTexts" type="button">Ingenieurvermessung speichern</button>
+          <button id="reloadEngineerPageTexts" class="secondary" type="button">Neu laden</button>
+          <div id="engineerPageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
       </section>
     </section>
 
@@ -683,7 +799,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-16"></script>
-  <script src="./admin.js?v=20260923-16"></script>
+  <script src="./config.js?v=20260923-17"></script>
+  <script src="./admin.js?v=20260923-17"></script>
 </body>
 </html>
