@@ -17,6 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       img.src = cmsMediaUrl(img.dataset.cmsMedia);
     });
+
+    root.querySelectorAll("[data-cms-bg]").forEach((element) => {
+      if (element.dataset.cmsApplied === "1") return;
+      element.dataset.cmsApplied = "1";
+      const image = new Image();
+      image.onload = () => {
+        element.style.setProperty("--hero-image", `url("${cmsMediaUrl(element.dataset.cmsBg)}")`);
+      };
+      image.src = cmsMediaUrl(element.dataset.cmsBg);
+    });
   }
 
   applyCmsMedia();
