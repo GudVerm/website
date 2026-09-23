@@ -158,3 +158,32 @@ function render(){
 }
 
 render();
+
+
+const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
+const adminSections=adminNavLinks
+  .map(link=>document.querySelector(link.getAttribute("href")))
+  .filter(Boolean);
+
+function setActiveAdminNav(id){
+  adminNavLinks.forEach(link=>{
+    link.classList.toggle("active",link.getAttribute("href")==="#"+id);
+  });
+}
+
+adminNavLinks.forEach(link=>{
+  link.addEventListener("click",()=>{
+    const id=link.getAttribute("href").slice(1);
+    setActiveAdminNav(id);
+  });
+});
+
+if("IntersectionObserver" in window){
+  const adminNavObserver=new IntersectionObserver(entries=>{
+    const visible=entries
+      .filter(entry=>entry.isIntersecting)
+      .sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(visible?.target?.id) setActiveAdminNav(visible.target.id);
+  },{rootMargin:"-70px 0px -55% 0px",threshold:[0,.1,.25,.5]});
+  adminSections.forEach(section=>adminNavObserver.observe(section));
+}
