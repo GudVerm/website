@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-23">
+  <link rel="stylesheet" href="./admin.css?v=20260923-24">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -43,34 +43,99 @@
         <p>Jede Leistung ist als eigene Abteilung aufgebaut. Bilder und zugehörige Texte liegen direkt zusammen.</p>
       </section>
 
-      <div class="service-flyover" id="serviceFlyover">
-        <button class="service-flyover-trigger" id="serviceFlyoverTrigger" type="button" aria-expanded="false" aria-controls="serviceFlyoverPanel">
-          <span>
-            <small>Leistung bearbeiten</small>
-            <strong id="serviceFlyoverCurrent">Ingenieurvermessung</strong>
-          </span>
-          <b aria-hidden="true">⌄</b>
-        </button>
-
-        <div class="service-flyover-panel" id="serviceFlyoverPanel">
-          <div class="service-flyover-column">
-            <span class="service-flyover-label">Leistung</span>
-            <button type="button" class="service-flyover-service active" data-service-target="ingenieurvermessung"><span>01</span>Ingenieurvermessung</button>
-            <button type="button" class="service-flyover-service" data-service-target="gis-bauvermessung"><span>02</span>GIS & Bauvermessung</button>
-            <button type="button" class="service-flyover-service" data-service-target="3d-laserscanning"><span>03</span>3D-Laserscanning</button>
-            <button type="button" class="service-flyover-service" data-service-target="drohnenvermessung"><span>04</span>Drohnenvermessung</button>
+      <div class="service-mega-nav" id="serviceFlyover" aria-label="Leistungsbereiche">
+        <div class="service-mega-nav-inner">
+          <div class="service-mega-item" data-service-menu="ingenieurvermessung">
+            <button class="service-mega-service active" type="button" data-service-target="ingenieurvermessung" aria-expanded="false">
+              <span class="service-mega-no">01</span>
+              <span class="service-mega-name">Ingenieurvermessung</span>
+              <span class="service-mega-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="service-mega-flyout" role="menu" aria-label="Ingenieurvermessung">
+              <div class="service-mega-flyout-head">
+                <small>Bereich auswählen</small>
+                <strong>Ingenieurvermessung</strong>
+              </div>
+              <div class="service-mega-section-grid">
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="media">Bilder & Kachel<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="hero">Hero<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="overview">Überblick<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="scope">Leistungsumfang<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="detail">Details<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="results">Ergebnisse<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="process">Projektablauf<span>→</span></button>
+                <button type="button" role="menuitem" data-service="ingenieurvermessung" data-section-target="related">Weitere Leistungen<span>→</span></button>
+              </div>
+            </div>
           </div>
-
-          <div class="service-flyover-column service-flyover-sections">
-            <span class="service-flyover-label">Bereich</span>
-            <button type="button" data-section-target="media">Bilder & Kachel</button>
-            <button type="button" data-section-target="hero">Hero</button>
-            <button type="button" data-section-target="overview">Überblick</button>
-            <button type="button" data-section-target="scope">Leistungsumfang</button>
-            <button type="button" data-section-target="detail">Details</button>
-            <button type="button" data-section-target="results">Ergebnisse</button>
-            <button type="button" data-section-target="process">Projektablauf</button>
-            <button type="button" data-section-target="related">Weitere Leistungen</button>
+          <div class="service-mega-item" data-service-menu="gis-bauvermessung">
+            <button class="service-mega-service" type="button" data-service-target="gis-bauvermessung" aria-expanded="false">
+              <span class="service-mega-no">02</span>
+              <span class="service-mega-name">GIS & Bauvermessung</span>
+              <span class="service-mega-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="service-mega-flyout" role="menu" aria-label="GIS & Bauvermessung">
+              <div class="service-mega-flyout-head">
+                <small>Bereich auswählen</small>
+                <strong>GIS & Bauvermessung</strong>
+              </div>
+              <div class="service-mega-section-grid">
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="media">Bilder & Kachel<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="hero">Hero<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="overview">Überblick<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="scope">Leistungsumfang<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="detail">Details<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="results">Ergebnisse<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="process">Projektablauf<span>→</span></button>
+                <button type="button" role="menuitem" data-service="gis-bauvermessung" data-section-target="related">Weitere Leistungen<span>→</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="service-mega-item" data-service-menu="3d-laserscanning">
+            <button class="service-mega-service" type="button" data-service-target="3d-laserscanning" aria-expanded="false">
+              <span class="service-mega-no">03</span>
+              <span class="service-mega-name">3D-Laserscanning</span>
+              <span class="service-mega-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="service-mega-flyout" role="menu" aria-label="3D-Laserscanning">
+              <div class="service-mega-flyout-head">
+                <small>Bereich auswählen</small>
+                <strong>3D-Laserscanning</strong>
+              </div>
+              <div class="service-mega-section-grid">
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="media">Bilder & Kachel<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="hero">Hero<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="overview">Überblick<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="scope">Leistungsumfang<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="detail">Details<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="results">Ergebnisse<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="process">Projektablauf<span>→</span></button>
+                <button type="button" role="menuitem" data-service="3d-laserscanning" data-section-target="related">Weitere Leistungen<span>→</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="service-mega-item" data-service-menu="drohnenvermessung">
+            <button class="service-mega-service" type="button" data-service-target="drohnenvermessung" aria-expanded="false">
+              <span class="service-mega-no">04</span>
+              <span class="service-mega-name">Drohnenvermessung</span>
+              <span class="service-mega-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="service-mega-flyout" role="menu" aria-label="Drohnenvermessung">
+              <div class="service-mega-flyout-head">
+                <small>Bereich auswählen</small>
+                <strong>Drohnenvermessung</strong>
+              </div>
+              <div class="service-mega-section-grid">
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="media">Bilder & Kachel<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="hero">Hero<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="overview">Überblick<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="scope">Leistungsumfang<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="detail">Details<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="results">Ergebnisse<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="process">Projektablauf<span>→</span></button>
+                <button type="button" role="menuitem" data-service="drohnenvermessung" data-section-target="related">Weitere Leistungen<span>→</span></button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -451,7 +516,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-23"></script>
-  <script src="./admin.js?v=20260923-23"></script>
+  <script src="./config.js?v=20260923-24"></script>
+  <script src="./admin.js?v=20260923-24"></script>
 </body>
 </html>
