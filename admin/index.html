@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-14">
+  <link rel="stylesheet" href="./admin.css?v=20260923-15">
 </head>
 <body>
   <header class="admin-header">
@@ -29,187 +29,253 @@
   </nav>
 
   <main class="wrap">
-    <section class="panel connect-panel admin-section" id="verbindung">
-      <div>
-        <span class="kicker">Verbindung</span>
-        <h2>Cloudflare CMS verbinden</h2>
-        <p>Worker-URL und Admin-Token werden nur in diesem Browser gespeichert. Das Token landet nicht im Git-Repository.</p>
-      </div>
-      <div class="connection-form">
-        <label>Worker-URL
-          <input id="apiUrl" type="url" placeholder="https://gudelius-cms.DEIN-ACCOUNT.workers.dev">
-        </label>
-        <label>Admin-Token
-          <input id="adminToken" type="password" placeholder="CMS_ADMIN_TOKEN">
-        </label>
-        <div class="actions">
-          <button id="saveConnection" type="button">Verbinden</button>
-          <button id="testConnection" class="secondary" type="button">Verbindung testen</button>
+    <section class="admin-section" id="verbindung">
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Verbindung</span>
+          <h2>Cloudflare CMS</h2>
         </div>
-        <div id="connectionStatus" class="status">Noch nicht verbunden.</div>
-      </div>
+        <p>Hier wird die Verbindung zwischen Admin-Oberfläche und Cloudflare Worker verwaltet.</p>
+      </section>
+
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Zugang</span>
+            <h3>Worker & Admin-Token</h3>
+            <p>Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.</p>
+          </div>
+        </div>
+
+        <div class="connection-form">
+          <label>Worker-URL
+            <input id="apiUrl" type="url" placeholder="https://gudelius-cms.DEIN-ACCOUNT.workers.dev">
+          </label>
+          <label>Admin-Token
+            <input id="adminToken" type="password" placeholder="CMS_ADMIN_TOKEN">
+          </label>
+          <div class="actions">
+            <button id="saveConnection" type="button">Verbinden</button>
+            <button id="testConnection" class="secondary" type="button">Verbindung testen</button>
+          </div>
+          <div id="connectionStatus" class="status">Noch nicht verbunden.</div>
+        </div>
+      </section>
     </section>
 
     <section class="admin-section" id="startseite">
-      <section class="section-head">
+      <section class="section-head admin-section-head">
         <div>
           <span class="kicker">Startseite</span>
-          <h2>Hero-Bild austauschen</h2>
+          <h2>Hero-Bereich</h2>
         </div>
-        <p>Dieses Bild erscheint groß im Kopfbereich der Startseite. Das bisherige Bild bleibt als Fallback erhalten.</p>
-      </section>
-      <section id="startPageGrid" class="equipment-grid" aria-live="polite"></section>
-
-      <section class="section-head">
-        <div>
-          <span class="kicker">Startseitentexte</span>
-          <h2>Hero-Texte bearbeiten</h2>
-        </div>
-        <p>Die drei Texte werden in Cloudflare D1 gespeichert. Ohne CMS-Daten bleiben automatisch die bisherigen Texte sichtbar.</p>
+        <p>Bild und zentrale Einstiegstexte der Startseite sind getrennt voneinander pflegbar.</p>
       </section>
 
-      <section class="panel text-editor-panel">
-        <div class="text-editor-grid">
-          <label>Eyebrow
-            <input id="heroEyebrow" type="text" maxlength="120" placeholder="Vermessung für anspruchsvolle Projekte">
-          </label>
-          <label>Hauptüberschrift
-            <input id="heroTitle" type="text" maxlength="160" placeholder="Von der Planung bis zum Bestand.">
-          </label>
-          <label class="text-editor-wide">Einleitung
-            <textarea id="heroLead" rows="4" maxlength="500" placeholder="Einleitungstext der Startseite"></textarea>
-          </label>
-        </div>
-        <div class="text-editor-actions">
-          <button id="saveHeroTexts" type="button">Texte speichern</button>
-          <button id="reloadHeroTexts" class="secondary" type="button">Neu laden</button>
-          <div id="heroTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
-        </div>
-      </section>
+      <div class="cms-group-grid">
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">01</span>
+            <div>
+              <span class="kicker">Bild</span>
+              <h3>Hero-Bild</h3>
+              <p>Das große Hintergrundbild im Kopfbereich der Startseite.</p>
+            </div>
+          </div>
+          <section id="startPageGrid" class="equipment-grid compact-grid" aria-live="polite"></section>
+        </section>
+
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">02</span>
+            <div>
+              <span class="kicker">Texte</span>
+              <h3>Hero-Texte</h3>
+              <p>Eyebrow, Hauptüberschrift und Einleitungstext.</p>
+            </div>
+          </div>
+
+          <div class="text-editor-grid single-column">
+            <label>Eyebrow
+              <input id="heroEyebrow" type="text" maxlength="120" placeholder="Vermessung für anspruchsvolle Projekte">
+            </label>
+            <label>Hauptüberschrift
+              <input id="heroTitle" type="text" maxlength="160" placeholder="Von der Planung bis zum Bestand.">
+            </label>
+            <label>Einleitung
+              <textarea id="heroLead" rows="4" maxlength="500" placeholder="Einleitungstext der Startseite"></textarea>
+            </label>
+          </div>
+          <div class="text-editor-actions">
+            <button id="saveHeroTexts" type="button">Texte speichern</button>
+            <button id="reloadHeroTexts" class="secondary" type="button">Neu laden</button>
+            <div id="heroTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+          </div>
+        </section>
+      </div>
     </section>
 
     <section class="admin-section" id="leistungen">
-      <section class="section-head">
+      <section class="section-head admin-section-head">
         <div>
           <span class="kicker">Leistungen</span>
-          <h2>Leistungsbilder austauschen</h2>
+          <h2>Leistungsbereich</h2>
         </div>
-        <p>Hier werden nur die vier Bilder der Leistungs-Kacheln auf der Startseite gepflegt. Texte und Links bleiben unverändert.</p>
-      </section>
-      <section id="serviceGrid" class="equipment-grid" aria-live="polite"></section>
-
-      <section class="section-head">
-        <div>
-          <span class="kicker">Leistungstexte</span>
-          <h2>Titel und Beschreibungen bearbeiten</h2>
-        </div>
-        <p>Die Nummern und Links bleiben fest. Bearbeitbar sind nur Titel und Kurzbeschreibung der vier Kacheln.</p>
+        <p>Startseiten-Kacheln und Bilder der Leistungs-Unterseiten sind in eigene Pflegebereiche gegliedert.</p>
       </section>
 
-      <section class="panel text-editor-panel">
-        <div class="text-editor-grid">
-          <label>01 · Titel
-            <input id="service1Title" type="text" maxlength="120">
-          </label>
-          <label>01 · Beschreibung
-            <textarea id="service1Text" rows="3" maxlength="400"></textarea>
-          </label>
-
-          <label>02 · Titel
-            <input id="service2Title" type="text" maxlength="120">
-          </label>
-          <label>02 · Beschreibung
-            <textarea id="service2Text" rows="3" maxlength="400"></textarea>
-          </label>
-
-          <label>03 · Titel
-            <input id="service3Title" type="text" maxlength="120">
-          </label>
-          <label>03 · Beschreibung
-            <textarea id="service3Text" rows="3" maxlength="400"></textarea>
-          </label>
-
-          <label>04 · Titel
-            <input id="service4Title" type="text" maxlength="120">
-          </label>
-          <label>04 · Beschreibung
-            <textarea id="service4Text" rows="3" maxlength="400"></textarea>
-          </label>
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Startseite</span>
+            <h3>Bilder der Leistungs-Kacheln</h3>
+            <p>Die vier Bilder der Leistungsübersicht auf der Startseite.</p>
+          </div>
         </div>
-        <div class="text-editor-actions">
+        <section id="serviceGrid" class="equipment-grid" aria-live="polite"></section>
+      </section>
+
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">02</span>
+          <div>
+            <span class="kicker">Startseite</span>
+            <h3>Titel & Beschreibungen</h3>
+            <p>Die Nummern und Links bleiben fest; Titel und Kurztexte sind editierbar.</p>
+          </div>
+        </div>
+
+        <div class="service-text-card-grid">
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>01 · Ingenieurvermessung</strong><span>Startseiten-Kachel</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Titel<input id="service1Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service1Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+          </div>
+
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>02 · GIS & Bauvermessung</strong><span>Startseiten-Kachel</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Titel<input id="service2Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service2Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+          </div>
+
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>03 · 3D-Laserscanning</strong><span>Startseiten-Kachel</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Titel<input id="service3Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service3Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+          </div>
+
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>04 · Drohnenvermessung</strong><span>Startseiten-Kachel</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Titel<input id="service4Title" type="text" maxlength="120"></label>
+              <label>Beschreibung<textarea id="service4Text" rows="3" maxlength="400"></textarea></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
           <button id="saveServiceTexts" type="button">Leistungstexte speichern</button>
           <button id="reloadServiceTexts" class="secondary" type="button">Neu laden</button>
           <div id="serviceTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
         </div>
       </section>
 
-      <section class="section-head">
-        <div>
-          <span class="kicker">Leistungs-Unterseiten</span>
-          <h2>Bilder der Unterseiten austauschen</h2>
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Unterseiten</span>
+            <h3>Bilder der Leistungs-Unterseiten</h3>
+            <p>Hero-Bild und Ergebnisbilder jeder Leistungsseite.</p>
+          </div>
         </div>
-        <p>Pro Leistungsseite können Hero-Bild und die beiden Ergebnisbilder getrennt gepflegt werden.</p>
+        <section id="servicePageGrid" class="equipment-grid" aria-live="polite"></section>
       </section>
-      <section id="servicePageGrid" class="equipment-grid" aria-live="polite"></section>
     </section>
 
     <section class="admin-section" id="unternehmen">
-      <section class="section-head">
+      <section class="section-head admin-section-head">
         <div>
           <span class="kicker">Unternehmen</span>
-          <h2>Unternehmensbilder austauschen</h2>
+          <h2>Unternehmensbereich</h2>
         </div>
-        <p>Hier können das Foto von Jost und das Prüf-/Kammerbild unabhängig voneinander ersetzt werden.</p>
-      </section>
-      <section id="companyGrid" class="equipment-grid" aria-live="polite"></section>
-
-      <section class="section-head">
-        <div>
-          <span class="kicker">Unternehmenstexte</span>
-          <h2>Unternehmensbereich bearbeiten</h2>
-        </div>
-        <p>Überschrift, Vorstellung und beruflicher Werdegang werden in Cloudflare D1 gespeichert.</p>
+        <p>Bilder, Vorstellung und beruflicher Werdegang sind in getrennten Karten organisiert.</p>
       </section>
 
-      <section class="panel text-editor-panel">
-        <div class="text-editor-grid">
-          <label>Eyebrow
-            <input id="companyEyebrow" type="text" maxlength="120">
-          </label>
-          <label>Überschrift
-            <input id="companyTitle" type="text" maxlength="180">
-          </label>
+      <div class="cms-group-grid">
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">01</span>
+            <div>
+              <span class="kicker">Bilder</span>
+              <h3>Unternehmensbilder</h3>
+              <p>Portrait und Prüf-/Kammerbild.</p>
+            </div>
+          </div>
+          <section id="companyGrid" class="equipment-grid compact-grid" aria-live="polite"></section>
+        </section>
 
-          <label>Name / Qualifikation
-            <input id="companyName" type="text" maxlength="160">
-          </label>
-          <label>Beschreibung
-            <textarea id="companyLead" rows="4" maxlength="700"></textarea>
-          </label>
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">02</span>
+            <div>
+              <span class="kicker">Vorstellung</span>
+              <h3>Kopftext & Person</h3>
+              <p>Überschrift, Name, Qualifikation und Beschreibung.</p>
+            </div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Eyebrow<input id="companyEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="companyTitle" type="text" maxlength="180"></label>
+            <label>Name / Qualifikation<input id="companyName" type="text" maxlength="160"></label>
+            <label>Beschreibung<textarea id="companyLead" rows="4" maxlength="700"></textarea></label>
+          </div>
+        </section>
+      </div>
 
-          <label>Timeline 1 · Zeitraum
-            <input id="companyTimeline1Year" type="text" maxlength="80">
-          </label>
-          <label>Timeline 1 · Text
-            <input id="companyTimeline1Text" type="text" maxlength="220">
-          </label>
-
-          <label>Timeline 2 · Zeitraum
-            <input id="companyTimeline2Year" type="text" maxlength="80">
-          </label>
-          <label>Timeline 2 · Text
-            <input id="companyTimeline2Text" type="text" maxlength="220">
-          </label>
-
-          <label>Timeline 3 · Zeitraum
-            <input id="companyTimeline3Year" type="text" maxlength="80">
-          </label>
-          <label>Timeline 3 · Text
-            <input id="companyTimeline3Text" type="text" maxlength="220">
-          </label>
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Werdegang</span>
+            <h3>Timeline</h3>
+            <p>Die drei Stationen des beruflichen Werdegangs.</p>
+          </div>
         </div>
 
-        <div class="text-editor-actions">
+        <div class="timeline-editor-grid">
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 1</strong><span>Aktuell</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline1Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline1Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 2</strong><span>Berufserfahrung</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline2Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline2Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 3</strong><span>Ausbildung</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline3Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline3Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
           <button id="saveCompanyTexts" type="button">Unternehmenstexte speichern</button>
           <button id="reloadCompanyTexts" class="secondary" type="button">Neu laden</button>
           <div id="companyTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
@@ -218,64 +284,74 @@
     </section>
 
     <section class="admin-section" id="technik">
-    <section class="section-head">
-      <div>
-        <span class="kicker">Technik</span>
-        <h2>Bilder austauschen</h2>
-      </div>
-      <p>Wähle pro Gerät ein eigenes Foto. Nach dem Upload liegt es in Cloudflare R2 und kann auf der Website verwendet werden.</p>
-    </section>
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Technik</span>
+          <h2>Geräte & Software</h2>
+        </div>
+        <p>Alle Technikbilder sind in einem eigenen Medienbereich zusammengefasst.</p>
+      </section>
 
-    <section id="equipmentGrid" class="equipment-grid" aria-live="polite"></section>
-  </section>
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Medien</span>
+            <h3>Technikbilder</h3>
+            <p>Pro Gerät oder Software-Eintrag kann ein eigenes Bild hochgeladen oder entfernt werden.</p>
+          </div>
+        </div>
+        <section id="equipmentGrid" class="equipment-grid" aria-live="polite"></section>
+      </section>
+    </section>
 
     <section class="admin-section" id="projekte">
-    <section class="section-head">
-      <div>
-        <span class="kicker">Projekte</span>
-        <h2>Projektbilder austauschen</h2>
-      </div>
-      <p>Diese sechs Bilder entsprechen den aktuellen Projektkacheln auf der Startseite. Texte und Reihenfolge bleiben in diesem Schritt unverändert.</p>
-    </section>
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Projekte</span>
+          <h2>Projektkacheln</h2>
+        </div>
+        <p>Bilder und sichtbare Bezeichnungen der sechs Projektkacheln werden getrennt gepflegt.</p>
+      </section>
 
-    <section id="projectGrid" class="equipment-grid" aria-live="polite"></section>
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Bilder</span>
+            <h3>Projektbilder</h3>
+            <p>Die sechs Bilder der Projektübersicht auf der Startseite.</p>
+          </div>
+        </div>
+        <section id="projectGrid" class="equipment-grid" aria-live="polite"></section>
+      </section>
 
-    <section class="section-head">
-      <div>
-        <span class="kicker">Projekt-Titel</span>
-        <h2>Bezeichnungen der Projektkacheln bearbeiten</h2>
-      </div>
-      <p>Nur die sichtbaren Titel werden geändert. Bilder, Reihenfolge und Anzahl der Projekte bleiben unverändert.</p>
-    </section>
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">02</span>
+          <div>
+            <span class="kicker">Texte</span>
+            <h3>Projekt-Titel</h3>
+            <p>Nur die sichtbaren Bezeichnungen werden geändert; Reihenfolge und Anzahl bleiben fest.</p>
+          </div>
+        </div>
 
-    <section class="panel text-editor-panel">
-      <div class="text-editor-grid">
-        <label>Projekt 1
-          <input id="project1Title" type="text" maxlength="140">
-        </label>
-        <label>Projekt 2
-          <input id="project2Title" type="text" maxlength="140">
-        </label>
-        <label>Projekt 3
-          <input id="project3Title" type="text" maxlength="140">
-        </label>
-        <label>Projekt 4
-          <input id="project4Title" type="text" maxlength="140">
-        </label>
-        <label>Projekt 5
-          <input id="project5Title" type="text" maxlength="140">
-        </label>
-        <label>Projekt 6
-          <input id="project6Title" type="text" maxlength="140">
-        </label>
-      </div>
-      <div class="text-editor-actions">
-        <button id="saveProjectTitles" type="button">Projekt-Titel speichern</button>
-        <button id="reloadProjectTitles" class="secondary" type="button">Neu laden</button>
-        <div id="projectTitleStatus" class="status">Noch keine CMS-Titel geladen.</div>
-      </div>
+        <div class="project-title-grid">
+          <label>Projekt 1<input id="project1Title" type="text" maxlength="140"></label>
+          <label>Projekt 2<input id="project2Title" type="text" maxlength="140"></label>
+          <label>Projekt 3<input id="project3Title" type="text" maxlength="140"></label>
+          <label>Projekt 4<input id="project4Title" type="text" maxlength="140"></label>
+          <label>Projekt 5<input id="project5Title" type="text" maxlength="140"></label>
+          <label>Projekt 6<input id="project6Title" type="text" maxlength="140"></label>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveProjectTitles" type="button">Projekt-Titel speichern</button>
+          <button id="reloadProjectTitles" class="secondary" type="button">Neu laden</button>
+          <div id="projectTitleStatus" class="status">Noch keine CMS-Titel geladen.</div>
+        </div>
+      </section>
     </section>
-  </section>
 
     <section class="admin-section" id="kontakt">
       <section class="section-head">
@@ -556,7 +632,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-14"></script>
-  <script src="./admin.js?v=20260923-14"></script>
+  <script src="./config.js?v=20260923-15"></script>
+  <script src="./admin.js?v=20260923-15"></script>
 </body>
 </html>
