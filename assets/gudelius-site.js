@@ -71,6 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
+      root.querySelectorAll("[data-cms-placeholder]").forEach((element) => {
+        const value = content[element.dataset.cmsPlaceholder];
+        if (typeof value === "string" && value.trim()) {
+          element.setAttribute("placeholder", value);
+        }
+      });
+
+      root.querySelectorAll("[data-cms-value]").forEach((element) => {
+        const value = content[element.dataset.cmsValue];
+        if (typeof value === "string" && value.trim()) {
+          element.value = value;
+        }
+      });
+
       if (typeof content["kontakt/email"] === "string" && content["kontakt/email"].trim()) {
         window.GUDELIUS_CONTACT_EMAIL = content["kontakt/email"].trim();
       }
