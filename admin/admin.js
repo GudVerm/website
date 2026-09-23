@@ -1228,6 +1228,194 @@ if(reloadGisPageTexts){
 }
 
 
+
+const scanPageFields = [
+  ["leistungsseiten/3d-laserscanning/text/hero-eyebrow","scanHeroEyebrow","Punktwolke · Bestand · 3D"],
+  ["leistungsseiten/3d-laserscanning/text/hero-title","scanHeroTitle","3D-Laserscanning"],
+  ["leistungsseiten/3d-laserscanning/text/hero-lead","scanHeroLead","Detaillierte digitale Bestandserfassung mit 3D-Laserscanning – für Punktwolken, Aufmaß und digitale Modelle."],
+  ["leistungsseiten/3d-laserscanning/text/hero-primary","scanHeroPrimary","Projekt anfragen →"],
+  ["leistungsseiten/3d-laserscanning/text/hero-secondary","scanHeroSecondary","Leistung ansehen"],
+
+  ["leistungsseiten/3d-laserscanning/text/overview-eyebrow","scanOverviewEyebrow","Im Überblick"],
+  ["leistungsseiten/3d-laserscanning/text/overview-title","scanOverviewTitle","Komplexe Geometrien vollständig erfassen."],
+  ["leistungsseiten/3d-laserscanning/text/overview-text-1","scanOverviewText1","3D-Laserscanning eignet sich für Situationen, in denen viele räumliche Informationen präzise und nachvollziehbar erfasst werden sollen."],
+  ["leistungsseiten/3d-laserscanning/text/overview-text-2","scanOverviewText2","Aus der Aufnahme entstehen Punktwolken und digitale Grundlagen, die für weitere Planungs- und Dokumentationsschritte genutzt werden können."],
+  ["leistungsseiten/3d-laserscanning/text/overview-back","scanOverviewBack","← Alle Leistungsfelder"],
+  ["leistungsseiten/3d-laserscanning/text/tasks-eyebrow","scanTasksEyebrow","Leistungsumfang"],
+  ["leistungsseiten/3d-laserscanning/text/tasks-title","scanTasksTitle","Typische Aufgaben"],
+
+  ["leistungsseiten/3d-laserscanning/text/scope-eyebrow","scanScopeEyebrow","Vollständiger Leistungsumfang"],
+  ["leistungsseiten/3d-laserscanning/text/scope-title","scanScopeTitle","Alle Leistungen im Überblick."],
+  ["leistungsseiten/3d-laserscanning/text/scope-lead","scanScopeLead","Der Bereich 3D-Laserscanning umfasst auf der aktuellen Website diese Punkte:"],
+  ["leistungsseiten/3d-laserscanning/text/scope-note","scanScopeNote","Inhaltliche Basis: aktueller Leistungsumfang von GudeliusVermessung."],
+
+  ["leistungsseiten/3d-laserscanning/text/detail-eyebrow","scanDetailEyebrow","Leistung im Detail"],
+  ["leistungsseiten/3d-laserscanning/text/detail-title","scanDetailTitle","Bestand als digitales 3D-Abbild."],
+  ["leistungsseiten/3d-laserscanning/text/detail-lead","scanDetailLead","Der Laserscan erfasst räumliche Strukturen umfassend und bildet die Grundlage für digitale Auswertungen."],
+  ["leistungsseiten/3d-laserscanning/text/detail-01-title","scanDetail1Title","Aufnahme"],
+  ["leistungsseiten/3d-laserscanning/text/detail-01-text","scanDetail1Text","Räumliche Geometrien werden mit dem Laserscanner detailliert erfasst."],
+  ["leistungsseiten/3d-laserscanning/text/detail-02-title","scanDetail2Title","Punktwolke"],
+  ["leistungsseiten/3d-laserscanning/text/detail-02-text","scanDetail2Text","Die Messdaten bilden eine dreidimensionale Punktwolke des aufgenommenen Bestands."],
+  ["leistungsseiten/3d-laserscanning/text/detail-03-title","scanDetail3Title","Modell & Auswertung"],
+  ["leistungsseiten/3d-laserscanning/text/detail-03-text","scanDetail3Text","Aus den Daten können digitale Modelle und weitere Planungsgrundlagen abgeleitet werden."],
+
+  ["leistungsseiten/3d-laserscanning/text/results-eyebrow","scanResultsEyebrow","Ergebnisse"],
+  ["leistungsseiten/3d-laserscanning/text/results-title","scanResultsTitle","Vom Messwert zur nutzbaren Grundlage."],
+  ["leistungsseiten/3d-laserscanning/text/results-lead","scanResultsLead","Die räumlichen Messdaten werden projektbezogen aufbereitet und können als Punktwolke, Modell oder Planungsgrundlage weitergegeben werden."],
+  ["leistungsseiten/3d-laserscanning/text/result-01-title","scanResult1Title","Punktwolke"],
+  ["leistungsseiten/3d-laserscanning/text/result-01-text","scanResult1Text","Dreidimensionale Messdaten als Grundlage für Auswertung und Planung."],
+  ["leistungsseiten/3d-laserscanning/text/result-02-title","scanResult2Title","Digitale Modelle"],
+  ["leistungsseiten/3d-laserscanning/text/result-02-text","scanResult2Text","Aufbereitete 3D-Grundlagen für die weitere Bearbeitung."],
+  ["leistungsseiten/3d-laserscanning/text/result-03-title","scanResult3Title","Bestandsaufmaß"],
+  ["leistungsseiten/3d-laserscanning/text/result-03-text","scanResult3Text","Detaillierte Erfassung vorhandener Geometrien."],
+  ["leistungsseiten/3d-laserscanning/text/result-04-title","scanResult4Title","CAD & PDF"],
+  ["leistungsseiten/3d-laserscanning/text/result-04-text","scanResult4Text","Ergänzende Pläne und Dokumentation je nach Projektanforderung."],
+
+  ["leistungsseiten/3d-laserscanning/text/process-eyebrow","scanProcessEyebrow","Projektablauf"],
+  ["leistungsseiten/3d-laserscanning/text/process-title","scanProcessTitle","Klare Schritte. Direkte Abstimmung."],
+  ["leistungsseiten/3d-laserscanning/text/process-01-title","scanProcess1Title","Anforderung klären"],
+  ["leistungsseiten/3d-laserscanning/text/process-01-text","scanProcess1Text","Projekt, Ort und gewünschtes Ergebnis gemeinsam festlegen."],
+  ["leistungsseiten/3d-laserscanning/text/process-02-title","scanProcess2Title","Vermessung"],
+  ["leistungsseiten/3d-laserscanning/text/process-02-text","scanProcess2Text","Passende Methode und Technik für die Aufgabe einsetzen."],
+  ["leistungsseiten/3d-laserscanning/text/process-03-title","scanProcess3Title","Auswertung"],
+  ["leistungsseiten/3d-laserscanning/text/process-03-text","scanProcess3Text","Messdaten prüfen, aufbereiten und projektbezogen auswerten."],
+  ["leistungsseiten/3d-laserscanning/text/process-04-title","scanProcess4Title","Übergabe"],
+  ["leistungsseiten/3d-laserscanning/text/process-04-text","scanProcess4Text","Ergebnisse nachvollziehbar und in nutzbarer Form bereitstellen."],
+
+  ["leistungsseiten/3d-laserscanning/text/related-eyebrow","scanRelatedEyebrow","Weitere Leistungen"],
+  ["leistungsseiten/3d-laserscanning/text/related-title","scanRelatedTitle","Passende Ergänzungen für Ihr Projekt."],
+  ["leistungsseiten/3d-laserscanning/text/related-link-label","scanRelatedLinkLabel","Mehr erfahren →"],
+  ["leistungsseiten/3d-laserscanning/text/related-01-title","scanRelated1Title","Ingenieurvermessung"],
+  ["leistungsseiten/3d-laserscanning/text/related-01-text","scanRelated1Text","Klassische Vermessung für Bau, Kontrolle und Bestand."],
+  ["leistungsseiten/3d-laserscanning/text/related-02-title","scanRelated2Title","GIS & Bauvermessung"],
+  ["leistungsseiten/3d-laserscanning/text/related-02-text","scanRelated2Text","Geländedaten und Bauvermessung für Infrastrukturprojekte."],
+  ["leistungsseiten/3d-laserscanning/text/related-03-title","scanRelated3Title","Drohnenvermessung"],
+  ["leistungsseiten/3d-laserscanning/text/related-03-text","scanRelated3Text","Erfassung größerer Flächen aus der Luft."]
+];
+
+const scanTaskDefaults = [
+  "Verformungsgerechtes Aufmaß",
+  "2D-Auswertung",
+  "3D-Auswertung",
+  "CAD-/BIM-Schnittstellen"
+];
+
+const scanScopeDefaults = [
+  "Verformungsgerechtes Aufmaß mit 3D-Laserscanner",
+  "Auswertung in 2D und 3D",
+  "2D-Schnittstellen: PDF, DWG, DXF",
+  "3D-Schnittstellen: Archicad PLA/PLN, IFC"
+];
+
+const scanTasksInput=document.getElementById("scanTasksItems");
+const scanScopeInput=document.getElementById("scanScopeItems");
+const saveScanPageTexts=document.getElementById("saveScanPageTexts");
+const reloadScanPageTexts=document.getElementById("reloadScanPageTexts");
+const scanPageTextStatus=document.getElementById("scanPageTextStatus");
+
+async function loadScanPageTexts(){
+  if(!scanPageTextStatus) return;
+  if(!getApi()) return setStatus(scanPageTextStatus,"Worker-URL fehlt.",false);
+
+  setStatus(scanPageTextStatus,"Lade 3D-Laserscanning …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+
+    scanPageFields.forEach(([key,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=typeof content[key]==="string" ? content[key] : fallback;
+    });
+
+    if(scanTasksInput){
+      scanTasksInput.value=engineerListValue(
+        content,
+        "leistungsseiten/3d-laserscanning/text/task-",
+        scanTaskDefaults
+      );
+    }
+
+    if(scanScopeInput){
+      scanScopeInput.value=engineerListValue(
+        content,
+        "leistungsseiten/3d-laserscanning/text/scope-",
+        scanScopeDefaults
+      );
+    }
+
+    setStatus(scanPageTextStatus,"3D-Laserscanning geladen.",true);
+  }catch(error){
+    scanPageFields.forEach(([,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=fallback;
+    });
+    if(scanTasksInput) scanTasksInput.value=scanTaskDefaults.join("\n");
+    if(scanScopeInput) scanScopeInput.value=scanScopeDefaults.join("\n");
+    setStatus(scanPageTextStatus,"Texte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveScanPageTexts){
+  saveScanPageTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()){
+      return setStatus(scanPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    }
+
+    const taskLines=(scanTasksInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    const scopeLines=(scanScopeInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    if(taskLines.length!==4){
+      return setStatus(scanPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 4 Zeilen verwenden.",false);
+    }
+    if(scopeLines.length!==4){
+      return setStatus(scanPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 4 Zeilen verwenden.",false);
+    }
+
+    const entries=scanPageFields.map(([key,id])=>[
+      key,
+      document.getElementById(id)?.value.trim()||""
+    ]);
+
+    taskLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/3d-laserscanning/text/task-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    scopeLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/3d-laserscanning/text/scope-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    saveScanPageTexts.disabled=true;
+    setStatus(scanPageTextStatus,"Speichere 3D-Laserscanning …");
+    try{
+      await saveCmsEntriesInBatches(entries);
+      setStatus(scanPageTextStatus,"3D-Laserscanning erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(scanPageTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveScanPageTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadScanPageTexts){
+  reloadScanPageTexts.addEventListener("click",loadScanPageTexts);
+}
+
 function setupServiceFlyover(){
   const nav=document.getElementById("serviceFlyover");
   if(!nav) return;
@@ -1494,6 +1682,7 @@ loadContactTexts();
 loadServiceContactTexts();
 loadEngineerPageTexts();
 loadGisPageTexts();
+loadScanPageTexts();
 loadInquiries();
 
 
