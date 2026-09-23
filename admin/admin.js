@@ -66,8 +66,14 @@ const grid=document.getElementById("equipmentGrid");
 const projectGrid=document.getElementById("projectGrid");
 const startPageGrid=document.getElementById("startPageGrid");
 const companyGrid=document.getElementById("companyGrid");
-const serviceGrid=document.getElementById("serviceGrid");
-const servicePageGrid=document.getElementById("servicePageGrid");
+const service1Grid=document.getElementById("service1Grid");
+const service2Grid=document.getElementById("service2Grid");
+const service3Grid=document.getElementById("service3Grid");
+const service4Grid=document.getElementById("service4Grid");
+const servicePage1Grid=document.getElementById("servicePage1Grid");
+const servicePage2Grid=document.getElementById("servicePage2Grid");
+const servicePage3Grid=document.getElementById("servicePage3Grid");
+const servicePage4Grid=document.getElementById("servicePage4Grid");
 const template=document.getElementById("equipmentTemplate");
 const inquiriesList=document.getElementById("inquiriesList");
 const inquiriesStatus=document.getElementById("inquiriesStatus");
@@ -94,9 +100,36 @@ const serviceTextFields={
   "leistungen/04-title":document.getElementById("service4Title"),
   "leistungen/04-text":document.getElementById("service4Text")
 };
-const saveServiceTexts=document.getElementById("saveServiceTexts");
-const reloadServiceTexts=document.getElementById("reloadServiceTexts");
-const serviceTextStatus=document.getElementById("serviceTextStatus");
+const serviceTextControls=[
+  {
+    keys:["leistungen/01-title","leistungen/01-text"],
+    save:document.getElementById("saveService1Texts"),
+    reload:document.getElementById("reloadService1Texts"),
+    status:document.getElementById("service1TextStatus"),
+    label:"Ingenieurvermessung"
+  },
+  {
+    keys:["leistungen/02-title","leistungen/02-text"],
+    save:document.getElementById("saveService2Texts"),
+    reload:document.getElementById("reloadService2Texts"),
+    status:document.getElementById("service2TextStatus"),
+    label:"GIS & Bauvermessung"
+  },
+  {
+    keys:["leistungen/03-title","leistungen/03-text"],
+    save:document.getElementById("saveService3Texts"),
+    reload:document.getElementById("reloadService3Texts"),
+    status:document.getElementById("service3TextStatus"),
+    label:"3D-Laserscanning"
+  },
+  {
+    keys:["leistungen/04-title","leistungen/04-text"],
+    save:document.getElementById("saveService4Texts"),
+    reload:document.getElementById("reloadService4Texts"),
+    status:document.getElementById("service4TextStatus"),
+    label:"Drohnenvermessung"
+  }
+];
 const companyTextFields={
   "unternehmen/eyebrow":document.getElementById("companyEyebrow"),
   "unternehmen/title":document.getElementById("companyTitle"),
@@ -297,45 +330,62 @@ const serviceTextDefaults={
 };
 
 async function loadServiceTexts(){
-  if(!serviceTextStatus) return;
-  if(!getApi()) return setStatus(serviceTextStatus,"Worker-URL fehlt.",false);
-  setStatus(serviceTextStatus,"Lade Leistungstexte …");
+  const activeControls=serviceTextControls.filter(control=>control.status);
+  if(!activeControls.length) return;
+
+  if(!getApi()){
+    activeControls.forEach(control=>setStatus(control.status,"Worker-URL fehlt.",false));
+    return;
+  }
+
+  activeControls.forEach(control=>setStatus(control.status,"Lade Kacheltext …"));
+
   try{
     const response=await fetch(getApi()+"/api/site");
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
+
     Object.entries(serviceTextFields).forEach(([key,field])=>{
       if(field) field.value=typeof content[key]==="string" ? content[key] : serviceTextDefaults[key];
     });
-    setStatus(serviceTextStatus,"Leistungstexte geladen.",true);
+
+    activeControls.forEach(control=>setStatus(control.status,control.label+" geladen.",true));
   }catch(error){
     Object.entries(serviceTextFields).forEach(([key,field])=>{
       if(field) field.value=serviceTextDefaults[key];
     });
-    setStatus(serviceTextStatus,"Leistungstexte konnten nicht geladen werden: "+error.message,false);
+    activeControls.forEach(control=>setStatus(control.status,"Kacheltext konnte nicht geladen werden: "+error.message,false));
   }
 }
 
-if(saveServiceTexts){
-  saveServiceTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(serviceTextStatus,"Worker-URL und Admin-Token fehlen.",false);
-    saveServiceTexts.disabled=true;
-    setStatus(serviceTextStatus,"Speichere Leistungstexte …");
-    try{
-      await Promise.all(Object.entries(serviceTextFields).map(([key,field])=>
-        saveHeroText(key,field.value.trim())
-      ));
-      setStatus(serviceTextStatus,"Leistungstexte erfolgreich gespeichert.",true);
-    }catch(error){
-      setStatus(serviceTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
-    }finally{
-      saveServiceTexts.disabled=false;
-    }
-  });
-}
+serviceTextControls.forEach(control=>{
+  if(control.save){
+    control.save.addEventListener("click",async()=>{
+      if(!getApi()||!getToken()){
+        return setStatus(control.status,"Worker-URL und Admin-Token fehlen.",false);
+      }
 
-if(reloadServiceTexts) reloadServiceTexts.addEventListener("click",loadServiceTexts);
+      control.save.disabled=true;
+      setStatus(control.status,"Speichere Kacheltext …");
+      try{
+        await Promise.all(control.keys.map(key=>{
+          const field=serviceTextFields[key];
+          return saveHeroText(key,field?.value.trim()||"");
+        }));
+        setStatus(control.status,control.label+" erfolgreich gespeichert.",true);
+      }catch(error){
+        setStatus(control.status,"Speichern fehlgeschlagen: "+error.message,false);
+      }finally{
+        control.save.disabled=false;
+      }
+    });
+  }
+
+  if(control.reload){
+    control.reload.addEventListener("click",loadServiceTexts);
+  }
+});
 
 const companyTextDefaults={
   "unternehmen/eyebrow":"Ihr Ansprechpartner",
@@ -1266,8 +1316,17 @@ function renderCollection(target, items){
 
 function render(){
   renderCollection(startPageGrid, startPageImages);
-  renderCollection(serviceGrid, serviceImages);
-  renderCollection(servicePageGrid, servicePageImages);
+
+  renderCollection(service1Grid, serviceImages.filter(item=>item.key==="leistungen/ingenieurvermessung"));
+  renderCollection(service2Grid, serviceImages.filter(item=>item.key==="leistungen/gis-bauvermessung"));
+  renderCollection(service3Grid, serviceImages.filter(item=>item.key==="leistungen/3d-laserscanning"));
+  renderCollection(service4Grid, serviceImages.filter(item=>item.key==="leistungen/drohnenvermessung"));
+
+  renderCollection(servicePage1Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/ingenieurvermessung/")));
+  renderCollection(servicePage2Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/gis-bauvermessung/")));
+  renderCollection(servicePage3Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/3d-laserscanning/")));
+  renderCollection(servicePage4Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/drohnenvermessung/")));
+
   renderCollection(companyGrid, companyImages);
   renderCollection(grid, equipment);
   renderCollection(projectGrid, projects);
