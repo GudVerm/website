@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-11">
+  <link rel="stylesheet" href="./admin.css?v=20260923-12">
 </head>
 <body>
   <header class="admin-header">
@@ -24,6 +24,7 @@
       <a class="admin-nav-link" href="#unternehmen">Unternehmen</a>
       <a class="admin-nav-link" href="#technik">Technik</a>
       <a class="admin-nav-link" href="#projekte">Projekte</a>
+      <a class="admin-nav-link" href="#kontakt">Kontakt</a>
     </div>
   </nav>
 
@@ -275,6 +276,44 @@
       </div>
     </section>
   </section>
+
+    <section class="admin-section" id="kontakt">
+      <section class="section-head">
+        <div>
+          <span class="kicker">Kontakt</span>
+          <h2>Kontaktdaten bearbeiten</h2>
+        </div>
+        <p>Überschrift, Einleitung und die sichtbaren Kontaktdaten der Startseite werden in Cloudflare D1 gespeichert.</p>
+      </section>
+
+      <section class="panel text-editor-panel">
+        <div class="text-editor-grid">
+          <label>Überschrift
+            <input id="contactTitle" type="text" maxlength="180">
+          </label>
+          <label>Einleitung
+            <input id="contactLead" type="text" maxlength="300">
+          </label>
+          <label>Telefon 1
+            <input id="contactPhone1" type="text" maxlength="80">
+          </label>
+          <label>Telefon 2
+            <input id="contactPhone2" type="text" maxlength="80">
+          </label>
+          <label>E-Mail
+            <input id="contactEmail" type="email" maxlength="180">
+          </label>
+          <label>Adresse
+            <input id="contactAddress" type="text" maxlength="240">
+          </label>
+        </div>
+        <div class="text-editor-actions">
+          <button id="saveContactTexts" type="button">Kontaktdaten speichern</button>
+          <button id="reloadContactTexts" class="secondary" type="button">Neu laden</button>
+          <div id="contactTextStatus" class="status">Noch keine CMS-Kontaktdaten geladen.</div>
+        </div>
+      </section>
+    </section>
   </main>
 
   <template id="equipmentTemplate">
@@ -299,7 +338,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-11"></script>
-  <script src="./admin.js?v=20260923-11"></script>
+  <script src="./config.js?v=20260923-12"></script>
+  <script src="./admin.js?v=20260923-12"></script>
 </body>
 </html>
