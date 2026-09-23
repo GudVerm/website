@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-22">
+  <link rel="stylesheet" href="./admin.css?v=20260923-23">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -43,7 +43,39 @@
         <p>Jede Leistung ist als eigene Abteilung aufgebaut. Bilder und zugehörige Texte liegen direkt zusammen.</p>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department">
+      <div class="service-flyover" id="serviceFlyover">
+        <button class="service-flyover-trigger" id="serviceFlyoverTrigger" type="button" aria-expanded="false" aria-controls="serviceFlyoverPanel">
+          <span>
+            <small>Leistung bearbeiten</small>
+            <strong id="serviceFlyoverCurrent">Ingenieurvermessung</strong>
+          </span>
+          <b aria-hidden="true">⌄</b>
+        </button>
+
+        <div class="service-flyover-panel" id="serviceFlyoverPanel">
+          <div class="service-flyover-column">
+            <span class="service-flyover-label">Leistung</span>
+            <button type="button" class="service-flyover-service active" data-service-target="ingenieurvermessung"><span>01</span>Ingenieurvermessung</button>
+            <button type="button" class="service-flyover-service" data-service-target="gis-bauvermessung"><span>02</span>GIS & Bauvermessung</button>
+            <button type="button" class="service-flyover-service" data-service-target="3d-laserscanning"><span>03</span>3D-Laserscanning</button>
+            <button type="button" class="service-flyover-service" data-service-target="drohnenvermessung"><span>04</span>Drohnenvermessung</button>
+          </div>
+
+          <div class="service-flyover-column service-flyover-sections">
+            <span class="service-flyover-label">Bereich</span>
+            <button type="button" data-section-target="media">Bilder & Kachel</button>
+            <button type="button" data-section-target="hero">Hero</button>
+            <button type="button" data-section-target="overview">Überblick</button>
+            <button type="button" data-section-target="scope">Leistungsumfang</button>
+            <button type="button" data-section-target="detail">Details</button>
+            <button type="button" data-section-target="results">Ergebnisse</button>
+            <button type="button" data-section-target="process">Projektablauf</button>
+            <button type="button" data-section-target="related">Weitere Leistungen</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="cms-subpanel cms-subpanel-form service-department" data-service-department="ingenieurvermessung">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">01</span>
           <div>
@@ -53,7 +85,7 @@
           </div>
         </div>
 
-        <div class="service-department-media">
+        <div class="service-department-media" data-fly-section="media">
           <div class="form-editor-block service-media-card">
             <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
             <section id="service1Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
@@ -182,7 +214,7 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department">
+      <section class="cms-subpanel cms-subpanel-form service-department" data-service-department="gis-bauvermessung">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">02</span>
           <div>
@@ -192,7 +224,7 @@
           </div>
         </div>
 
-        <div class="service-department-media">
+        <div class="service-department-media" data-fly-section="media">
           <div class="form-editor-block service-media-card">
             <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
             <section id="service2Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
@@ -321,7 +353,7 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending">
+      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending" data-service-department="3d-laserscanning">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">03</span>
           <div>
@@ -331,7 +363,7 @@
           </div>
         </div>
 
-        <div class="service-department-media">
+        <div class="service-department-media" data-fly-section="media">
           <div class="form-editor-block service-media-card">
             <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
             <section id="service3Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
@@ -358,7 +390,7 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending">
+      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending" data-service-department="drohnenvermessung">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">04</span>
           <div>
@@ -368,7 +400,7 @@
           </div>
         </div>
 
-        <div class="service-department-media">
+        <div class="service-department-media" data-fly-section="media">
           <div class="form-editor-block service-media-card">
             <div class="form-editor-block-head"><strong>Startseiten-Kachel</strong><span>Bild & Kurztext</span></div>
             <section id="service4Grid" class="equipment-grid service-single-media" aria-live="polite"></section>
@@ -419,7 +451,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-22"></script>
-  <script src="./admin.js?v=20260923-22"></script>
+  <script src="./config.js?v=20260923-23"></script>
+  <script src="./admin.js?v=20260923-23"></script>
 </body>
 </html>
