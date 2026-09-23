@@ -272,7 +272,7 @@ async function sendContactNotification(env, inquiry) {
   }
 
   const recipient = "gudeliusvermessung@web.de";
-  const adminUrl = "https://gudverm.github.io/website/admin/#anfragen";
+  const adminUrl = "https://gudverm.github.io/website/admin/anfragen/";
   const subject = `Neue Projektanfrage: ${inquiry.subject}`;
 
   const text = [
