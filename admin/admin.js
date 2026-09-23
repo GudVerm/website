@@ -1416,6 +1416,194 @@ if(reloadScanPageTexts){
   reloadScanPageTexts.addEventListener("click",loadScanPageTexts);
 }
 
+
+const dronePageFields = [
+  ["leistungsseiten/drohnenvermessung/text/hero-eyebrow","droneHeroEyebrow","RTK · Orthophoto · Fläche"],
+  ["leistungsseiten/drohnenvermessung/text/hero-title","droneHeroTitle","Drohnenvermessung mit RTK-Drohne"],
+  ["leistungsseiten/drohnenvermessung/text/hero-lead","droneHeroLead","Effiziente Erfassung aus der Luft für Orthophotos, Flächen, Infrastruktur, Inspektionen und Massenermittlung."],
+  ["leistungsseiten/drohnenvermessung/text/hero-primary","droneHeroPrimary","Projekt anfragen →"],
+  ["leistungsseiten/drohnenvermessung/text/hero-secondary","droneHeroSecondary","Leistung ansehen"],
+
+  ["leistungsseiten/drohnenvermessung/text/overview-eyebrow","droneOverviewEyebrow","Im Überblick"],
+  ["leistungsseiten/drohnenvermessung/text/overview-title","droneOverviewTitle","Große Bereiche aus der Luft erfassen."],
+  ["leistungsseiten/drohnenvermessung/text/overview-text-1","droneOverviewText1","Drohnenvermessung ergänzt die terrestrische Vermessung dort, wo Flächen und Strukturen effizient aus der Luft aufgenommen werden sollen."],
+  ["leistungsseiten/drohnenvermessung/text/overview-text-2","droneOverviewText2","Die Aufnahmen können als Grundlage für Orthophotos, Flächenauswertungen, Infrastrukturprojekte oder Massenermittlung genutzt werden."],
+  ["leistungsseiten/drohnenvermessung/text/overview-back","droneOverviewBack","← Alle Leistungsfelder"],
+  ["leistungsseiten/drohnenvermessung/text/tasks-eyebrow","droneTasksEyebrow","Leistungsumfang"],
+  ["leistungsseiten/drohnenvermessung/text/tasks-title","droneTasksTitle","Typische Aufgaben"],
+
+  ["leistungsseiten/drohnenvermessung/text/scope-eyebrow","droneScopeEyebrow","Vollständiger Leistungsumfang"],
+  ["leistungsseiten/drohnenvermessung/text/scope-title","droneScopeTitle","Alle Leistungen im Überblick."],
+  ["leistungsseiten/drohnenvermessung/text/scope-lead","droneScopeLead","Bei der Drohnenvermessung mit RTK-Drohne sind aktuell diese Leistungen genannt:"],
+  ["leistungsseiten/drohnenvermessung/text/scope-note","droneScopeNote","Inhaltliche Basis: aktueller Leistungsumfang von GudeliusVermessung."],
+
+  ["leistungsseiten/drohnenvermessung/text/detail-eyebrow","droneDetailEyebrow","Leistung im Detail"],
+  ["leistungsseiten/drohnenvermessung/text/detail-title","droneDetailTitle","Luftbilder werden zu Vermessungsdaten."],
+  ["leistungsseiten/drohnenvermessung/text/detail-lead","droneDetailLead","Die Drohne erfasst große Bereiche effizient und liefert Daten für digitale Auswertung und Dokumentation."],
+  ["leistungsseiten/drohnenvermessung/text/detail-01-title","droneDetail1Title","Befliegung"],
+  ["leistungsseiten/drohnenvermessung/text/detail-01-text","droneDetail1Text","Das Projektgebiet wird passend zur Aufgabenstellung aus der Luft aufgenommen."],
+  ["leistungsseiten/drohnenvermessung/text/detail-02-title","droneDetail2Title","Auswertung"],
+  ["leistungsseiten/drohnenvermessung/text/detail-02-text","droneDetail2Text","Die Bilddaten werden photogrammetrisch verarbeitet und räumlich ausgewertet."],
+  ["leistungsseiten/drohnenvermessung/text/detail-03-title","droneDetail3Title","Ergebnis"],
+  ["leistungsseiten/drohnenvermessung/text/detail-03-text","droneDetail3Text","Orthophotos, Flächen- oder Mengengrundlagen werden für das Projekt bereitgestellt."],
+
+  ["leistungsseiten/drohnenvermessung/text/results-eyebrow","droneResultsEyebrow","Ergebnisse"],
+  ["leistungsseiten/drohnenvermessung/text/results-title","droneResultsTitle","Vom Messwert zur nutzbaren Grundlage."],
+  ["leistungsseiten/drohnenvermessung/text/results-lead","droneResultsLead","Die Luftbilddaten werden zu projektbezogenen Ergebnissen aufbereitet, die mit anderen Vermessungsdaten kombiniert werden können."],
+  ["leistungsseiten/drohnenvermessung/text/result-01-title","droneResult1Title","Orthophotos"],
+  ["leistungsseiten/drohnenvermessung/text/result-01-text","droneResult1Text","Entzerrte Bildgrundlagen für Übersicht und Dokumentation."],
+  ["leistungsseiten/drohnenvermessung/text/result-02-title","droneResult2Title","Flächendaten"],
+  ["leistungsseiten/drohnenvermessung/text/result-02-text","droneResult2Text","Erfasste Flächen als Grundlage für weitere Projektbearbeitung."],
+  ["leistungsseiten/drohnenvermessung/text/result-03-title","droneResult3Title","Massenermittlung"],
+  ["leistungsseiten/drohnenvermessung/text/result-03-text","droneResult3Text","Datenbasis für projektbezogene Mengen- und Volumenbetrachtungen."],
+  ["leistungsseiten/drohnenvermessung/text/result-04-title","droneResult4Title","Infrastruktur & Inspektion"],
+  ["leistungsseiten/drohnenvermessung/text/result-04-text","droneResult4Text","Bild- und Geodaten zur Unterstützung von Infrastrukturaufgaben."],
+
+  ["leistungsseiten/drohnenvermessung/text/process-eyebrow","droneProcessEyebrow","Projektablauf"],
+  ["leistungsseiten/drohnenvermessung/text/process-title","droneProcessTitle","Klare Schritte. Direkte Abstimmung."],
+  ["leistungsseiten/drohnenvermessung/text/process-01-title","droneProcess1Title","Anforderung klären"],
+  ["leistungsseiten/drohnenvermessung/text/process-01-text","droneProcess1Text","Projekt, Ort und gewünschtes Ergebnis gemeinsam festlegen."],
+  ["leistungsseiten/drohnenvermessung/text/process-02-title","droneProcess2Title","Vermessung"],
+  ["leistungsseiten/drohnenvermessung/text/process-02-text","droneProcess2Text","Passende Methode und Technik für die Aufgabe einsetzen."],
+  ["leistungsseiten/drohnenvermessung/text/process-03-title","droneProcess3Title","Auswertung"],
+  ["leistungsseiten/drohnenvermessung/text/process-03-text","droneProcess3Text","Messdaten prüfen, aufbereiten und projektbezogen auswerten."],
+  ["leistungsseiten/drohnenvermessung/text/process-04-title","droneProcess4Title","Übergabe"],
+  ["leistungsseiten/drohnenvermessung/text/process-04-text","droneProcess4Text","Ergebnisse nachvollziehbar und in nutzbarer Form bereitstellen."],
+
+  ["leistungsseiten/drohnenvermessung/text/related-eyebrow","droneRelatedEyebrow","Weitere Leistungen"],
+  ["leistungsseiten/drohnenvermessung/text/related-title","droneRelatedTitle","Passende Ergänzungen für Ihr Projekt."],
+  ["leistungsseiten/drohnenvermessung/text/related-link-label","droneRelatedLinkLabel","Mehr erfahren →"],
+  ["leistungsseiten/drohnenvermessung/text/related-01-title","droneRelated1Title","Ingenieurvermessung"],
+  ["leistungsseiten/drohnenvermessung/text/related-01-text","droneRelated1Text","Absteckung, Kontrolle und Bestandsaufnahme."],
+  ["leistungsseiten/drohnenvermessung/text/related-02-title","droneRelated2Title","GIS & Bauvermessung"],
+  ["leistungsseiten/drohnenvermessung/text/related-02-text","droneRelated2Text","Gelände, Tiefbau und digitale Baugrundlagen."],
+  ["leistungsseiten/drohnenvermessung/text/related-03-title","droneRelated3Title","3D-Laserscanning"],
+  ["leistungsseiten/drohnenvermessung/text/related-03-text","droneRelated3Text","Punktwolken und digitale Modelle für komplexe Geometrien."]
+];
+
+const droneTaskDefaults = [
+  "Großflächen & Massen",
+  "Inspektion",
+  "Orthophotos",
+  "Infrastruktur-Bestand"
+];
+
+const droneScopeDefaults = [
+  "Großflächige Massenermittlung",
+  "Inspektion",
+  "Orthophoto",
+  "Bestandsaufnahmen von Infrastruktur"
+];
+
+const droneTasksInput=document.getElementById("droneTasksItems");
+const droneScopeInput=document.getElementById("droneScopeItems");
+const saveDronePageTexts=document.getElementById("saveDronePageTexts");
+const reloadDronePageTexts=document.getElementById("reloadDronePageTexts");
+const dronePageTextStatus=document.getElementById("dronePageTextStatus");
+
+async function loadDronePageTexts(){
+  if(!dronePageTextStatus) return;
+  if(!getApi()) return setStatus(dronePageTextStatus,"Worker-URL fehlt.",false);
+
+  setStatus(dronePageTextStatus,"Lade Drohnenvermessung …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+
+    dronePageFields.forEach(([key,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=typeof content[key]==="string" ? content[key] : fallback;
+    });
+
+    if(droneTasksInput){
+      droneTasksInput.value=engineerListValue(
+        content,
+        "leistungsseiten/drohnenvermessung/text/task-",
+        droneTaskDefaults
+      );
+    }
+
+    if(droneScopeInput){
+      droneScopeInput.value=engineerListValue(
+        content,
+        "leistungsseiten/drohnenvermessung/text/scope-",
+        droneScopeDefaults
+      );
+    }
+
+    setStatus(dronePageTextStatus,"Drohnenvermessung geladen.",true);
+  }catch(error){
+    dronePageFields.forEach(([,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=fallback;
+    });
+    if(droneTasksInput) droneTasksInput.value=droneTaskDefaults.join("\n");
+    if(droneScopeInput) droneScopeInput.value=droneScopeDefaults.join("\n");
+    setStatus(dronePageTextStatus,"Texte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveDronePageTexts){
+  saveDronePageTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()){
+      return setStatus(dronePageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    }
+
+    const taskLines=(droneTasksInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    const scopeLines=(droneScopeInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    if(taskLines.length!==4){
+      return setStatus(dronePageTextStatus,"Bei „Typische Aufgaben“ bitte genau 4 Zeilen verwenden.",false);
+    }
+    if(scopeLines.length!==4){
+      return setStatus(dronePageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 4 Zeilen verwenden.",false);
+    }
+
+    const entries=dronePageFields.map(([key,id])=>[
+      key,
+      document.getElementById(id)?.value.trim()||""
+    ]);
+
+    taskLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/drohnenvermessung/text/task-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    scopeLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/drohnenvermessung/text/scope-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    saveDronePageTexts.disabled=true;
+    setStatus(dronePageTextStatus,"Speichere Drohnenvermessung …");
+    try{
+      await saveCmsEntriesInBatches(entries);
+      setStatus(dronePageTextStatus,"Drohnenvermessung erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(dronePageTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveDronePageTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadDronePageTexts){
+  reloadDronePageTexts.addEventListener("click",loadDronePageTexts);
+}
+
 function setupServiceFlyover(){
   const nav=document.getElementById("serviceFlyover");
   if(!nav) return;
@@ -1683,6 +1871,7 @@ loadServiceContactTexts();
 loadEngineerPageTexts();
 loadGisPageTexts();
 loadScanPageTexts();
+loadDronePageTexts();
 loadInquiries();
 
 
