@@ -88,6 +88,21 @@ const serviceTextFields={
 const saveServiceTexts=document.getElementById("saveServiceTexts");
 const reloadServiceTexts=document.getElementById("reloadServiceTexts");
 const serviceTextStatus=document.getElementById("serviceTextStatus");
+const companyTextFields={
+  "unternehmen/eyebrow":document.getElementById("companyEyebrow"),
+  "unternehmen/title":document.getElementById("companyTitle"),
+  "unternehmen/name":document.getElementById("companyName"),
+  "unternehmen/lead":document.getElementById("companyLead"),
+  "unternehmen/timeline-1-year":document.getElementById("companyTimeline1Year"),
+  "unternehmen/timeline-1-text":document.getElementById("companyTimeline1Text"),
+  "unternehmen/timeline-2-year":document.getElementById("companyTimeline2Year"),
+  "unternehmen/timeline-2-text":document.getElementById("companyTimeline2Text"),
+  "unternehmen/timeline-3-year":document.getElementById("companyTimeline3Year"),
+  "unternehmen/timeline-3-text":document.getElementById("companyTimeline3Text")
+};
+const saveCompanyTexts=document.getElementById("saveCompanyTexts");
+const reloadCompanyTexts=document.getElementById("reloadCompanyTexts");
+const companyTextStatus=document.getElementById("companyTextStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -239,6 +254,59 @@ if(saveServiceTexts){
 
 if(reloadServiceTexts) reloadServiceTexts.addEventListener("click",loadServiceTexts);
 
+const companyTextDefaults={
+  "unternehmen/eyebrow":"Ihr Ansprechpartner",
+  "unternehmen/title":"Persönlich geführt. Direkt erreichbar.",
+  "unternehmen/name":"Jost Gudelius, B. Eng. (FH)",
+  "unternehmen/lead":"ist Vermessungsingenieur mit langjähriger Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau.",
+  "unternehmen/timeline-1-year":"Seit 2020",
+  "unternehmen/timeline-1-text":"GudeliusVermessung",
+  "unternehmen/timeline-2-year":"2013 – 2020",
+  "unternehmen/timeline-2-text":"Projektleitende Tätigkeit als Vermessungsingenieur",
+  "unternehmen/timeline-3-year":"2013",
+  "unternehmen/timeline-3-text":"Geoinformatik und Satellitenpositionierung · FH München"
+};
+
+async function loadCompanyTexts(){
+  if(!getApi()) return setStatus(companyTextStatus,"Worker-URL fehlt.",false);
+  setStatus(companyTextStatus,"Lade Unternehmenstexte …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(companyTextFields).forEach(([key,field])=>{
+      if(field) field.value=typeof content[key]==="string" ? content[key] : companyTextDefaults[key];
+    });
+    setStatus(companyTextStatus,"Unternehmenstexte geladen.",true);
+  }catch(error){
+    Object.entries(companyTextFields).forEach(([key,field])=>{
+      if(field) field.value=companyTextDefaults[key];
+    });
+    setStatus(companyTextStatus,"Unternehmenstexte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveCompanyTexts){
+  saveCompanyTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(companyTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveCompanyTexts.disabled=true;
+    setStatus(companyTextStatus,"Speichere Unternehmenstexte …");
+    try{
+      await Promise.all(Object.entries(companyTextFields).map(([key,field])=>
+        saveHeroText(key,field.value.trim())
+      ));
+      setStatus(companyTextStatus,"Unternehmenstexte erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(companyTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveCompanyTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadCompanyTexts) reloadCompanyTexts.addEventListener("click",loadCompanyTexts);
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -337,6 +405,7 @@ function render(){
 render();
 loadHeroTexts();
 loadServiceTexts();
+loadCompanyTexts();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
