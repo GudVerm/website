@@ -1,0 +1,198 @@
+{
+  "generated_at": "2026-09-23T12:43:16.853Z",
+  "source": "GitHub Issues",
+  "issues": [
+    {
+      "number": 1,
+      "title": "[Gudelius Beta] Bilder zusammensuchen",
+      "body": "## Aufgabe\nJost stellt die Bilder zusammen, die auf der neuen Website verwendet werden sollen.\n\n**Status:** Wartet  \n**Verantwortlich:** Jost  \n**Fällig:** 03.10.2026  \n**Bereich:** Bilder\n\nVerknüpft mit: Version 3 Beta",
+      "state": "open",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/1",
+      "labels": [
+        {
+          "name": "status: wartet",
+          "color": "D7A64A",
+          "description": "Wartet auf Zuarbeit oder Abhängigkeit"
+        },
+        {
+          "name": "verantwortlich: jost",
+          "color": "8FB5C7",
+          "description": "Verantwortlich: Jost"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "[Gudelius Beta] Leistungs-Unterseiten erstellen",
+      "body": "## Aufgabe\nUnterseiten für Ingenieurvermessung, GIS & Bauvermessung, 3D-Laserscanning und Drohnenvermessung erstellen.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Ziel:** 03.10.2026  \n**Bereich:** Unterseiten\n\n## Umsetzung\n\nDie vier Leistungs-Unterseiten wurden in der Beta-Version umgesetzt und auf der Startseite verlinkt:\n\n- Ingenieurvermessung: https://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/leistungen/ingenieurvermessung/\n- GIS & Bauvermessung: https://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/leistungen/gis-bauvermessung/\n- 3D-Laserscanning: https://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/leistungen/3d-laserscanning/\n- Drohnenvermessung: https://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/leistungen/drohnenvermessung/\n\nDie Leistungs-Kacheln der Beta-Startseite führen jetzt jeweils über „Mehr erfahren“ auf die passende Unterseite.\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/2",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "[Gudelius Beta] Leistungsfelder nach oben verschieben",
+      "body": "## Aufgabe\nDen Bereich „Leistungsfelder“ auf der Startseite weiter nach oben verschieben, damit Leistungen früher sichtbar werden.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Startseite  \n**Priorität:** Hoch\n\n## Umsetzung\n\n- „Leistungsfelder“ steht jetzt direkt unter dem Hero.\n- „Leistungen“ steht im Hauptmenü vor „Projekte“.\n- Der primäre Hero-Button führt jetzt auf „Leistungen ansehen“.\n- Die vier Leistungs-Kacheln bleiben direkt mit ihren Unterseiten verknüpft.\n\nBeta:\nhttps://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/3",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "title": "[Gudelius Beta] „Arbeit, die man sehen kann.“ nach unten verschieben",
+      "body": "## Aufgabe\nDen Projekt-/Bildbereich „Arbeit, die man sehen kann.“ auf der Startseite weiter nach unten verschieben.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Startseite\n\n## Umsetzung\n\nDer Bereich „Arbeit, die man sehen kann.“ wurde deutlich nach unten verschoben.\n\nNeue Reihenfolge der Startseite:\n1. Hero\n2. Leistungsfelder\n3. Projektbegleitung\n4. Unternehmen\n5. Ausstattung\n6. Arbeit, die man sehen kann.\n7. Kontakt\n\nBeta:\nhttps://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/4",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "title": "[Gudelius Beta] Komplette Ausstattung auflisten",
+      "body": "## Aufgabe\nJost liefert eine vollständige Liste der Geräte, Software und weiteren Ausstattung.\n\n**Status:** Wartet  \n**Verantwortlich:** Jost  \n**Bereich:** Ausstattung\n\nVerknüpft mit: Version 3 Beta",
+      "state": "open",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/5",
+      "labels": [
+        {
+          "name": "status: wartet",
+          "color": "D7A64A",
+          "description": "Wartet auf Zuarbeit oder Abhängigkeit"
+        },
+        {
+          "name": "verantwortlich: jost",
+          "color": "8FB5C7",
+          "description": "Verantwortlich: Jost"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "title": "[Gudelius Beta] Ausstattungs-Popup mit Bildern bauen",
+      "body": "## Aufgabe\nNach der Liste von Jost wird der Ausstattungsbereich als Popup-/Detailansicht mit den Bildern von Jost umgesetzt.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Ausstattung\n\n## Umsetzung\n\nDer Ausstattungsbereich der Beta wurde als interaktive Detailansicht umgesetzt:\n\n- Klickbare Karten für **Außendienst**, **3D & Drohne** und **Programme & mobil**\n- Großes Popup mit Beschreibung und Detail-Liste\n- Zwei Bilder pro Bereich\n- Tastatursteuerung mit Enter/Leertaste\n- Schließen über X, Klick auf den Hintergrund oder Escape\n- Responsive Darstellung auf Mobilgeräten\n\nAktuell werden bewusst **Dummy-/Platzhalterbilder** verwendet. Sobald Jost die Originalbilder liefert, können die Platzhalter direkt ersetzt werden, ohne das Popup neu bauen zu müssen.\n\nBeta:\nhttps://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/#technik\n\nHinweis: Aufgabe #5 (vollständige Ausstattungsliste von Jost) bleibt separat offen; die jetzige Detailansicht verwendet die aktuell vorhandenen Geräte-/Softwareangaben.\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/6",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "title": "[Gudelius Beta] Richtige Impressumsdaten schicken",
+      "body": "## Aufgabe\nJost liefert die korrekten und vollständigen Daten für das Impressum.\n\n**Status:** Erledigt  \n**Verantwortlich:** Jost  \n**Bereich:** Impressum\n\n## Umsetzung\n\nDie vollständigen Impressumsdaten und Rechtstexte wurden bereitgestellt und in die Beta übernommen.\n\nEnthalten sind:\n- Angaben gemäß § 5 TMG\n- Kontaktdaten inkl. Fax\n- Berufsbezeichnung und berufsrechtliche Angaben\n- Berufshaftpflichtversicherung\n- EU-Streitschlichtung\n- Verbraucherstreitbeilegung\n- Haftung für Inhalte\n- Haftung für Links\n- Urheberrecht\n- Quellenangabe e-recht24\n\nBeta-Impressum:\nhttps://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/impressum/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/7",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: jost",
+          "color": "8FB5C7",
+          "description": "Verantwortlich: Jost"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "title": "[Gudelius Beta] Impressumsseite erstellen",
+      "body": "## Aufgabe\nAus den von Jost gelieferten Daten wird eine eigene Impressums-Unterseite erstellt und verlinkt.\n\n**Status:** Erledigt  \n**Verantwortlich:** Basti  \n**Bereich:** Impressum\n\n## Umsetzung\n\nDie Impressums-Unterseite wurde vollständig mit dem Originaltext umgesetzt und aus der Beta-Startseite sowie den Leistungs-Unterseiten verlinkt.\n\nBeta-Impressum:\nhttps://sebmut.github.io/Smartwerk-Presentation/gudelius/03-projekte-beta/impressum/\n\nVerknüpft mit: Version 3 Beta",
+      "state": "closed",
+      "html_url": "https://github.com/SebMut/Smartwerk-Presentation/issues/8",
+      "labels": [
+        {
+          "name": "status: erledigt",
+          "color": "5A9A6A",
+          "description": "Abgeschlossen"
+        },
+        {
+          "name": "verantwortlich: basti",
+          "color": "8BC49A",
+          "description": "Verantwortlich: Basti"
+        },
+        {
+          "name": "gudelius-beta",
+          "color": "E5C533",
+          "description": "Gudelius Version 3 Beta"
+        }
+      ]
+    }
+  ]
+}
