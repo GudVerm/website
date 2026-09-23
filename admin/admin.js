@@ -75,6 +75,19 @@ const heroLead=document.getElementById("heroLead");
 const saveHeroTexts=document.getElementById("saveHeroTexts");
 const reloadHeroTexts=document.getElementById("reloadHeroTexts");
 const heroTextStatus=document.getElementById("heroTextStatus");
+const serviceTextFields={
+  "leistungen/01-title":document.getElementById("service1Title"),
+  "leistungen/01-text":document.getElementById("service1Text"),
+  "leistungen/02-title":document.getElementById("service2Title"),
+  "leistungen/02-text":document.getElementById("service2Text"),
+  "leistungen/03-title":document.getElementById("service3Title"),
+  "leistungen/03-text":document.getElementById("service3Text"),
+  "leistungen/04-title":document.getElementById("service4Title"),
+  "leistungen/04-text":document.getElementById("service4Text")
+};
+const saveServiceTexts=document.getElementById("saveServiceTexts");
+const reloadServiceTexts=document.getElementById("reloadServiceTexts");
+const serviceTextStatus=document.getElementById("serviceTextStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -175,6 +188,57 @@ if(saveHeroTexts){
 
 if(reloadHeroTexts) reloadHeroTexts.addEventListener("click",loadHeroTexts);
 
+const serviceTextDefaults={
+  "leistungen/01-title":"Ingenieurvermessung",
+  "leistungen/01-text":"Bauabsteckung, Kontrollen, Planungsgrundlagen, Bestands- und Innenaufmaß sowie Kataster- und Überwachungsmessungen.",
+  "leistungen/02-title":"GIS & Bauvermessung",
+  "leistungen/02-text":"Leitungsdokumentation, Tief- und Straßenbau, DGM/Massen, Maschinensteuerung und präzise Absteckung.",
+  "leistungen/03-title":"3D-Laserscanning",
+  "leistungen/03-text":"Verformungsgerechtes Aufmaß, 2D-/3D-Auswertung sowie CAD- und BIM-Schnittstellen.",
+  "leistungen/04-title":"Drohnenvermessung",
+  "leistungen/04-text":"RTK-Drohne für Massenermittlung, Inspektion, Orthophotos und Infrastruktur-Bestand."
+};
+
+async function loadServiceTexts(){
+  if(!getApi()) return setStatus(serviceTextStatus,"Worker-URL fehlt.",false);
+  setStatus(serviceTextStatus,"Lade Leistungstexte …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(serviceTextFields).forEach(([key,field])=>{
+      if(field) field.value=typeof content[key]==="string" ? content[key] : serviceTextDefaults[key];
+    });
+    setStatus(serviceTextStatus,"Leistungstexte geladen.",true);
+  }catch(error){
+    Object.entries(serviceTextFields).forEach(([key,field])=>{
+      if(field) field.value=serviceTextDefaults[key];
+    });
+    setStatus(serviceTextStatus,"Leistungstexte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveServiceTexts){
+  saveServiceTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(serviceTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveServiceTexts.disabled=true;
+    setStatus(serviceTextStatus,"Speichere Leistungstexte …");
+    try{
+      await Promise.all(Object.entries(serviceTextFields).map(([key,field])=>
+        saveHeroText(key,field.value.trim())
+      ));
+      setStatus(serviceTextStatus,"Leistungstexte erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(serviceTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveServiceTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadServiceTexts) reloadServiceTexts.addEventListener("click",loadServiceTexts);
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -272,6 +336,7 @@ function render(){
 
 render();
 loadHeroTexts();
+loadServiceTexts();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
