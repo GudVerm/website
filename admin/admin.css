@@ -52,3 +52,11 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
 @media(max-width:620px){
   .admin-nav-inner{width:min(100% - 22px,1180px)}
 }
+
+.text-editor-panel{margin-top:0}
+.text-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.text-editor-grid input,.text-editor-grid textarea{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;font:inherit;background:#fbfbf8;color:var(--ink);resize:vertical}
+.text-editor-wide{grid-column:1/-1}
+.text-editor-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.text-editor-actions .status{flex:1 1 240px}
+@media(max-width:700px){.text-editor-grid{grid-template-columns:1fr}.text-editor-wide{grid-column:auto}}
