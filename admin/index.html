@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-12">
+  <link rel="stylesheet" href="./admin.css?v=20260923-13">
 </head>
 <body>
   <header class="admin-header">
@@ -281,18 +281,25 @@
       <section class="section-head">
         <div>
           <span class="kicker">Kontakt</span>
-          <h2>Kontaktdaten bearbeiten</h2>
+          <h2>Kompletten Kontaktbereich bearbeiten</h2>
         </div>
-        <p>Überschrift, Einleitung und die sichtbaren Kontaktdaten der Startseite werden in Cloudflare D1 gespeichert.</p>
+        <p>Hier lassen sich Kontaktdaten, Überschriften, Formulartexte, Feldbezeichnungen und Platzhalter zentral pflegen.</p>
       </section>
 
       <section class="panel text-editor-panel">
         <div class="text-editor-grid">
+          <label>Eyebrow
+            <input id="contactEyebrow" type="text" maxlength="100">
+          </label>
           <label>Überschrift
             <input id="contactTitle" type="text" maxlength="180">
           </label>
-          <label>Einleitung
-            <input id="contactLead" type="text" maxlength="300">
+          <label class="text-editor-wide">Einleitung
+            <textarea id="contactLead" rows="3" maxlength="500"></textarea>
+          </label>
+
+          <label>Bezeichnung Telefon
+            <input id="contactPhoneLabel" type="text" maxlength="80">
           </label>
           <label>Telefon 1
             <input id="contactPhone1" type="text" maxlength="80">
@@ -300,17 +307,122 @@
           <label>Telefon 2
             <input id="contactPhone2" type="text" maxlength="80">
           </label>
+          <label>Bezeichnung E-Mail
+            <input id="contactEmailLabel" type="text" maxlength="80">
+          </label>
           <label>E-Mail
             <input id="contactEmail" type="email" maxlength="180">
+          </label>
+          <label>Bezeichnung Adresse
+            <input id="contactAddressLabel" type="text" maxlength="80">
           </label>
           <label>Adresse
             <input id="contactAddress" type="text" maxlength="240">
           </label>
+
+          <label>Formularüberschrift
+            <input id="contactFormTitle" type="text" maxlength="160">
+          </label>
+          <label>Formular-Einleitung
+            <input id="contactFormLead" type="text" maxlength="240">
+          </label>
+
+          <label>Feldname · Name
+            <input id="contactNameLabel" type="text" maxlength="80">
+          </label>
+          <label>Platzhalter · Name
+            <input id="contactNamePlaceholder" type="text" maxlength="160">
+          </label>
+
+          <label>Feldname · E-Mail
+            <input id="contactEmailFieldLabel" type="text" maxlength="80">
+          </label>
+          <label>Platzhalter · E-Mail
+            <input id="contactEmailPlaceholder" type="text" maxlength="160">
+          </label>
+
+          <label>Feldname · Betreff
+            <input id="contactSubjectLabel" type="text" maxlength="100">
+          </label>
+          <label>Platzhalter · Betreff
+            <input id="contactSubjectPlaceholder" type="text" maxlength="220">
+          </label>
+
+          <label>Feldname · Nachricht
+            <input id="contactMessageLabel" type="text" maxlength="100">
+          </label>
+          <label>Platzhalter · Nachricht
+            <input id="contactMessagePlaceholder" type="text" maxlength="260">
+          </label>
+
+          <label>Buttontext
+            <input id="contactButtonText" type="text" maxlength="100">
+          </label>
+          <label>Hinweis unter dem Formular
+            <input id="contactFormNote" type="text" maxlength="300">
+          </label>
         </div>
         <div class="text-editor-actions">
-          <button id="saveContactTexts" type="button">Kontaktdaten speichern</button>
+          <button id="saveContactTexts" type="button">Kontaktbereich speichern</button>
           <button id="reloadContactTexts" class="secondary" type="button">Neu laden</button>
           <div id="contactTextStatus" class="status">Noch keine CMS-Kontaktdaten geladen.</div>
+        </div>
+      </section>
+
+      <section class="section-head">
+        <div>
+          <span class="kicker">Leistungs-Unterseiten</span>
+          <h2>Kontakttexte je Leistung</h2>
+        </div>
+        <p>Die Kontaktdaten und Formularbeschriftungen sind zentral. Überschrift, Einleitung und Standard-Betreff können je Leistungsseite separat angepasst werden.</p>
+      </section>
+
+      <section class="panel text-editor-panel">
+        <div class="text-editor-grid">
+          <label>Ingenieurvermessung · Überschrift
+            <input id="contactEngineerTitle" type="text" maxlength="180">
+          </label>
+          <label>Ingenieurvermessung · Standard-Betreff
+            <input id="contactEngineerSubject" type="text" maxlength="180">
+          </label>
+          <label class="text-editor-wide">Ingenieurvermessung · Einleitung
+            <textarea id="contactEngineerLead" rows="2" maxlength="400"></textarea>
+          </label>
+
+          <label>GIS & Bauvermessung · Überschrift
+            <input id="contactGisTitle" type="text" maxlength="180">
+          </label>
+          <label>GIS & Bauvermessung · Standard-Betreff
+            <input id="contactGisSubject" type="text" maxlength="180">
+          </label>
+          <label class="text-editor-wide">GIS & Bauvermessung · Einleitung
+            <textarea id="contactGisLead" rows="2" maxlength="400"></textarea>
+          </label>
+
+          <label>3D-Laserscanning · Überschrift
+            <input id="contactScanTitle" type="text" maxlength="180">
+          </label>
+          <label>3D-Laserscanning · Standard-Betreff
+            <input id="contactScanSubject" type="text" maxlength="180">
+          </label>
+          <label class="text-editor-wide">3D-Laserscanning · Einleitung
+            <textarea id="contactScanLead" rows="2" maxlength="400"></textarea>
+          </label>
+
+          <label>Drohnenvermessung · Überschrift
+            <input id="contactDroneTitle" type="text" maxlength="180">
+          </label>
+          <label>Drohnenvermessung · Standard-Betreff
+            <input id="contactDroneSubject" type="text" maxlength="180">
+          </label>
+          <label class="text-editor-wide">Drohnenvermessung · Einleitung
+            <textarea id="contactDroneLead" rows="2" maxlength="400"></textarea>
+          </label>
+        </div>
+        <div class="text-editor-actions">
+          <button id="saveServiceContactTexts" type="button">Leistungs-Kontakttexte speichern</button>
+          <button id="reloadServiceContactTexts" class="secondary" type="button">Neu laden</button>
+          <div id="serviceContactTextStatus" class="status">Noch keine Leistungs-Kontakttexte geladen.</div>
         </div>
       </section>
     </section>
@@ -338,7 +450,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-12"></script>
-  <script src="./admin.js?v=20260923-12"></script>
+  <script src="./config.js?v=20260923-13"></script>
+  <script src="./admin.js?v=20260923-13"></script>
 </body>
 </html>
