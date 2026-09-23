@@ -101,6 +101,39 @@ export default {
         }
       }
 
+      if (url.pathname.startsWith("/api/contact/") && request.method === "PUT") {
+        if (!isAuthorized(request, env)) {
+          return json({ error: "Unauthorized" }, 401, cors);
+        }
+
+        const id = decodeKey(url.pathname, "/api/contact/");
+        if (!id) return json({ error: "Missing inquiry id" }, 400, cors);
+
+        let payload;
+        try {
+          payload = await request.json();
+        } catch {
+          return json({ error: "Ungültige Anfrage." }, 400, cors);
+        }
+
+        const status = cleanText(payload.status, 30);
+        const allowedStatuses = new Set(["neu", "in-arbeit", "erledigt"]);
+        if (!allowedStatuses.has(status)) {
+          return json({ error: "Ungültiger Status." }, 400, cors);
+        }
+
+        await ensureContactTable(env);
+        const result = await env.DB.prepare(
+          "UPDATE contact_requests SET status = ? WHERE id = ?"
+        ).bind(status, id).run();
+
+        if (!result.meta?.changes) {
+          return json({ error: "Anfrage nicht gefunden." }, 404, cors);
+        }
+
+        return json({ ok: true, id, status }, 200, cors);
+      }
+
       if (url.pathname.startsWith("/api/content/")) {
         const key = decodeKey(url.pathname, "/api/content/");
         if (!key) return json({ error: "Missing content key" }, 400, cors);
