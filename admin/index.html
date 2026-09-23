@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-10">
+  <link rel="stylesheet" href="./admin.css?v=20260923-11">
 </head>
 <body>
   <header class="admin-header">
@@ -238,6 +238,42 @@
     </section>
 
     <section id="projectGrid" class="equipment-grid" aria-live="polite"></section>
+
+    <section class="section-head">
+      <div>
+        <span class="kicker">Projekt-Titel</span>
+        <h2>Bezeichnungen der Projektkacheln bearbeiten</h2>
+      </div>
+      <p>Nur die sichtbaren Titel werden geändert. Bilder, Reihenfolge und Anzahl der Projekte bleiben unverändert.</p>
+    </section>
+
+    <section class="panel text-editor-panel">
+      <div class="text-editor-grid">
+        <label>Projekt 1
+          <input id="project1Title" type="text" maxlength="140">
+        </label>
+        <label>Projekt 2
+          <input id="project2Title" type="text" maxlength="140">
+        </label>
+        <label>Projekt 3
+          <input id="project3Title" type="text" maxlength="140">
+        </label>
+        <label>Projekt 4
+          <input id="project4Title" type="text" maxlength="140">
+        </label>
+        <label>Projekt 5
+          <input id="project5Title" type="text" maxlength="140">
+        </label>
+        <label>Projekt 6
+          <input id="project6Title" type="text" maxlength="140">
+        </label>
+      </div>
+      <div class="text-editor-actions">
+        <button id="saveProjectTitles" type="button">Projekt-Titel speichern</button>
+        <button id="reloadProjectTitles" class="secondary" type="button">Neu laden</button>
+        <div id="projectTitleStatus" class="status">Noch keine CMS-Titel geladen.</div>
+      </div>
+    </section>
   </section>
   </main>
 
@@ -263,7 +299,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-10"></script>
-  <script src="./admin.js?v=20260923-10"></script>
+  <script src="./config.js?v=20260923-11"></script>
+  <script src="./admin.js?v=20260923-11"></script>
 </body>
 </html>
