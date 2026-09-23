@@ -60,3 +60,129 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
 .text-editor-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
 .text-editor-actions .status{flex:1 1 240px}
 @media(max-width:700px){.text-editor-grid{grid-template-columns:1fr}.text-editor-wide{grid-column:auto}}
+
+.cms-group-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+.cms-subpanel{
+  background:linear-gradient(180deg,#fff 0%,#fbfbf7 100%);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 10px 28px rgba(20,32,38,.045);
+}
+.cms-subpanel-form{
+  margin-top:18px;
+}
+.cms-subpanel-head{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  padding-bottom:18px;
+  margin-bottom:18px;
+  border-bottom:1px solid #e8ebe7;
+}
+.cms-subpanel-head.compact{
+  padding-bottom:14px;
+  margin-bottom:14px;
+}
+.cms-subpanel-head h3{
+  margin:4px 0 5px;
+  font-size:1.12rem;
+}
+.cms-subpanel-head p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.5;
+  font-size:.82rem;
+}
+.cms-subpanel-icon{
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:var(--ink);
+  color:#fff;
+  font-weight:900;
+  font-size:.72rem;
+  letter-spacing:.05em;
+}
+.form-editor-block{
+  padding:18px;
+  border:1px solid #e5e9e4;
+  border-radius:16px;
+  background:#fff;
+}
+.form-editor-block + .form-editor-block{
+  margin-top:14px;
+}
+.form-editor-block-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:14px;
+}
+.form-editor-block-head strong{
+  font-size:.9rem;
+}
+.form-editor-block-head span{
+  color:var(--muted);
+  font-size:.74rem;
+}
+.contact-save-actions{
+  padding-top:18px;
+  margin-top:18px;
+  border-top:1px solid #e5e9e4;
+}
+.contact-subsection-head{
+  margin-top:56px;
+}
+.service-contact-shared{
+  margin-bottom:18px;
+}
+.service-contact-card-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+.service-contact-card .text-editor-grid.single-column{
+  grid-template-columns:1fr;
+}
+.service-contact-actions{
+  margin-top:18px;
+  padding:18px 22px;
+}
+.service-contact-actions .text-editor-actions{
+  margin-top:0;
+}
+#kontakt .text-editor-grid input,
+#kontakt .text-editor-grid textarea{
+  background:#fff;
+}
+@media(max-width:900px){
+  .cms-group-grid,
+  .service-contact-card-grid{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:620px){
+  .cms-subpanel{
+    padding:17px;
+    border-radius:16px;
+  }
+  .form-editor-block{
+    padding:14px;
+  }
+  .form-editor-block-head{
+    display:block;
+  }
+  .form-editor-block-head span{
+    display:block;
+    margin-top:4px;
+  }
+}
