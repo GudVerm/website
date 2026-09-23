@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Technik · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-20">
+  <link rel="stylesheet" href="./admin.css?v=20260923-21">
 </head>
 <body data-admin-page="technik">
   <header class="admin-header">
@@ -40,46 +40,106 @@
           <span class="kicker">Technik</span>
           <h2>Geräte & Software</h2>
         </div>
-        <p>Alle Technikbilder sind in einem eigenen Medienbereich zusammengefasst.</p>
+        <p>Alle 13 Technik-Einträge werden einzeln gepflegt. Bild und zugehörige Texte bleiben dabei immer in derselben Editor-Ansicht.</p>
       </section>
 
-      <section class="cms-subpanel">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">01</span>
+      <section class="cms-subpanel technik-picker">
+        <div class="cms-subpanel-head compact">
+          <span class="cms-subpanel-icon">13</span>
           <div>
-            <span class="kicker">Medien</span>
-            <h3>Technikbilder</h3>
-            <p>Pro Gerät oder Software-Eintrag kann ein eigenes Bild hochgeladen oder entfernt werden.</p>
+            <span class="kicker">Auswahl</span>
+            <h3>Technik-Eintrag auswählen</h3>
+            <p>Es wird immer nur ein Gerät bzw. eine Software angezeigt. Dadurch bleibt der Bereich auch auf Mobilgeräten übersichtlich.</p>
           </div>
         </div>
-        <section id="equipmentGrid" class="equipment-grid" aria-live="polite"></section>
+        <div class="technik-picker-row">
+          <label>
+            <span>Gerät / Software</span>
+            <select id="technikSelect" aria-label="Technik-Eintrag auswählen"></select>
+          </label>
+          <div class="technik-picker-hint">
+            <strong>D1 + R2</strong>
+            <span>6 Textfelder · 1 Bild je Eintrag</span>
+          </div>
+        </div>
       </section>
+
+      <section id="technikEditor" class="technik-editor-host" aria-live="polite"></section>
     </section>
   </main>
 
-  <template id="equipmentTemplate">
-    <article class="equipment-card">
-      <div class="image-wrap">
-        <img alt="">
-        <span class="badge">Bild</span>
-      </div>
-      <div class="card-body">
-        <h3></h3>
-        <p class="detail"></p>
-        <label class="file-label">
-          <span>Neues Bild auswählen</span>
-          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
-        </label>
-        <div class="card-actions">
-          <button class="upload" type="button">Bild hochladen</button>
-          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+  <template id="technikEditorTemplate">
+    <article class="cms-subpanel technik-editor-card">
+      <div class="cms-subpanel-head technik-editor-head">
+        <span class="cms-subpanel-icon technik-editor-index">01</span>
+        <div>
+          <span class="kicker technik-editor-category">Kategorie</span>
+          <h3 class="technik-editor-name">Technik</h3>
+          <p>Bild und Texte dieses Eintrags werden gemeinsam bearbeitet. Leere oder nicht erreichbare CMS-Werte fallen auf die im Projekt hinterlegten Standardtexte zurück.</p>
         </div>
-        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+
+      <div class="technik-editor-layout">
+        <section class="technik-media-panel" aria-label="Technikbild">
+          <div class="image-wrap">
+            <img alt="">
+            <span class="badge">R2-Bild</span>
+          </div>
+          <div class="technik-media-body">
+            <div class="technik-media-meta">
+              <span>Medienkey</span>
+              <code class="technik-media-key"></code>
+            </div>
+            <label class="file-label">
+              <span>Neues Bild auswählen</span>
+              <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+            </label>
+            <div class="card-actions">
+              <button class="upload" type="button">Bild hochladen</button>
+              <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+            </div>
+            <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+          </div>
+        </section>
+
+        <section class="text-editor-panel technik-text-panel" aria-label="Techniktexte">
+          <div class="text-editor-grid">
+            <label>
+              <span>Anzeigename</span>
+              <input type="text" data-technique-field="name">
+            </label>
+            <label>
+              <span>Kategorie / Kurzbezeichnung</span>
+              <input type="text" data-technique-field="category">
+            </label>
+            <label>
+              <span>Hersteller</span>
+              <input type="text" data-technique-field="manufacturer">
+            </label>
+            <label>
+              <span>Modell</span>
+              <input type="text" data-technique-field="model">
+            </label>
+            <label class="text-editor-wide">
+              <span>Beschreibung</span>
+              <textarea rows="4" data-technique-field="description"></textarea>
+            </label>
+            <label class="text-editor-wide">
+              <span>Technische Details / Besonderheiten</span>
+              <textarea rows="4" data-technique-field="details"></textarea>
+            </label>
+          </div>
+          <div class="text-editor-actions technik-text-actions">
+            <button class="technik-save" type="button">Texte speichern</button>
+            <button class="technik-reload secondary" type="button">Neu laden</button>
+            <span class="technik-text-status status">Fallback-Texte werden angezeigt.</span>
+          </div>
+        </section>
       </div>
     </article>
   </template>
 
   <script src="./config.js?v=20260923-20"></script>
-  <script src="./admin.js?v=20260923-20"></script>
+  <script src="./admin.js?v=20260923-21"></script>
 </body>
 </html>

@@ -863,3 +863,126 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
     grid-template-columns:1fr;
   }
 }
+
+
+/* Technik: kompakter D1/R2-Editor */
+.technik-picker{
+  margin-bottom:18px;
+}
+.technik-picker-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(220px,.5fr);
+  gap:16px;
+  align-items:end;
+}
+.technik-picker select{
+  width:100%;
+  min-height:48px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:0 42px 0 13px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  font-weight:800;
+}
+.technik-picker-hint{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 13px;
+  border:1px solid #e3e7e3;
+  border-radius:12px;
+  background:#fafaf7;
+}
+.technik-picker-hint strong{
+  font-size:.75rem;
+  letter-spacing:.06em;
+}
+.technik-picker-hint span{
+  color:var(--muted);
+  font-size:.72rem;
+  text-align:right;
+}
+.technik-editor-host{
+  min-height:420px;
+}
+.technik-editor-card{
+  border-top:5px solid var(--ink);
+}
+.technik-editor-head h3{
+  margin:4px 0 5px;
+  font-size:1.28rem;
+}
+.technik-editor-layout{
+  display:grid;
+  grid-template-columns:minmax(280px,.82fr) minmax(0,1.55fr);
+  gap:20px;
+  align-items:start;
+}
+.technik-media-panel{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+}
+.technik-media-panel .image-wrap{
+  aspect-ratio:4/3;
+}
+.technik-media-panel .image-wrap img{
+  object-fit:contain;
+  padding:12px;
+  background:#fff;
+}
+.technik-media-body{
+  padding:16px;
+}
+.technik-media-meta{
+  display:grid;
+  gap:5px;
+  margin-bottom:14px;
+}
+.technik-media-meta span{
+  color:var(--muted);
+  font-size:.68rem;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.technik-media-key{
+  overflow-wrap:anywhere;
+  color:#38464d;
+  font-size:.72rem;
+}
+.technik-text-panel{
+  padding:2px 0 0;
+}
+.technik-text-actions{
+  padding-top:16px;
+  border-top:1px solid #e5e9e4;
+}
+@media(max-width:920px){
+  .technik-editor-layout,
+  .technik-picker-row{
+    grid-template-columns:1fr;
+  }
+  .technik-picker-hint{
+    justify-content:flex-start;
+  }
+  .technik-picker-hint span{
+    text-align:left;
+  }
+}
+@media(max-width:620px){
+  .technik-editor-card{
+    padding:17px;
+  }
+  .technik-editor-head{
+    gap:10px;
+  }
+  .technik-media-panel .image-wrap{
+    aspect-ratio:16/10;
+  }
+}

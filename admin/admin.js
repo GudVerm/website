@@ -1,17 +1,17 @@
 const equipment = [
-  { key:"equipment/trimble-sx12", name:"Trimble SX12", detail:"Scanning-Totalstation", fallback:"../assets/equipment-trimble-sx12.svg" },
-  { key:"equipment/trimble-s6", name:"Trimble S6", detail:"Robotik-Totalstation", fallback:"../assets/equipment-trimble-s6.svg" },
-  { key:"equipment/trimble-r2", name:"Trimble R2 GNSS-Empfänger", detail:"GNSS-Positionierung", fallback:"../assets/equipment-trimble-r2.svg" },
-  { key:"equipment/trimble-dini07", name:"Trimble DiNi 07 Ingenieurnivellier", detail:"Digitalnivellement", fallback:"../assets/equipment-trimble-dini07.svg" },
-  { key:"equipment/trimble-tx8", name:"Trimble TX8 3D-Laserscanner", detail:"Terrestrisches 3D-Laserscanning", fallback:"../assets/equipment-trimble-tx8.svg" },
-  { key:"equipment/rtk-drohne", name:"RTK-Drohne", detail:"Vermessung & Orthophoto", fallback:"../assets/equipment-rtk-drohne.svg" },
-  { key:"equipment/infrarotkamera", name:"RTK-Drohne mit Infrarotkamera", detail:"Thermische Bildaufnahme", fallback:"../assets/equipment-infrarotkamera.svg" },
-  { key:"equipment/photogrammetrie", name:"Punktwolken & Photogrammetrie", detail:"Workflow / Ergebnisdarstellung", fallback:"../assets/equipment-photogrammetrie.svg" },
-  { key:"equipment/bricscad", name:"BricsCAD", detail:"CAD-Bearbeitung", fallback:"../assets/equipment-bricscad.svg" },
-  { key:"equipment/bbsoft", name:"BBSOFT", detail:"Tiefbau, Vermessung & DGM", fallback:"../assets/equipment-bbsoft.svg" },
-  { key:"equipment/realworks", name:"Trimble RealWorks", detail:"Punktwolken-Auswertung", fallback:"../assets/equipment-realworks.svg" },
-  { key:"equipment/metashape", name:"Agisoft Metashape", detail:"Photogrammetrie", fallback:"../assets/equipment-metashape.svg" },
-  { key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", detail:"Auswertung direkt im Projektumfeld", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" }
+  { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/equipment-trimble-sx12.svg" },
+  { slug:"trimble-s6", group:"Außendienst", key:"equipment/trimble-s6", name:"Trimble S6", category:"Robotik-Totalstation", detail:"Robotik-Totalstation", manufacturer:"Trimble", model:"S6", description:"Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.", details:"Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.", fallback:"../assets/equipment-trimble-s6.svg" },
+  { slug:"trimble-r2", group:"Außendienst", key:"equipment/trimble-r2", name:"Trimble R2 GNSS-Empfänger", category:"GNSS-Positionierung", detail:"GNSS-Positionierung", manufacturer:"Trimble", model:"R2", description:"GNSS-Empfänger für präzise Positionsbestimmung bei Aufnahme und Absteckung.", details:"RTK- und GNSS-gestützte Vermessung für flexible Punktaufnahme im Projektumfeld.", fallback:"../assets/equipment-trimble-r2.svg" },
+  { slug:"trimble-dini07", group:"Außendienst", key:"equipment/trimble-dini07", name:"Trimble DiNi 07 Ingenieurnivellier", category:"Digitalnivellement", detail:"Digitalnivellement", manufacturer:"Trimble", model:"DiNi 07", description:"Digitales Ingenieurnivellier für präzise Höhenmessungen und Höhenübertragungen.", details:"Geeignet für Nivellements, Kontrollmessungen und die nachvollziehbare Bestimmung von Höhenunterschieden.", fallback:"../assets/equipment-trimble-dini07.svg" },
+  { slug:"trimble-tx8", group:"3D & Drohne", key:"equipment/trimble-tx8", name:"Trimble TX8 3D-Laserscanner", category:"Terrestrisches 3D-Laserscanning", detail:"Terrestrisches 3D-Laserscanning", manufacturer:"Trimble", model:"TX8", description:"Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.", details:"Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.", fallback:"../assets/equipment-trimble-tx8.svg" },
+  { slug:"rtk-drohne", group:"3D & Drohne", key:"equipment/rtk-drohne", name:"RTK-Drohne", category:"Vermessung & Orthophoto", detail:"Vermessung & Orthophoto", manufacturer:"DJI Enterprise", model:"RTK-Drohne", description:"RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.", details:"Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.", fallback:"../assets/equipment-rtk-drohne.svg" },
+  { slug:"infrarotkamera", group:"3D & Drohne", key:"equipment/infrarotkamera", name:"RTK-Drohne mit Infrarotkamera", category:"Thermische Bildaufnahme", detail:"Thermische Bildaufnahme", manufacturer:"DJI Enterprise", model:"RTK-Drohne mit Infrarotkamera", description:"Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.", details:"Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.", fallback:"../assets/equipment-infrarotkamera.svg" },
+  { slug:"photogrammetrie", group:"3D & Drohne", key:"equipment/photogrammetrie", name:"Punktwolken & Photogrammetrie", category:"Workflow / Ergebnisdarstellung", detail:"Workflow / Ergebnisdarstellung", manufacturer:"–", model:"Punktwolken & Photogrammetrie", description:"Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.", details:"Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.", fallback:"../assets/equipment-photogrammetrie.svg" },
+  { slug:"bricscad", group:"Programme & Arbeitsplatz", key:"equipment/bricscad", name:"BricsCAD", category:"CAD-Bearbeitung", detail:"CAD-Bearbeitung", manufacturer:"Bricsys", model:"BricsCAD", description:"CAD-Software für die zeichnerische Aufbereitung und Weiterbearbeitung von Vermessungsdaten.", details:"Für 2D-/3D-CAD, Bestandspläne und projektbezogene Planbearbeitung.", fallback:"../assets/equipment-bricscad.svg" },
+  { slug:"bbsoft", group:"Programme & Arbeitsplatz", key:"equipment/bbsoft", name:"BBSOFT", category:"Tiefbau, Vermessung & DGM", detail:"Tiefbau, Vermessung & DGM", manufacturer:"BBSOFT", model:"BBSOFT", description:"Fachsoftware für vermessungsnahe Tiefbauplanung, Geländemodelle und Massenermittlung.", details:"Unterstützt die Bearbeitung von Vermessungsdaten, DGM und projektbezogenen Tiefbauaufgaben.", fallback:"../assets/equipment-bbsoft.svg" },
+  { slug:"realworks", group:"Programme & Arbeitsplatz", key:"equipment/realworks", name:"Trimble RealWorks", category:"Punktwolken-Auswertung", detail:"Punktwolken-Auswertung", manufacturer:"Trimble", model:"RealWorks", description:"Software zur Registrierung, Auswertung und Aufbereitung terrestrischer Punktwolken.", details:"Für Scanregistrierung, Punktwolkenanalyse und die Ableitung weiterverwendbarer 2D-/3D-Ergebnisse.", fallback:"../assets/equipment-realworks.svg" },
+  { slug:"metashape", group:"Programme & Arbeitsplatz", key:"equipment/metashape", name:"Agisoft Metashape", category:"Photogrammetrie", detail:"Photogrammetrie", manufacturer:"Agisoft", model:"Metashape", description:"Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.", details:"Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.", fallback:"../assets/equipment-metashape.svg" },
+  { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" }
 ];
 
 const projects = [
@@ -75,6 +75,11 @@ const servicePage2Grid=document.getElementById("servicePage2Grid");
 const servicePage3Grid=document.getElementById("servicePage3Grid");
 const servicePage4Grid=document.getElementById("servicePage4Grid");
 const template=document.getElementById("equipmentTemplate");
+const technikSelect=document.getElementById("technikSelect");
+const technikEditor=document.getElementById("technikEditor");
+const technikEditorTemplate=document.getElementById("technikEditorTemplate");
+let technikContentCache={};
+let activeTechnikSlug="";
 const inquiriesList=document.getElementById("inquiriesList");
 const inquiriesStatus=document.getElementById("inquiriesStatus");
 const inquiryFilter=document.getElementById("inquiryFilter");
@@ -1763,6 +1768,219 @@ function setStatus(el,text,ok){
   if(ok===false) el.classList.add("bad");
 }
 
+
+const techniqueTextFields=["name","category","manufacturer","model","description","details"];
+
+function techniqueContentKey(item,field){
+  return "technik/"+item.slug+"/"+field;
+}
+
+function techniqueValue(item,field){
+  const value=technikContentCache[techniqueContentKey(item,field)];
+  return typeof value==="string" ? value : (item[field]||"");
+}
+
+function techniqueBySlug(slug){
+  return equipment.find(item=>item.slug===slug)||equipment[0];
+}
+
+function refreshTechniqueSelectLabels(){
+  if(!technikSelect) return;
+  [...technikSelect.querySelectorAll("option[data-technik-slug]")].forEach(option=>{
+    const item=techniqueBySlug(option.dataset.technikSlug);
+    const index=equipment.indexOf(item)+1;
+    const name=techniqueValue(item,"name").trim()||item.name;
+    option.textContent=String(index).padStart(2,"0")+" · "+name;
+  });
+}
+
+function populateTechniqueSelect(){
+  if(!technikSelect) return;
+  technikSelect.innerHTML="";
+  const groups=[...new Set(equipment.map(item=>item.group))];
+  groups.forEach(group=>{
+    const optgroup=document.createElement("optgroup");
+    optgroup.label=group;
+    equipment.filter(item=>item.group===group).forEach(item=>{
+      const option=document.createElement("option");
+      option.value=item.slug;
+      option.dataset.technikSlug=item.slug;
+      optgroup.appendChild(option);
+    });
+    technikSelect.appendChild(optgroup);
+  });
+  refreshTechniqueSelectLabels();
+}
+
+function renderTechniqueEditor(item){
+  if(!technikEditor||!technikEditorTemplate||!item) return;
+  activeTechnikSlug=item.slug;
+  technikEditor.innerHTML="";
+  const node=technikEditorTemplate.content.cloneNode(true);
+  const card=node.querySelector(".technik-editor-card");
+  const img=node.querySelector("img");
+  const heading=node.querySelector(".technik-editor-name");
+  const categoryLabel=node.querySelector(".technik-editor-category");
+  const indexLabel=node.querySelector(".technik-editor-index");
+  const mediaKey=node.querySelector(".technik-media-key");
+  const file=node.querySelector(".file-input");
+  const upload=node.querySelector(".upload");
+  const reset=node.querySelector(".reset");
+  const mediaStatus=node.querySelector(".card-status");
+  const save=node.querySelector(".technik-save");
+  const reload=node.querySelector(".technik-reload");
+  const textStatus=node.querySelector(".technik-text-status");
+  const fields={};
+
+  techniqueTextFields.forEach(field=>{
+    const input=node.querySelector('[data-technique-field="'+field+'"]');
+    if(input){
+      input.value=techniqueValue(item,field);
+      fields[field]=input;
+    }
+  });
+
+  const displayName=techniqueValue(item,"name").trim()||item.name;
+  const displayCategory=techniqueValue(item,"category").trim()||item.category;
+  heading.textContent=displayName;
+  categoryLabel.textContent=displayCategory;
+  indexLabel.textContent=String(equipment.indexOf(item)+1).padStart(2,"0");
+  mediaKey.textContent=item.key;
+  card.dataset.technikSlug=item.slug;
+
+  img.src=getApi()?mediaUrl(item.key):item.fallback;
+  img.alt=displayName;
+  img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+
+  file.addEventListener("change",()=>{
+    const selected=file.files?.[0];
+    if(!selected) return;
+    img.src=URL.createObjectURL(selected);
+    setStatus(mediaStatus,selected.name+" ausgewählt.");
+  });
+
+  upload.addEventListener("click",async()=>{
+    const selected=file.files?.[0];
+    if(!selected) return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);
+    if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    upload.disabled=true;
+    setStatus(mediaStatus,"Upload läuft …");
+    try{
+      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+        method:"PUT",
+        headers:{
+          "authorization":"Bearer "+getToken(),
+          "content-type":selected.type||"application/octet-stream",
+          "x-file-name":selected.name
+        },
+        body:selected
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+      img.src=mediaUrl(item.key)+"?v="+Date.now();
+      setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
+    }catch(error){
+      setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false);
+    }finally{
+      upload.disabled=false;
+    }
+  });
+
+  reset.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    reset.disabled=true;
+    setStatus(mediaStatus,"Lösche Cloudflare-Bild …");
+    try{
+      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+        method:"DELETE",
+        headers:{"authorization":"Bearer "+getToken()}
+      });
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+      img.src=item.fallback;
+      file.value="";
+      setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
+    }catch(error){
+      setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false);
+    }finally{
+      reset.disabled=false;
+    }
+  });
+
+  save.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    save.disabled=true;
+    setStatus(textStatus,"Speichere Techniktexte …");
+    try{
+      const values={};
+      techniqueTextFields.forEach(field=>{values[field]=fields[field]?.value.trim()||""});
+      await Promise.all(techniqueTextFields.map(field=>
+        saveHeroText(techniqueContentKey(item,field),values[field])
+      ));
+      techniqueTextFields.forEach(field=>{
+        technikContentCache[techniqueContentKey(item,field)]=values[field];
+      });
+      heading.textContent=values.name||item.name;
+      categoryLabel.textContent=values.category||item.category;
+      img.alt=values.name||item.name;
+      refreshTechniqueSelectLabels();
+      setStatus(textStatus,"Techniktexte erfolgreich in D1 gespeichert.",true);
+    }catch(error){
+      setStatus(textStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      save.disabled=false;
+    }
+  });
+
+  reload.addEventListener("click",()=>loadTechniqueTexts());
+
+  technikEditor.appendChild(node);
+}
+
+async function loadTechniqueTexts(){
+  if(!technikEditor) return;
+  const current=techniqueBySlug(activeTechnikSlug||technikSelect?.value);
+  const status=technikEditor.querySelector(".technik-text-status");
+  if(!getApi()){
+    technikContentCache={};
+    renderTechniqueEditor(current);
+    const fallbackStatus=technikEditor.querySelector(".technik-text-status");
+    return setStatus(fallbackStatus,"Worker-URL fehlt; Fallback-Texte werden angezeigt.",false);
+  }
+  setStatus(status,"Lade Techniktexte …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    technikContentCache=data.content||{};
+    refreshTechniqueSelectLabels();
+    renderTechniqueEditor(techniqueBySlug(activeTechnikSlug||technikSelect.value));
+    setStatus(technikEditor.querySelector(".technik-text-status"),"Techniktexte geladen.",true);
+  }catch(error){
+    technikContentCache={};
+    renderTechniqueEditor(current);
+    setStatus(technikEditor.querySelector(".technik-text-status"),"CMS-Texte konnten nicht geladen werden; Fallbacks aktiv: "+error.message,false);
+  }
+}
+
+function setupTechniqueEditor(){
+  if(!technikSelect||!technikEditor||!technikEditorTemplate) return;
+  populateTechniqueSelect();
+  const hashSlug=decodeURIComponent(location.hash.replace(/^#/,""));
+  const initial=equipment.some(item=>item.slug===hashSlug)?hashSlug:equipment[0].slug;
+  activeTechnikSlug=initial;
+  technikSelect.value=initial;
+  renderTechniqueEditor(techniqueBySlug(initial));
+
+  technikSelect.addEventListener("change",()=>{
+    activeTechnikSlug=technikSelect.value;
+    history.replaceState(null,"","#"+encodeURIComponent(activeTechnikSlug));
+    renderTechniqueEditor(techniqueBySlug(activeTechnikSlug));
+  });
+
+  loadTechniqueTexts();
+}
+
 function renderCollection(target, items){
   if(!target) return;
   target.innerHTML="";
@@ -1861,6 +2079,7 @@ function render(){
 }
 
 render();
+setupTechniqueEditor();
 setupServiceFlyover();
 loadHeroTexts();
 loadServiceTexts();
