@@ -94,7 +94,7 @@
       <a class="btn primary" id="newTicket" target="_blank" rel="noopener">+ Ticket erstellen</a>
       <button class="btn" id="githubAuth" type="button">GitHub verbinden</button>
       <button class="btn" id="refresh" type="button">↻ Aktualisieren</button>
-      <a class="btn" href="https://github.com/SebMut/Smartwerk-Presentation/issues?q=is%3Aissue%20label%3A%22gudelius-beta%22" target="_blank" rel="noopener">GitHub Issues ↗</a>
+      <a class="btn" href="https://github.com/GudVerm/website/issues?q=is%3Aissue%20label%3A%22gudelius-beta%22" target="_blank" rel="noopener">GitHub Issues ↗</a>
     </div>
   </div>
 </header>
@@ -135,7 +135,7 @@
     <div class="auth-body">
       <ol>
         <li>Erstelle bei GitHub einen <strong>Fine-grained personal access token</strong>.</li>
-        <li>Repository access: nur <code>SebMut/Smartwerk-Presentation</code>.</li>
+        <li>Repository access: nur <code>GudVerm/website</code>.</li>
         <li>Repository permissions → <strong>Issues: Read and write</strong>. Weitere Schreibrechte sind nicht nötig.</li>
         <li>Token unten einfügen. Er wird nur in <strong>sessionStorage</strong> dieses Browser-Tabs gespeichert.</li>
       </ol>
@@ -159,8 +159,8 @@
 
 <script>
 (() => {
-  const OWNER = 'SebMut';
-  const REPO = 'Smartwerk-Presentation';
+  const OWNER = 'GudVerm';
+  const REPO = 'website';
   const API_BASE = 'https://api.github.com/repos/' + OWNER + '/' + REPO;
   const DATA_URL = './data.json';
   const TOKEN_KEY = 'gudelius-kanban-github-token';
