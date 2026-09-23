@@ -2412,6 +2412,7 @@ function renderCollection(target, items){
 
     reset.addEventListener("click",async()=>{
       if(!getApi()||!getToken()) return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);
+      if(!confirm("Cloudflare-Bild „"+item.name+"“ löschen? Danach wird der hinterlegte Fallback angezeigt.")) return;
       reset.disabled=true;
       setStatus(status,"Lösche Cloudflare-Bild …");
       try{
