@@ -143,6 +143,7 @@ const reloadContactTexts=document.getElementById("reloadContactTexts");
 const contactTextStatus=document.getElementById("contactTextStatus");
 
 const serviceContactTextFields={
+  "kontakt/service-eyebrow":document.getElementById("contactServiceEyebrow"),
   "kontakt/ingenieurvermessung/title":document.getElementById("contactEngineerTitle"),
   "kontakt/ingenieurvermessung/lead":document.getElementById("contactEngineerLead"),
   "kontakt/ingenieurvermessung/subject":document.getElementById("contactEngineerSubject"),
@@ -438,6 +439,7 @@ const contactTextDefaults={
 };
 
 const serviceContactTextDefaults={
+  "kontakt/service-eyebrow":"Projektanfrage",
   "kontakt/ingenieurvermessung/title":"Ingenieurvermessung für Ihr Projekt anfragen.",
   "kontakt/ingenieurvermessung/lead":"Kurze Eckdaten zu Projekt, Ort und gewünschter Leistung reichen für den ersten Austausch.",
   "kontakt/ingenieurvermessung/subject":"Anfrage Ingenieurvermessung",
