@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Verbindung · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20260923-18">
+</head>
+<body data-admin-page="verbindung">
+  <header class="admin-header">
+    <div>
+      <span class="kicker">GudeliusVermessung</span>
+      <h1>Website-Admin</h1>
+    </div>
+    <div class="admin-header-actions">
+      <a class="ghost" href="./">Übersicht</a>
+      <a class="ghost" href="../">Website öffnen ↗</a>
+    </div>
+  </header>
+
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link active" data-page="verbindung" href="./verbindung/">Verbindung</a>
+      <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+      <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+      <a class="admin-nav-link" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+      <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+      <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+      <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen <span class="nav-count" id="inquiryNavCount" hidden>0</span></a>
+      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    </div>
+  </nav>
+
+  <main class="wrap admin-page-wrap">
+    <section class="admin-section" id="verbindung">
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Verbindung</span>
+          <h2>Cloudflare CMS</h2>
+        </div>
+        <p>Hier wird die Verbindung zwischen Admin-Oberfläche und Cloudflare Worker verwaltet.</p>
+      </section>
+
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Zugang</span>
+            <h3>Worker & Admin-Token</h3>
+            <p>Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.</p>
+          </div>
+        </div>
+
+        <div class="connection-form">
+          <label>Worker-URL
+            <input id="apiUrl" type="url" placeholder="https://gudelius-cms.DEIN-ACCOUNT.workers.dev">
+          </label>
+          <label>Admin-Token
+            <input id="adminToken" type="password" placeholder="CMS_ADMIN_TOKEN">
+          </label>
+          <div class="actions">
+            <button id="saveConnection" type="button">Verbinden</button>
+            <button id="testConnection" class="secondary" type="button">Verbindung testen</button>
+          </div>
+          <div id="connectionStatus" class="status">Noch nicht verbunden.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="equipmentTemplate">
+    <article class="equipment-card">
+      <div class="image-wrap">
+        <img alt="">
+        <span class="badge">Bild</span>
+      </div>
+      <div class="card-body">
+        <h3></h3>
+        <p class="detail"></p>
+        <label class="file-label">
+          <span>Neues Bild auswählen</span>
+          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+        </label>
+        <div class="card-actions">
+          <button class="upload" type="button">Bild hochladen</button>
+          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+        </div>
+        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./config.js?v=20260923-18"></script>
+  <script src="./admin.js?v=20260923-18"></script>
+</body>
+</html>
