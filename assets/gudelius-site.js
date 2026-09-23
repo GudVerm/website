@@ -214,6 +214,49 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     }
   };
+
+  const equipmentFallbackBySlug = new Map(Object.values(equipmentData).flatMap(group=>group.devices).map(device=>[device.slug,{...device}]));
+  const equipmentGroupKeys = {'Außendienst':'aussendienst','3D & Drohne':'digital','Programme & Arbeitsplatz':'software'};
+  function escapeEquipmentHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+  function equipmentFallbackImage(group){if(group==='3D & Drohne')return 'assets/dummy-3d-01.svg';if(group==='Programme & Arbeitsplatz')return 'assets/dummy-software-01.svg';return 'assets/dummy-aussendienst-01.svg'}
+  function equipmentCmsValue(content,slug,field,fallback=''){const value=content['technik/'+slug+'/'+field];return typeof value==='string'?value:fallback}
+  function renderDynamicEquipmentOverview(){
+    document.querySelectorAll('.equip-open[data-equipment]').forEach(card=>{
+      const group=equipmentData[card.dataset.equipment];if(!group)return;
+      const devices=group.devices||[];card.hidden=!devices.length;if(!devices.length)return;
+      const main=card.querySelector(':scope > img');
+      if(main){const first=devices[0];delete main.dataset.cmsApplied;main.src=first.image;main.dataset.cmsMedia=first.mediaKey;main.alt=first.name}
+      const list=card.querySelector('.equip-copy ul');
+      if(list){list.innerHTML='';devices.forEach(device=>{const li=document.createElement('li');li.textContent=device.name;list.appendChild(li)})}
+      const strip=card.querySelector('.equip-preview-strip');
+      if(strip){strip.innerHTML='';devices.forEach(device=>{const img=document.createElement('img');img.src=device.image;img.dataset.cmsMedia=device.mediaKey;img.alt=device.name;img.loading='lazy';img.decoding='async';strip.appendChild(img)})}
+      applyCmsMedia(card);
+    });
+  }
+  async function loadDynamicTechnique(){
+    if(!cmsApi||!document.querySelector('.equip-open[data-equipment]'))return;
+    try{
+      const response=await fetch(cmsApi+'/api/site');if(!response.ok)return;
+      const data=await response.json(),content=data.content||{},manifest=content['technik/index'];
+      if(!Array.isArray(manifest)||!manifest.length)return;
+      const grouped={aussendienst:[],digital:[],software:[]};
+      manifest.filter(entry=>entry&&typeof entry.slug==='string'&&entry.visible!==false&&entry.archived!==true)
+        .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)).forEach(entry=>{
+          const groupKey=equipmentGroupKeys[entry.group];if(!groupKey)return;
+          const base=equipmentFallbackBySlug.get(entry.slug)||{};
+          grouped[groupKey].push({...base,slug:entry.slug,
+            name:equipmentCmsValue(content,entry.slug,'name',base.name||entry.slug),
+            category:equipmentCmsValue(content,entry.slug,'category',base.category||''),
+            manufacturer:equipmentCmsValue(content,entry.slug,'manufacturer',base.manufacturer||''),
+            model:equipmentCmsValue(content,entry.slug,'model',base.model||''),
+            description:equipmentCmsValue(content,entry.slug,'description',base.description||''),
+            details:equipmentCmsValue(content,entry.slug,'details',base.details||''),
+            image:base.image||equipmentFallbackImage(entry.group),mediaKey:'equipment/'+entry.slug,source:base.source||'',sourceLabel:base.sourceLabel||''});
+        });
+      Object.entries(grouped).forEach(([key,devices])=>{equipmentData[key].devices=devices});renderDynamicEquipmentOverview();
+    }catch(error){console.warn('Dynamische Technik konnte nicht geladen werden; Fallback bleibt aktiv.',error)}
+  }
+
   function openEquipmentModal(key) {
     if (!equipmentModal || !equipmentData[key]) return;
     const data = equipmentData[key];
@@ -227,17 +270,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const cmsBase = 'technik/' + device.slug;
         return `
           <article class="equipment-device-card" data-technique="${device.slug}">
-            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${device.name} Platzhalterbild" loading="lazy" decoding="async" fetchpriority="low">
+            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${escapeEquipmentHtml(device.name)} Platzhalterbild" loading="lazy" decoding="async" fetchpriority="low">
             <div class="equipment-device-copy">
-              <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${device.category}</span>
-              <strong data-cms-text="${cmsBase}/name">${device.name}</strong>
+              <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${escapeEquipmentHtml(device.category)}</span>
+              <strong data-cms-text="${cmsBase}/name">${escapeEquipmentHtml(device.name)}</strong>
               <dl class="equipment-device-meta">
-                <div><dt>Hersteller</dt><dd data-cms-text="${cmsBase}/manufacturer">${device.manufacturer}</dd></div>
-                <div><dt>Modell</dt><dd data-cms-text="${cmsBase}/model">${device.model}</dd></div>
+                <div><dt>Hersteller</dt><dd data-cms-text="${cmsBase}/manufacturer">${escapeEquipmentHtml(device.manufacturer)}</dd></div>
+                <div><dt>Modell</dt><dd data-cms-text="${cmsBase}/model">${escapeEquipmentHtml(device.model)}</dd></div>
               </dl>
-              <p class="equipment-device-description" data-cms-text="${cmsBase}/description">${device.description}</p>
-              <p class="equipment-device-details"><b>Besonderheiten</b><span data-cms-text="${cmsBase}/details">${device.details}</span></p>
-              <a class="equipment-source" href="${device.source}" target="_blank" rel="noopener">Bildquelle: ${device.sourceLabel} ↗</a>
+              <p class="equipment-device-description" data-cms-text="${cmsBase}/description">${escapeEquipmentHtml(device.description)}</p>
+              <p class="equipment-device-details"><b>Besonderheiten</b><span data-cms-text="${cmsBase}/details">${escapeEquipmentHtml(device.details)}</span></p>
+              ${device.source ? `<a class="equipment-source" href="${escapeEquipmentHtml(device.source)}" target="_blank" rel="noopener">Bildquelle: ${escapeEquipmentHtml(device.sourceLabel)} ↗</a>` : ''}
             </div>
           </article>
         `;
@@ -267,6 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  loadDynamicTechnique();
 
   if (equipmentClose) equipmentClose.addEventListener('click', closeEquipmentModal);
 

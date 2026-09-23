@@ -40,7 +40,7 @@
           <span class="kicker">Technik</span>
           <h2>Geräte & Software</h2>
         </div>
-        <p>Alle 13 Technik-Einträge werden einzeln gepflegt. Bild und zugehörige Texte bleiben dabei immer in derselben Editor-Ansicht.</p>
+        <p>Geräte und Software werden als erweiterbare Sammlung gepflegt. Die 13 bestehenden Einträge bleiben als sichere Fallback-Basis erhalten.</p>
       </section>
 
       <section class="cms-subpanel technik-picker">
@@ -57,10 +57,16 @@
             <span>Gerät / Software</span>
             <select id="technikSelect" aria-label="Technik-Eintrag auswählen"></select>
           </label>
-          <div class="technik-picker-hint">
-            <strong>D1 + R2</strong>
-            <span>6 Textfelder · 1 Bild je Eintrag</span>
+          <button id="technikAddButton" class="collection-add" type="button">+ Neues Gerät / Software</button>
+          <div class="technik-picker-hint"><strong>D1 + R2</strong><span>Dynamische Sammlung · Fallback bleibt erhalten</span></div>
+        </div>
+        <div id="technikCreatePanel" class="collection-create-panel" hidden>
+          <div class="form-editor-block-head"><strong>Neuen Technik-Eintrag anlegen</strong><span>Der Slug wird einmalig automatisch erzeugt.</span></div>
+          <div class="text-editor-grid">
+            <label><span>Anzeigename</span><input id="technikCreateName" type="text" maxlength="140" placeholder="z. B. Trimble X9"></label>
+            <label><span>Gruppe</span><select id="technikCreateGroup"><option>Außendienst</option><option>3D &amp; Drohne</option><option>Programme &amp; Arbeitsplatz</option></select></label>
           </div>
+          <div class="text-editor-actions"><button id="technikCreateSave" type="button">Eintrag anlegen</button><button id="technikCreateCancel" class="secondary" type="button">Abbrechen</button><span id="technikCreateStatus" class="status"></span></div>
         </div>
       </section>
 
@@ -75,7 +81,8 @@
         <div>
           <span class="kicker technik-editor-category">Kategorie</span>
           <h3 class="technik-editor-name">Technik</h3>
-          <p>Bild und Texte dieses Eintrags werden gemeinsam bearbeitet. Leere oder nicht erreichbare CMS-Werte fallen auf die im Projekt hinterlegten Standardtexte zurück.</p>
+          <p>Bild, Texte und Veröffentlichungsstatus dieses Eintrags werden gemeinsam bearbeitet. Bestehende Slugs bleiben stabil.</p>
+          <div class="collection-status-row"><span class="collection-status technik-visible-badge">Sichtbar</span><span class="collection-status is-archive technik-archive-badge" hidden>Archiviert</span><span class="collection-status is-dirty technik-dirty-badge" hidden>Ungespeicherte Änderungen</span></div>
         </div>
       </div>
 
@@ -104,10 +111,8 @@
 
         <section class="text-editor-panel technik-text-panel" aria-label="Techniktexte">
           <div class="text-editor-grid">
-            <label>
-              <span>Anzeigename</span>
-              <input type="text" data-technique-field="name">
-            </label>
+            <label><span>Anzeigename</span><input type="text" data-technique-field="name" maxlength="140"></label>
+            <label><span>Gruppe</span><select data-technique-meta="group"></select></label>
             <label>
               <span>Kategorie / Kurzbezeichnung</span>
               <input type="text" data-technique-field="category">
@@ -129,10 +134,10 @@
               <textarea rows="4" data-technique-field="details"></textarea>
             </label>
           </div>
-          <div class="text-editor-actions technik-text-actions">
-            <button class="technik-save" type="button">Texte speichern</button>
-            <button class="technik-reload secondary" type="button">Neu laden</button>
-            <span class="technik-text-status status">Fallback-Texte werden angezeigt.</span>
+          <div class="text-editor-actions technik-text-actions"><button class="technik-save" type="button">Eintrag speichern</button><button class="technik-reload secondary" type="button">Neu laden</button><span class="technik-text-status status">Fallback-Texte werden angezeigt.</span></div>
+          <div class="collection-actions">
+            <div class="collection-order"><span>Reihenfolge <b class="technik-order">1</b></span><button class="technik-up secondary" type="button" aria-label="Nach oben verschieben">↑</button><button class="technik-down secondary" type="button" aria-label="Nach unten verschieben">↓</button></div>
+            <button class="technik-visibility secondary" type="button">Ausblenden</button><button class="technik-duplicate secondary" type="button">Duplizieren</button><button class="technik-archive danger-soft" type="button">Archivieren</button><button class="technik-delete danger" type="button" hidden>Endgültig löschen</button>
           </div>
         </section>
       </div>

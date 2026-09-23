@@ -1,4 +1,4 @@
-const equipment = [
+const defaultEquipment = [
   { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/equipment-trimble-sx12.svg" },
   { slug:"trimble-s6", group:"Außendienst", key:"equipment/trimble-s6", name:"Trimble S6", category:"Robotik-Totalstation", detail:"Robotik-Totalstation", manufacturer:"Trimble", model:"S6", description:"Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.", details:"Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.", fallback:"../assets/equipment-trimble-s6.svg" },
   { slug:"trimble-r2", group:"Außendienst", key:"equipment/trimble-r2", name:"Trimble R2 GNSS-Empfänger", category:"GNSS-Positionierung", detail:"GNSS-Positionierung", manufacturer:"Trimble", model:"R2", description:"GNSS-Empfänger für präzise Positionsbestimmung bei Aufnahme und Absteckung.", details:"RTK- und GNSS-gestützte Vermessung für flexible Punktaufnahme im Projektumfeld.", fallback:"../assets/equipment-trimble-r2.svg" },
@@ -13,6 +13,7 @@ const equipment = [
   { slug:"metashape", group:"Programme & Arbeitsplatz", key:"equipment/metashape", name:"Agisoft Metashape", category:"Photogrammetrie", detail:"Photogrammetrie", manufacturer:"Agisoft", model:"Metashape", description:"Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.", details:"Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.", fallback:"../assets/equipment-metashape.svg" },
   { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" }
 ];
+let equipment=defaultEquipment.map((item,index)=>({...item,order:index+1,visible:true,archived:false}));
 
 const projects = [
   { key:"projects/ingenieur-bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg" },
@@ -80,6 +81,13 @@ const technikEditor=document.getElementById("technikEditor");
 const technikEditorTemplate=document.getElementById("technikEditorTemplate");
 let technikContentCache={};
 let activeTechnikSlug="";
+const technikAddButton=document.getElementById("technikAddButton");
+const technikCreatePanel=document.getElementById("technikCreatePanel");
+const technikCreateName=document.getElementById("technikCreateName");
+const technikCreateGroup=document.getElementById("technikCreateGroup");
+const technikCreateSave=document.getElementById("technikCreateSave");
+const technikCreateCancel=document.getElementById("technikCreateCancel");
+const technikCreateStatus=document.getElementById("technikCreateStatus");
 const inquiriesList=document.getElementById("inquiriesList");
 const inquiriesStatus=document.getElementById("inquiriesStatus");
 const inquiryFilter=document.getElementById("inquiryFilter");
@@ -1770,38 +1778,93 @@ function setStatus(el,text,ok){
 
 
 const techniqueTextFields=["name","category","manufacturer","model","description","details"];
+const techniqueManifestKey="technik/index";
+const techniqueGroups=["Außendienst","3D & Drohne","Programme & Arbeitsplatz"];
 
 function techniqueContentKey(item,field){
   return "technik/"+item.slug+"/"+field;
 }
-
 function techniqueValue(item,field){
   const value=technikContentCache[techniqueContentKey(item,field)];
   return typeof value==="string" ? value : (item[field]||"");
 }
-
 function techniqueBySlug(slug){
-  return equipment.find(item=>item.slug===slug)||equipment[0];
+  return equipment.find(item=>item.slug===slug)||equipment[0]||null;
 }
-
+function techniqueFallbackForGroup(group){
+  if(group==="3D & Drohne") return "../assets/dummy-3d-01.svg";
+  if(group==="Programme & Arbeitsplatz") return "../assets/dummy-software-01.svg";
+  return "../assets/dummy-aussendienst-01.svg";
+}
+function normalizeTechniqueManifest(raw){
+  if(!Array.isArray(raw)||!raw.length){
+    return defaultEquipment.map((item,index)=>({slug:item.slug,group:item.group,order:index+1,visible:true,archived:false}));
+  }
+  const seen=new Set();
+  return raw.filter(entry=>entry&&typeof entry.slug==="string"&&entry.slug.trim()).map((entry,index)=>({
+    slug:entry.slug.trim(),
+    group:techniqueGroups.includes(entry.group)?entry.group:"Außendienst",
+    order:Number.isFinite(Number(entry.order))?Number(entry.order):index+1,
+    visible:entry.visible!==false,
+    archived:entry.archived===true
+  })).filter(entry=>{
+    if(seen.has(entry.slug)) return false;
+    seen.add(entry.slug);
+    return true;
+  }).sort((a,b)=>a.order-b.order);
+}
+function applyTechniqueManifest(raw){
+  const manifest=normalizeTechniqueManifest(raw);
+  equipment=manifest.map((entry,index)=>{
+    const fallback=defaultEquipment.find(item=>item.slug===entry.slug);
+    return {
+      ...(fallback||{slug:entry.slug,name:entry.slug,category:"",detail:"",manufacturer:"",model:"",description:"",details:"",fallback:techniqueFallbackForGroup(entry.group)}),
+      slug:entry.slug,key:"equipment/"+entry.slug,group:entry.group,order:index+1,visible:entry.visible,archived:entry.archived
+    };
+  });
+}
+function techniqueManifest(){
+  return equipment.map((item,index)=>({slug:item.slug,group:item.group,order:index+1,visible:item.visible!==false,archived:item.archived===true}));
+}
+async function saveTechniqueManifest(){
+  const manifest=techniqueManifest();
+  await saveHeroText(techniqueManifestKey,manifest);
+  technikContentCache[techniqueManifestKey]=manifest;
+}
+function slugifyTechnique(value){
+  return String(value||"").trim().toLowerCase()
+    .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"").slice(0,72);
+}
+function uniqueTechniqueSlug(name){
+  const base=slugifyTechnique(name)||"technik";
+  let slug=base,index=2;
+  const used=new Set(equipment.map(item=>item.slug));
+  while(used.has(slug)) slug=base+"-"+index++;
+  return slug;
+}
 function refreshTechniqueSelectLabels(){
   if(!technikSelect) return;
   [...technikSelect.querySelectorAll("option[data-technik-slug]")].forEach(option=>{
     const item=techniqueBySlug(option.dataset.technikSlug);
+    if(!item) return;
     const index=equipment.indexOf(item)+1;
-    const name=techniqueValue(item,"name").trim()||item.name;
-    option.textContent=String(index).padStart(2,"0")+" · "+name;
+    const name=techniqueValue(item,"name").trim()||item.name||item.slug;
+    const status=item.archived?" · Archiv":(item.visible===false?" · Ausgeblendet":"");
+    option.textContent=String(index).padStart(2,"0")+" · "+name+status;
   });
 }
-
 function populateTechniqueSelect(){
   if(!technikSelect) return;
+  const current=activeTechnikSlug||technikSelect.value;
   technikSelect.innerHTML="";
-  const groups=[...new Set(equipment.map(item=>item.group))];
-  groups.forEach(group=>{
+  techniqueGroups.forEach(group=>{
+    const items=equipment.filter(item=>item.group===group);
+    if(!items.length) return;
     const optgroup=document.createElement("optgroup");
     optgroup.label=group;
-    equipment.filter(item=>item.group===group).forEach(item=>{
+    items.forEach(item=>{
       const option=document.createElement("option");
       option.value=item.slug;
       option.dataset.technikSlug=item.slug;
@@ -1810,8 +1873,24 @@ function populateTechniqueSelect(){
     technikSelect.appendChild(optgroup);
   });
   refreshTechniqueSelectLabels();
+  const next=equipment.some(item=>item.slug===current)?current:(equipment[0]?.slug||"");
+  technikSelect.value=next;
+  activeTechnikSlug=next;
 }
-
+function setTechniqueDirty(card,dirty=true){
+  const badge=card?.querySelector(".technik-dirty-badge");
+  if(badge) badge.hidden=!dirty;
+}
+async function deleteTechniqueContent(item){
+  const headers={"authorization":"Bearer "+getToken()};
+  for(const field of techniqueTextFields){
+    const response=await fetch(contentUrl(techniqueContentKey(item,field)),{method:"DELETE",headers});
+    if(!response.ok&&response.status!==404){
+      const data=await response.json().catch(()=>({}));
+      throw new Error(data.error||("HTTP "+response.status));
+    }
+  }
+}
 function renderTechniqueEditor(item){
   if(!technikEditor||!technikEditorTemplate||!item) return;
   activeTechnikSlug=item.slug;
@@ -1830,154 +1909,191 @@ function renderTechniqueEditor(item){
   const save=node.querySelector(".technik-save");
   const reload=node.querySelector(".technik-reload");
   const textStatus=node.querySelector(".technik-text-status");
+  const groupField=node.querySelector('[data-technique-meta="group"]');
+  const visibilityButton=node.querySelector(".technik-visibility");
+  const archiveButton=node.querySelector(".technik-archive");
+  const duplicateButton=node.querySelector(".technik-duplicate");
+  const moveUp=node.querySelector(".technik-up");
+  const moveDown=node.querySelector(".technik-down");
+  const permanentDelete=node.querySelector(".technik-delete");
+  const visibleBadge=node.querySelector(".technik-visible-badge");
+  const archiveBadge=node.querySelector(".technik-archive-badge");
+  const orderLabel=node.querySelector(".technik-order");
   const fields={};
 
+  techniqueGroups.forEach(group=>{
+    const option=document.createElement("option");
+    option.value=group; option.textContent=group; groupField.appendChild(option);
+  });
+  groupField.value=item.group;
   techniqueTextFields.forEach(field=>{
     const input=node.querySelector('[data-technique-field="'+field+'"]');
-    if(input){
-      input.value=techniqueValue(item,field);
-      fields[field]=input;
-    }
+    if(input){input.value=techniqueValue(item,field);fields[field]=input;input.addEventListener("input",()=>setTechniqueDirty(card,true));}
   });
+  groupField.addEventListener("change",()=>setTechniqueDirty(card,true));
 
-  const displayName=techniqueValue(item,"name").trim()||item.name;
-  const displayCategory=techniqueValue(item,"category").trim()||item.category;
-  heading.textContent=displayName;
-  categoryLabel.textContent=displayCategory;
+  const displayName=techniqueValue(item,"name").trim()||item.name||item.slug;
+  const displayCategory=techniqueValue(item,"category").trim()||item.category||"Technik";
+  heading.textContent=displayName; categoryLabel.textContent=displayCategory;
   indexLabel.textContent=String(equipment.indexOf(item)+1).padStart(2,"0");
-  mediaKey.textContent=item.key;
-  card.dataset.technikSlug=item.slug;
+  mediaKey.textContent=item.key; orderLabel.textContent=String(equipment.indexOf(item)+1); card.dataset.technikSlug=item.slug;
+  visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";
+  visibleBadge.classList.toggle("is-off",item.visible===false);
+  archiveBadge.hidden=!item.archived;
+  archiveButton.textContent=item.archived?"Aus Archiv holen":"Archivieren";
+  visibilityButton.textContent=item.visible===false?"Einblenden":"Ausblenden";
+  permanentDelete.hidden=!item.archived;
+  moveUp.disabled=equipment.indexOf(item)===0;
+  moveDown.disabled=equipment.indexOf(item)===equipment.length-1;
 
-  img.src=getApi()?mediaUrl(item.key):item.fallback;
-  img.alt=displayName;
+  img.src=getApi()?mediaUrl(item.key):item.fallback; img.alt=displayName;
   img.onerror=()=>{img.onerror=null;img.src=item.fallback};
 
   file.addEventListener("change",()=>{
-    const selected=file.files?.[0];
-    if(!selected) return;
-    img.src=URL.createObjectURL(selected);
-    setStatus(mediaStatus,selected.name+" ausgewählt.");
+    const selected=file.files?.[0]; if(!selected) return;
+    img.src=URL.createObjectURL(selected); setStatus(mediaStatus,selected.name+" ausgewählt.");
   });
-
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];
     if(!selected) return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);
     if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
-    upload.disabled=true;
-    setStatus(mediaStatus,"Upload läuft …");
+    upload.disabled=true; setStatus(mediaStatus,"Upload läuft …");
     try{
       const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
-        method:"PUT",
-        headers:{
-          "authorization":"Bearer "+getToken(),
-          "content-type":selected.type||"application/octet-stream",
-          "x-file-name":selected.name
-        },
-        body:selected
+        method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected
       });
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-      img.src=mediaUrl(item.key)+"?v="+Date.now();
-      setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
-    }catch(error){
-      setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false);
-    }finally{
-      upload.disabled=false;
-    }
+      const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+      img.src=mediaUrl(item.key)+"?v="+Date.now(); setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
+    }catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
-
   reset.addEventListener("click",async()=>{
     if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
-    reset.disabled=true;
-    setStatus(mediaStatus,"Lösche Cloudflare-Bild …");
+    if(!confirm("Cloudflare-Bild für „"+displayName+"“ löschen? Der lokale Fallback bleibt erhalten.")) return;
+    reset.disabled=true; setStatus(mediaStatus,"Lösche Cloudflare-Bild …");
     try{
-      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
-        method:"DELETE",
-        headers:{"authorization":"Bearer "+getToken()}
-      });
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-      img.src=item.fallback;
-      file.value="";
-      setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
-    }catch(error){
-      setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false);
-    }finally{
-      reset.disabled=false;
-    }
+      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+      img.src=item.fallback; file.value=""; setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
+    }catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
   });
-
   save.addEventListener("click",async()=>{
     if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
-    save.disabled=true;
-    setStatus(textStatus,"Speichere Techniktexte …");
+    save.disabled=true; setStatus(textStatus,"Speichere Technik …");
     try{
-      const values={};
-      techniqueTextFields.forEach(field=>{values[field]=fields[field]?.value.trim()||""});
-      await Promise.all(techniqueTextFields.map(field=>
-        saveHeroText(techniqueContentKey(item,field),values[field])
-      ));
-      techniqueTextFields.forEach(field=>{
-        technikContentCache[techniqueContentKey(item,field)]=values[field];
-      });
-      heading.textContent=values.name||item.name;
-      categoryLabel.textContent=values.category||item.category;
-      img.alt=values.name||item.name;
-      refreshTechniqueSelectLabels();
-      setStatus(textStatus,"Techniktexte erfolgreich in D1 gespeichert.",true);
-    }catch(error){
-      setStatus(textStatus,"Speichern fehlgeschlagen: "+error.message,false);
-    }finally{
-      save.disabled=false;
-    }
+      const values={}; techniqueTextFields.forEach(field=>{values[field]=fields[field]?.value.trim()||""});
+      item.group=techniqueGroups.includes(groupField.value)?groupField.value:item.group;
+      await Promise.all(techniqueTextFields.map(field=>saveHeroText(techniqueContentKey(item,field),values[field])));
+      techniqueTextFields.forEach(field=>{technikContentCache[techniqueContentKey(item,field)]=values[field]});
+      await saveTechniqueManifest();
+      heading.textContent=values.name||item.name||item.slug; categoryLabel.textContent=values.category||item.category||"Technik"; img.alt=values.name||item.name||item.slug;
+      populateTechniqueSelect(); technikSelect.value=item.slug; setTechniqueDirty(card,false); setStatus(textStatus,"Technik-Eintrag erfolgreich gespeichert.",true);
+    }catch(error){setStatus(textStatus,"Speichern fehlgeschlagen: "+error.message,false)}finally{save.disabled=false}
   });
-
   reload.addEventListener("click",()=>loadTechniqueTexts());
-
+  visibilityButton.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    const old=item.visible; item.visible=item.visible===false;
+    try{
+      await saveTechniqueManifest(); populateTechniqueSelect(); technikSelect.value=item.slug; renderTechniqueEditor(item);
+      setStatus(technikEditor.querySelector(".technik-text-status"),item.visible?"Eintrag ist öffentlich sichtbar.":"Eintrag ist öffentlich ausgeblendet.",true);
+    }catch(error){item.visible=old;setStatus(textStatus,"Sichtbarkeit konnte nicht gespeichert werden: "+error.message,false)}
+  });
+  archiveButton.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!item.archived&&!confirm("„"+displayName+"“ archivieren? Der Eintrag verschwindet von der öffentlichen Website.")) return;
+    const oldArchived=item.archived,oldVisible=item.visible; item.archived=!item.archived; if(item.archived)item.visible=false;
+    try{
+      await saveTechniqueManifest(); populateTechniqueSelect(); technikSelect.value=item.slug; renderTechniqueEditor(item);
+      setStatus(technikEditor.querySelector(".technik-text-status"),item.archived?"Eintrag archiviert.":"Eintrag aus dem Archiv geholt.",true);
+    }catch(error){item.archived=oldArchived;item.visible=oldVisible;setStatus(textStatus,"Archivstatus konnte nicht gespeichert werden: "+error.message,false)}
+  });
+  duplicateButton.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    const copiedName=(techniqueValue(item,"name")||item.name||item.slug)+" Kopie";
+    const slug=uniqueTechniqueSlug(copiedName);
+    const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:false,archived:false,order:equipment.length+1};
+    duplicateButton.disabled=true;
+    try{
+      equipment.push(copy);
+      for(const field of techniqueTextFields){
+        const value=field==="name"?copiedName:techniqueValue(item,field);
+        technikContentCache[techniqueContentKey(copy,field)]=value; await saveHeroText(techniqueContentKey(copy,field),value);
+      }
+      await saveTechniqueManifest(); populateTechniqueSelect(); activeTechnikSlug=slug; technikSelect.value=slug; renderTechniqueEditor(copy);
+      setStatus(technikEditor.querySelector(".technik-text-status"),"Kopie angelegt und zunächst ausgeblendet.",true);
+    }catch(error){equipment=equipment.filter(entry=>entry.slug!==slug);setStatus(textStatus,"Duplizieren fehlgeschlagen: "+error.message,false)}finally{duplicateButton.disabled=false}
+  });
+  const move=async direction=>{
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    const index=equipment.indexOf(item),target=index+direction; if(target<0||target>=equipment.length)return;
+    [equipment[index],equipment[target]]=[equipment[target],equipment[index]];
+    try{
+      await saveTechniqueManifest(); populateTechniqueSelect(); technikSelect.value=item.slug; renderTechniqueEditor(item);
+      setStatus(technikEditor.querySelector(".technik-text-status"),"Reihenfolge gespeichert.",true);
+    }catch(error){[equipment[index],equipment[target]]=[equipment[target],equipment[index]];setStatus(textStatus,"Reihenfolge konnte nicht gespeichert werden: "+error.message,false)}
+  };
+  moveUp.addEventListener("click",()=>move(-1)); moveDown.addEventListener("click",()=>move(1));
+  permanentDelete.addEventListener("click",async()=>{
+    if(!item.archived) return;
+    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!confirm("„"+displayName+"“ endgültig aus dem CMS entfernen? Dieser Schritt kann nicht rückgängig gemacht werden.")) return;
+    permanentDelete.disabled=true;
+    try{
+      const mediaResponse=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      if(!mediaResponse.ok&&mediaResponse.status!==404){const d=await mediaResponse.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mediaResponse.status))}
+      await deleteTechniqueContent(item);
+      equipment=equipment.filter(entry=>entry.slug!==item.slug); techniqueTextFields.forEach(field=>delete technikContentCache[techniqueContentKey(item,field)]);
+      await saveTechniqueManifest(); activeTechnikSlug=equipment[0]?.slug||""; populateTechniqueSelect();
+      if(equipment.length) renderTechniqueEditor(equipment[0]);
+      else technikEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Lege ein neues Gerät oder eine Software an.</p></div>';
+    }catch(error){setStatus(textStatus,"Endgültiges Löschen fehlgeschlagen: "+error.message,false);permanentDelete.disabled=false}
+  });
   technikEditor.appendChild(node);
 }
-
 async function loadTechniqueTexts(){
   if(!technikEditor) return;
-  const current=techniqueBySlug(activeTechnikSlug||technikSelect?.value);
-  const status=technikEditor.querySelector(".technik-text-status");
+  const previousSlug=activeTechnikSlug||technikSelect?.value;
   if(!getApi()){
-    technikContentCache={};
-    renderTechniqueEditor(current);
-    const fallbackStatus=technikEditor.querySelector(".technik-text-status");
-    return setStatus(fallbackStatus,"Worker-URL fehlt; Fallback-Texte werden angezeigt.",false);
+    technikContentCache={}; applyTechniqueManifest(null); populateTechniqueSelect();
+    const current=techniqueBySlug(previousSlug)||equipment[0]; if(current)renderTechniqueEditor(current);
+    return setStatus(technikEditor.querySelector(".technik-text-status"),"Worker-URL fehlt; Fallback-Technik wird angezeigt.",false);
   }
-  setStatus(status,"Lade Techniktexte …");
+  setStatus(technikEditor.querySelector(".technik-text-status"),"Lade Technik …");
   try{
-    const response=await fetch(getApi()+"/api/site");
-    if(!response.ok) throw new Error("HTTP "+response.status);
-    const data=await response.json();
-    technikContentCache=data.content||{};
-    refreshTechniqueSelectLabels();
-    renderTechniqueEditor(techniqueBySlug(activeTechnikSlug||technikSelect.value));
-    setStatus(technikEditor.querySelector(".technik-text-status"),"Techniktexte geladen.",true);
+    const response=await fetch(getApi()+"/api/site"); if(!response.ok)throw new Error("HTTP "+response.status);
+    const data=await response.json(); technikContentCache=data.content||{}; applyTechniqueManifest(technikContentCache[techniqueManifestKey]); populateTechniqueSelect();
+    const current=techniqueBySlug(previousSlug)||equipment[0];
+    if(current){activeTechnikSlug=current.slug;technikSelect.value=current.slug;renderTechniqueEditor(current);setStatus(technikEditor.querySelector(".technik-text-status"),Array.isArray(technikContentCache[techniqueManifestKey])?"Technik-Manifest und Texte geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es in D1 angelegt.",true)}
   }catch(error){
-    technikContentCache={};
-    renderTechniqueEditor(current);
-    setStatus(technikEditor.querySelector(".technik-text-status"),"CMS-Texte konnten nicht geladen werden; Fallbacks aktiv: "+error.message,false);
+    technikContentCache={};applyTechniqueManifest(null);populateTechniqueSelect();const current=techniqueBySlug(previousSlug)||equipment[0];if(current)renderTechniqueEditor(current);
+    setStatus(technikEditor.querySelector(".technik-text-status"),"CMS konnte nicht geladen werden; vollständiger Fallback aktiv: "+error.message,false);
   }
 }
-
+function openTechniqueCreatePanel(){if(!technikCreatePanel)return;technikCreatePanel.hidden=false;technikCreateName.value="";technikCreateGroup.value="Außendienst";setStatus(technikCreateStatus,"");technikCreateName.focus()}
+function closeTechniqueCreatePanel(){if(!technikCreatePanel)return;technikCreatePanel.hidden=true;setStatus(technikCreateStatus,"")}
+async function createTechnique(){
+  const name=technikCreateName?.value.trim()||"",group=technikCreateGroup?.value||"Außendienst";
+  if(!name)return setStatus(technikCreateStatus,"Bitte einen Anzeigenamen eingeben.",false);
+  if(!getApi()||!getToken())return setStatus(technikCreateStatus,"Worker-URL und Admin-Token fehlen.",false);
+  const slug=uniqueTechniqueSlug(name);
+  const item={slug,group:techniqueGroups.includes(group)?group:"Außendienst",key:"equipment/"+slug,name,category:"",detail:"",manufacturer:"",model:"",description:"",details:"",fallback:techniqueFallbackForGroup(group),visible:false,archived:false,order:equipment.length+1};
+  technikCreateSave.disabled=true;setStatus(technikCreateStatus,"Lege Eintrag an …");
+  try{
+    equipment.push(item);const initialValues={name,category:"",manufacturer:"",model:"",description:"",details:""};
+    await Promise.all(techniqueTextFields.map(field=>saveHeroText(techniqueContentKey(item,field),initialValues[field])));
+    Object.entries(initialValues).forEach(([field,value])=>{technikContentCache[techniqueContentKey(item,field)]=value});
+    await saveTechniqueManifest();populateTechniqueSelect();activeTechnikSlug=slug;technikSelect.value=slug;closeTechniqueCreatePanel();renderTechniqueEditor(item);
+    setStatus(technikEditor.querySelector(".technik-text-status"),"Neuer Eintrag angelegt und zunächst ausgeblendet. Ergänze die Angaben und lade ein Bild hoch.",true);history.replaceState(null,"","#"+encodeURIComponent(slug));
+  }catch(error){equipment=equipment.filter(entry=>entry.slug!==slug);setStatus(technikCreateStatus,"Anlegen fehlgeschlagen: "+error.message,false)}finally{technikCreateSave.disabled=false}
+}
 function setupTechniqueEditor(){
-  if(!technikSelect||!technikEditor||!technikEditorTemplate) return;
-  populateTechniqueSelect();
-  const hashSlug=decodeURIComponent(location.hash.replace(/^#/,""));
-  const initial=equipment.some(item=>item.slug===hashSlug)?hashSlug:equipment[0].slug;
-  activeTechnikSlug=initial;
-  technikSelect.value=initial;
-  renderTechniqueEditor(techniqueBySlug(initial));
-
-  technikSelect.addEventListener("change",()=>{
-    activeTechnikSlug=technikSelect.value;
-    history.replaceState(null,"","#"+encodeURIComponent(activeTechnikSlug));
-    renderTechniqueEditor(techniqueBySlug(activeTechnikSlug));
-  });
-
+  if(!technikSelect||!technikEditor||!technikEditorTemplate)return;
+  applyTechniqueManifest(null);populateTechniqueSelect();
+  const hashSlug=decodeURIComponent(location.hash.replace(/^#/,""));const initial=equipment.some(item=>item.slug===hashSlug)?hashSlug:equipment[0]?.slug;
+  activeTechnikSlug=initial||"";technikSelect.value=activeTechnikSlug;const initialItem=techniqueBySlug(activeTechnikSlug);if(initialItem)renderTechniqueEditor(initialItem);
+  technikSelect.addEventListener("change",()=>{activeTechnikSlug=technikSelect.value;history.replaceState(null,"","#"+encodeURIComponent(activeTechnikSlug));renderTechniqueEditor(techniqueBySlug(activeTechnikSlug))});
+  technikAddButton?.addEventListener("click",openTechniqueCreatePanel);technikCreateCancel?.addEventListener("click",closeTechniqueCreatePanel);technikCreateSave?.addEventListener("click",createTechnique);
+  technikCreateName?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();createTechnique()}});
   loadTechniqueTexts();
 }
 

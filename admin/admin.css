@@ -986,3 +986,18 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
     aspect-ratio:16/10;
   }
 }
+
+
+/* Schritt 15: dynamische Sammlungsverwaltung Technik */
+.technik-picker-row{grid-template-columns:minmax(0,1fr) auto minmax(220px,.5fr)}
+.collection-add{align-self:end;min-height:48px;background:var(--accent);color:#172026}
+.collection-create-panel{margin-top:18px;padding:18px;border:1px solid #dfe4df;border-radius:15px;background:#f8f9f6}
+.collection-create-panel select,.technik-text-panel select{width:100%;min-height:45px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:#fff;color:var(--ink);font:inherit}
+.collection-status-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.collection-status{display:inline-flex;align-items:center;min-height:26px;padding:4px 9px;border-radius:999px;background:#e5f2e9;color:#25633b;font-size:.65rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+.collection-status.is-off{background:#edf0ed;color:#68757a}.collection-status.is-archive{background:#f5ead6;color:#7d5a17}.collection-status.is-dirty{background:#fff0c2;color:#765b00}
+.collection-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid #e5e9e4}
+.collection-order{display:flex;align-items:center;gap:7px;margin-right:auto}.collection-order span{font-size:.72rem;color:var(--muted);font-weight:800}.collection-order button{min-width:38px;padding:9px}
+button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f352e;color:#fff}.empty-state{text-align:center;padding:42px 24px}
+@media(max-width:920px){.technik-picker-row{grid-template-columns:1fr}.collection-add{width:100%}}
+@media(max-width:620px){.collection-actions{align-items:stretch}.collection-actions>button{flex:1 1 46%}.collection-order{width:100%;margin-right:0}}

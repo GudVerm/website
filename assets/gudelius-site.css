@@ -730,3 +730,7 @@ body.modal-open{overflow:hidden}
 @media(max-width:520px){
   .equipment-device-meta{grid-template-columns:1fr}
 }
+
+
+/* Dynamische Technik: ausgeblendete Gruppen aus dem CMS */
+.equip-card[hidden]{display:none!important}

@@ -194,6 +194,12 @@ export default {
 
           return json({ ok: true, key }, 200, cors);
         }
+
+        if (request.method === "DELETE") {
+          if (!isAuthorized(request, env)) return json({ error: "Unauthorized" }, 401, cors);
+          await env.DB.prepare("DELETE FROM content WHERE key = ?").bind(key).run();
+          return json({ ok: true, key }, 200, cors);
+        }
       }
 
       if (url.pathname.startsWith("/api/media/")) {
