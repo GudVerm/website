@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-7">
+  <link rel="stylesheet" href="./admin.css?v=20260923-8">
 </head>
 <body>
   <header class="admin-header">
@@ -58,6 +58,33 @@
         <p>Dieses Bild erscheint groß im Kopfbereich der Startseite. Das bisherige Bild bleibt als Fallback erhalten.</p>
       </section>
       <section id="startPageGrid" class="equipment-grid" aria-live="polite"></section>
+
+      <section class="section-head">
+        <div>
+          <span class="kicker">Startseitentexte</span>
+          <h2>Hero-Texte bearbeiten</h2>
+        </div>
+        <p>Die drei Texte werden in Cloudflare D1 gespeichert. Ohne CMS-Daten bleiben automatisch die bisherigen Texte sichtbar.</p>
+      </section>
+
+      <section class="panel text-editor-panel">
+        <div class="text-editor-grid">
+          <label>Eyebrow
+            <input id="heroEyebrow" type="text" maxlength="120" placeholder="Vermessung für anspruchsvolle Projekte">
+          </label>
+          <label>Hauptüberschrift
+            <input id="heroTitle" type="text" maxlength="160" placeholder="Von der Planung bis zum Bestand.">
+          </label>
+          <label class="text-editor-wide">Einleitung
+            <textarea id="heroLead" rows="4" maxlength="500" placeholder="Einleitungstext der Startseite"></textarea>
+          </label>
+        </div>
+        <div class="text-editor-actions">
+          <button id="saveHeroTexts" type="button">Texte speichern</button>
+          <button id="reloadHeroTexts" class="secondary" type="button">Neu laden</button>
+          <div id="heroTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
+      </section>
     </section>
 
     <section class="admin-section" id="leistungen">
@@ -138,7 +165,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-7"></script>
-  <script src="./admin.js?v=20260923-7"></script>
+  <script src="./config.js?v=20260923-8"></script>
+  <script src="./admin.js?v=20260923-8"></script>
 </body>
 </html>
