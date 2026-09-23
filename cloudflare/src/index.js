@@ -77,9 +77,25 @@ export default {
              VALUES (?, ?, ?, ?, ?, ?, 'neu', CURRENT_TIMESTAMP)`
           ).bind(id, name, email, subject, message, source).run();
 
+          let notificationSent = false;
+          try {
+            await sendContactNotification(env, {
+              id,
+              name,
+              email,
+              subject,
+              message,
+              source
+            });
+            notificationSent = true;
+          } catch (emailError) {
+            console.error("Kontaktanfrage gespeichert, E-Mail-Benachrichtigung fehlgeschlagen:", emailError);
+          }
+
           return json({
             ok: true,
             id,
+            notificationSent,
             message: "Vielen Dank. Ihre Anfrage wurde übermittelt."
           }, 201, cors);
         }
@@ -249,6 +265,72 @@ export default {
     }
   }
 };
+
+async function sendContactNotification(env, inquiry) {
+  if (!env.CONTACT_EMAIL || !env.CONTACT_EMAIL_FROM) {
+    throw new Error("Email binding or sender is not configured.");
+  }
+
+  const recipient = "gudeliusvermessung@web.de";
+  const adminUrl = "https://gudverm.github.io/website/admin/#anfragen";
+  const subject = `Neue Projektanfrage: ${inquiry.subject}`;
+
+  const text = [
+    "Neue Projektanfrage über gudeliusvermessung.de",
+    "",
+    "Name: " + inquiry.name,
+    "E-Mail: " + inquiry.email,
+    "Betreff: " + inquiry.subject,
+    "Quelle: " + inquiry.source,
+    "",
+    "Nachricht:",
+    inquiry.message,
+    "",
+    "Anfrage-ID: " + inquiry.id,
+    "Im CMS öffnen: " + adminUrl
+  ].join("\n");
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;color:#172026">
+      <div style="background:#172026;color:#fff;padding:22px 26px;border-radius:14px 14px 0 0">
+        <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#e5c533;font-weight:700">GudeliusVermessung</div>
+        <h1 style="font-size:22px;margin:8px 0 0">Neue Projektanfrage</h1>
+      </div>
+      <div style="border:1px solid #dce1dd;border-top:0;padding:26px;border-radius:0 0 14px 14px">
+        <p><strong>Name:</strong> ${escapeHtml(inquiry.name)}</p>
+        <p><strong>E-Mail:</strong> <a href="mailto:${escapeHtml(inquiry.email)}">${escapeHtml(inquiry.email)}</a></p>
+        <p><strong>Betreff:</strong> ${escapeHtml(inquiry.subject)}</p>
+        <p><strong>Quelle:</strong> ${escapeHtml(inquiry.source)}</p>
+        <div style="margin:22px 0;padding:18px;background:#f5f4ee;border-radius:10px">
+          <strong>Nachricht</strong>
+          <p style="white-space:pre-wrap;line-height:1.6;margin:10px 0 0">${escapeHtml(inquiry.message)}</p>
+        </div>
+        <p style="margin:22px 0 0">
+          <a href="${adminUrl}" style="display:inline-block;background:#172026;color:#fff;text-decoration:none;padding:11px 15px;border-radius:8px;font-weight:700">Anfrage im CMS öffnen</a>
+        </p>
+        <p style="font-size:12px;color:#67757b;margin-top:22px">Anfrage-ID: ${escapeHtml(inquiry.id)}</p>
+      </div>
+    </div>
+  `;
+
+  await env.CONTACT_EMAIL.send({
+    from: env.CONTACT_EMAIL_FROM,
+    to: recipient,
+    replyTo: inquiry.email,
+    subject,
+    text,
+    html
+  });
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 async function ensureContactTable(env) {
   await env.DB.batch([
