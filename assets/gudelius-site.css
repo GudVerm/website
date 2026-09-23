@@ -734,3 +734,8 @@ body.modal-open{overflow:hidden}
 
 /* Dynamische Technik: ausgeblendete Gruppen aus dem CMS */
 .equip-card[hidden]{display:none!important}
+
+
+/* Dynamische Projekte */
+.project-caption{position:absolute;z-index:2;left:18px;right:18px;bottom:16px;color:#fff;display:grid;gap:2px}.project-caption strong{font-size:.88rem}.project-caption small{font-size:.7rem;color:#dce3e5}
+.projects-grid .project[data-featured="true"]:first-child{grid-row:span 2}

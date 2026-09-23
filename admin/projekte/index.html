@@ -36,71 +36,59 @@
   <main class="wrap admin-page-wrap">
     <section class="admin-section" id="projekte">
       <section class="section-head admin-section-head">
-        <div>
-          <span class="kicker">Projekte</span>
-          <h2>Projektkacheln</h2>
-        </div>
-        <p>Bilder und sichtbare Bezeichnungen der sechs Projektkacheln werden getrennt gepflegt.</p>
+        <div><span class="kicker">Projekte</span><h2>Referenzprojekte</h2></div>
+        <p>Referenzen sind eine erweiterbare Sammlung. Bild, Projektangaben, Leistungszuordnung und Sichtbarkeit werden gemeinsam gepflegt.</p>
       </section>
-
-      <section class="cms-subpanel">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">01</span>
-          <div>
-            <span class="kicker">Bilder</span>
-            <h3>Projektbilder</h3>
-            <p>Die sechs Bilder der Projektübersicht auf der Startseite.</p>
-          </div>
+      <section class="cms-subpanel collection-picker">
+        <div class="cms-subpanel-head compact"><span class="cms-subpanel-icon">P</span><div><span class="kicker">Auswahl</span><h3>Projekt auswählen</h3><p>Bestehende sechs Referenzen bleiben als Fallback erhalten; neue Projekte können ohne Code ergänzt werden.</p></div></div>
+        <div class="collection-picker-row">
+          <label><span>Projekt</span><select id="projectSelect"></select></label>
+          <button id="projectAddButton" class="collection-add" type="button">+ Neues Projekt</button>
+          <div class="technik-picker-hint"><strong>D1 + R2</strong><span>Projektmanifest · stabile Slugs</span></div>
         </div>
-        <section id="projectGrid" class="equipment-grid" aria-live="polite"></section>
-      </section>
-
-      <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head">
-          <span class="cms-subpanel-icon">02</span>
-          <div>
-            <span class="kicker">Texte</span>
-            <h3>Projekt-Titel</h3>
-            <p>Nur die sichtbaren Bezeichnungen werden geändert; Reihenfolge und Anzahl bleiben fest.</p>
-          </div>
-        </div>
-
-        <div class="project-title-grid">
-          <label>Projekt 1<input id="project1Title" type="text" maxlength="140"></label>
-          <label>Projekt 2<input id="project2Title" type="text" maxlength="140"></label>
-          <label>Projekt 3<input id="project3Title" type="text" maxlength="140"></label>
-          <label>Projekt 4<input id="project4Title" type="text" maxlength="140"></label>
-          <label>Projekt 5<input id="project5Title" type="text" maxlength="140"></label>
-          <label>Projekt 6<input id="project6Title" type="text" maxlength="140"></label>
-        </div>
-
-        <div class="text-editor-actions contact-save-actions">
-          <button id="saveProjectTitles" type="button">Projekt-Titel speichern</button>
-          <button id="reloadProjectTitles" class="secondary" type="button">Neu laden</button>
-          <div id="projectTitleStatus" class="status">Noch keine CMS-Titel geladen.</div>
+        <div id="projectCreatePanel" class="collection-create-panel" hidden>
+          <div class="form-editor-block-head"><strong>Neues Projekt anlegen</strong><span>Der Slug wird einmalig aus dem Titel erzeugt.</span></div>
+          <div class="text-editor-grid single-column"><label><span>Projekttitel</span><input id="projectCreateTitle" type="text" maxlength="160" placeholder="z. B. Brückenneubau Isar"></label></div>
+          <div class="text-editor-actions"><button id="projectCreateSave" type="button">Projekt anlegen</button><button id="projectCreateCancel" class="secondary" type="button">Abbrechen</button><span id="projectCreateStatus" class="status"></span></div>
         </div>
       </section>
+      <section id="projectEditor" class="technik-editor-host" aria-live="polite"></section>
     </section>
   </main>
 
-  <template id="equipmentTemplate">
-    <article class="equipment-card">
-      <div class="image-wrap">
-        <img alt="">
-        <span class="badge">Bild</span>
-      </div>
-      <div class="card-body">
-        <h3></h3>
-        <p class="detail"></p>
-        <label class="file-label">
-          <span>Neues Bild auswählen</span>
-          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
-        </label>
-        <div class="card-actions">
-          <button class="upload" type="button">Bild hochladen</button>
-          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+  <template id="projectEditorTemplate">
+    <article class="cms-subpanel project-editor-card">
+      <div class="cms-subpanel-head technik-editor-head">
+        <span class="cms-subpanel-icon project-editor-index">01</span>
+        <div><span class="kicker">Referenz</span><h3 class="project-editor-name">Projekt</h3><p>Bild und fachliche Projektdaten bleiben in einer gemeinsamen Editoransicht.</p>
+          <div class="collection-status-row"><span class="collection-status project-visible-badge">Sichtbar</span><span class="collection-status is-archive project-archive-badge" hidden>Archiviert</span><span class="collection-status is-dirty project-dirty-badge" hidden>Ungespeicherte Änderungen</span></div>
         </div>
-        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+      <div class="technik-editor-layout">
+        <section class="technik-media-panel" aria-label="Projektbild">
+          <div class="image-wrap"><img alt=""><span class="badge">R2-Bild</span></div>
+          <div class="technik-media-body">
+            <div class="technik-media-meta"><span>Medienkey</span><code class="project-media-key"></code></div>
+            <label class="file-label"><span>Neues Bild auswählen</span><input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif"></label>
+            <div class="card-actions"><button class="upload" type="button">Bild hochladen</button><button class="reset secondary" type="button">Cloudflare-Bild löschen</button></div>
+            <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+          </div>
+        </section>
+        <section class="text-editor-panel technik-text-panel">
+          <div class="text-editor-grid">
+            <label class="text-editor-wide"><span>Titel</span><input data-project-field="title" type="text" maxlength="160"></label>
+            <label><span>Ort</span><input data-project-field="location" type="text" maxlength="140"></label>
+            <label><span>Jahr</span><input data-project-field="year" type="text" maxlength="20" placeholder="z. B. 2026"></label>
+            <label class="text-editor-wide"><span>Kurzbeschreibung</span><textarea data-project-field="description" rows="4" maxlength="900"></textarea></label>
+            <fieldset class="text-editor-wide collection-fieldset"><legend>Zugeordnete Leistungen</legend><div class="project-services check-option-grid"></div></fieldset>
+            <label class="check-option text-editor-wide"><input data-project-meta="featured" type="checkbox"> Projekt als hervorgehoben markieren</label>
+          </div>
+          <div class="text-editor-actions"><button class="project-save" type="button">Projekt speichern</button><button class="project-reload secondary" type="button">Neu laden</button><span class="project-status status">Fallback-Projekt wird angezeigt.</span></div>
+          <div class="collection-actions">
+            <div class="collection-order"><span>Reihenfolge <b class="project-order">1</b></span><button class="project-up secondary" type="button">↑</button><button class="project-down secondary" type="button">↓</button></div>
+            <button class="project-visibility secondary" type="button">Ausblenden</button><button class="project-duplicate secondary" type="button">Duplizieren</button><button class="project-archive danger-soft" type="button">Archivieren</button><button class="project-delete danger" type="button" hidden>Endgültig löschen</button>
+          </div>
+        </section>
       </div>
     </article>
   </template>

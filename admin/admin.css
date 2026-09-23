@@ -1001,3 +1001,12 @@ a{color:inherit}.admin-header{display:flex;align-items:center;justify-content:sp
 button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f352e;color:#fff}.empty-state{text-align:center;padding:42px 24px}
 @media(max-width:920px){.technik-picker-row{grid-template-columns:1fr}.collection-add{width:100%}}
 @media(max-width:620px){.collection-actions{align-items:stretch}.collection-actions>button{flex:1 1 46%}.collection-order{width:100%;margin-right:0}}
+
+
+/* Schritt 16: dynamische Projekte */
+.collection-picker{margin-bottom:18px}.collection-picker-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(220px,.5fr);gap:16px;align-items:end}
+.collection-picker select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff;color:var(--ink);font:inherit;font-weight:800}
+.project-editor-card{border-top:5px solid var(--ink)}
+.collection-fieldset{margin:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}.collection-fieldset legend{padding:0 6px;font-size:.75rem;font-weight:900}
+.check-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.check-option{display:flex;grid-template-columns:none;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e4e8e4;border-radius:10px;background:#fafaf7;font-size:.78rem;font-weight:800}.check-option input{width:auto}
+@media(max-width:920px){.collection-picker-row{grid-template-columns:1fr}.check-option-grid{grid-template-columns:1fr}}

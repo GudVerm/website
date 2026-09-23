@@ -15,14 +15,15 @@ const defaultEquipment = [
 ];
 let equipment=defaultEquipment.map((item,index)=>({...item,order:index+1,visible:true,archived:false}));
 
-const projects = [
-  { key:"projects/ingenieur-bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg" },
-  { key:"projects/3d-laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png" },
-  { key:"projects/rtk-drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg" },
-  { key:"projects/gelaende-gewaesser", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png/v1/fill/w_980%2Ch_723%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png" },
-  { key:"projects/mobiler-einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" },
-  { key:"projects/bestand-planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg" }
+const defaultProjects = [
+  { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"https://static.wixstatic.com/media/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_eba448583b9c4cde93a373781a5fa8b6~mv2.jpg" },
+  { slug:"3d-laserscanning", key:"projects/3d-laserscanning", title:"3D-Laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["3d-laserscanning"], fallback:"https://static.wixstatic.com/media/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_44c89c41036e46258f57a20400fc64a0~mv2.png" },
+  { slug:"rtk-drohnenvermessung", key:"projects/rtk-drohnenvermessung", title:"RTK-Drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["drohnenvermessung"], fallback:"https://static.wixstatic.com/media/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg/v1/fill/w_300%2Ch_300%2Cq_90%2Cenc_avif%2Cquality_auto/bdad94_a1998bb61ea946aca7d6f19f6643cb07~mv2.jpg" },
+  { slug:"gelaende-gewaesser", key:"projects/gelaende-gewaesser", title:"Gelände & Gewässer", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["gis-bauvermessung"], fallback:"https://static.wixstatic.com/media/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png/v1/fill/w_980%2Ch_723%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png" },
+  { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"https://static.wixstatic.com/media/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg/v1/fill/w_980%2Ch_321%2Cal_c%2Cq_80%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_b3c3899c62854fc2af846e55db7be150~mv2.jpg" },
+  { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"https://static.wixstatic.com/media/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg" }
 ];
+let projects=defaultProjects.map((item,index)=>({...item,order:index+1,visible:true,archived:false,featured:index===0}));
 
 const startPageImages = [
   { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"https://static.wixstatic.com/media/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png/v1/fill/w_980%2Ch_723%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png" }
@@ -158,17 +159,17 @@ const companyTextFields={
 const saveCompanyTexts=document.getElementById("saveCompanyTexts");
 const reloadCompanyTexts=document.getElementById("reloadCompanyTexts");
 const companyTextStatus=document.getElementById("companyTextStatus");
-const projectTitleFields={
-  "projekte/01-title":document.getElementById("project1Title"),
-  "projekte/02-title":document.getElementById("project2Title"),
-  "projekte/03-title":document.getElementById("project3Title"),
-  "projekte/04-title":document.getElementById("project4Title"),
-  "projekte/05-title":document.getElementById("project5Title"),
-  "projekte/06-title":document.getElementById("project6Title")
-};
-const saveProjectTitles=document.getElementById("saveProjectTitles");
-const reloadProjectTitles=document.getElementById("reloadProjectTitles");
-const projectTitleStatus=document.getElementById("projectTitleStatus");
+const projectSelect=document.getElementById("projectSelect");
+const projectEditor=document.getElementById("projectEditor");
+const projectEditorTemplate=document.getElementById("projectEditorTemplate");
+const projectAddButton=document.getElementById("projectAddButton");
+const projectCreatePanel=document.getElementById("projectCreatePanel");
+const projectCreateTitle=document.getElementById("projectCreateTitle");
+const projectCreateSave=document.getElementById("projectCreateSave");
+const projectCreateCancel=document.getElementById("projectCreateCancel");
+const projectCreateStatus=document.getElementById("projectCreateStatus");
+let projectContentCache={};
+let activeProjectSlug="";
 const contactTextFields={
   "kontakt/eyebrow":document.getElementById("contactEyebrow"),
   "kontakt/title":document.getElementById("contactTitle"),
@@ -454,55 +455,171 @@ if(saveCompanyTexts){
 
 if(reloadCompanyTexts) reloadCompanyTexts.addEventListener("click",loadCompanyTexts);
 
-const projectTitleDefaults={
-  "projekte/01-title":"Ingenieur- & Bauvermessung",
-  "projekte/02-title":"3D-Laserscanning",
-  "projekte/03-title":"RTK-Drohnenvermessung",
-  "projekte/04-title":"Gelände & Gewässer",
-  "projekte/05-title":"Mobiler Einsatz",
-  "projekte/06-title":"Bestand & Planung"
-};
+const projectManifestKey="projekte/index";
+const projectFields=["title","description","location","year","services"];
+const projectServiceOptions=[
+  ["ingenieurvermessung","Ingenieurvermessung"],
+  ["gis-bauvermessung","GIS & Bauvermessung"],
+  ["3d-laserscanning","3D-Laserscanning"],
+  ["drohnenvermessung","Drohnenvermessung"]
+];
 
-async function loadProjectTitles(){
-  if(!projectTitleStatus) return;
-  if(!getApi()) return setStatus(projectTitleStatus,"Worker-URL fehlt.",false);
-  setStatus(projectTitleStatus,"Lade Projekt-Titel …");
-  try{
-    const response=await fetch(getApi()+"/api/site");
-    if(!response.ok) throw new Error("HTTP "+response.status);
-    const data=await response.json();
-    const content=data.content||{};
-    Object.entries(projectTitleFields).forEach(([key,field])=>{
-      if(field) field.value=typeof content[key]==="string" ? content[key] : projectTitleDefaults[key];
-    });
-    setStatus(projectTitleStatus,"Projekt-Titel geladen.",true);
-  }catch(error){
-    Object.entries(projectTitleFields).forEach(([key,field])=>{
-      if(field) field.value=projectTitleDefaults[key];
-    });
-    setStatus(projectTitleStatus,"Projekt-Titel konnten nicht geladen werden: "+error.message,false);
-  }
+function projectContentKey(item,field){return "projekte/"+item.slug+"/"+field}
+function projectValue(item,field){
+  const value=projectContentCache[projectContentKey(item,field)];
+  if(field==="services") return Array.isArray(value)?value:(Array.isArray(item.services)?item.services:[]);
+  return typeof value==="string"?value:(item[field]||"");
 }
-
-if(saveProjectTitles){
-  saveProjectTitles.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(projectTitleStatus,"Worker-URL und Admin-Token fehlen.",false);
-    saveProjectTitles.disabled=true;
-    setStatus(projectTitleStatus,"Speichere Projekt-Titel …");
-    try{
-      await Promise.all(Object.entries(projectTitleFields).map(([key,field])=>
-        saveHeroText(key,field.value.trim())
-      ));
-      setStatus(projectTitleStatus,"Projekt-Titel erfolgreich gespeichert.",true);
-    }catch(error){
-      setStatus(projectTitleStatus,"Speichern fehlgeschlagen: "+error.message,false);
-    }finally{
-      saveProjectTitles.disabled=false;
-    }
+function projectFallbackImage(){return "../assets/dummy-aussendienst-02.svg"}
+function projectBySlug(slug){return projects.find(item=>item.slug===slug)||projects[0]||null}
+function normalizeProjectManifest(raw){
+  if(!Array.isArray(raw)||!raw.length){
+    return defaultProjects.map((item,index)=>({slug:item.slug,order:index+1,visible:true,archived:false,featured:index===0}));
+  }
+  const seen=new Set();
+  return raw.filter(entry=>entry&&typeof entry.slug==="string"&&entry.slug.trim()).map((entry,index)=>({
+    slug:entry.slug.trim(),order:Number.isFinite(Number(entry.order))?Number(entry.order):index+1,
+    visible:entry.visible!==false,archived:entry.archived===true,featured:entry.featured===true
+  })).filter(entry=>{if(seen.has(entry.slug))return false;seen.add(entry.slug);return true}).sort((a,b)=>a.order-b.order);
+}
+function applyProjectManifest(raw){
+  projects=normalizeProjectManifest(raw).map((entry,index)=>{
+    const fallback=defaultProjects.find(item=>item.slug===entry.slug);
+    return {...(fallback||{slug:entry.slug,key:"projects/"+entry.slug,title:entry.slug,name:entry.slug,description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage()}),
+      slug:entry.slug,key:"projects/"+entry.slug,order:index+1,visible:entry.visible,archived:entry.archived,featured:entry.featured};
   });
 }
+function projectManifest(){return projects.map((item,index)=>({slug:item.slug,order:index+1,visible:item.visible!==false,archived:item.archived===true,featured:item.featured===true}))}
+async function saveProjectManifest(){const manifest=projectManifest();await saveHeroText(projectManifestKey,manifest);projectContentCache[projectManifestKey]=manifest}
+function slugifyProject(value){
+  return String(value||"").trim().toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,72);
+}
+function uniqueProjectSlug(title){const base=slugifyProject(title)||"projekt";let slug=base,index=2;const used=new Set(projects.map(item=>item.slug));while(used.has(slug))slug=base+"-"+index++;return slug}
+function refreshProjectSelect(){
+  if(!projectSelect)return;
+  const current=activeProjectSlug||projectSelect.value;projectSelect.innerHTML="";
+  projects.forEach((item,index)=>{
+    const option=document.createElement("option");option.value=item.slug;
+    const title=projectValue(item,"title")||item.title||item.slug;
+    option.textContent=String(index+1).padStart(2,"0")+" · "+title+(item.archived?" · Archiv":(item.visible===false?" · Ausgeblendet":""));
+    projectSelect.appendChild(option);
+  });
+  const next=projects.some(item=>item.slug===current)?current:(projects[0]?.slug||"");projectSelect.value=next;activeProjectSlug=next;
+}
+function setProjectDirty(card,dirty=true){const badge=card?.querySelector(".project-dirty-badge");if(badge)badge.hidden=!dirty}
+async function deleteProjectContent(item){
+  const headers={"authorization":"Bearer "+getToken()};
+  for(const field of projectFields){
+    const response=await fetch(contentUrl(projectContentKey(item,field)),{method:"DELETE",headers});
+    if(!response.ok&&response.status!==404){const data=await response.json().catch(()=>({}));throw new Error(data.error||("HTTP "+response.status))}
+  }
+}
+function renderProjectEditor(item){
+  if(!projectEditor||!projectEditorTemplate||!item)return;
+  activeProjectSlug=item.slug;projectEditor.innerHTML="";
+  const node=projectEditorTemplate.content.cloneNode(true),card=node.querySelector(".project-editor-card");
+  const img=node.querySelector("img"),heading=node.querySelector(".project-editor-name"),indexLabel=node.querySelector(".project-editor-index"),mediaKey=node.querySelector(".project-media-key");
+  const file=node.querySelector(".file-input"),upload=node.querySelector(".upload"),reset=node.querySelector(".reset"),mediaStatus=node.querySelector(".card-status");
+  const save=node.querySelector(".project-save"),reload=node.querySelector(".project-reload"),status=node.querySelector(".project-status");
+  const visibility=node.querySelector(".project-visibility"),archive=node.querySelector(".project-archive"),duplicate=node.querySelector(".project-duplicate"),remove=node.querySelector(".project-delete");
+  const up=node.querySelector(".project-up"),down=node.querySelector(".project-down"),visibleBadge=node.querySelector(".project-visible-badge"),archiveBadge=node.querySelector(".project-archive-badge"),orderLabel=node.querySelector(".project-order");
+  const title=node.querySelector('[data-project-field="title"]'),description=node.querySelector('[data-project-field="description"]'),location=node.querySelector('[data-project-field="location"]'),year=node.querySelector('[data-project-field="year"]'),featured=node.querySelector('[data-project-meta="featured"]');
+  const servicesWrap=node.querySelector(".project-services");
+  projectServiceOptions.forEach(([value,label])=>{
+    const l=document.createElement("label");l.className="check-option";const input=document.createElement("input");input.type="checkbox";input.value=value;
+    input.checked=projectValue(item,"services").includes(value);input.addEventListener("change",()=>setProjectDirty(card,true));l.append(input,document.createTextNode(label));servicesWrap.appendChild(l);
+  });
+  title.value=projectValue(item,"title");description.value=projectValue(item,"description");location.value=projectValue(item,"location");year.value=projectValue(item,"year");featured.checked=item.featured===true;
+  [title,description,location,year].forEach(field=>field.addEventListener("input",()=>setProjectDirty(card,true)));featured.addEventListener("change",()=>setProjectDirty(card,true));
+  const displayTitle=title.value||item.title||item.slug;heading.textContent=displayTitle;indexLabel.textContent=String(projects.indexOf(item)+1).padStart(2,"0");mediaKey.textContent=item.key;orderLabel.textContent=String(projects.indexOf(item)+1);
+  visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";visibleBadge.classList.toggle("is-off",item.visible===false);archiveBadge.hidden=!item.archived;
+  visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
+  img.src=getApi()?mediaUrl(item.key):item.fallback;img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  file.addEventListener("change",()=>{const selected=file.files?.[0];if(!selected)return;img.src=URL.createObjectURL(selected);setStatus(mediaStatus,selected.name+" ausgewählt.")});
+  upload.addEventListener("click",async()=>{
+    const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    upload.disabled=true;setStatus(mediaStatus,"Upload läuft …");
+    try{const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected});
+      const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=mediaUrl(item.key)+"?v="+Date.now();setStatus(mediaStatus,"Projektbild gespeichert.",true)}
+    catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
+  });
+  reset.addEventListener("click",async()=>{
+    if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);if(!confirm("Cloudflare-Bild für „"+displayTitle+"“ löschen?"))return;
+    reset.disabled=true;try{const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=item.fallback;file.value="";setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback aktiv.",true)}
+    catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
+  });
+  save.addEventListener("click",async()=>{
+    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);save.disabled=true;setStatus(status,"Speichere Projekt …");
+    try{
+      const values={title:title.value.trim(),description:description.value.trim(),location:location.value.trim(),year:year.value.trim(),services:[...servicesWrap.querySelectorAll('input:checked')].map(i=>i.value)};
+      if(!values.title)throw new Error("Titel darf nicht leer sein.");
+      if(featured.checked){projects.forEach(p=>{p.featured=p.slug===item.slug})}else item.featured=false;
+      for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
+      await saveProjectManifest();heading.textContent=values.title;img.alt=values.title;refreshProjectSelect();projectSelect.value=item.slug;setProjectDirty(card,false);setStatus(status,"Projekt erfolgreich gespeichert.",true);
+    }catch(error){setStatus(status,"Speichern fehlgeschlagen: "+error.message,false)}finally{save.disabled=false}
+  });
+  reload.addEventListener("click",loadProjectsCms);
+  visibility.addEventListener("click",async()=>{
+    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);const old=item.visible;item.visible=item.visible===false;
+    try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),item.visible?"Projekt ist sichtbar.":"Projekt ist ausgeblendet.",true)}
+    catch(error){item.visible=old;setStatus(status,"Sichtbarkeit konnte nicht gespeichert werden: "+error.message,false)}
+  });
+  archive.addEventListener("click",async()=>{
+    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);if(!item.archived&&!confirm("„"+displayTitle+"“ archivieren?"))return;
+    const oldA=item.archived,oldV=item.visible;item.archived=!item.archived;if(item.archived)item.visible=false;
+    try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),item.archived?"Projekt archiviert.":"Projekt reaktiviert.",true)}
+    catch(error){item.archived=oldA;item.visible=oldV;setStatus(status,"Archivstatus konnte nicht gespeichert werden: "+error.message,false)}
+  });
+  duplicate.addEventListener("click",async()=>{
+    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);
+    const copiedTitle=(projectValue(item,"title")||item.title||item.slug)+" Kopie",slug=uniqueProjectSlug(copiedTitle),copy={...item,slug,key:"projects/"+slug,title:copiedTitle,name:copiedTitle,fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
+    duplicate.disabled=true;
+    try{projects.push(copy);for(const field of projectFields){const value=field==="title"?copiedTitle:projectValue(item,field);projectContentCache[projectContentKey(copy,field)]=value;await saveHeroText(projectContentKey(copy,field),value)}
+      await saveProjectManifest();refreshProjectSelect();activeProjectSlug=slug;projectSelect.value=slug;renderProjectEditor(copy);setStatus(projectEditor.querySelector(".project-status"),"Projektkopie angelegt und ausgeblendet.",true)}
+    catch(error){projects=projects.filter(p=>p.slug!==slug);setStatus(status,"Duplizieren fehlgeschlagen: "+error.message,false)}finally{duplicate.disabled=false}
+  });
+  const move=async direction=>{
+    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);const index=projects.indexOf(item),target=index+direction;if(target<0||target>=projects.length)return;
+    [projects[index],projects[target]]=[projects[target],projects[index]];
+    try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),"Reihenfolge gespeichert.",true)}
+    catch(error){[projects[index],projects[target]]=[projects[target],projects[index]];setStatus(status,"Reihenfolge konnte nicht gespeichert werden: "+error.message,false)}
+  };
+  up.addEventListener("click",()=>move(-1));down.addEventListener("click",()=>move(1));
+  remove.addEventListener("click",async()=>{
+    if(!item.archived||!getApi()||!getToken())return;if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;remove.disabled=true;
+    try{const mr=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
+      await deleteProjectContent(item);projects=projects.filter(p=>p.slug!==item.slug);projectFields.forEach(f=>delete projectContentCache[projectContentKey(item,f)]);await saveProjectManifest();activeProjectSlug=projects[0]?.slug||"";refreshProjectSelect();
+      if(projects.length)renderProjectEditor(projects[0]);else projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Lege die erste Referenz an.</p></div>'}
+    catch(error){setStatus(status,"Endgültiges Löschen fehlgeschlagen: "+error.message,false);remove.disabled=false}
+  });
+  projectEditor.appendChild(node);
+}
+async function loadProjectsCms(){
+  if(!projectEditor)return;const previous=activeProjectSlug||projectSelect?.value;
+  if(!getApi()){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);return setStatus(projectEditor.querySelector(".project-status"),"Worker-URL fehlt; sechs Fallback-Projekte aktiv.",false)}
+  try{const r=await fetch(getApi()+"/api/site");if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();projectContentCache=data.content||{};applyProjectManifest(projectContentCache[projectManifestKey]);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];
+    if(current){activeProjectSlug=current.slug;projectSelect.value=current.slug;renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),Array.isArray(projectContentCache[projectManifestKey])?"Projekt-Manifest geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es angelegt.",true)}}
+  catch(error){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),"CMS nicht erreichbar; Fallback-Projekte aktiv: "+error.message,false)}
+}
+function openProjectCreate(){projectCreatePanel.hidden=false;projectCreateTitle.value="";setStatus(projectCreateStatus,"");projectCreateTitle.focus()}
+function closeProjectCreate(){projectCreatePanel.hidden=true;setStatus(projectCreateStatus,"")}
+async function createProject(){
+  const title=projectCreateTitle?.value.trim()||"";if(!title)return setStatus(projectCreateStatus,"Bitte einen Projekttitel eingeben.",false);if(!getApi()||!getToken())return setStatus(projectCreateStatus,"Worker-URL und Admin-Token fehlen.",false);
+  const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
+  projectCreateSave.disabled=true;setStatus(projectCreateStatus,"Lege Projekt an …");
+  try{projects.push(item);const values={title,description:"",location:"",year:"",services:[]};for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
+    await saveProjectManifest();refreshProjectSelect();activeProjectSlug=slug;projectSelect.value=slug;closeProjectCreate();renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),"Neues Projekt angelegt und zunächst ausgeblendet.",true);history.replaceState(null,"","#"+encodeURIComponent(slug))}
+  catch(error){projects=projects.filter(p=>p.slug!==slug);setStatus(projectCreateStatus,"Anlegen fehlgeschlagen: "+error.message,false)}finally{projectCreateSave.disabled=false}
+}
+function setupProjectEditor(){
+  if(!projectSelect||!projectEditor||!projectEditorTemplate)return;applyProjectManifest(null);refreshProjectSelect();const hash=decodeURIComponent(location.hash.replace(/^#/,"")),initial=projects.some(p=>p.slug===hash)?hash:projects[0]?.slug;activeProjectSlug=initial||"";projectSelect.value=activeProjectSlug;const first=projectBySlug(activeProjectSlug);if(first)renderProjectEditor(first);
+  projectSelect.addEventListener("change",()=>{activeProjectSlug=projectSelect.value;history.replaceState(null,"","#"+encodeURIComponent(activeProjectSlug));renderProjectEditor(projectBySlug(activeProjectSlug))});
+  projectAddButton?.addEventListener("click",openProjectCreate);projectCreateCancel?.addEventListener("click",closeProjectCreate);projectCreateSave?.addEventListener("click",createProject);projectCreateTitle?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();createProject()}});
+  loadProjectsCms();
+}
 
-if(reloadProjectTitles) reloadProjectTitles.addEventListener("click",loadProjectTitles);
 
 const contactTextDefaults={
   "kontakt/eyebrow":"Kontakt",
@@ -2196,11 +2313,11 @@ function render(){
 
 render();
 setupTechniqueEditor();
+setupProjectEditor();
 setupServiceFlyover();
 loadHeroTexts();
 loadServiceTexts();
 loadCompanyTexts();
-loadProjectTitles();
 loadContactTexts();
 loadServiceContactTexts();
 loadEngineerPageTexts();
