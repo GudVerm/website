@@ -114,6 +114,17 @@ const projectTitleFields={
 const saveProjectTitles=document.getElementById("saveProjectTitles");
 const reloadProjectTitles=document.getElementById("reloadProjectTitles");
 const projectTitleStatus=document.getElementById("projectTitleStatus");
+const contactTextFields={
+  "kontakt/title":document.getElementById("contactTitle"),
+  "kontakt/lead":document.getElementById("contactLead"),
+  "kontakt/telefon-1":document.getElementById("contactPhone1"),
+  "kontakt/telefon-2":document.getElementById("contactPhone2"),
+  "kontakt/email":document.getElementById("contactEmail"),
+  "kontakt/adresse":document.getElementById("contactAddress")
+};
+const saveContactTexts=document.getElementById("saveContactTexts");
+const reloadContactTexts=document.getElementById("reloadContactTexts");
+const contactTextStatus=document.getElementById("contactTextStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -367,6 +378,55 @@ if(saveProjectTitles){
 
 if(reloadProjectTitles) reloadProjectTitles.addEventListener("click",loadProjectTitles);
 
+const contactTextDefaults={
+  "kontakt/title":"Welches Projekt dürfen wir vermessen?",
+  "kontakt/lead":"Kurze Eckdaten genügen für den ersten Austausch.",
+  "kontakt/telefon-1":"08043 / 9187958",
+  "kontakt/telefon-2":"01511 / 5653694",
+  "kontakt/email":"jost@gudeliusvermessung.de",
+  "kontakt/adresse":"Bäcker 25 · 83676 Jachenau"
+};
+
+async function loadContactTexts(){
+  if(!getApi()) return setStatus(contactTextStatus,"Worker-URL fehlt.",false);
+  setStatus(contactTextStatus,"Lade Kontaktdaten …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(contactTextFields).forEach(([key,field])=>{
+      if(field) field.value=typeof content[key]==="string" ? content[key] : contactTextDefaults[key];
+    });
+    setStatus(contactTextStatus,"Kontaktdaten geladen.",true);
+  }catch(error){
+    Object.entries(contactTextFields).forEach(([key,field])=>{
+      if(field) field.value=contactTextDefaults[key];
+    });
+    setStatus(contactTextStatus,"Kontaktdaten konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveContactTexts){
+  saveContactTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(contactTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveContactTexts.disabled=true;
+    setStatus(contactTextStatus,"Speichere Kontaktdaten …");
+    try{
+      await Promise.all(Object.entries(contactTextFields).map(([key,field])=>
+        saveHeroText(key,field.value.trim())
+      ));
+      setStatus(contactTextStatus,"Kontaktdaten erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(contactTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveContactTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadContactTexts) reloadContactTexts.addEventListener("click",loadContactTexts);
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -467,6 +527,7 @@ loadHeroTexts();
 loadServiceTexts();
 loadCompanyTexts();
 loadProjectTitles();
+loadContactTexts();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
