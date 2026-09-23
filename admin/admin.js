@@ -751,6 +751,217 @@ async function loadInquiries(){
 if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
 if(inquiryFilter) inquiryFilter.addEventListener("change",renderInquiries);
 
+
+const engineerPageFields = [
+  ["leistungsseiten/ingenieurvermessung/text/hero-eyebrow","engHeroEyebrow","Hochbau · Kontrolle · Bestand"],
+  ["leistungsseiten/ingenieurvermessung/text/hero-title","engHeroTitle","Ingenieurvermessung"],
+  ["leistungsseiten/ingenieurvermessung/text/hero-lead","engHeroLead","Präzise Vermessung für Bauvorhaben – von der Absteckung über Kontrollen bis zum Gebäudeaufmaß."],
+  ["leistungsseiten/ingenieurvermessung/text/hero-primary","engHeroPrimary","Projekt anfragen →"],
+  ["leistungsseiten/ingenieurvermessung/text/hero-secondary","engHeroSecondary","Leistung ansehen"],
+
+  ["leistungsseiten/ingenieurvermessung/text/overview-eyebrow","engOverviewEyebrow","Im Überblick"],
+  ["leistungsseiten/ingenieurvermessung/text/overview-title","engOverviewTitle","Vermessung als verlässliche Grundlage für den Bau."],
+  ["leistungsseiten/ingenieurvermessung/text/overview-text-1","engOverviewText1","Bei Bauprojekten müssen Planung und Ausführung eindeutig zusammenpassen. GudeliusVermessung begleitet diese Aufgaben mit präziser Absteckung, Kontrollen und nachvollziehbaren Ergebnissen."],
+  ["leistungsseiten/ingenieurvermessung/text/overview-text-2","engOverviewText2","Der Schwerpunkt liegt auf einer direkten, projektbezogenen Zusammenarbeit und einer klaren Übergabe der Vermessungsdaten."],
+  ["leistungsseiten/ingenieurvermessung/text/overview-back","engOverviewBack","← Alle Leistungsfelder"],
+  ["leistungsseiten/ingenieurvermessung/text/tasks-eyebrow","engTasksEyebrow","Leistungsumfang"],
+  ["leistungsseiten/ingenieurvermessung/text/tasks-title","engTasksTitle","Typische Aufgaben"],
+
+  ["leistungsseiten/ingenieurvermessung/text/scope-eyebrow","engScopeEyebrow","Vollständiger Leistungsumfang"],
+  ["leistungsseiten/ingenieurvermessung/text/scope-title","engScopeTitle","Alle Leistungen im Überblick."],
+  ["leistungsseiten/ingenieurvermessung/text/scope-lead","engScopeLead","Die aktuelle Gudelius-Website führt für die Ingenieurvermessung folgende Einzelleistungen auf:"],
+  ["leistungsseiten/ingenieurvermessung/text/scope-note","engScopeNote","Inhaltliche Basis: aktueller Leistungsumfang von GudeliusVermessung."],
+
+  ["leistungsseiten/ingenieurvermessung/text/detail-eyebrow","engDetailEyebrow","Leistung im Detail"],
+  ["leistungsseiten/ingenieurvermessung/text/detail-title","engDetailTitle","Präzision in jeder Bauphase."],
+  ["leistungsseiten/ingenieurvermessung/text/detail-lead","engDetailLead","Die Leistungen decken typische vermessungstechnische Aufgaben im Hochbau und bei Bestandsaufnahmen ab."],
+  ["leistungsseiten/ingenieurvermessung/text/detail-01-title","engDetail1Title","Absteckung"],
+  ["leistungsseiten/ingenieurvermessung/text/detail-01-text","engDetail1Text","Planungsdaten werden in die Örtlichkeit übertragen und als Grundlage für die Ausführung bereitgestellt."],
+  ["leistungsseiten/ingenieurvermessung/text/detail-02-title","engDetail2Title","Kontrolle"],
+  ["leistungsseiten/ingenieurvermessung/text/detail-02-text","engDetail2Text","Lage und Ausführung können im Projektverlauf vermessungstechnisch überprüft werden."],
+  ["leistungsseiten/ingenieurvermessung/text/detail-03-title","engDetail3Title","Bestand"],
+  ["leistungsseiten/ingenieurvermessung/text/detail-03-text","engDetail3Text","Gebäude und vorhandene Situationen werden aufgenommen und für Planung oder Dokumentation aufbereitet."],
+
+  ["leistungsseiten/ingenieurvermessung/text/results-eyebrow","engResultsEyebrow","Ergebnisse"],
+  ["leistungsseiten/ingenieurvermessung/text/results-title","engResultsTitle","Vom Messwert zur nutzbaren Grundlage."],
+  ["leistungsseiten/ingenieurvermessung/text/results-lead","engResultsLead","Je nach Aufgabenstellung entstehen klassische Planunterlagen, Bestandsdaten oder digitale Grundlagen für die weitere Planung."],
+  ["leistungsseiten/ingenieurvermessung/text/result-01-title","engResult1Title","CAD & Pläne"],
+  ["leistungsseiten/ingenieurvermessung/text/result-01-text","engResult1Text","Aufbereitete Vermessungsgrundlagen für die weitere Projektbearbeitung."],
+  ["leistungsseiten/ingenieurvermessung/text/result-02-title","engResult2Title","PDF & Dokumentation"],
+  ["leistungsseiten/ingenieurvermessung/text/result-02-text","engResult2Text","Nachvollziehbare Ergebnisse für Abstimmung und Projektdokumentation."],
+  ["leistungsseiten/ingenieurvermessung/text/result-03-title","engResult3Title","Bestandsdaten"],
+  ["leistungsseiten/ingenieurvermessung/text/result-03-text","engResult3Text","Erfasste Geometrie als Grundlage für weitere Planungsschritte."],
+  ["leistungsseiten/ingenieurvermessung/text/result-04-title","engResult4Title","Direkte Abstimmung"],
+  ["leistungsseiten/ingenieurvermessung/text/result-04-text","engResult4Text","Ein Ansprechpartner vom Außendienst bis zur Auswertung."],
+
+  ["leistungsseiten/ingenieurvermessung/text/process-eyebrow","engProcessEyebrow","Projektablauf"],
+  ["leistungsseiten/ingenieurvermessung/text/process-title","engProcessTitle","Klare Schritte. Direkte Abstimmung."],
+  ["leistungsseiten/ingenieurvermessung/text/process-01-title","engProcess1Title","Anforderung klären"],
+  ["leistungsseiten/ingenieurvermessung/text/process-01-text","engProcess1Text","Projekt, Ort und gewünschtes Ergebnis gemeinsam festlegen."],
+  ["leistungsseiten/ingenieurvermessung/text/process-02-title","engProcess2Title","Vermessung"],
+  ["leistungsseiten/ingenieurvermessung/text/process-02-text","engProcess2Text","Passende Methode und Technik für die Aufgabe einsetzen."],
+  ["leistungsseiten/ingenieurvermessung/text/process-03-title","engProcess3Title","Auswertung"],
+  ["leistungsseiten/ingenieurvermessung/text/process-03-text","engProcess3Text","Messdaten prüfen, aufbereiten und projektbezogen auswerten."],
+  ["leistungsseiten/ingenieurvermessung/text/process-04-title","engProcess4Title","Übergabe"],
+  ["leistungsseiten/ingenieurvermessung/text/process-04-text","engProcess4Text","Ergebnisse nachvollziehbar und in nutzbarer Form bereitstellen."],
+
+  ["leistungsseiten/ingenieurvermessung/text/related-eyebrow","engRelatedEyebrow","Weitere Leistungen"],
+  ["leistungsseiten/ingenieurvermessung/text/related-title","engRelatedTitle","Passende Ergänzungen für Ihr Projekt."],
+  ["leistungsseiten/ingenieurvermessung/text/related-link-label","engRelatedLinkLabel","Mehr erfahren →"],
+  ["leistungsseiten/ingenieurvermessung/text/related-01-title","engRelated1Title","GIS & Bauvermessung"],
+  ["leistungsseiten/ingenieurvermessung/text/related-01-text","engRelated1Text","Tiefbau, Leitungen, Straßenbau und digitale Geländemodelle."],
+  ["leistungsseiten/ingenieurvermessung/text/related-02-title","engRelated2Title","3D-Laserscanning"],
+  ["leistungsseiten/ingenieurvermessung/text/related-02-text","engRelated2Text","Punktwolken und digitale Modelle für komplexe Bestände."],
+  ["leistungsseiten/ingenieurvermessung/text/related-03-title","engRelated3Title","Drohnenvermessung"],
+  ["leistungsseiten/ingenieurvermessung/text/related-03-text","engRelated3Text","Orthophotos, Flächen und Massenermittlung aus der Luft."]
+];
+
+const engineerTaskDefaults = [
+  "Bauabsteckung & Schnurgerüst",
+  "Kontrollmessungen",
+  "Planungsgrundlagen",
+  "Bestands- & Innenaufmaß",
+  "Kataster & Grundstücksteilung"
+];
+
+const engineerScopeDefaults = [
+  "Bauabsteckung/Schnurgerüst; Nachweise: Einmessprotokoll, -bestätigung, -bescheinigung",
+  "Sockel- und Wandkontrollen während der Bauphase mit Nachweisen",
+  "Baustellenvorbereitung: Lage- und Höhenfestpunkte für Folgegewerke",
+  "Planungsgrundlagen: Eingabe-, Bebauungs-, Garten-, Gelände- und Straßenplanung",
+  "Abstandsflächen bestehender Gebäude nach BayBO",
+  "Innenaufmaß für Umbau, Anbau, Renovierung sowie Wohn-/Nutzflächen",
+  "Gewässer-Bestand: Flussprofile und Schnitte",
+  "Retentionsberechnung bei Bauvorhaben in Überschwemmungsgebieten",
+  "Gebäudeeinmessung nach GÜVO für die Katasterübernahme",
+  "Grundstücksteilung: Parzellierung/Zerlegung, Neupunkt-Koordinaten, NAS, ADBV-Antragsvorbereitung",
+  "Überwachungsmessungen: Gebäude, Bauwerke, Gruben-/Hangverbau, Altablagerungen"
+];
+
+const engineerTasksInput=document.getElementById("engTasksItems");
+const engineerScopeInput=document.getElementById("engScopeItems");
+const saveEngineerPageTexts=document.getElementById("saveEngineerPageTexts");
+const reloadEngineerPageTexts=document.getElementById("reloadEngineerPageTexts");
+const engineerPageTextStatus=document.getElementById("engineerPageTextStatus");
+
+function engineerListValue(content,prefix,defaults){
+  return defaults.map((fallback,index)=>{
+    const key=prefix+String(index+1).padStart(2,"0");
+    return typeof content[key]==="string" ? content[key] : fallback;
+  }).join("\n");
+}
+
+async function loadEngineerPageTexts(){
+  if(!engineerPageTextStatus) return;
+  if(!getApi()) return setStatus(engineerPageTextStatus,"Worker-URL fehlt.",false);
+
+  setStatus(engineerPageTextStatus,"Lade Ingenieurvermessung …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+
+    engineerPageFields.forEach(([key,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=typeof content[key]==="string" ? content[key] : fallback;
+    });
+
+    if(engineerTasksInput){
+      engineerTasksInput.value=engineerListValue(
+        content,
+        "leistungsseiten/ingenieurvermessung/text/task-",
+        engineerTaskDefaults
+      );
+    }
+
+    if(engineerScopeInput){
+      engineerScopeInput.value=engineerListValue(
+        content,
+        "leistungsseiten/ingenieurvermessung/text/scope-",
+        engineerScopeDefaults
+      );
+    }
+
+    setStatus(engineerPageTextStatus,"Ingenieurvermessung geladen.",true);
+  }catch(error){
+    engineerPageFields.forEach(([,id,fallback])=>{
+      const field=document.getElementById(id);
+      if(field) field.value=fallback;
+    });
+    if(engineerTasksInput) engineerTasksInput.value=engineerTaskDefaults.join("\n");
+    if(engineerScopeInput) engineerScopeInput.value=engineerScopeDefaults.join("\n");
+    setStatus(engineerPageTextStatus,"Texte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+async function saveCmsEntriesInBatches(entries,batchSize=6){
+  for(let index=0;index<entries.length;index+=batchSize){
+    await Promise.all(
+      entries.slice(index,index+batchSize).map(([key,value])=>saveHeroText(key,value))
+    );
+  }
+}
+
+if(saveEngineerPageTexts){
+  saveEngineerPageTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()){
+      return setStatus(engineerPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    }
+
+    const taskLines=(engineerTasksInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    const scopeLines=(engineerScopeInput?.value||"")
+      .split(/\r?\n/)
+      .map(line=>line.trim())
+      .filter(Boolean);
+
+    if(taskLines.length!==5){
+      return setStatus(engineerPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 5 Zeilen verwenden.",false);
+    }
+    if(scopeLines.length!==11){
+      return setStatus(engineerPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 11 Zeilen verwenden.",false);
+    }
+
+    const entries=engineerPageFields.map(([key,id])=>[
+      key,
+      document.getElementById(id)?.value.trim()||""
+    ]);
+
+    taskLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/ingenieurvermessung/text/task-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    scopeLines.forEach((value,index)=>{
+      entries.push([
+        "leistungsseiten/ingenieurvermessung/text/scope-"+String(index+1).padStart(2,"0"),
+        value
+      ]);
+    });
+
+    saveEngineerPageTexts.disabled=true;
+    setStatus(engineerPageTextStatus,"Speichere Ingenieurvermessung …");
+    try{
+      await saveCmsEntriesInBatches(entries);
+      setStatus(engineerPageTextStatus,"Ingenieurvermessung erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(engineerPageTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveEngineerPageTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadEngineerPageTexts){
+  reloadEngineerPageTexts.addEventListener("click",loadEngineerPageTexts);
+}
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -853,6 +1064,7 @@ loadCompanyTexts();
 loadProjectTitles();
 loadContactTexts();
 loadServiceContactTexts();
+loadEngineerPageTexts();
 loadInquiries();
 
 
