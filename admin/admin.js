@@ -103,6 +103,17 @@ const companyTextFields={
 const saveCompanyTexts=document.getElementById("saveCompanyTexts");
 const reloadCompanyTexts=document.getElementById("reloadCompanyTexts");
 const companyTextStatus=document.getElementById("companyTextStatus");
+const projectTitleFields={
+  "projekte/01-title":document.getElementById("project1Title"),
+  "projekte/02-title":document.getElementById("project2Title"),
+  "projekte/03-title":document.getElementById("project3Title"),
+  "projekte/04-title":document.getElementById("project4Title"),
+  "projekte/05-title":document.getElementById("project5Title"),
+  "projekte/06-title":document.getElementById("project6Title")
+};
+const saveProjectTitles=document.getElementById("saveProjectTitles");
+const reloadProjectTitles=document.getElementById("reloadProjectTitles");
+const projectTitleStatus=document.getElementById("projectTitleStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -307,6 +318,55 @@ if(saveCompanyTexts){
 
 if(reloadCompanyTexts) reloadCompanyTexts.addEventListener("click",loadCompanyTexts);
 
+const projectTitleDefaults={
+  "projekte/01-title":"Ingenieur- & Bauvermessung",
+  "projekte/02-title":"3D-Laserscanning",
+  "projekte/03-title":"RTK-Drohnenvermessung",
+  "projekte/04-title":"Gelände & Gewässer",
+  "projekte/05-title":"Mobiler Einsatz",
+  "projekte/06-title":"Bestand & Planung"
+};
+
+async function loadProjectTitles(){
+  if(!getApi()) return setStatus(projectTitleStatus,"Worker-URL fehlt.",false);
+  setStatus(projectTitleStatus,"Lade Projekt-Titel …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(projectTitleFields).forEach(([key,field])=>{
+      if(field) field.value=typeof content[key]==="string" ? content[key] : projectTitleDefaults[key];
+    });
+    setStatus(projectTitleStatus,"Projekt-Titel geladen.",true);
+  }catch(error){
+    Object.entries(projectTitleFields).forEach(([key,field])=>{
+      if(field) field.value=projectTitleDefaults[key];
+    });
+    setStatus(projectTitleStatus,"Projekt-Titel konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveProjectTitles){
+  saveProjectTitles.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(projectTitleStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveProjectTitles.disabled=true;
+    setStatus(projectTitleStatus,"Speichere Projekt-Titel …");
+    try{
+      await Promise.all(Object.entries(projectTitleFields).map(([key,field])=>
+        saveHeroText(key,field.value.trim())
+      ));
+      setStatus(projectTitleStatus,"Projekt-Titel erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(projectTitleStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveProjectTitles.disabled=false;
+    }
+  });
+}
+
+if(reloadProjectTitles) reloadProjectTitles.addEventListener("click",loadProjectTitles);
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -406,6 +466,7 @@ render();
 loadHeroTexts();
 loadServiceTexts();
 loadCompanyTexts();
+loadProjectTitles();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
