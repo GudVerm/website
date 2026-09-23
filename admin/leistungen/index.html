@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-26">
+  <link rel="stylesheet" href="./admin.css?v=20260923-27">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -555,13 +555,13 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending" data-service-department="drohnenvermessung">
+      <section class="cms-subpanel cms-subpanel-form service-department" data-service-department="drohnenvermessung">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">04</span>
           <div>
             <span class="kicker">Leistung 04</span>
             <h3>Drohnenvermessung</h3>
-            <p>Startseiten-Kachel und Unterseitenbilder sind hier gebündelt. Die vollständigen Seitentexte ergänzen wir als nächsten Teil von Schritt 13.</p>
+            <p>Startseiten-Kachel, Unterseitenbilder und komplette Seitentexte an einer Stelle.</p>
           </div>
         </div>
 
@@ -586,9 +586,109 @@
           </div>
         </div>
 
-        <div class="service-department-next">
-          <span class="kicker">Schritt 13</span>
-          <strong>Seitentexte folgen in dieser Abteilung.</strong>
+        <div class="service-department-divider"><span>Seitentexte</span></div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneHeroEyebrow" type="text" maxlength="140"></label>
+            <label>Hauptüberschrift<input id="droneHeroTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="droneHeroLead" rows="3" maxlength="500"></textarea></label>
+            <label>Primärer Button<input id="droneHeroPrimary" type="text" maxlength="100"></label>
+            <label>Sekundärer Button<input id="droneHeroSecondary" type="text" maxlength="100"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Überblick</strong><span>Einführung und typische Aufgaben</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneOverviewEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="droneOverviewTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Absatz 1<textarea id="droneOverviewText1" rows="3" maxlength="700"></textarea></label>
+            <label class="text-editor-wide">Absatz 2<textarea id="droneOverviewText2" rows="3" maxlength="700"></textarea></label>
+            <label>Zurück-Link<input id="droneOverviewBack" type="text" maxlength="120"></label>
+            <label>Aufgaben · Eyebrow<input id="droneTasksEyebrow" type="text" maxlength="120"></label>
+            <label>Aufgaben · Überschrift<input id="droneTasksTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Typische Aufgaben · exakt eine Zeile pro Punkt
+              <textarea id="droneTasksItems" rows="6" maxlength="1200"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Vollständiger Leistungsumfang</strong><span>4 Einzelleistungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneScopeEyebrow" type="text" maxlength="140"></label>
+            <label>Überschrift<input id="droneScopeTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="droneScopeLead" rows="3" maxlength="600"></textarea></label>
+            <label class="text-editor-wide">Leistungen · exakt eine Zeile pro Punkt
+              <textarea id="droneScopeItems" rows="6" maxlength="2400"></textarea>
+            </label>
+            <label class="text-editor-wide">Hinweis unter der Liste<input id="droneScopeNote" type="text" maxlength="300"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Leistung im Detail</strong><span>Drei Detailkarten</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneDetailEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="droneDetailTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="droneDetailLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>01 · Befliegung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneDetail1Title" type="text" maxlength="120"></label><label>Text<textarea id="droneDetail1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>02 · Auswertung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneDetail2Title" type="text" maxlength="120"></label><label>Text<textarea id="droneDetail2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>03 · Ergebnis</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneDetail3Title" type="text" maxlength="120"></label><label>Text<textarea id="droneDetail3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Ergebnisse</strong><span>Ausgabe und Projektgrundlagen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneResultsEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="droneResultsTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="droneResultsLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 1</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneResult1Title" type="text" maxlength="120"></label><label>Text<textarea id="droneResult1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 2</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneResult2Title" type="text" maxlength="120"></label><label>Text<textarea id="droneResult2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 3</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneResult3Title" type="text" maxlength="120"></label><label>Text<textarea id="droneResult3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 4</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneResult4Title" type="text" maxlength="120"></label><label>Text<textarea id="droneResult4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Projektablauf</strong><span>Vier Schritte</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneProcessEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="droneProcessTitle" type="text" maxlength="180"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 01</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneProcess1Title" type="text" maxlength="120"></label><label>Text<textarea id="droneProcess1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 02</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneProcess2Title" type="text" maxlength="120"></label><label>Text<textarea id="droneProcess2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 03</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneProcess3Title" type="text" maxlength="120"></label><label>Text<textarea id="droneProcess3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 04</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneProcess4Title" type="text" maxlength="120"></label><label>Text<textarea id="droneProcess4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Weitere Leistungen</strong><span>Verlinkte Ergänzungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="droneRelatedEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="droneRelatedTitle" type="text" maxlength="180"></label>
+            <label>Linktext<input id="droneRelatedLinkLabel" type="text" maxlength="100"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ingenieurvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneRelated1Title" type="text" maxlength="120"></label><label>Text<textarea id="droneRelated1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>GIS & Bauvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneRelated2Title" type="text" maxlength="120"></label><label>Text<textarea id="droneRelated2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>3D-Laserscanning</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="droneRelated3Title" type="text" maxlength="120"></label><label>Text<textarea id="droneRelated3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveDronePageTexts" type="button">Drohnenvermessung speichern</button>
+          <button id="reloadDronePageTexts" class="secondary" type="button">Neu laden</button>
+          <div id="dronePageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
         </div>
       </section>
     </section>
@@ -616,7 +716,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-26"></script>
-  <script src="./admin.js?v=20260923-26"></script>
+  <script src="./config.js?v=20260923-27"></script>
+  <script src="./admin.js?v=20260923-27"></script>
 </body>
 </html>
