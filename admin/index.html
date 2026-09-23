@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-8">
+  <link rel="stylesheet" href="./admin.css?v=20260923-9">
 </head>
 <body>
   <header class="admin-header">
@@ -99,6 +99,51 @@
 
       <section class="section-head">
         <div>
+          <span class="kicker">Leistungstexte</span>
+          <h2>Titel und Beschreibungen bearbeiten</h2>
+        </div>
+        <p>Die Nummern und Links bleiben fest. Bearbeitbar sind nur Titel und Kurzbeschreibung der vier Kacheln.</p>
+      </section>
+
+      <section class="panel text-editor-panel">
+        <div class="text-editor-grid">
+          <label>01 · Titel
+            <input id="service1Title" type="text" maxlength="120">
+          </label>
+          <label>01 · Beschreibung
+            <textarea id="service1Text" rows="3" maxlength="400"></textarea>
+          </label>
+
+          <label>02 · Titel
+            <input id="service2Title" type="text" maxlength="120">
+          </label>
+          <label>02 · Beschreibung
+            <textarea id="service2Text" rows="3" maxlength="400"></textarea>
+          </label>
+
+          <label>03 · Titel
+            <input id="service3Title" type="text" maxlength="120">
+          </label>
+          <label>03 · Beschreibung
+            <textarea id="service3Text" rows="3" maxlength="400"></textarea>
+          </label>
+
+          <label>04 · Titel
+            <input id="service4Title" type="text" maxlength="120">
+          </label>
+          <label>04 · Beschreibung
+            <textarea id="service4Text" rows="3" maxlength="400"></textarea>
+          </label>
+        </div>
+        <div class="text-editor-actions">
+          <button id="saveServiceTexts" type="button">Leistungstexte speichern</button>
+          <button id="reloadServiceTexts" class="secondary" type="button">Neu laden</button>
+          <div id="serviceTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
+      </section>
+
+      <section class="section-head">
+        <div>
           <span class="kicker">Leistungs-Unterseiten</span>
           <h2>Bilder der Unterseiten austauschen</h2>
         </div>
@@ -165,7 +210,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-8"></script>
-  <script src="./admin.js?v=20260923-8"></script>
+  <script src="./config.js?v=20260923-9"></script>
+  <script src="./admin.js?v=20260923-9"></script>
 </body>
 </html>
