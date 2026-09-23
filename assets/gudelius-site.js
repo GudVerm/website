@@ -260,15 +260,63 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-function sendMail(e) {
+async function sendMail(e) {
   e.preventDefault();
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const subject = document.getElementById('subject').value;
-  const message = document.getElementById('message').value;
-  const body = `Name: ${name}\nE-Mail: ${email}\n\n${message}`;
 
-  const recipient = window.GUDELIUS_CONTACT_EMAIL || 'jost@gudeliusvermessung.de';
-  location.href =
-    `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const form = e.currentTarget;
+  const api = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
+  const status = form.querySelector(".form-note");
+  const submit = form.querySelector('button[type="submit"]');
+
+  if (!api) {
+    if (status) status.textContent = "Das Kontaktformular ist momentan nicht verfügbar.";
+    return;
+  }
+
+  const payload = {
+    name: form.querySelector("#name")?.value || "",
+    email: form.querySelector("#email")?.value || "",
+    subject: form.querySelector("#subject")?.value || "",
+    message: form.querySelector("#message")?.value || "",
+    website: form.querySelector('[name="website"]')?.value || "",
+    source: window.location.pathname
+  };
+
+  if (submit) {
+    submit.disabled = true;
+    submit.dataset.originalText = submit.textContent;
+    submit.textContent = "Wird gesendet …";
+  }
+  if (status) {
+    status.textContent = "Ihre Anfrage wird sicher übermittelt …";
+    status.classList.remove("success", "error");
+  }
+
+  try {
+    const response = await fetch(api + "/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || ("HTTP " + response.status));
+
+    form.reset();
+    if (status) {
+      status.textContent = "Vielen Dank. Ihre Anfrage wurde erfolgreich übermittelt.";
+      status.classList.add("success");
+    }
+  } catch (error) {
+    if (status) {
+      status.textContent = "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder nutzen Sie die angegebene E-Mail-Adresse.";
+      status.classList.add("error");
+    }
+    console.error("Kontaktformular:", error);
+  } finally {
+    if (submit) {
+      submit.disabled = false;
+      submit.textContent = submit.dataset.originalText || "Anfrage senden →";
+    }
+  }
 }
