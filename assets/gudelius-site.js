@@ -57,6 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
           element.textContent = value;
         }
       });
+
+      root.querySelectorAll("[data-cms-link]").forEach((element) => {
+        const value = content[element.dataset.cmsLink];
+        if (typeof value !== "string" || !value.trim()) return;
+
+        const type = element.dataset.cmsLinkType;
+        if (type === "mailto") {
+          element.href = "mailto:" + value.trim();
+        } else if (type === "tel") {
+          const normalized = value.trim().replace(/[^+\d]/g, "");
+          element.href = "tel:" + normalized;
+        }
+      });
+
+      if (typeof content["kontakt/email"] === "string" && content["kontakt/email"].trim()) {
+        window.GUDELIUS_CONTACT_EMAIL = content["kontakt/email"].trim();
+      }
     } catch (error) {
       console.warn("CMS-Texte konnten nicht geladen werden.", error);
     }
@@ -251,6 +268,7 @@ function sendMail(e) {
   const message = document.getElementById('message').value;
   const body = `Name: ${name}\nE-Mail: ${email}\n\n${message}`;
 
+  const recipient = window.GUDELIUS_CONTACT_EMAIL || 'jost@gudeliusvermessung.de';
   location.href =
-    `mailto:jost@gudeliusvermessung.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
