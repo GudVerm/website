@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Kontakt · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20260923-18">
+</head>
+<body data-admin-page="kontakt">
+  <header class="admin-header">
+    <div>
+      <span class="kicker">GudeliusVermessung</span>
+      <h1>Website-Admin</h1>
+    </div>
+    <div class="admin-header-actions">
+      <a class="ghost" href="./">Übersicht</a>
+      <a class="ghost" href="../">Website öffnen ↗</a>
+    </div>
+  </header>
+
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link" data-page="verbindung" href="./verbindung/">Verbindung</a>
+      <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+      <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+      <a class="admin-nav-link" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+      <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+      <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+      <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen <span class="nav-count" id="inquiryNavCount" hidden>0</span></a>
+      <a class="admin-nav-link active" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    </div>
+  </nav>
+
+  <main class="wrap admin-page-wrap">
+    <section class="admin-section" id="kontakt">
+      <section class="section-head">
+        <div>
+          <span class="kicker">Kontakt</span>
+          <h2>Kontaktbereich bearbeiten</h2>
+        </div>
+        <p>Die Inhalte sind nach Funktion gruppiert. So lassen sich Texte, Kontaktdaten und Formular getrennt und übersichtlich pflegen.</p>
+      </section>
+
+      <div class="cms-group-grid">
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">01</span>
+            <div>
+              <span class="kicker">Kontaktbereich</span>
+              <h3>Überschrift & Einleitung</h3>
+              <p>Texte links über den Kontaktdaten auf der Startseite.</p>
+            </div>
+          </div>
+          <div class="text-editor-grid">
+            <label>Eyebrow
+              <input id="contactEyebrow" type="text" maxlength="100">
+            </label>
+            <label>Überschrift
+              <input id="contactTitle" type="text" maxlength="180">
+            </label>
+            <label class="text-editor-wide">Einleitung
+              <textarea id="contactLead" rows="3" maxlength="500"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">02</span>
+            <div>
+              <span class="kicker">Kontaktdaten</span>
+              <h3>Telefon, E-Mail & Adresse</h3>
+              <p>Die sichtbaren Angaben und ihre Bezeichnungen.</p>
+            </div>
+          </div>
+          <div class="text-editor-grid">
+            <label>Bezeichnung Telefon
+              <input id="contactPhoneLabel" type="text" maxlength="80">
+            </label>
+            <label>Telefon 1
+              <input id="contactPhone1" type="text" maxlength="80">
+            </label>
+            <label>Telefon 2
+              <input id="contactPhone2" type="text" maxlength="80">
+            </label>
+            <label>Bezeichnung E-Mail
+              <input id="contactEmailLabel" type="text" maxlength="80">
+            </label>
+            <label>E-Mail
+              <input id="contactEmail" type="email" maxlength="180">
+            </label>
+            <label>Bezeichnung Adresse
+              <input id="contactAddressLabel" type="text" maxlength="80">
+            </label>
+            <label class="text-editor-wide">Adresse
+              <input id="contactAddress" type="text" maxlength="240">
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Formular</span>
+            <h3>Kontaktformular</h3>
+            <p>Alles, was Besucher im Anfrageformular sehen: Überschriften, Feldnamen, Platzhalter, Button und Hinweis.</p>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head">
+            <strong>Formularkopf</strong>
+            <span>Überschrift und kurzer Erklärungstext</span>
+          </div>
+          <div class="text-editor-grid">
+            <label>Formularüberschrift
+              <input id="contactFormTitle" type="text" maxlength="160">
+            </label>
+            <label>Formular-Einleitung
+              <input id="contactFormLead" type="text" maxlength="240">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head">
+            <strong>Eingabefelder</strong>
+            <span>Feldbezeichnungen und Platzhalter</span>
+          </div>
+          <div class="text-editor-grid">
+            <label>Feldname · Name
+              <input id="contactNameLabel" type="text" maxlength="80">
+            </label>
+            <label>Platzhalter · Name
+              <input id="contactNamePlaceholder" type="text" maxlength="160">
+            </label>
+
+            <label>Feldname · E-Mail
+              <input id="contactEmailFieldLabel" type="text" maxlength="80">
+            </label>
+            <label>Platzhalter · E-Mail
+              <input id="contactEmailPlaceholder" type="text" maxlength="160">
+            </label>
+
+            <label>Feldname · Betreff
+              <input id="contactSubjectLabel" type="text" maxlength="100">
+            </label>
+            <label>Platzhalter · Betreff
+              <input id="contactSubjectPlaceholder" type="text" maxlength="220">
+            </label>
+
+            <label>Feldname · Nachricht
+              <input id="contactMessageLabel" type="text" maxlength="100">
+            </label>
+            <label>Platzhalter · Nachricht
+              <input id="contactMessagePlaceholder" type="text" maxlength="260">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head">
+            <strong>Absenden</strong>
+            <span>Button und Hinweis unter dem Formular</span>
+          </div>
+          <div class="text-editor-grid">
+            <label>Buttontext
+              <input id="contactButtonText" type="text" maxlength="100">
+            </label>
+            <label>Hinweis unter dem Formular
+              <input id="contactFormNote" type="text" maxlength="300">
+            </label>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveContactTexts" type="button">Kontaktbereich speichern</button>
+          <button id="reloadContactTexts" class="secondary" type="button">Neu laden</button>
+          <div id="contactTextStatus" class="status">Noch keine CMS-Kontaktdaten geladen.</div>
+        </div>
+      </section>
+
+      <section class="section-head contact-subsection-head">
+        <div>
+          <span class="kicker">Leistungs-Unterseiten</span>
+          <h2>Kontakttexte je Leistung</h2>
+        </div>
+        <p>Gemeinsame Kontaktdaten kommen aus den Feldern oben. Nur Überschrift, Einleitung und Standard-Betreff werden je Leistungsseite separat gepflegt.</p>
+      </section>
+
+      <section class="cms-subpanel service-contact-shared">
+        <div class="cms-subpanel-head compact">
+          <span class="cms-subpanel-icon">A</span>
+          <div>
+            <span class="kicker">Gemeinsam</span>
+            <h3>Eyebrow aller Leistungsseiten</h3>
+          </div>
+        </div>
+        <div class="text-editor-grid">
+          <label class="text-editor-wide">Eyebrow auf Leistungs-Unterseiten
+            <input id="contactServiceEyebrow" type="text" maxlength="100">
+          </label>
+        </div>
+      </section>
+
+      <div class="service-contact-card-grid">
+        <section class="cms-subpanel service-contact-card">
+          <div class="cms-subpanel-head compact">
+            <span class="cms-subpanel-icon">01</span>
+            <div><span class="kicker">Leistung</span><h3>Ingenieurvermessung</h3></div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Überschrift
+              <input id="contactEngineerTitle" type="text" maxlength="180">
+            </label>
+            <label>Einleitung
+              <textarea id="contactEngineerLead" rows="3" maxlength="400"></textarea>
+            </label>
+            <label>Standard-Betreff
+              <input id="contactEngineerSubject" type="text" maxlength="180">
+            </label>
+          </div>
+        </section>
+
+        <section class="cms-subpanel service-contact-card">
+          <div class="cms-subpanel-head compact">
+            <span class="cms-subpanel-icon">02</span>
+            <div><span class="kicker">Leistung</span><h3>GIS & Bauvermessung</h3></div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Überschrift
+              <input id="contactGisTitle" type="text" maxlength="180">
+            </label>
+            <label>Einleitung
+              <textarea id="contactGisLead" rows="3" maxlength="400"></textarea>
+            </label>
+            <label>Standard-Betreff
+              <input id="contactGisSubject" type="text" maxlength="180">
+            </label>
+          </div>
+        </section>
+
+        <section class="cms-subpanel service-contact-card">
+          <div class="cms-subpanel-head compact">
+            <span class="cms-subpanel-icon">03</span>
+            <div><span class="kicker">Leistung</span><h3>3D-Laserscanning</h3></div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Überschrift
+              <input id="contactScanTitle" type="text" maxlength="180">
+            </label>
+            <label>Einleitung
+              <textarea id="contactScanLead" rows="3" maxlength="400"></textarea>
+            </label>
+            <label>Standard-Betreff
+              <input id="contactScanSubject" type="text" maxlength="180">
+            </label>
+          </div>
+        </section>
+
+        <section class="cms-subpanel service-contact-card">
+          <div class="cms-subpanel-head compact">
+            <span class="cms-subpanel-icon">04</span>
+            <div><span class="kicker">Leistung</span><h3>Drohnenvermessung</h3></div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Überschrift
+              <input id="contactDroneTitle" type="text" maxlength="180">
+            </label>
+            <label>Einleitung
+              <textarea id="contactDroneLead" rows="3" maxlength="400"></textarea>
+            </label>
+            <label>Standard-Betreff
+              <input id="contactDroneSubject" type="text" maxlength="180">
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <div class="panel service-contact-actions">
+        <div class="text-editor-actions">
+          <button id="saveServiceContactTexts" type="button">Leistungs-Kontakttexte speichern</button>
+          <button id="reloadServiceContactTexts" class="secondary" type="button">Neu laden</button>
+          <div id="serviceContactTextStatus" class="status">Noch keine Leistungs-Kontakttexte geladen.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <template id="equipmentTemplate">
+    <article class="equipment-card">
+      <div class="image-wrap">
+        <img alt="">
+        <span class="badge">Bild</span>
+      </div>
+      <div class="card-body">
+        <h3></h3>
+        <p class="detail"></p>
+        <label class="file-label">
+          <span>Neues Bild auswählen</span>
+          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+        </label>
+        <div class="card-actions">
+          <button class="upload" type="button">Bild hochladen</button>
+          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+        </div>
+        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./config.js?v=20260923-18"></script>
+  <script src="./admin.js?v=20260923-18"></script>
+</body>
+</html>
