@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Leistungen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-24">
+  <link rel="stylesheet" href="./admin.css?v=20260923-25">
 </head>
 <body data-admin-page="leistungen">
   <header class="admin-header">
@@ -418,13 +418,13 @@
         </div>
       </section>
 
-      <section class="cms-subpanel cms-subpanel-form service-department service-department-pending" data-service-department="3d-laserscanning">
+      <section class="cms-subpanel cms-subpanel-form service-department" data-service-department="3d-laserscanning">
         <div class="cms-subpanel-head">
           <span class="cms-subpanel-icon">03</span>
           <div>
             <span class="kicker">Leistung 03</span>
             <h3>3D-Laserscanning</h3>
-            <p>Startseiten-Kachel und Unterseitenbilder sind hier gebündelt. Die vollständigen Seitentexte ergänzen wir als nächsten Teil von Schritt 13.</p>
+            <p>Startseiten-Kachel, Unterseitenbilder und komplette Seitentexte an einer Stelle.</p>
           </div>
         </div>
 
@@ -449,9 +449,109 @@
           </div>
         </div>
 
-        <div class="service-department-next">
-          <span class="kicker">Schritt 13</span>
-          <strong>Seitentexte folgen in dieser Abteilung.</strong>
+        <div class="service-department-divider"><span>Seitentexte</span></div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Hero</strong><span>Kopfbereich der Leistungsseite</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanHeroEyebrow" type="text" maxlength="140"></label>
+            <label>Hauptüberschrift<input id="scanHeroTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="scanHeroLead" rows="3" maxlength="500"></textarea></label>
+            <label>Primärer Button<input id="scanHeroPrimary" type="text" maxlength="100"></label>
+            <label>Sekundärer Button<input id="scanHeroSecondary" type="text" maxlength="100"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Überblick</strong><span>Einführung und typische Aufgaben</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanOverviewEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="scanOverviewTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Absatz 1<textarea id="scanOverviewText1" rows="3" maxlength="700"></textarea></label>
+            <label class="text-editor-wide">Absatz 2<textarea id="scanOverviewText2" rows="3" maxlength="700"></textarea></label>
+            <label>Zurück-Link<input id="scanOverviewBack" type="text" maxlength="120"></label>
+            <label>Aufgaben · Eyebrow<input id="scanTasksEyebrow" type="text" maxlength="120"></label>
+            <label>Aufgaben · Überschrift<input id="scanTasksTitle" type="text" maxlength="160"></label>
+            <label class="text-editor-wide">Typische Aufgaben · exakt eine Zeile pro Punkt
+              <textarea id="scanTasksItems" rows="6" maxlength="1200"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Vollständiger Leistungsumfang</strong><span>4 Einzelleistungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanScopeEyebrow" type="text" maxlength="140"></label>
+            <label>Überschrift<input id="scanScopeTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="scanScopeLead" rows="3" maxlength="600"></textarea></label>
+            <label class="text-editor-wide">Leistungen · exakt eine Zeile pro Punkt
+              <textarea id="scanScopeItems" rows="6" maxlength="2400"></textarea>
+            </label>
+            <label class="text-editor-wide">Hinweis unter der Liste<input id="scanScopeNote" type="text" maxlength="300"></label>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Leistung im Detail</strong><span>Drei Detailkarten</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanDetailEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="scanDetailTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="scanDetailLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>01 · Aufnahme</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanDetail1Title" type="text" maxlength="120"></label><label>Text<textarea id="scanDetail1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>02 · Punktwolke</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanDetail2Title" type="text" maxlength="120"></label><label>Text<textarea id="scanDetail2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>03 · Modell & Auswertung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanDetail3Title" type="text" maxlength="120"></label><label>Text<textarea id="scanDetail3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Ergebnisse</strong><span>Ausgabe und Projektgrundlagen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanResultsEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="scanResultsTitle" type="text" maxlength="180"></label>
+            <label class="text-editor-wide">Einleitung<textarea id="scanResultsLead" rows="3" maxlength="600"></textarea></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 1</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanResult1Title" type="text" maxlength="120"></label><label>Text<textarea id="scanResult1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 2</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanResult2Title" type="text" maxlength="120"></label><label>Text<textarea id="scanResult2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 3</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanResult3Title" type="text" maxlength="120"></label><label>Text<textarea id="scanResult3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ergebnis 4</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanResult4Title" type="text" maxlength="120"></label><label>Text<textarea id="scanResult4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Projektablauf</strong><span>Vier Schritte</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanProcessEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="scanProcessTitle" type="text" maxlength="180"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 01</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanProcess1Title" type="text" maxlength="120"></label><label>Text<textarea id="scanProcess1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 02</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanProcess2Title" type="text" maxlength="120"></label><label>Text<textarea id="scanProcess2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 03</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanProcess3Title" type="text" maxlength="120"></label><label>Text<textarea id="scanProcess3Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Schritt 04</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanProcess4Title" type="text" maxlength="120"></label><label>Text<textarea id="scanProcess4Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="form-editor-block">
+          <div class="form-editor-block-head"><strong>Weitere Leistungen</strong><span>Verlinkte Ergänzungen</span></div>
+          <div class="text-editor-grid">
+            <label>Eyebrow<input id="scanRelatedEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="scanRelatedTitle" type="text" maxlength="180"></label>
+            <label>Linktext<input id="scanRelatedLinkLabel" type="text" maxlength="100"></label>
+          </div>
+          <div class="service-text-card-grid nested-editor-grid">
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Ingenieurvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanRelated1Title" type="text" maxlength="120"></label><label>Text<textarea id="scanRelated1Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>GIS & Bauvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanRelated2Title" type="text" maxlength="120"></label><label>Text<textarea id="scanRelated2Text" rows="3" maxlength="500"></textarea></label></div></div>
+            <div class="form-editor-block"><div class="form-editor-block-head"><strong>Drohnenvermessung</strong></div><div class="text-editor-grid single-column"><label>Titel<input id="scanRelated3Title" type="text" maxlength="120"></label><label>Text<textarea id="scanRelated3Text" rows="3" maxlength="500"></textarea></label></div></div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveScanPageTexts" type="button">3D-Laserscanning speichern</button>
+          <button id="reloadScanPageTexts" class="secondary" type="button">Neu laden</button>
+          <div id="scanPageTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
         </div>
       </section>
 
@@ -516,7 +616,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-24"></script>
-  <script src="./admin.js?v=20260923-24"></script>
+  <script src="./config.js?v=20260923-25"></script>
+  <script src="./admin.js?v=20260923-25"></script>
 </body>
 </html>
