@@ -1227,6 +1227,134 @@ if(reloadGisPageTexts){
   reloadGisPageTexts.addEventListener("click",loadGisPageTexts);
 }
 
+
+function setupServiceFlyover(){
+  const flyover=document.getElementById("serviceFlyover");
+  if(!flyover) return;
+
+  const trigger=document.getElementById("serviceFlyoverTrigger");
+  const current=document.getElementById("serviceFlyoverCurrent");
+  const departments=[...document.querySelectorAll("[data-service-department]")];
+  const serviceButtons=[...flyover.querySelectorAll("[data-service-target]")];
+  const sectionButtons=[...flyover.querySelectorAll("[data-section-target]")];
+
+  const serviceNames={
+    "ingenieurvermessung":"Ingenieurvermessung",
+    "gis-bauvermessung":"GIS & Bauvermessung",
+    "3d-laserscanning":"3D-Laserscanning",
+    "drohnenvermessung":"Drohnenvermessung"
+  };
+
+  const sectionMap={
+    "Hero":"hero",
+    "Überblick":"overview",
+    "Vollständiger Leistungsumfang":"scope",
+    "Leistung im Detail":"detail",
+    "Ergebnisse":"results",
+    "Projektablauf":"process",
+    "Weitere Leistungen":"related"
+  };
+
+  departments.forEach(department=>{
+    department.querySelectorAll(".form-editor-block").forEach(block=>{
+      const title=block.querySelector(".form-editor-block-head strong")?.textContent?.trim();
+      const key=sectionMap[title];
+      if(key && !block.dataset.flySection) block.dataset.flySection=key;
+    });
+  });
+
+  const validServices=new Set(departments.map(el=>el.dataset.serviceDepartment));
+  const requestedHash=decodeURIComponent(location.hash.replace(/^#/,""));
+  const remembered=localStorage.getItem("gudelius-admin-service");
+  let activeService=validServices.has(requestedHash)
+    ? requestedHash
+    : validServices.has(remembered)
+      ? remembered
+      : "ingenieurvermessung";
+
+  function activeDepartment(){
+    return departments.find(el=>el.dataset.serviceDepartment===activeService)||null;
+  }
+
+  function updateSectionAvailability(){
+    const department=activeDepartment();
+    sectionButtons.forEach(button=>{
+      const section=button.dataset.sectionTarget;
+      button.disabled=!department?.querySelector('[data-fly-section="'+section+'"]');
+    });
+  }
+
+  function showService(service,{scroll=false,updateHash=true}={}){
+    if(!validServices.has(service)) return;
+    activeService=service;
+    localStorage.setItem("gudelius-admin-service",service);
+
+    departments.forEach(department=>{
+      const active=department.dataset.serviceDepartment===service;
+      department.hidden=!active;
+      department.classList.toggle("flyover-active",active);
+    });
+
+    serviceButtons.forEach(button=>{
+      const active=button.dataset.serviceTarget===service;
+      button.classList.toggle("active",active);
+      button.setAttribute("aria-pressed",active?"true":"false");
+    });
+
+    if(current) current.textContent=serviceNames[service]||service;
+    updateSectionAvailability();
+
+    if(updateHash){
+      history.replaceState(null,"","#"+service);
+    }
+
+    if(scroll){
+      activeDepartment()?.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+
+    flyover.classList.remove("is-open");
+    trigger?.setAttribute("aria-expanded","false");
+  }
+
+  trigger?.addEventListener("click",()=>{
+    const open=!flyover.classList.contains("is-open");
+    flyover.classList.toggle("is-open",open);
+    trigger.setAttribute("aria-expanded",open?"true":"false");
+  });
+
+  serviceButtons.forEach(button=>{
+    button.addEventListener("click",()=>showService(button.dataset.serviceTarget,{scroll:true}));
+  });
+
+  sectionButtons.forEach(button=>{
+    button.addEventListener("click",()=>{
+      const department=activeDepartment();
+      const target=department?.querySelector('[data-fly-section="'+button.dataset.sectionTarget+'"]');
+      if(!target) return;
+      flyover.classList.remove("is-open");
+      trigger?.setAttribute("aria-expanded","false");
+      target.scrollIntoView({behavior:"smooth",block:"start"});
+    });
+  });
+
+  document.addEventListener("click",event=>{
+    if(!flyover.contains(event.target)){
+      flyover.classList.remove("is-open");
+      trigger?.setAttribute("aria-expanded","false");
+    }
+  });
+
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"){
+      flyover.classList.remove("is-open");
+      trigger?.setAttribute("aria-expanded","false");
+      trigger?.focus();
+    }
+  });
+
+  showService(activeService,{updateHash:false});
+}
+
 function setStatus(el,text,ok){
   if(!el) return;
   el.textContent=text;
@@ -1333,6 +1461,7 @@ function render(){
 }
 
 render();
+setupServiceFlyover();
 loadHeroTexts();
 loadServiceTexts();
 loadCompanyTexts();
