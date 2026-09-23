@@ -1010,3 +1010,10 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .collection-fieldset{margin:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}.collection-fieldset legend{padding:0 6px;font-size:.75rem;font-weight:900}
 .check-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.check-option{display:flex;grid-template-columns:none;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e4e8e4;border-radius:10px;background:#fafaf7;font-size:.78rem;font-weight:800}.check-option input{width:auto}
 @media(max-width:920px){.collection-picker-row{grid-template-columns:1fr}.check-option-grid{grid-template-columns:1fr}}
+
+
+/* Schritt 17: flexible Leistungslisten */
+.service-list-editor-block{padding:14px;border:1px solid #e4e8e4;border-radius:14px;background:#fafaf7}.service-list-editor-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.service-list-editor-head strong{font-size:.8rem}
+.service-list-editor{display:grid;gap:8px}.service-list-row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px;border:1px solid #e1e5e1;border-radius:11px;background:#fff}.service-list-no{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#172026;color:#fff;font-size:.65rem;font-weight:900}
+.service-list-row input{width:100%;border:0;background:transparent;padding:8px;font:inherit;color:var(--ink);outline:none}.service-list-row input:focus{box-shadow:0 0 0 2px rgba(229,197,51,.3);border-radius:7px}.service-list-controls{display:flex;gap:5px}.service-list-controls button{padding:7px 9px;min-width:34px}.service-list-empty{padding:16px;text-align:center;color:var(--muted);font-size:.78rem}
+@media(max-width:620px){.service-list-row{grid-template-columns:30px minmax(0,1fr)}.service-list-controls{grid-column:2;justify-content:flex-end}.service-list-editor-head{align-items:flex-start;flex-direction:column}.service-list-editor-head button{width:100%}}

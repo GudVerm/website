@@ -952,6 +952,37 @@ if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
 if(inquiryFilter) inquiryFilter.addEventListener("change",renderInquiries);
 
 
+
+function setupServiceListEditor(element){
+  if(!element||element.dataset.listReady==="1")return;
+  element.dataset.listReady="1";
+  let items=[];
+  const render=()=>{
+    element.innerHTML="";
+    items.forEach((value,index)=>{
+      const row=document.createElement("div");row.className="service-list-row";
+      const number=document.createElement("span");number.className="service-list-no";number.textContent=String(index+1).padStart(2,"0");
+      const input=document.createElement("input");input.type="text";input.value=value;input.maxLength=700;input.setAttribute("aria-label","Listeneintrag "+(index+1));
+      input.addEventListener("input",()=>{items[index]=input.value});
+      const controls=document.createElement("div");controls.className="service-list-controls";
+      const up=document.createElement("button");up.type="button";up.className="secondary";up.textContent="↑";up.disabled=index===0;up.title="Nach oben";
+      const down=document.createElement("button");down.type="button";down.className="secondary";down.textContent="↓";down.disabled=index===items.length-1;down.title="Nach unten";
+      const remove=document.createElement("button");remove.type="button";remove.className="danger-soft";remove.textContent="×";remove.title="Eintrag entfernen";
+      up.addEventListener("click",()=>{[items[index-1],items[index]]=[items[index],items[index-1]];render()});
+      down.addEventListener("click",()=>{[items[index+1],items[index]]=[items[index],items[index+1]];render()});
+      remove.addEventListener("click",()=>{items.splice(index,1);render()});
+      controls.append(up,down,remove);row.append(number,input,controls);element.appendChild(row);
+    });
+    if(!items.length){const empty=document.createElement("div");empty.className="service-list-empty";empty.textContent="Noch keine Einträge. Mit „+ Eintrag“ beginnen.";element.appendChild(empty)}
+  };
+  Object.defineProperty(element,"value",{configurable:true,get(){return items.map(value=>value.trim()).filter(Boolean).join("\n")},set(value){items=String(value||"").split(/\r?\n/).map(line=>line.trim()).filter(Boolean);render()}});
+  const add=document.querySelector('[data-list-add="'+element.id+'"]');
+  add?.addEventListener("click",()=>{items.push("");render();const inputs=element.querySelectorAll("input");inputs[inputs.length-1]?.focus()});
+  render();
+}
+function setupServiceListEditors(){document.querySelectorAll(".service-list-editor").forEach(setupServiceListEditor)}
+
+
 const engineerPageFields = [
   ["leistungsseiten/ingenieurvermessung/text/hero-eyebrow","engHeroEyebrow","Hochbau · Kontrolle · Bestand"],
   ["leistungsseiten/ingenieurvermessung/text/hero-title","engHeroTitle","Ingenieurvermessung"],
@@ -1045,10 +1076,10 @@ const reloadEngineerPageTexts=document.getElementById("reloadEngineerPageTexts")
 const engineerPageTextStatus=document.getElementById("engineerPageTextStatus");
 
 function engineerListValue(content,prefix,defaults){
-  return defaults.map((fallback,index)=>{
-    const key=prefix+String(index+1).padStart(2,"0");
-    return typeof content[key]==="string" ? content[key] : fallback;
-  }).join("\n");
+  const listKey=prefix.includes("/task-")?prefix.replace(/\/text\/task-$/,"/lists/tasks"):prefix.replace(/\/text\/scope-$/,"/lists/scope");
+  const list=content[listKey];
+  if(Array.isArray(list)) return list.filter(value=>typeof value==="string"&&value.trim()).join("\n");
+  return defaults.map((fallback,index)=>{const key=prefix+String(index+1).padStart(2,"0");return typeof content[key]==="string" ? content[key] : fallback}).join("\n");
 }
 
 async function loadEngineerPageTexts(){
@@ -1119,13 +1150,6 @@ if(saveEngineerPageTexts){
       .map(line=>line.trim())
       .filter(Boolean);
 
-    if(taskLines.length!==5){
-      return setStatus(engineerPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 5 Zeilen verwenden.",false);
-    }
-    if(scopeLines.length!==11){
-      return setStatus(engineerPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 11 Zeilen verwenden.",false);
-    }
-
     const entries=engineerPageFields.map(([key,id])=>[
       key,
       document.getElementById(id)?.value.trim()||""
@@ -1144,6 +1168,9 @@ if(saveEngineerPageTexts){
         value
       ]);
     });
+
+    entries.push(["leistungsseiten/ingenieurvermessung/lists/tasks",taskLines]);
+    entries.push(["leistungsseiten/ingenieurvermessung/lists/scope",scopeLines]);
 
     saveEngineerPageTexts.disabled=true;
     setStatus(engineerPageTextStatus,"Speichere Ingenieurvermessung …");
@@ -1314,13 +1341,6 @@ if(saveGisPageTexts){
       .map(line=>line.trim())
       .filter(Boolean);
 
-    if(taskLines.length!==5){
-      return setStatus(gisPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 5 Zeilen verwenden.",false);
-    }
-    if(scopeLines.length!==10){
-      return setStatus(gisPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 10 Zeilen verwenden.",false);
-    }
-
     const entries=gisPageFields.map(([key,id])=>[
       key,
       document.getElementById(id)?.value.trim()||""
@@ -1339,6 +1359,9 @@ if(saveGisPageTexts){
         value
       ]);
     });
+
+    entries.push(["leistungsseiten/gis-bauvermessung/lists/tasks",taskLines]);
+    entries.push(["leistungsseiten/gis-bauvermessung/lists/scope",scopeLines]);
 
     saveGisPageTexts.disabled=true;
     setStatus(gisPageTextStatus,"Speichere GIS & Bauvermessung …");
@@ -1503,13 +1526,6 @@ if(saveScanPageTexts){
       .map(line=>line.trim())
       .filter(Boolean);
 
-    if(taskLines.length!==4){
-      return setStatus(scanPageTextStatus,"Bei „Typische Aufgaben“ bitte genau 4 Zeilen verwenden.",false);
-    }
-    if(scopeLines.length!==4){
-      return setStatus(scanPageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 4 Zeilen verwenden.",false);
-    }
-
     const entries=scanPageFields.map(([key,id])=>[
       key,
       document.getElementById(id)?.value.trim()||""
@@ -1528,6 +1544,9 @@ if(saveScanPageTexts){
         value
       ]);
     });
+
+    entries.push(["leistungsseiten/3d-laserscanning/lists/tasks",taskLines]);
+    entries.push(["leistungsseiten/3d-laserscanning/lists/scope",scopeLines]);
 
     saveScanPageTexts.disabled=true;
     setStatus(scanPageTextStatus,"Speichere 3D-Laserscanning …");
@@ -1691,13 +1710,6 @@ if(saveDronePageTexts){
       .map(line=>line.trim())
       .filter(Boolean);
 
-    if(taskLines.length!==4){
-      return setStatus(dronePageTextStatus,"Bei „Typische Aufgaben“ bitte genau 4 Zeilen verwenden.",false);
-    }
-    if(scopeLines.length!==4){
-      return setStatus(dronePageTextStatus,"Beim vollständigen Leistungsumfang bitte genau 4 Zeilen verwenden.",false);
-    }
-
     const entries=dronePageFields.map(([key,id])=>[
       key,
       document.getElementById(id)?.value.trim()||""
@@ -1716,6 +1728,9 @@ if(saveDronePageTexts){
         value
       ]);
     });
+
+    entries.push(["leistungsseiten/drohnenvermessung/lists/tasks",taskLines]);
+    entries.push(["leistungsseiten/drohnenvermessung/lists/scope",scopeLines]);
 
     saveDronePageTexts.disabled=true;
     setStatus(dronePageTextStatus,"Speichere Drohnenvermessung …");
@@ -2314,6 +2329,7 @@ function render(){
 render();
 setupTechniqueEditor();
 setupProjectEditor();
+setupServiceListEditors();
 setupServiceFlyover();
 loadHeroTexts();
 loadServiceTexts();
