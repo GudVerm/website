@@ -23,6 +23,15 @@ const projects = [
   { key:"projects/bestand-planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", fallback:"https://static.wixstatic.com/media/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg/v1/fill/w_980%2Ch_735%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_7deed34091c6465aa82d25f8b981d966~mv2.jpg" }
 ];
 
+const startPageImages = [
+  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"https://static.wixstatic.com/media/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png/v1/fill/w_980%2Ch_723%2Cal_c%2Cq_90%2Cusm_0.66_1.00_0.01%2Cenc_avif%2Cquality_auto/bdad94_da5d693375a14f28ad2c5d25d450a7ee~mv2.png" }
+];
+
+const companyImages = [
+  { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"https://static.wixstatic.com/media/bdad94_11e412ba9cd74e4695f923ef756c6b34~mv2.jpg/v1/fill/w_250%2Ch_273%2Cal_c%2Cq_90%2Cenc_auto/bdad94_11e412ba9cd74e4695f923ef756c6b34~mv2.jpg" },
+  { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"https://static.wixstatic.com/media/bdad94_91e2d46020314618a1e009aab515dda3~mv2.jpg/v1/fill/w_250%2Ch_250%2Cal_c%2Cq_90%2Cenc_auto/bdad94_91e2d46020314618a1e009aab515dda3~mv2.jpg" }
+];
+
 const apiUrlInput=document.getElementById("apiUrl");
 const tokenInput=document.getElementById("adminToken");
 const saveButton=document.getElementById("saveConnection");
@@ -30,6 +39,8 @@ const testButton=document.getElementById("testConnection");
 const connectionStatus=document.getElementById("connectionStatus");
 const grid=document.getElementById("equipmentGrid");
 const projectGrid=document.getElementById("projectGrid");
+const startPageGrid=document.getElementById("startPageGrid");
+const companyGrid=document.getElementById("companyGrid");
 const template=document.getElementById("equipmentTemplate");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
@@ -153,6 +164,8 @@ function renderCollection(target, items){
 }
 
 function render(){
+  renderCollection(startPageGrid, startPageImages);
+  renderCollection(companyGrid, companyImages);
   renderCollection(grid, equipment);
   renderCollection(projectGrid, projects);
 }
