@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = cmsMediaUrl(element.dataset.cmsBg);
         if (element.classList.contains("hero")) {
           element.style.setProperty("--hero-image", `url("${url}")`);
+        } else if (element.classList.contains("service-hero")) {
+          element.style.setProperty("--service-image", `url("${url}")`);
         } else {
           element.style.backgroundImage = `url("${url}")`;
           element.removeAttribute("data-bg");
