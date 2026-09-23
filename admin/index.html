@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-15">
+  <link rel="stylesheet" href="./admin.css?v=20260923-16">
 </head>
 <body>
   <header class="admin-header">
@@ -24,6 +24,7 @@
       <a class="admin-nav-link" href="#unternehmen">Unternehmen</a>
       <a class="admin-nav-link" href="#technik">Technik</a>
       <a class="admin-nav-link" href="#projekte">Projekte</a>
+      <a class="admin-nav-link" href="#anfragen">Anfragen <span class="nav-count" id="inquiryNavCount" hidden>0</span></a>
       <a class="admin-nav-link" href="#kontakt">Kontakt</a>
     </div>
   </nav>
@@ -353,6 +354,56 @@
       </section>
     </section>
 
+    <section class="admin-section" id="anfragen">
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Anfragen</span>
+          <h2>Eingegangene Projektanfragen</h2>
+        </div>
+        <p>Alle über die Website gesendeten Kontaktanfragen werden hier aus Cloudflare D1 geladen und können bearbeitet werden.</p>
+      </section>
+
+      <div class="inquiry-stats">
+        <div class="inquiry-stat">
+          <span>Neu</span>
+          <strong id="inquiryCountNew">0</strong>
+        </div>
+        <div class="inquiry-stat">
+          <span>In Arbeit</span>
+          <strong id="inquiryCountProgress">0</strong>
+        </div>
+        <div class="inquiry-stat">
+          <span>Erledigt</span>
+          <strong id="inquiryCountDone">0</strong>
+        </div>
+      </div>
+
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head inquiry-head">
+          <span class="cms-subpanel-icon">01</span>
+          <div>
+            <span class="kicker">Posteingang</span>
+            <h3>Projektanfragen</h3>
+            <p>Name, Kontaktdaten, Betreff, Nachricht und Bearbeitungsstatus.</p>
+          </div>
+          <div class="inquiry-toolbar">
+            <label>Filter
+              <select id="inquiryFilter">
+                <option value="alle">Alle</option>
+                <option value="neu">Neu</option>
+                <option value="in-arbeit">In Arbeit</option>
+                <option value="erledigt">Erledigt</option>
+              </select>
+            </label>
+            <button id="refreshInquiries" class="secondary" type="button">Aktualisieren</button>
+          </div>
+        </div>
+
+        <div id="inquiriesStatus" class="status inquiry-load-status">Anfragen werden geladen …</div>
+        <div id="inquiriesList" class="inquiry-list" aria-live="polite"></div>
+      </section>
+    </section>
+
     <section class="admin-section" id="kontakt">
       <section class="section-head">
         <div>
@@ -632,7 +683,7 @@
     </article>
   </template>
 
-  <script src="./config.js?v=20260923-15"></script>
-  <script src="./admin.js?v=20260923-15"></script>
+  <script src="./config.js?v=20260923-16"></script>
+  <script src="./admin.js?v=20260923-16"></script>
 </body>
 </html>
