@@ -24,13 +24,17 @@ const template=document.getElementById("equipmentTemplate");
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
 
-function getApi(){return apiUrlInput.value.trim().replace(/\/$/,"")}
+function getApi(){
+  let value=apiUrlInput.value.trim().replace(/\/$/,"");
+  if(value && !/^https?:\/\//i.test(value)) value="https://"+value;
+  return value;
+}
 function getToken(){return tokenInput.value.trim()}
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
 
 saveButton.addEventListener("click",()=>{
   const api=getApi();
-  if(api) localStorage.setItem("gudelius-cms-api",api);
+  if(api){ apiUrlInput.value=api; localStorage.setItem("gudelius-cms-api",api); }
   else localStorage.removeItem("gudelius-cms-api");
   if(getToken()) sessionStorage.setItem("gudelius-cms-token",getToken());
   else sessionStorage.removeItem("gudelius-cms-token");
