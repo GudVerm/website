@@ -69,6 +69,12 @@ const companyGrid=document.getElementById("companyGrid");
 const serviceGrid=document.getElementById("serviceGrid");
 const servicePageGrid=document.getElementById("servicePageGrid");
 const template=document.getElementById("equipmentTemplate");
+const heroEyebrow=document.getElementById("heroEyebrow");
+const heroTitle=document.getElementById("heroTitle");
+const heroLead=document.getElementById("heroLead");
+const saveHeroTexts=document.getElementById("saveHeroTexts");
+const reloadHeroTexts=document.getElementById("reloadHeroTexts");
+const heroTextStatus=document.getElementById("heroTextStatus");
 
 apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
 tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
@@ -103,6 +109,71 @@ testButton.addEventListener("click",async()=>{
     setStatus(connectionStatus,"Worker nicht erreichbar: "+e.message,false);
   }
 });
+
+const heroTextDefaults={
+  "startseite/hero-eyebrow":"Vermessung für anspruchsvolle Projekte",
+  "startseite/hero-title":"Von der Planung bis zum Bestand.",
+  "startseite/hero-lead":"Wir begleiten Bau- und Infrastrukturprojekte mit präziser Vermessung und digitalen Geodaten – zuverlässig, nachvollziehbar und mit moderner Technik."
+};
+
+function contentUrl(key){
+  return getApi()+"/api/content/"+key.split("/").map(encodeURIComponent).join("/");
+}
+
+async function loadHeroTexts(){
+  if(!getApi()) return setStatus(heroTextStatus,"Worker-URL fehlt.",false);
+  setStatus(heroTextStatus,"Lade Texte …");
+  try{
+    const response=await fetch(getApi()+"/api/site");
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    heroEyebrow.value=typeof content["startseite/hero-eyebrow"]==="string" ? content["startseite/hero-eyebrow"] : heroTextDefaults["startseite/hero-eyebrow"];
+    heroTitle.value=typeof content["startseite/hero-title"]==="string" ? content["startseite/hero-title"] : heroTextDefaults["startseite/hero-title"];
+    heroLead.value=typeof content["startseite/hero-lead"]==="string" ? content["startseite/hero-lead"] : heroTextDefaults["startseite/hero-lead"];
+    setStatus(heroTextStatus,"Texte geladen.",true);
+  }catch(error){
+    heroEyebrow.value=heroTextDefaults["startseite/hero-eyebrow"];
+    heroTitle.value=heroTextDefaults["startseite/hero-title"];
+    heroLead.value=heroTextDefaults["startseite/hero-lead"];
+    setStatus(heroTextStatus,"CMS-Texte konnten nicht geladen werden: "+error.message,false);
+  }
+}
+
+async function saveHeroText(key,value){
+  const response=await fetch(contentUrl(key),{
+    method:"PUT",
+    headers:{
+      "authorization":"Bearer "+getToken(),
+      "content-type":"application/json"
+    },
+    body:JSON.stringify(value)
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+}
+
+if(saveHeroTexts){
+  saveHeroTexts.addEventListener("click",async()=>{
+    if(!getApi()||!getToken()) return setStatus(heroTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    saveHeroTexts.disabled=true;
+    setStatus(heroTextStatus,"Speichere Texte …");
+    try{
+      await Promise.all([
+        saveHeroText("startseite/hero-eyebrow",heroEyebrow.value.trim()),
+        saveHeroText("startseite/hero-title",heroTitle.value.trim()),
+        saveHeroText("startseite/hero-lead",heroLead.value.trim())
+      ]);
+      setStatus(heroTextStatus,"Startseitentexte erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(heroTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveHeroTexts.disabled=false;
+    }
+  });
+}
+
+if(reloadHeroTexts) reloadHeroTexts.addEventListener("click",loadHeroTexts);
 
 function setStatus(el,text,ok){
   el.textContent=text;
@@ -200,6 +271,7 @@ function render(){
 }
 
 render();
+loadHeroTexts();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
