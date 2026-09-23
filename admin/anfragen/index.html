@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Anfragen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260923-20">
+  <link rel="stylesheet" href="./admin.css?v=20260924-19">
 </head>
 <body data-admin-page="anfragen">
   <header class="admin-header">
@@ -67,12 +67,25 @@
             <p>Name, Kontaktdaten, Betreff, Nachricht und Bearbeitungsstatus.</p>
           </div>
           <div class="inquiry-toolbar">
-            <label>Filter
+            <label class="inquiry-search-label">Suche
+              <input id="inquirySearch" type="search" placeholder="Name, E-Mail, Betreff …">
+            </label>
+            <label>Status
               <select id="inquiryFilter">
                 <option value="alle">Alle</option>
                 <option value="neu">Neu</option>
                 <option value="in-arbeit">In Arbeit</option>
                 <option value="erledigt">Erledigt</option>
+                <option value="archiviert">Archiviert</option>
+                <option value="spam">Spam</option>
+              </select>
+            </label>
+            <label>Zeitraum
+              <select id="inquiryPeriod">
+                <option value="alle">Alle</option>
+                <option value="heute">Heute</option>
+                <option value="7">Letzte 7 Tage</option>
+                <option value="30">Letzte 30 Tage</option>
               </select>
             </label>
             <button id="refreshInquiries" class="secondary" type="button">Aktualisieren</button>
@@ -108,6 +121,6 @@
   </template>
 
   <script src="./config.js?v=20260923-20"></script>
-  <script src="./admin.js?v=20260923-20"></script>
+  <script src="./admin.js?v=20260924-19"></script>
 </body>
 </html>

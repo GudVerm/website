@@ -92,6 +92,8 @@ const technikCreateStatus=document.getElementById("technikCreateStatus");
 const inquiriesList=document.getElementById("inquiriesList");
 const inquiriesStatus=document.getElementById("inquiriesStatus");
 const inquiryFilter=document.getElementById("inquiryFilter");
+const inquirySearch=document.getElementById("inquirySearch");
+const inquiryPeriod=document.getElementById("inquiryPeriod");
 const refreshInquiries=document.getElementById("refreshInquiries");
 const inquiryCountNew=document.getElementById("inquiryCountNew");
 const inquiryCountProgress=document.getElementById("inquiryCountProgress");
@@ -818,6 +820,8 @@ if(reloadServiceContactTexts) reloadServiceContactTexts.addEventListener("click"
 function inquiryStatusLabel(status){
   if(status==="in-arbeit") return "In Arbeit";
   if(status==="erledigt") return "Erledigt";
+  if(status==="archiviert") return "Archiviert";
+  if(status==="spam") return "Spam";
   return "Neu";
 }
 
@@ -826,10 +830,24 @@ function formatInquiryDate(value){
   const normalized=value.includes("T") ? value : value.replace(" ","T")+"Z";
   const date=new Date(normalized);
   if(Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("de-DE",{
-    dateStyle:"medium",
-    timeStyle:"short"
-  }).format(date);
+  return new Intl.DateTimeFormat("de-DE",{dateStyle:"medium",timeStyle:"short"}).format(date);
+}
+
+function inquiryDate(value){
+  if(!value) return null;
+  const normalized=value.includes("T") ? value : value.replace(" ","T")+"Z";
+  const date=new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function inquiryMatchesPeriod(inquiry,period){
+  if(period==="alle") return true;
+  const date=inquiryDate(inquiry.created_at);
+  if(!date) return false;
+  const now=new Date();
+  if(period==="heute") return date.toDateString()===now.toDateString();
+  const days=period==="7"?7:period==="30"?30:0;
+  return !days || date.getTime()>=now.getTime()-days*86400000;
 }
 
 function updateInquiryStats(){
@@ -837,32 +855,51 @@ function updateInquiryStats(){
   inquiriesCache.forEach(item=>{
     if(Object.prototype.hasOwnProperty.call(counts,item.status)) counts[item.status]+=1;
   });
-
   if(inquiryCountNew) inquiryCountNew.textContent=counts.neu;
   if(inquiryCountProgress) inquiryCountProgress.textContent=counts["in-arbeit"];
   if(inquiryCountDone) inquiryCountDone.textContent=counts.erledigt;
-
   if(inquiryNavCount){
     inquiryNavCount.textContent=counts.neu;
     inquiryNavCount.hidden=counts.neu===0;
   }
 }
 
+async function saveInquiryUpdate(inquiry,payload){
+  const response=await fetch(getApi()+"/api/contact/"+encodeURIComponent(inquiry.id),{
+    method:"PUT",
+    headers:{"authorization":"Bearer "+getToken(),"content-type":"application/json"},
+    body:JSON.stringify(payload)
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+  return data;
+}
+
+function filteredInquiries(){
+  const status=inquiryFilter?.value||"alle";
+  const period=inquiryPeriod?.value||"alle";
+  const query=(inquirySearch?.value||"").trim().toLocaleLowerCase("de-DE");
+  return inquiriesCache.filter(item=>{
+    if(status!=="alle"&&item.status!==status) return false;
+    if(!inquiryMatchesPeriod(item,period)) return false;
+    if(!query) return true;
+    return [item.name,item.email,item.subject,item.message].some(value=>
+      String(value||"").toLocaleLowerCase("de-DE").includes(query)
+    );
+  });
+}
+
 function renderInquiries(){
   if(!inquiriesList) return;
   inquiriesList.innerHTML="";
-
-  const filter=inquiryFilter?.value||"alle";
-  const items=filter==="alle"
-    ? inquiriesCache
-    : inquiriesCache.filter(item=>item.status===filter);
+  const items=filteredInquiries();
 
   if(!items.length){
     const empty=document.createElement("div");
     empty.className="inquiry-empty";
-    empty.textContent=filter==="alle"
-      ? "Noch keine Projektanfragen vorhanden."
-      : "Für diesen Status sind aktuell keine Anfragen vorhanden.";
+    empty.textContent=inquiriesCache.length
+      ? "Keine Anfragen entsprechen den aktuellen Filtern."
+      : "Noch keine Projektanfragen vorhanden.";
     inquiriesList.appendChild(empty);
     return;
   }
@@ -874,55 +911,89 @@ function renderInquiries(){
 
     const top=document.createElement("div");
     top.className="inquiry-card-top";
-
     const identity=document.createElement("div");
     identity.className="inquiry-identity";
-
     const name=document.createElement("strong");
     name.textContent=inquiry.name||"Ohne Name";
-
-    const email=document.createElement("a");
-    email.href="mailto:"+(inquiry.email||"");
-    email.textContent=inquiry.email||"Keine E-Mail";
-
-    identity.append(name,email);
+    const subject=document.createElement("h3");
+    subject.textContent=inquiry.subject||"Ohne Betreff";
+    identity.append(name,subject);
 
     const badge=document.createElement("span");
     badge.className="inquiry-status-badge";
     badge.textContent=inquiryStatusLabel(inquiry.status);
-
     top.append(identity,badge);
 
     const meta=document.createElement("div");
     meta.className="inquiry-meta";
-
     const created=document.createElement("span");
     created.textContent=formatInquiryDate(inquiry.created_at);
-
     const source=document.createElement("span");
     source.textContent="Quelle: "+(inquiry.source||"/");
-
     meta.append(created,source);
 
-    const subject=document.createElement("h3");
-    subject.textContent=inquiry.subject||"Ohne Betreff";
+    const toggle=document.createElement("button");
+    toggle.type="button";
+    toggle.className="secondary inquiry-detail-toggle";
+    toggle.textContent="Details anzeigen";
 
+    const detail=document.createElement("div");
+    detail.className="inquiry-detail";
+    detail.hidden=true;
+    toggle.addEventListener("click",()=>{
+      detail.hidden=!detail.hidden;
+      toggle.textContent=detail.hidden?"Details anzeigen":"Details ausblenden";
+    });
+
+    const email=document.createElement("a");
+    email.href="mailto:"+(inquiry.email||"");
+    email.className="inquiry-detail-email";
+    email.textContent=inquiry.email||"Keine E-Mail";
     const message=document.createElement("p");
     message.className="inquiry-message";
     message.textContent=inquiry.message||"";
 
+    const noteLabel=document.createElement("label");
+    noteLabel.className="inquiry-note";
+    noteLabel.textContent="Interne Notiz";
+    const note=document.createElement("textarea");
+    note.rows=3;
+    note.maxLength=2000;
+    note.placeholder="Nur intern sichtbar, z. B. Rückruf vereinbart …";
+    note.value=inquiry.internal_note||"";
+    noteLabel.appendChild(note);
+
+    const noteActions=document.createElement("div");
+    noteActions.className="inquiry-note-actions";
+    const noteSave=document.createElement("button");
+    noteSave.type="button";
+    noteSave.className="secondary";
+    noteSave.textContent="Notiz speichern";
+    const noteStatus=document.createElement("span");
+    noteStatus.className="status";
+    noteSave.addEventListener("click",async()=>{
+      if(!getApi()||!getToken()) return setStatus(noteStatus,"Worker-URL und Admin-Token fehlen.",false);
+      noteSave.disabled=true;
+      setStatus(noteStatus,"Speichere …");
+      try{
+        await saveInquiryUpdate(inquiry,{internal_note:note.value});
+        inquiry.internal_note=note.value;
+        setStatus(noteStatus,"Interne Notiz gespeichert.",true);
+      }catch(error){
+        setStatus(noteStatus,"Notiz konnte nicht gespeichert werden: "+error.message,false);
+      }finally{
+        noteSave.disabled=false;
+      }
+    });
+    noteActions.append(noteSave,noteStatus);
+    detail.append(email,message,noteLabel,noteActions);
+
     const actions=document.createElement("div");
     actions.className="inquiry-actions";
-
     const statusLabel=document.createElement("label");
     statusLabel.textContent="Status";
-
     const select=document.createElement("select");
-    [
-      ["neu","Neu"],
-      ["in-arbeit","In Arbeit"],
-      ["erledigt","Erledigt"]
-    ].forEach(([value,label])=>{
+    [["neu","Neu"],["in-arbeit","In Arbeit"],["erledigt","Erledigt"],["archiviert","Archiviert"],["spam","Spam"]].forEach(([value,label])=>{
       const option=document.createElement("option");
       option.value=value;
       option.textContent=label;
@@ -935,27 +1006,13 @@ function renderInquiries(){
       const next=select.value;
       select.disabled=true;
       badge.textContent="Speichert …";
-
       try{
-        const response=await fetch(getApi()+"/api/contact/"+encodeURIComponent(inquiry.id),{
-          method:"PUT",
-          headers:{
-            "authorization":"Bearer "+getToken(),
-            "content-type":"application/json"
-          },
-          body:JSON.stringify({status:next})
-        });
-        const data=await response.json().catch(()=>({}));
-        if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-
+        await saveInquiryUpdate(inquiry,{status:next});
         inquiry.status=next;
         card.dataset.status=next;
         badge.textContent=inquiryStatusLabel(next);
         updateInquiryStats();
-
-        if((inquiryFilter?.value||"alle")!=="alle"){
-          renderInquiries();
-        }
+        if((inquiryFilter?.value||"alle")!=="alle") renderInquiries();
       }catch(error){
         select.value=previous;
         badge.textContent=inquiryStatusLabel(previous);
@@ -964,7 +1021,6 @@ function renderInquiries(){
         select.disabled=false;
       }
     });
-
     statusLabel.appendChild(select);
 
     const reply=document.createElement("a");
@@ -972,9 +1028,8 @@ function renderInquiries(){
     reply.href="mailto:"+(inquiry.email||"")+"?subject="+encodeURIComponent("Re: "+(inquiry.subject||"Ihre Anfrage"));
     reply.textContent="Per E-Mail antworten ↗";
 
-    actions.append(statusLabel,reply);
-
-    card.append(top,meta,subject,message,actions);
+    actions.append(statusLabel,toggle,reply);
+    card.append(top,meta,detail,actions);
     inquiriesList.appendChild(card);
   }
 }
@@ -1020,6 +1075,8 @@ async function loadInquiries(){
 
 if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
 if(inquiryFilter) inquiryFilter.addEventListener("change",renderInquiries);
+if(inquiryPeriod) inquiryPeriod.addEventListener("change",renderInquiries);
+if(inquirySearch) inquirySearch.addEventListener("input",renderInquiries);
 
 
 
