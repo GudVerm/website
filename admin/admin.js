@@ -69,6 +69,15 @@ const companyGrid=document.getElementById("companyGrid");
 const serviceGrid=document.getElementById("serviceGrid");
 const servicePageGrid=document.getElementById("servicePageGrid");
 const template=document.getElementById("equipmentTemplate");
+const inquiriesList=document.getElementById("inquiriesList");
+const inquiriesStatus=document.getElementById("inquiriesStatus");
+const inquiryFilter=document.getElementById("inquiryFilter");
+const refreshInquiries=document.getElementById("refreshInquiries");
+const inquiryCountNew=document.getElementById("inquiryCountNew");
+const inquiryCountProgress=document.getElementById("inquiryCountProgress");
+const inquiryCountDone=document.getElementById("inquiryCountDone");
+const inquiryNavCount=document.getElementById("inquiryNavCount");
+let inquiriesCache=[];
 const heroEyebrow=document.getElementById("heroEyebrow");
 const heroTitle=document.getElementById("heroTitle");
 const heroLead=document.getElementById("heroLead");
@@ -180,6 +189,7 @@ saveButton.addEventListener("click",()=>{
   else sessionStorage.removeItem("gudelius-cms-token");
   setStatus(connectionStatus,"Verbindungsdaten gespeichert.",true);
   render();
+  loadInquiries();
 });
 
 testButton.addEventListener("click",async()=>{
@@ -534,6 +544,213 @@ if(saveServiceContactTexts){
 
 if(reloadServiceContactTexts) reloadServiceContactTexts.addEventListener("click",loadServiceContactTexts);
 
+
+function inquiryStatusLabel(status){
+  if(status==="in-arbeit") return "In Arbeit";
+  if(status==="erledigt") return "Erledigt";
+  return "Neu";
+}
+
+function formatInquiryDate(value){
+  if(!value) return "–";
+  const normalized=value.includes("T") ? value : value.replace(" ","T")+"Z";
+  const date=new Date(normalized);
+  if(Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("de-DE",{
+    dateStyle:"medium",
+    timeStyle:"short"
+  }).format(date);
+}
+
+function updateInquiryStats(){
+  const counts={neu:0,"in-arbeit":0,erledigt:0};
+  inquiriesCache.forEach(item=>{
+    if(Object.prototype.hasOwnProperty.call(counts,item.status)) counts[item.status]+=1;
+  });
+
+  if(inquiryCountNew) inquiryCountNew.textContent=counts.neu;
+  if(inquiryCountProgress) inquiryCountProgress.textContent=counts["in-arbeit"];
+  if(inquiryCountDone) inquiryCountDone.textContent=counts.erledigt;
+
+  if(inquiryNavCount){
+    inquiryNavCount.textContent=counts.neu;
+    inquiryNavCount.hidden=counts.neu===0;
+  }
+}
+
+function renderInquiries(){
+  if(!inquiriesList) return;
+  inquiriesList.innerHTML="";
+
+  const filter=inquiryFilter?.value||"alle";
+  const items=filter==="alle"
+    ? inquiriesCache
+    : inquiriesCache.filter(item=>item.status===filter);
+
+  if(!items.length){
+    const empty=document.createElement("div");
+    empty.className="inquiry-empty";
+    empty.textContent=filter==="alle"
+      ? "Noch keine Projektanfragen vorhanden."
+      : "Für diesen Status sind aktuell keine Anfragen vorhanden.";
+    inquiriesList.appendChild(empty);
+    return;
+  }
+
+  for(const inquiry of items){
+    const card=document.createElement("article");
+    card.className="inquiry-card";
+    card.dataset.status=inquiry.status||"neu";
+
+    const top=document.createElement("div");
+    top.className="inquiry-card-top";
+
+    const identity=document.createElement("div");
+    identity.className="inquiry-identity";
+
+    const name=document.createElement("strong");
+    name.textContent=inquiry.name||"Ohne Name";
+
+    const email=document.createElement("a");
+    email.href="mailto:"+(inquiry.email||"");
+    email.textContent=inquiry.email||"Keine E-Mail";
+
+    identity.append(name,email);
+
+    const badge=document.createElement("span");
+    badge.className="inquiry-status-badge";
+    badge.textContent=inquiryStatusLabel(inquiry.status);
+
+    top.append(identity,badge);
+
+    const meta=document.createElement("div");
+    meta.className="inquiry-meta";
+
+    const created=document.createElement("span");
+    created.textContent=formatInquiryDate(inquiry.created_at);
+
+    const source=document.createElement("span");
+    source.textContent="Quelle: "+(inquiry.source||"/");
+
+    meta.append(created,source);
+
+    const subject=document.createElement("h3");
+    subject.textContent=inquiry.subject||"Ohne Betreff";
+
+    const message=document.createElement("p");
+    message.className="inquiry-message";
+    message.textContent=inquiry.message||"";
+
+    const actions=document.createElement("div");
+    actions.className="inquiry-actions";
+
+    const statusLabel=document.createElement("label");
+    statusLabel.textContent="Status";
+
+    const select=document.createElement("select");
+    [
+      ["neu","Neu"],
+      ["in-arbeit","In Arbeit"],
+      ["erledigt","Erledigt"]
+    ].forEach(([value,label])=>{
+      const option=document.createElement("option");
+      option.value=value;
+      option.textContent=label;
+      if(value===inquiry.status) option.selected=true;
+      select.appendChild(option);
+    });
+
+    select.addEventListener("change",async()=>{
+      const previous=inquiry.status;
+      const next=select.value;
+      select.disabled=true;
+      badge.textContent="Speichert …";
+
+      try{
+        const response=await fetch(getApi()+"/api/contact/"+encodeURIComponent(inquiry.id),{
+          method:"PUT",
+          headers:{
+            "authorization":"Bearer "+getToken(),
+            "content-type":"application/json"
+          },
+          body:JSON.stringify({status:next})
+        });
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+
+        inquiry.status=next;
+        card.dataset.status=next;
+        badge.textContent=inquiryStatusLabel(next);
+        updateInquiryStats();
+
+        if((inquiryFilter?.value||"alle")!=="alle"){
+          renderInquiries();
+        }
+      }catch(error){
+        select.value=previous;
+        badge.textContent=inquiryStatusLabel(previous);
+        setStatus(inquiriesStatus,"Status konnte nicht gespeichert werden: "+error.message,false);
+      }finally{
+        select.disabled=false;
+      }
+    });
+
+    statusLabel.appendChild(select);
+
+    const reply=document.createElement("a");
+    reply.className="inquiry-reply";
+    reply.href="mailto:"+(inquiry.email||"")+"?subject="+encodeURIComponent("Re: "+(inquiry.subject||"Ihre Anfrage"));
+    reply.textContent="Per E-Mail antworten ↗";
+
+    actions.append(statusLabel,reply);
+
+    card.append(top,meta,subject,message,actions);
+    inquiriesList.appendChild(card);
+  }
+}
+
+async function loadInquiries(){
+  if(!inquiriesList||!inquiriesStatus) return;
+
+  if(!getApi()||!getToken()){
+    inquiriesCache=[];
+    updateInquiryStats();
+    inquiriesList.innerHTML="";
+    setStatus(inquiriesStatus,"Zum Laden der Anfragen bitte zuerst Worker-URL und Admin-Token verbinden.",false);
+    return;
+  }
+
+  if(refreshInquiries) refreshInquiries.disabled=true;
+  setStatus(inquiriesStatus,"Lade Projektanfragen …");
+
+  try{
+    const response=await fetch(getApi()+"/api/contact",{
+      headers:{"authorization":"Bearer "+getToken()}
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+
+    inquiriesCache=Array.isArray(data.inquiries)?data.inquiries:[];
+    updateInquiryStats();
+    renderInquiries();
+    setStatus(
+      inquiriesStatus,
+      inquiriesCache.length===1 ? "1 Anfrage geladen." : inquiriesCache.length+" Anfragen geladen.",
+      true
+    );
+  }catch(error){
+    inquiriesCache=[];
+    updateInquiryStats();
+    inquiriesList.innerHTML="";
+    setStatus(inquiriesStatus,"Anfragen konnten nicht geladen werden: "+error.message,false);
+  }finally{
+    if(refreshInquiries) refreshInquiries.disabled=false;
+  }
+}
+
+if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
+if(inquiryFilter) inquiryFilter.addEventListener("change",renderInquiries);
+
 function setStatus(el,text,ok){
   el.textContent=text;
   el.classList.remove("ok","bad");
@@ -636,6 +853,7 @@ loadCompanyTexts();
 loadProjectTitles();
 loadContactTexts();
 loadServiceContactTexts();
+loadInquiries();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
