@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Unternehmen · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20260923-18">
+</head>
+<body data-admin-page="unternehmen">
+  <header class="admin-header">
+    <div>
+      <span class="kicker">GudeliusVermessung</span>
+      <h1>Website-Admin</h1>
+    </div>
+    <div class="admin-header-actions">
+      <a class="ghost" href="./">Übersicht</a>
+      <a class="ghost" href="../">Website öffnen ↗</a>
+    </div>
+  </header>
+
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link" data-page="verbindung" href="./verbindung/">Verbindung</a>
+      <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+      <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+      <a class="admin-nav-link active" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+      <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+      <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+      <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen <span class="nav-count" id="inquiryNavCount" hidden>0</span></a>
+      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    </div>
+  </nav>
+
+  <main class="wrap admin-page-wrap">
+    <section class="admin-section" id="unternehmen">
+      <section class="section-head admin-section-head">
+        <div>
+          <span class="kicker">Unternehmen</span>
+          <h2>Unternehmensbereich</h2>
+        </div>
+        <p>Bilder, Vorstellung und beruflicher Werdegang sind in getrennten Karten organisiert.</p>
+      </section>
+
+      <div class="cms-group-grid">
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">01</span>
+            <div>
+              <span class="kicker">Bilder</span>
+              <h3>Unternehmensbilder</h3>
+              <p>Portrait und Prüf-/Kammerbild.</p>
+            </div>
+          </div>
+          <section id="companyGrid" class="equipment-grid compact-grid" aria-live="polite"></section>
+        </section>
+
+        <section class="cms-subpanel">
+          <div class="cms-subpanel-head">
+            <span class="cms-subpanel-icon">02</span>
+            <div>
+              <span class="kicker">Vorstellung</span>
+              <h3>Kopftext & Person</h3>
+              <p>Überschrift, Name, Qualifikation und Beschreibung.</p>
+            </div>
+          </div>
+          <div class="text-editor-grid single-column">
+            <label>Eyebrow<input id="companyEyebrow" type="text" maxlength="120"></label>
+            <label>Überschrift<input id="companyTitle" type="text" maxlength="180"></label>
+            <label>Name / Qualifikation<input id="companyName" type="text" maxlength="160"></label>
+            <label>Beschreibung<textarea id="companyLead" rows="4" maxlength="700"></textarea></label>
+          </div>
+        </section>
+      </div>
+
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Werdegang</span>
+            <h3>Timeline</h3>
+            <p>Die drei Stationen des beruflichen Werdegangs.</p>
+          </div>
+        </div>
+
+        <div class="timeline-editor-grid">
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 1</strong><span>Aktuell</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline1Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline1Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 2</strong><span>Berufserfahrung</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline2Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline2Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+          <div class="form-editor-block">
+            <div class="form-editor-block-head"><strong>Station 3</strong><span>Ausbildung</span></div>
+            <div class="text-editor-grid single-column">
+              <label>Zeitraum<input id="companyTimeline3Year" type="text" maxlength="80"></label>
+              <label>Text<input id="companyTimeline3Text" type="text" maxlength="220"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-editor-actions contact-save-actions">
+          <button id="saveCompanyTexts" type="button">Unternehmenstexte speichern</button>
+          <button id="reloadCompanyTexts" class="secondary" type="button">Neu laden</button>
+          <div id="companyTextStatus" class="status">Noch keine CMS-Texte geladen.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="equipmentTemplate">
+    <article class="equipment-card">
+      <div class="image-wrap">
+        <img alt="">
+        <span class="badge">Bild</span>
+      </div>
+      <div class="card-body">
+        <h3></h3>
+        <p class="detail"></p>
+        <label class="file-label">
+          <span>Neues Bild auswählen</span>
+          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+        </label>
+        <div class="card-actions">
+          <button class="upload" type="button">Bild hochladen</button>
+          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+        </div>
+        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./config.js?v=20260923-18"></script>
+  <script src="./admin.js?v=20260923-18"></script>
+</body>
+</html>
