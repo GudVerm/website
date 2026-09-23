@@ -1229,21 +1229,13 @@ if(reloadGisPageTexts){
 
 
 function setupServiceFlyover(){
-  const flyover=document.getElementById("serviceFlyover");
-  if(!flyover) return;
+  const nav=document.getElementById("serviceFlyover");
+  if(!nav) return;
 
-  const trigger=document.getElementById("serviceFlyoverTrigger");
-  const current=document.getElementById("serviceFlyoverCurrent");
   const departments=[...document.querySelectorAll("[data-service-department]")];
-  const serviceButtons=[...flyover.querySelectorAll("[data-service-target]")];
-  const sectionButtons=[...flyover.querySelectorAll("[data-section-target]")];
-
-  const serviceNames={
-    "ingenieurvermessung":"Ingenieurvermessung",
-    "gis-bauvermessung":"GIS & Bauvermessung",
-    "3d-laserscanning":"3D-Laserscanning",
-    "drohnenvermessung":"Drohnenvermessung"
-  };
+  const menuItems=[...nav.querySelectorAll("[data-service-menu]")];
+  const serviceButtons=[...nav.querySelectorAll("[data-service-target]")];
+  const sectionButtons=[...nav.querySelectorAll("[data-section-target]")];
 
   const sectionMap={
     "Hero":"hero",
@@ -1264,27 +1256,39 @@ function setupServiceFlyover(){
   });
 
   const validServices=new Set(departments.map(el=>el.dataset.serviceDepartment));
-  const requestedHash=decodeURIComponent(location.hash.replace(/^#/,""));
+  const hashValue=decodeURIComponent(location.hash.replace(/^#/,""));
+  const [hashService,hashSection]=hashValue.split(":");
   const remembered=localStorage.getItem("gudelius-admin-service");
-  let activeService=validServices.has(requestedHash)
-    ? requestedHash
+  let activeService=validServices.has(hashService)
+    ? hashService
     : validServices.has(remembered)
       ? remembered
       : "ingenieurvermessung";
 
-  function activeDepartment(){
-    return departments.find(el=>el.dataset.serviceDepartment===activeService)||null;
+  function getDepartment(service){
+    return departments.find(el=>el.dataset.serviceDepartment===service)||null;
   }
 
-  function updateSectionAvailability(){
-    const department=activeDepartment();
-    sectionButtons.forEach(button=>{
-      const section=button.dataset.sectionTarget;
-      button.disabled=!department?.querySelector('[data-fly-section="'+section+'"]');
+  function closeFlyouts(except=null){
+    menuItems.forEach(item=>{
+      if(item!==except) item.classList.remove("is-open");
+    });
+    serviceButtons.forEach(button=>{
+      button.setAttribute(
+        "aria-expanded",
+        button.closest("[data-service-menu]")?.classList.contains("is-open")?"true":"false"
+      );
     });
   }
 
-  function showService(service,{scroll=false,updateHash=true}={}){
+  function refreshFlyoutAvailability(){
+    sectionButtons.forEach(button=>{
+      const department=getDepartment(button.dataset.service);
+      button.disabled=!department?.querySelector('[data-fly-section="'+button.dataset.sectionTarget+'"]');
+    });
+  }
+
+  function showService(service,{scroll=false,section=null,updateHash=true}={}){
     if(!validServices.has(service)) return;
     activeService=service;
     localStorage.setItem("gudelius-admin-service",service);
@@ -1301,58 +1305,78 @@ function setupServiceFlyover(){
       button.setAttribute("aria-pressed",active?"true":"false");
     });
 
-    if(current) current.textContent=serviceNames[service]||service;
-    updateSectionAvailability();
+    const department=getDepartment(service);
+    let target=department;
+    if(section){
+      target=department?.querySelector('[data-fly-section="'+section+'"]')||department;
+    }
 
     if(updateHash){
-      history.replaceState(null,"","#"+service);
+      history.replaceState(null,"","#"+service+(section?":"+section:""));
     }
 
-    if(scroll){
-      activeDepartment()?.scrollIntoView({behavior:"smooth",block:"start"});
-    }
+    closeFlyouts();
 
-    flyover.classList.remove("is-open");
-    trigger?.setAttribute("aria-expanded","false");
+    if(scroll && target){
+      requestAnimationFrame(()=>target.scrollIntoView({behavior:"smooth",block:"start"}));
+    }
   }
 
-  trigger?.addEventListener("click",()=>{
-    const open=!flyover.classList.contains("is-open");
-    flyover.classList.toggle("is-open",open);
-    trigger.setAttribute("aria-expanded",open?"true":"false");
-  });
-
   serviceButtons.forEach(button=>{
-    button.addEventListener("click",()=>showService(button.dataset.serviceTarget,{scroll:true}));
+    button.addEventListener("click",event=>{
+      const service=button.dataset.serviceTarget;
+      const item=button.closest("[data-service-menu]");
+      const isTouchLike=window.matchMedia("(hover: none)").matches;
+
+      if(isTouchLike && activeService===service){
+        event.preventDefault();
+        const open=!item.classList.contains("is-open");
+        closeFlyouts(item);
+        item.classList.toggle("is-open",open);
+        button.setAttribute("aria-expanded",open?"true":"false");
+        return;
+      }
+
+      showService(service,{scroll:true});
+    });
   });
 
   sectionButtons.forEach(button=>{
     button.addEventListener("click",()=>{
-      const department=activeDepartment();
-      const target=department?.querySelector('[data-fly-section="'+button.dataset.sectionTarget+'"]');
-      if(!target) return;
-      flyover.classList.remove("is-open");
-      trigger?.setAttribute("aria-expanded","false");
-      target.scrollIntoView({behavior:"smooth",block:"start"});
+      if(button.disabled) return;
+      showService(button.dataset.service,{
+        scroll:true,
+        section:button.dataset.sectionTarget
+      });
+    });
+  });
+
+  menuItems.forEach(item=>{
+    item.addEventListener("mouseenter",()=>{
+      closeFlyouts(item);
     });
   });
 
   document.addEventListener("click",event=>{
-    if(!flyover.contains(event.target)){
-      flyover.classList.remove("is-open");
-      trigger?.setAttribute("aria-expanded","false");
-    }
+    if(!nav.contains(event.target)) closeFlyouts();
   });
 
   document.addEventListener("keydown",event=>{
     if(event.key==="Escape"){
-      flyover.classList.remove("is-open");
-      trigger?.setAttribute("aria-expanded","false");
-      trigger?.focus();
+      closeFlyouts();
+      document.activeElement?.blur?.();
     }
   });
 
+  refreshFlyoutAvailability();
   showService(activeService,{updateHash:false});
+
+  if(validServices.has(hashService) && hashSection){
+    const target=getDepartment(hashService)?.querySelector('[data-fly-section="'+hashSection+'"]');
+    if(target){
+      requestAnimationFrame(()=>target.scrollIntoView({block:"start"}));
+    }
+  }
 }
 
 function setStatus(el,text,ok){
