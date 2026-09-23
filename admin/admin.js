@@ -170,40 +170,54 @@ const saveServiceContactTexts=document.getElementById("saveServiceContactTexts")
 const reloadServiceContactTexts=document.getElementById("reloadServiceContactTexts");
 const serviceContactTextStatus=document.getElementById("serviceContactTextStatus");
 
-apiUrlInput.value=(window.GUDELIUS_CMS_API||"").replace(/\/$/,"");
-tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
+if(apiUrlInput){
+  apiUrlInput.value=(window.GUDELIUS_CMS_API||localStorage.getItem("gudelius-cms-api")||"").replace(/\/$/,"");
+}
+if(tokenInput){
+  tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
+}
 
 function getApi(){
-  let value=apiUrlInput.value.trim().replace(/\/$/,"");
+  let value=(apiUrlInput?.value||window.GUDELIUS_CMS_API||localStorage.getItem("gudelius-cms-api")||"").trim().replace(/\/$/,"");
   if(value && !/^https?:\/\//i.test(value)) value="https://"+value;
   return value;
 }
-function getToken(){return tokenInput.value.trim()}
+function getToken(){
+  return (tokenInput?.value||sessionStorage.getItem("gudelius-cms-token")||"").trim();
+}
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
 
-saveButton.addEventListener("click",()=>{
-  const api=getApi();
-  if(api){ apiUrlInput.value=api; localStorage.setItem("gudelius-cms-api",api); }
-  else localStorage.removeItem("gudelius-cms-api");
-  if(getToken()) sessionStorage.setItem("gudelius-cms-token",getToken());
-  else sessionStorage.removeItem("gudelius-cms-token");
-  setStatus(connectionStatus,"Verbindungsdaten gespeichert.",true);
-  render();
-  loadInquiries();
-});
+if(saveButton){
+  saveButton.addEventListener("click",()=>{
+    const api=getApi();
+    if(api){
+      apiUrlInput.value=api;
+      localStorage.setItem("gudelius-cms-api",api);
+    }else{
+      localStorage.removeItem("gudelius-cms-api");
+    }
+    if(getToken()) sessionStorage.setItem("gudelius-cms-token",getToken());
+    else sessionStorage.removeItem("gudelius-cms-token");
+    setStatus(connectionStatus,"Verbindungsdaten gespeichert.",true);
+    render();
+    loadInquiries();
+  });
+}
 
-testButton.addEventListener("click",async()=>{
-  if(!getApi()) return setStatus(connectionStatus,"Bitte zuerst die Worker-URL eintragen.",false);
-  setStatus(connectionStatus,"Teste Verbindung …");
-  try{
-    const r=await fetch(getApi()+"/api/health");
-    if(!r.ok) throw new Error("HTTP "+r.status);
-    const data=await r.json();
-    setStatus(connectionStatus,data.ok?"Cloudflare Worker erreichbar.":"Unerwartete Antwort.",!!data.ok);
-  }catch(e){
-    setStatus(connectionStatus,"Worker nicht erreichbar: "+e.message,false);
-  }
-});
+if(testButton){
+  testButton.addEventListener("click",async()=>{
+    if(!getApi()) return setStatus(connectionStatus,"Bitte zuerst die Worker-URL eintragen.",false);
+    setStatus(connectionStatus,"Teste Verbindung …");
+    try{
+      const r=await fetch(getApi()+"/api/health");
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      const data=await r.json();
+      setStatus(connectionStatus,data.ok?"Cloudflare Worker erreichbar.":"Unerwartete Antwort.",!!data.ok);
+    }catch(e){
+      setStatus(connectionStatus,"Worker nicht erreichbar: "+e.message,false);
+    }
+  });
+}
 
 const heroTextDefaults={
   "startseite/hero-eyebrow":"Vermessung für anspruchsvolle Projekte",
@@ -216,6 +230,7 @@ function contentUrl(key){
 }
 
 async function loadHeroTexts(){
+  if(!heroTextStatus) return;
   if(!getApi()) return setStatus(heroTextStatus,"Worker-URL fehlt.",false);
   setStatus(heroTextStatus,"Lade Texte …");
   try{
@@ -282,6 +297,7 @@ const serviceTextDefaults={
 };
 
 async function loadServiceTexts(){
+  if(!serviceTextStatus) return;
   if(!getApi()) return setStatus(serviceTextStatus,"Worker-URL fehlt.",false);
   setStatus(serviceTextStatus,"Lade Leistungstexte …");
   try{
@@ -335,6 +351,7 @@ const companyTextDefaults={
 };
 
 async function loadCompanyTexts(){
+  if(!companyTextStatus) return;
   if(!getApi()) return setStatus(companyTextStatus,"Worker-URL fehlt.",false);
   setStatus(companyTextStatus,"Lade Unternehmenstexte …");
   try{
@@ -384,6 +401,7 @@ const projectTitleDefaults={
 };
 
 async function loadProjectTitles(){
+  if(!projectTitleStatus) return;
   if(!getApi()) return setStatus(projectTitleStatus,"Worker-URL fehlt.",false);
   setStatus(projectTitleStatus,"Lade Projekt-Titel …");
   try{
@@ -465,6 +483,7 @@ const serviceContactTextDefaults={
 };
 
 async function loadContactTexts(){
+  if(!contactTextStatus) return;
   if(!getApi()) return setStatus(contactTextStatus,"Worker-URL fehlt.",false);
   setStatus(contactTextStatus,"Lade Kontaktdaten …");
   try{
@@ -505,6 +524,7 @@ if(saveContactTexts){
 if(reloadContactTexts) reloadContactTexts.addEventListener("click",loadContactTexts);
 
 async function loadServiceContactTexts(){
+  if(!serviceContactTextStatus) return;
   if(!getApi()) return setStatus(serviceContactTextStatus,"Worker-URL fehlt.",false);
   setStatus(serviceContactTextStatus,"Lade Leistungs-Kontakttexte …");
   try{
@@ -963,6 +983,7 @@ if(reloadEngineerPageTexts){
 }
 
 function setStatus(el,text,ok){
+  if(!el) return;
   el.textContent=text;
   el.classList.remove("ok","bad");
   if(ok===true) el.classList.add("ok");
@@ -1069,29 +1090,9 @@ loadInquiries();
 
 
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
-const adminSections=adminNavLinks
-  .map(link=>document.querySelector(link.getAttribute("href")))
-  .filter(Boolean);
-
-function setActiveAdminNav(id){
-  adminNavLinks.forEach(link=>{
-    link.classList.toggle("active",link.getAttribute("href")==="#"+id);
-  });
-}
+const activeAdminPage=document.body.dataset.adminPage||"";
 
 adminNavLinks.forEach(link=>{
-  link.addEventListener("click",()=>{
-    const id=link.getAttribute("href").slice(1);
-    setActiveAdminNav(id);
-  });
+  const page=link.dataset.page||"";
+  link.classList.toggle("active",page===activeAdminPage);
 });
-
-if("IntersectionObserver" in window){
-  const adminNavObserver=new IntersectionObserver(entries=>{
-    const visible=entries
-      .filter(entry=>entry.isIntersecting)
-      .sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-    if(visible?.target?.id) setActiveAdminNav(visible.target.id);
-  },{rootMargin:"-70px 0px -55% 0px",threshold:[0,.1,.25,.5]});
-  adminSections.forEach(section=>adminNavObserver.observe(section));
-}
