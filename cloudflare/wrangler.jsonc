@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "gudelius-cms-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "7942d0c3-e587-4b61-8bc7-6f9b3b8d1029"
     }
   ],
   "r2_buckets": [
