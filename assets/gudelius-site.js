@@ -590,12 +590,47 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.equip-open[data-equipment]').forEach(card=>{
       const group=equipmentData[card.dataset.equipment];if(!group)return;
       const devices=group.devices||[];card.hidden=!devices.length;if(!devices.length)return;
+      card.removeAttribute('tabindex');
+      card.removeAttribute('role');
+      card.removeAttribute('aria-label');
       const main=card.querySelector(':scope > img');
       if(main){const first=devices[0];delete main.dataset.cmsApplied;main.src=first.image;main.dataset.cmsMedia=first.mediaKey;main.alt=first.name}
       const list=card.querySelector('.equip-copy ul');
-      if(list){list.innerHTML='';devices.forEach(device=>{const li=document.createElement('li');li.textContent=device.name;list.appendChild(li)})}
+      if(list){
+        list.innerHTML='';
+        devices.forEach(device=>{
+          const li=document.createElement('li');
+          const button=document.createElement('button');
+          button.type='button';
+          button.className='equip-device-trigger';
+          button.dataset.equipmentDevice=device.slug;
+          button.textContent=device.name;
+          button.setAttribute('aria-label',device.name+' im Detail öffnen');
+          li.appendChild(button);
+          list.appendChild(li);
+        });
+      }
       const strip=card.querySelector('.equip-preview-strip');
-      if(strip){strip.innerHTML='';devices.forEach(device=>{const img=document.createElement('img');img.src=device.image;img.dataset.cmsMedia=device.mediaKey;img.alt=device.name;img.loading='lazy';img.decoding='async';strip.appendChild(img)})}
+      if(strip){
+        strip.innerHTML='';
+        devices.forEach(device=>{
+          const button=document.createElement('button');
+          button.type='button';
+          button.className='equip-preview-trigger';
+          button.dataset.equipmentDevice=device.slug;
+          button.setAttribute('aria-label',device.name+' im Detail öffnen');
+          const img=document.createElement('img');
+          img.src=device.image;
+          img.dataset.cmsMedia=device.mediaKey;
+          img.alt=device.name;
+          img.loading='lazy';
+          img.decoding='async';
+          button.appendChild(img);
+          strip.appendChild(button);
+        });
+      }
+      const more=card.querySelector('.equip-more');
+      if(more) more.hidden=true;
       applyCmsMedia(card);
     });
   }
@@ -623,61 +658,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }catch(error){console.warn('Dynamische Technik konnte nicht geladen werden; Fallback bleibt aktiv.',error)}
   }
 
-  function openEquipmentModal(key) {
-    if (!equipmentModal || !equipmentData[key]) return;
-    const data = equipmentData[key];
+  function equipmentDeviceBySlug(slug){
+    for(const [groupKey,group] of Object.entries(equipmentData)){
+      const device=(group.devices||[]).find(item=>item.slug===slug);
+      if(device)return {groupKey,group,device};
+    }
+    return null;
+  }
 
-    equipmentKicker.textContent = data.kicker;
-    equipmentTitle.textContent = data.title;
-    equipmentLead.textContent = data.lead;
-    equipmentSummary.textContent = data.summary;
-    equipmentGallery.innerHTML = data.devices
-      .map((device) => {
-        const cmsBase = 'technik/' + device.slug;
-        return `
-          <article class="equipment-device-card" data-technique="${device.slug}">
-            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${escapeEquipmentHtml(device.name)}" loading="lazy" decoding="async" fetchpriority="low">
-            <div class="equipment-device-copy">
-              <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${escapeEquipmentHtml(device.category)}</span>
-              <strong data-cms-text="${cmsBase}/name">${escapeEquipmentHtml(device.name)}</strong>
-              <dl class="equipment-device-meta">
-                <div><dt>Hersteller</dt><dd data-cms-text="${cmsBase}/manufacturer">${escapeEquipmentHtml(device.manufacturer)}</dd></div>
-                <div><dt>Modell</dt><dd data-cms-text="${cmsBase}/model">${escapeEquipmentHtml(device.model)}</dd></div>
-              </dl>
-              <p class="equipment-device-description" data-cms-text="${cmsBase}/description">${escapeEquipmentHtml(device.description)}</p>
-              <p class="equipment-device-details"><b>Besonderheiten</b><span data-cms-text="${cmsBase}/details">${escapeEquipmentHtml(device.details)}</span></p>
-              ${device.source ? `<a class="equipment-source" href="${escapeEquipmentHtml(device.source)}" target="_blank" rel="noopener">Bildquelle: ${escapeEquipmentHtml(device.sourceLabel)} ↗</a>` : ''}
-            </div>
-          </article>
-        `;
-      })
-      .join('');
+  let equipmentModalPreviousFocus=null;
+
+  function openEquipmentModal(slug) {
+    if (!equipmentModal) return;
+    const record=equipmentDeviceBySlug(slug);
+    if(!record)return;
+    const {group,device}=record;
+    const cmsBase='technik/'+device.slug;
+
+    equipmentKicker.textContent=group.kicker;
+    equipmentTitle.textContent=device.name;
+    equipmentLead.textContent=device.description||'';
+    equipmentSummary.textContent=device.details||group.summary||'';
+    equipmentTitle.dataset.cmsText=cmsBase+'/name';
+    equipmentLead.dataset.cmsText=cmsBase+'/description';
+    equipmentSummary.dataset.cmsText=cmsBase+'/details';
+
+    equipmentGallery.innerHTML=`
+      <article class="equipment-device-card equipment-device-card-single" data-technique="${escapeEquipmentHtml(device.slug)}">
+        <img src="${escapeEquipmentHtml(device.image)}" data-cms-media="${escapeEquipmentHtml(device.mediaKey||'')}" alt="${escapeEquipmentHtml(device.name)}" loading="eager" decoding="async" fetchpriority="high">
+        <div class="equipment-device-copy">
+          <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${escapeEquipmentHtml(device.category)}</span>
+          <dl class="equipment-device-meta">
+            <div><dt>Hersteller</dt><dd data-cms-text="${cmsBase}/manufacturer">${escapeEquipmentHtml(device.manufacturer)}</dd></div>
+            <div><dt>Modell</dt><dd data-cms-text="${cmsBase}/model">${escapeEquipmentHtml(device.model)}</dd></div>
+          </dl>
+          <p class="equipment-device-description" data-cms-text="${cmsBase}/description">${escapeEquipmentHtml(device.description)}</p>
+          <p class="equipment-device-details"><b>Besonderheiten</b><span data-cms-text="${cmsBase}/details">${escapeEquipmentHtml(device.details)}</span></p>
+          ${device.source ? `<a class="equipment-source" href="${escapeEquipmentHtml(device.source)}" target="_blank" rel="noopener">Bildquelle: ${escapeEquipmentHtml(device.sourceLabel)} ↗</a>` : ''}
+        </div>
+      </article>
+    `;
+
+    applyCmsText(equipmentModal);
     applyCmsMedia(equipmentGallery);
+    sendAnalyticsEvent('equipment_open',device.slug,device.name||device.slug);
 
-    sendAnalyticsEvent('equipment_open',key,data.title||data.kicker||key);
-
+    equipmentModalPreviousFocus=document.activeElement;
+    equipmentModal.dataset.device=device.slug;
     equipmentModal.classList.add('open');
-    equipmentModal.setAttribute('aria-hidden', 'false');
+    equipmentModal.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
-    if (equipmentClose) equipmentClose.focus();
+    equipmentClose?.focus();
   }
 
   function closeEquipmentModal() {
     if (!equipmentModal) return;
     equipmentModal.classList.remove('open');
-    equipmentModal.setAttribute('aria-hidden', 'true');
+    equipmentModal.setAttribute('aria-hidden','true');
+    delete equipmentModal.dataset.device;
     document.body.classList.remove('modal-open');
+    equipmentModalPreviousFocus?.focus?.();
   }
 
-  document.querySelectorAll('.equip-open[data-equipment]').forEach((card) => {
-    card.addEventListener('click', () => openEquipmentModal(card.dataset.equipment));
-    card.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        openEquipmentModal(card.dataset.equipment);
-      }
-    });
+  document.addEventListener('click',(event)=>{
+    const trigger=event.target.closest('[data-equipment-device]');
+    if(trigger && trigger.closest('.equipment-grid')){
+      event.preventDefault();
+      openEquipmentModal(trigger.dataset.equipmentDevice);
+    }
   });
+
+  renderDynamicEquipmentOverview();
 
   loadDynamicTechnique();
 
@@ -690,9 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && equipmentModal?.classList.contains('open')) {
-      closeEquipmentModal();
-    }
+    if (event.key === 'Escape' && equipmentModal?.classList.contains('open')) closeEquipmentModal();
   });
 });
 
