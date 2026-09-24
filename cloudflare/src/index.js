@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.10";
+const WORKER_RELEASE = "2026-09-24.11";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -529,7 +529,7 @@ async function handleAdminUi(request, env, url) {
     body = body
       .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
       .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-44")
-      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-47")
+      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-48")
       .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
       .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
       .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
@@ -551,6 +551,7 @@ async function handlePublicAssetProxy(request, env, url) {
     return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
   }
   const sourceUrl = new URL(url.pathname.slice(1), publicSiteUrl(env));
+  sourceUrl.searchParams.set("worker_release", WORKER_RELEASE);
   const upstream = await fetch(sourceUrl, { method: "GET", headers: { "user-agent": "GudeliusVermessung-AssetProxy/1.0" }, redirect: "follow" });
   if (!upstream.ok) return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
 
@@ -559,7 +560,7 @@ async function handlePublicAssetProxy(request, env, url) {
   if (type) headers.set("content-type", type);
   const etag = upstream.headers.get("etag");
   if (etag) headers.set("etag", etag);
-  headers.set("cache-control", "public, max-age=300");
+  headers.set("cache-control", "no-store");
   headers.set("x-content-type-options", "nosniff");
   headers.set("cross-origin-resource-policy", "same-origin");
   return new Response(request.method === "HEAD" ? null : upstream.body, { status: 200, headers });
