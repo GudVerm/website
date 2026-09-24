@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Anfragen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260924-21">
+  <link rel="stylesheet" href="./admin.css?v=20260924-22">
 </head>
 <body data-admin-page="anfragen">
   <header class="admin-header">
@@ -44,57 +44,88 @@
         <p>Alle über die Website gesendeten Kontaktanfragen werden hier aus Cloudflare D1 geladen und können bearbeitet werden.</p>
       </section>
 
-      <div class="inquiry-stats">
-        <div class="inquiry-stat">
+      <div class="inquiry-stats" aria-label="Schnellfilter für Anfragen">
+        <button class="inquiry-stat active" type="button" data-inquiry-quick-filter="alle">
+          <span>Gesamt</span>
+          <strong id="inquiryCountAll">0</strong>
+        </button>
+        <button class="inquiry-stat" type="button" data-inquiry-quick-filter="neu">
           <span>Neu</span>
           <strong id="inquiryCountNew">0</strong>
-        </div>
-        <div class="inquiry-stat">
+        </button>
+        <button class="inquiry-stat" type="button" data-inquiry-quick-filter="in-arbeit">
           <span>In Arbeit</span>
           <strong id="inquiryCountProgress">0</strong>
-        </div>
-        <div class="inquiry-stat">
+        </button>
+        <button class="inquiry-stat" type="button" data-inquiry-quick-filter="erledigt">
           <span>Erledigt</span>
           <strong id="inquiryCountDone">0</strong>
-        </div>
+        </button>
       </div>
 
-      <section class="cms-subpanel">
+      <section class="cms-subpanel inquiry-inbox">
         <div class="cms-subpanel-head inquiry-head">
           <span class="cms-subpanel-icon">01</span>
           <div>
             <span class="kicker">Posteingang</span>
             <h3>Projektanfragen</h3>
-            <p>Name, Kontaktdaten, Betreff, Nachricht und Bearbeitungsstatus.</p>
-          </div>
-          <div class="inquiry-toolbar">
-            <label class="inquiry-search-label">Suche
-              <input id="inquirySearch" type="search" placeholder="Name, E-Mail, Betreff …">
-            </label>
-            <label>Status
-              <select id="inquiryFilter">
-                <option value="alle">Alle</option>
-                <option value="neu">Neu</option>
-                <option value="in-arbeit">In Arbeit</option>
-                <option value="erledigt">Erledigt</option>
-                <option value="archiviert">Archiviert</option>
-                <option value="spam">Spam</option>
-              </select>
-            </label>
-            <label>Zeitraum
-              <select id="inquiryPeriod">
-                <option value="alle">Alle</option>
-                <option value="heute">Heute</option>
-                <option value="7">Letzte 7 Tage</option>
-                <option value="30">Letzte 30 Tage</option>
-              </select>
-            </label>
-            <button id="refreshInquiries" class="secondary" type="button">Aktualisieren</button>
+            <p>Kompakte Übersicht mit Filtern, Suche und Seitenaufteilung. Details werden erst bei Bedarf geöffnet.</p>
           </div>
         </div>
 
-        <div id="inquiriesStatus" class="status inquiry-load-status">Anfragen werden geladen …</div>
+        <div class="inquiry-toolbar">
+          <label class="inquiry-search-label">Suche
+            <input id="inquirySearch" type="search" placeholder="Name, E-Mail, Betreff oder Nachricht …">
+          </label>
+          <label>Status
+            <select id="inquiryFilter">
+              <option value="alle">Alle</option>
+              <option value="neu">Neu</option>
+              <option value="in-arbeit">In Arbeit</option>
+              <option value="erledigt">Erledigt</option>
+              <option value="archiviert">Archiviert</option>
+              <option value="spam">Spam</option>
+            </select>
+          </label>
+          <label>Zeitraum
+            <select id="inquiryPeriod">
+              <option value="alle">Alle</option>
+              <option value="heute">Heute</option>
+              <option value="7">Letzte 7 Tage</option>
+              <option value="30">Letzte 30 Tage</option>
+            </select>
+          </label>
+          <label>Sortierung
+            <select id="inquirySort">
+              <option value="newest">Neueste zuerst</option>
+              <option value="oldest">Älteste zuerst</option>
+            </select>
+          </label>
+          <label>Pro Seite
+            <select id="inquiryPageSize">
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+          <button id="refreshInquiries" class="secondary" type="button">Aktualisieren</button>
+        </div>
+
+        <div class="inquiry-result-bar">
+          <div>
+            <strong id="inquiryResultSummary">0 Anfragen</strong>
+            <span>Nur die aktuelle Seite wird aufgeklappt dargestellt.</span>
+          </div>
+          <div id="inquiriesStatus" class="status inquiry-load-status">Anfragen werden geladen …</div>
+        </div>
+
         <div id="inquiriesList" class="inquiry-list" aria-live="polite"></div>
+
+        <div class="inquiry-pagination" id="inquiryPagination" aria-label="Seitennavigation">
+          <button id="inquiryPrevPage" class="secondary" type="button">← Zurück</button>
+          <span id="inquiryPageLabel">Seite 1 von 1</span>
+          <button id="inquiryNextPage" class="secondary" type="button">Weiter →</button>
+        </div>
       </section>
     </section>
   </main>
@@ -122,6 +153,6 @@
   </template>
 
   <script src="./config.js?v=20260924-44"></script>
-  <script src="./admin.js?v=20260924-44"></script>
+  <script src="./admin.js?v=20260924-45"></script>
 </body>
 </html>
