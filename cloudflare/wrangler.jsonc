@@ -8,7 +8,8 @@
   },
   "vars": {
     "ALLOWED_ORIGIN": "https://gudverm.github.io",
-    "CONTACT_EMAIL_FROM": "website@gudeliusvermessung.de"
+    "CONTACT_EMAIL_FROM": "website@gudeliusvermessung.de",
+    "PUBLIC_MEDIA_ENABLED": "false"
   },
   "d1_databases": [
     {
@@ -20,13 +21,42 @@
   "send_email": [
     {
       "name": "CONTACT_EMAIL",
-      "destination_address": "gudeliusvermessung@web.de"
+      "destination_address": "gudeliusvermessung@web.de",
+      "allowed_sender_addresses": [
+        "website@gudeliusvermessung.de"
+      ]
     }
   ],
   "r2_buckets": [
     {
       "binding": "MEDIA",
       "bucket_name": "gudelius-media"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "CONTACT_RATE_LIMITER",
+      "namespace_id": "2026092401",
+      "simple": {
+        "limit": 12,
+        "period": 60
+      }
+    },
+    {
+      "name": "ANALYTICS_RATE_LIMITER",
+      "namespace_id": "2026092402",
+      "simple": {
+        "limit": 600,
+        "period": 60
+      }
+    },
+    {
+      "name": "MEDIA_RATE_LIMITER",
+      "namespace_id": "2026092403",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
     }
   ]
 }

@@ -1,8 +1,11 @@
 const MAX_MEDIA_BYTES = 15 * 1024 * 1024;
 const MAX_CONTENT_BYTES = 1024 * 1024;
 const MAX_CONTACT_BYTES = 16 * 1024;
+const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
+const WORKER_RELEASE = "2026-09-24.1";
+const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
 export default {
   async fetch(request, env) {
@@ -10,15 +13,26 @@ export default {
     const cors = corsHeaders(request, env);
 
     if (request.method === "OPTIONS") {
+      if (!isCorsPreflightAllowed(request, env)) {
+        return json({ error: "Origin not allowed" }, 403, cors);
+      }
       return new Response(null, { status: 204, headers: cors });
     }
 
     try {
       if (url.pathname === "/api/health" && request.method === "GET") {
-        return json({ ok: true, service: "gudelius-cms" }, 200, cors);
+        return json({ ok: true, service: "gudelius-cms", release: WORKER_RELEASE }, 200, cors);
+      }
+
+      if (url.pathname === "/api/admin/health" && request.method === "GET") {
+        if (!isAuthorized(request, env)) {
+          return json({ error: "Unauthorized" }, 401, cors);
+        }
+        return handleAdminHealth(env, cors);
       }
 
       if (url.pathname === "/api/site" && request.method === "GET") {
+        await ensureContentTable(env);
         const { results = [] } = await env.DB.prepare(
           "SELECT key, value, updated_at FROM content ORDER BY key"
         ).all();
@@ -48,6 +62,9 @@ export default {
           if (!isAllowedPublicOrigin(request, env)) {
             return json({ error: "Origin not allowed" }, 403, cors);
           }
+          if (!isJsonRequest(request)) {
+            return json({ error: "Content-Type muss application/json sein." }, 415, cors);
+          }
           const contentLength = Number(request.headers.get("content-length") || 0);
           if (contentLength > MAX_CONTACT_BYTES) {
             return json({ error: "Anfrage zu groß." }, 413, cors);
@@ -68,11 +85,19 @@ export default {
             return json({ ok: true }, 200, cors);
           }
 
-          const name = cleanText(payload.name, 160);
-          const email = cleanText(payload.email, 240);
-          const subject = cleanText(payload.subject, 240);
+          if (await isRateLimited(env.CONTACT_RATE_LIMITER, "contact-form")) {
+            return json(
+              { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
+              429,
+              { ...cors, "retry-after": "60" }
+            );
+          }
+
+          const name = cleanSingleLine(payload.name, 160);
+          const email = cleanSingleLine(payload.email, 240);
+          const subject = cleanSingleLine(payload.subject, 240);
           const message = cleanText(payload.message, 5000);
-          const source = cleanText(payload.source, 300) || "/";
+          const source = normalizeContactSource(payload.source);
 
           if (!name || !email || !subject || !message) {
             return json({ error: "Bitte alle Pflichtfelder ausfüllen." }, 400, cors);
@@ -138,9 +163,18 @@ export default {
         const id = decodeKey(url.pathname, "/api/contact/");
         if (!id) return json({ error: "Missing inquiry id" }, 400, cors);
 
+        const updateLength = Number(request.headers.get("content-length") || 0);
+        if (updateLength > MAX_CONTACT_UPDATE_BYTES) {
+          return json({ error: "Änderung zu groß." }, 413, cors);
+        }
+        const updateRaw = await request.text();
+        if (new TextEncoder().encode(updateRaw).byteLength > MAX_CONTACT_UPDATE_BYTES) {
+          return json({ error: "Änderung zu groß." }, 413, cors);
+        }
+
         let payload;
         try {
-          payload = await request.json();
+          payload = JSON.parse(updateRaw);
         } catch {
           return json({ error: "Ungültige Anfrage." }, 400, cors);
         }
@@ -181,6 +215,7 @@ export default {
       if (url.pathname.startsWith("/api/content/")) {
         const key = decodeKey(url.pathname, "/api/content/");
         if (!key) return json({ error: "Missing content key" }, 400, cors);
+        await ensureContentTable(env);
 
         if (request.method === "GET") {
           const row = await env.DB.prepare(
@@ -238,10 +273,25 @@ export default {
           if (!isAuthorized(request, env)) {
             return json({ error: "Unauthorized" }, 401, cors);
           }
+          if (!isSafeMediaKey(key)) {
+            return json({ error: "Ungültiger Medien-Key." }, 400, cors);
+          }
+          if (await isRateLimited(env.MEDIA_RATE_LIMITER, "admin-media")) {
+            return json(
+              { error: "Zu viele Medienänderungen. Bitte versuchen Sie es in einer Minute erneut." },
+              429,
+              { ...cors, "retry-after": "60" }
+            );
+          }
 
           const contentLength = Number(request.headers.get("content-length") || 0);
           if (contentLength > MAX_MEDIA_BYTES) {
             return json({ error: "File too large" }, 413, cors);
+          }
+
+          const contentType = normalizeMediaType(request.headers.get("content-type"));
+          if (!ALLOWED_MEDIA_TYPES.has(contentType)) {
+            return json({ error: "Nicht unterstützter Dateityp." }, 415, cors);
           }
 
           const bytes = await request.arrayBuffer();
@@ -249,14 +299,19 @@ export default {
             return json({ error: "File too large" }, 413, cors);
           }
 
-          const contentType = request.headers.get("content-type") || "application/octet-stream";
+          const detectedType = detectImageMime(new Uint8Array(bytes));
+          if (!detectedType || detectedType !== contentType) {
+            return json({ error: "Dateiinhalt und MIME-Typ stimmen nicht überein." }, 415, cors);
+          }
+
+          const originalName = sanitizeFileName(request.headers.get("x-file-name"), contentType);
           await env.MEDIA.put(key, bytes, {
             httpMetadata: {
               contentType,
               cacheControl: "public, max-age=3600"
             },
             customMetadata: {
-              originalName: request.headers.get("x-file-name") || key
+              originalName
             }
           });
 
@@ -278,8 +333,17 @@ export default {
       }
 
       if (url.pathname.startsWith("/media/") && request.method === "GET") {
+        if (!isPublicMediaEnabled(env)) {
+          return new Response("Not found", {
+            status: 404,
+            headers: { ...cors, "cache-control": "no-store", "x-content-type-options": "nosniff" }
+          });
+        }
+
         const key = decodeKey(url.pathname, "/media/");
-        if (!key) return new Response("Not found", { status: 404, headers: cors });
+        if (!key || !isSafeMediaKey(key)) {
+          return new Response("Not found", { status: 404, headers: cors });
+        }
 
         const object = await env.MEDIA.get(key);
         if (!object) return new Response("Not found", { status: 404, headers: cors });
@@ -288,6 +352,8 @@ export default {
         object.writeHttpMetadata(headers);
         headers.set("etag", object.httpEtag);
         headers.set("cache-control", "public, max-age=3600");
+        headers.set("x-content-type-options", "nosniff");
+        headers.set("cross-origin-resource-policy", "cross-origin");
 
         return new Response(object.body, { headers });
       }
@@ -299,6 +365,70 @@ export default {
     }
   }
 };
+
+async function handleAdminHealth(env, cors) {
+  let dbOk = false;
+  let mediaOk = false;
+  let schema = {
+    content: false,
+    contact_requests: false,
+    analytics_events: false
+  };
+
+  try {
+    await ensureContentTable(env);
+    await ensureContactTable(env);
+    await ensureAnalyticsTable(env);
+
+    const [contentInfo, contactInfo, analyticsInfo] = await Promise.all([
+      env.DB.prepare("PRAGMA table_info(content)").all(),
+      env.DB.prepare("PRAGMA table_info(contact_requests)").all(),
+      env.DB.prepare("PRAGMA table_info(analytics_events)").all()
+    ]);
+
+    schema = {
+      content: hasColumns(contentInfo.results || [], ["key", "value", "updated_at"]),
+      contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "created_at"]),
+      analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"])
+    };
+    dbOk = Object.values(schema).every(Boolean);
+  } catch (error) {
+    console.error("Admin health D1 check failed:", error);
+  }
+
+  try {
+    if (env.MEDIA?.head) {
+      await env.MEDIA.head("__gudelius_healthcheck__");
+      mediaOk = true;
+    }
+  } catch (error) {
+    console.error("Admin health R2 check failed:", error);
+  }
+
+  const bindings = {
+    db: dbOk,
+    media: mediaOk,
+    contact_email: Boolean(env.CONTACT_EMAIL?.send),
+    contact_email_from: Boolean(env.CONTACT_EMAIL_FROM),
+    allowed_origin: getAllowedOrigins(env).length > 0,
+    admin_token: Boolean(env.CMS_ADMIN_TOKEN)
+  };
+
+  const ok = Object.values(bindings).every(Boolean) && Object.values(schema).every(Boolean);
+  return json({
+    ok,
+    service: "gudelius-cms",
+    release: WORKER_RELEASE,
+    public_media_enabled: isPublicMediaEnabled(env),
+    bindings,
+    schema
+  }, ok ? 200 : 503, cors);
+}
+
+function hasColumns(rows, expected) {
+  const names = new Set(rows.map(row => row.name));
+  return expected.every(name => names.has(name));
+}
 
 async function sendContactNotification(env, inquiry) {
   if (!env.CONTACT_EMAIL || !env.CONTACT_EMAIL_FROM) {
@@ -371,6 +501,10 @@ async function handleAnalyticsEvent(request, env, cors) {
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_ANALYTICS_BYTES) return json({ error: "Analytics payload too large" }, 413, cors);
   if (!isAllowedPublicOrigin(request, env)) return json({ error: "Origin not allowed" }, 403, cors);
+  if (!isJsonRequest(request)) return json({ error: "Content-Type muss application/json sein." }, 415, cors);
+  if (await isRateLimited(env.ANALYTICS_RATE_LIMITER, "analytics-events")) {
+    return json({ error: "Too many analytics events" }, 429, { ...cors, "retry-after": "60" });
+  }
 
   const userAgent = request.headers.get("user-agent") || "";
   if (looksLikeBot(userAgent)) return json({ ok: true, ignored: true }, 202, cors);
@@ -500,6 +634,16 @@ async function handleAnalyticsAdmin(request, env, cors, url) {
   }, 200, cors);
 }
 
+async function ensureContentTable(env) {
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS content (" +
+    "key TEXT PRIMARY KEY, " +
+    "value TEXT NOT NULL, " +
+    "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_updated_at ON content(updated_at)").run();
+}
+
 async function ensureAnalyticsTable(env) {
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS analytics_events (" +
@@ -538,8 +682,24 @@ async function purgeOldAnalytics(env) {
 function isAllowedPublicOrigin(request, env) {
   const origin = request.headers.get("origin") || "";
   if (!origin || origin === "null") return false;
-  const allowed = env.ALLOWED_ORIGIN || "*";
-  return allowed === "*" || origin === allowed;
+  return isOriginAllowed(origin, env);
+}
+
+function getAllowedOrigins(env) {
+  return String(env.ALLOWED_ORIGIN || "")
+    .split(",")
+    .map(value => value.trim())
+    .filter(Boolean);
+}
+
+function isOriginAllowed(origin, env) {
+  const allowed = getAllowedOrigins(env);
+  return allowed.includes("*") || allowed.includes(origin);
+}
+
+function isCorsPreflightAllowed(request, env) {
+  const origin = request.headers.get("origin") || "";
+  return !origin || isOriginAllowed(origin, env);
 }
 
 function normalizeAnalyticsPeriod(value) {
@@ -620,6 +780,88 @@ function cleanText(value, maxLength) {
   return value.trim().slice(0, maxLength);
 }
 
+function cleanSingleLine(value, maxLength) {
+  return cleanText(value, maxLength).replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ");
+}
+
+function normalizeContactSource(value) {
+  const source = cleanSingleLine(value, 300);
+  if (!source) return "/";
+  const path = source.split("?")[0].split("#")[0];
+  return path.startsWith("/") ? path : "/";
+}
+
+function isJsonRequest(request) {
+  const contentType = request.headers.get("content-type") || "";
+  return contentType.toLowerCase().split(";")[0].trim() === "application/json";
+}
+
+async function isRateLimited(binding, key) {
+  if (!binding?.limit) return false;
+  const result = await binding.limit({ key });
+  return result?.success === false;
+}
+
+function isPublicMediaEnabled(env) {
+  return /^(1|true|yes)$/i.test(String(env.PUBLIC_MEDIA_ENABLED || ""));
+}
+
+function normalizeMediaType(value) {
+  return String(value || "").toLowerCase().split(";")[0].trim();
+}
+
+function isSafeMediaKey(key) {
+  if (!key || key.length > 240 || key.startsWith("/") || key.includes("\\")) return false;
+  if (/[\u0000-\u001f\u007f]/.test(key)) return false;
+  const parts = key.split("/");
+  return parts.every(part => part && part !== "." && part !== ".." && part.length <= 120);
+}
+
+function sanitizeFileName(value, contentType) {
+  const extension = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/avif": ".avif"
+  }[contentType] || "";
+  let name = String(value || "").split(/[\\/]/).pop() || ("upload" + extension);
+  name = name.replace(/[\u0000-\u001f\u007f]/g, "").replace(/[^a-zA-Z0-9._ -]/g, "_").trim();
+  if (!name || name === "." || name === "..") name = "upload" + extension;
+  return name.slice(0, 120);
+}
+
+function detectImageMime(bytes) {
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (
+    bytes.length >= 12 &&
+    ascii(bytes, 0, 4) === "RIFF" &&
+    ascii(bytes, 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+  if (bytes.length >= 16 && ascii(bytes, 4, 8) === "ftyp") {
+    const end = Math.min(bytes.length, 64);
+    for (let offset = 8; offset + 4 <= end; offset += 4) {
+      const brand = ascii(bytes, offset, offset + 4);
+      if (brand === "avif" || brand === "avis") return "image/avif";
+    }
+  }
+  return "";
+}
+
+function ascii(bytes, start, end) {
+  return String.fromCharCode(...bytes.slice(start, end));
+}
+
 function isAuthorized(request, env) {
   if (!env.CMS_ADMIN_TOKEN) return false;
   return request.headers.get("authorization") === `Bearer ${env.CMS_ADMIN_TOKEN}`;
@@ -628,7 +870,11 @@ function isAuthorized(request, env) {
 function decodeKey(pathname, prefix) {
   const raw = pathname.slice(prefix.length);
   if (!raw) return "";
-  return raw.split("/").map(part => decodeURIComponent(part)).join("/");
+  try {
+    return raw.split("/").map(part => decodeURIComponent(part)).join("/");
+  } catch {
+    return "";
+  }
 }
 
 function encodePath(path) {
@@ -637,16 +883,20 @@ function encodePath(path) {
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("origin") || "";
-  const allowed = env.ALLOWED_ORIGIN || "*";
-  const allowOrigin = allowed === "*" || origin === allowed ? (origin || allowed) : allowed;
-
-  return {
-    "access-control-allow-origin": allowOrigin,
+  const headers = {
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
     "access-control-allow-headers": "authorization,content-type,x-file-name",
     "access-control-max-age": "86400",
     "vary": "Origin"
   };
+
+  if (origin && isOriginAllowed(origin, env)) {
+    headers["access-control-allow-origin"] = origin;
+  } else if (!origin && getAllowedOrigins(env).includes("*")) {
+    headers["access-control-allow-origin"] = "*";
+  }
+
+  return headers;
 }
 
 function json(data, status = 200, headers = {}) {
@@ -654,7 +904,9 @@ function json(data, status = 200, headers = {}) {
     status,
     headers: {
       ...headers,
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff"
     }
   });
 }

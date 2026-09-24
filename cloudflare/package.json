@@ -1,14 +1,17 @@
 {
   "name": "gudelius-cms",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "db:init:local": "wrangler d1 execute gudelius-cms-db --local --file=./schema.sql",
-    "db:init:remote": "wrangler d1 execute gudelius-cms-db --remote --file=./schema.sql"
+    "db:init:remote": "wrangler d1 execute gudelius-cms-db --remote --file=./schema.sql",
+    "check": "node --check src/index.js",
+    "deploy:dry": "wrangler deploy --dry-run"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
-  }
+    "wrangler": "^4.36.0"
+  },
+  "type": "module"
 }

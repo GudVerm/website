@@ -1,3 +1,8 @@
+-- Idempotentes Basisschema: nur CREATE ... IF NOT EXISTS, keine destruktiven Migrationen.
+-- Bestehende Daten bleiben erhalten. Additive Altbestandsmigrationen (aktuell
+-- internal_note in contact_requests) prüft der Worker per PRAGMA und ergänzt sie nur,
+-- wenn die Spalte tatsächlich fehlt.
+
 CREATE TABLE IF NOT EXISTS content (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL,
