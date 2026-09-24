@@ -282,12 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
     menuBtn.addEventListener('click', () => {
       const isOpen=navlinks.classList.toggle('open');
       menuBtn.setAttribute('aria-expanded',String(isOpen));
+      menuBtn.setAttribute('aria-label',isOpen?'Menü schließen':'Menü öffnen');
     });
 
     navlinks.querySelectorAll('a:not(.nav-dropdown-toggle)').forEach((a) => {
       a.addEventListener('click', () => {
         navlinks.classList.remove('open');
         menuBtn.setAttribute('aria-expanded','false');
+        menuBtn.setAttribute('aria-label','Menü öffnen');
         dropdowns.forEach((dropdown) => {
           dropdown.classList.remove('open');
           const toggle=dropdown.querySelector('.nav-dropdown-toggle');
