@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.2";
+const WORKER_RELEASE = "2026-09-24.3";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
@@ -211,6 +211,37 @@ export default {
 
       if (url.pathname === "/api/admin/analytics" && request.method === "GET") {
         return handleAnalyticsAdmin(request, env, cors, url);
+      }
+
+      if (url.pathname === "/api/admin/media" && request.method === "GET") {
+        if (!isAuthorized(request, env)) {
+          return json({ error: "Unauthorized" }, 401, cors);
+        }
+        return handleAdminMediaList(env, cors, url);
+      }
+
+      if (url.pathname.startsWith("/api/admin/media/") && request.method === "GET") {
+        if (!isAuthorized(request, env)) {
+          return json({ error: "Unauthorized" }, 401, cors);
+        }
+
+        const key = decodeKey(url.pathname, "/api/admin/media/");
+        if (!key || !isSafeMediaKey(key)) {
+          return json({ error: "Ungültiger Medien-Key." }, 400, cors);
+        }
+
+        const object = await env.MEDIA.get(key);
+        if (!object) {
+          return json({ error: "Not found" }, 404, cors);
+        }
+
+        const headers = new Headers(cors);
+        object.writeHttpMetadata(headers);
+        headers.set("etag", object.httpEtag);
+        headers.set("cache-control", "no-store");
+        headers.set("x-content-type-options", "nosniff");
+        headers.set("content-disposition", "inline");
+        return new Response(object.body, { status: 200, headers });
       }
 
       if (url.pathname.startsWith("/api/content/")) {
@@ -430,6 +461,41 @@ async function handleAdminHealth(env, cors) {
 function hasColumns(rows, expected) {
   const names = new Set(rows.map(row => row.name));
   return expected.every(name => names.has(name));
+}
+
+async function handleAdminMediaList(env, cors, url) {
+  const limit = clampNumber(url.searchParams.get("limit"), 1, 1000, 200);
+  const prefix = cleanText(url.searchParams.get("prefix") || "", 240);
+  const cursor = cleanText(url.searchParams.get("cursor") || "", 2048);
+
+  const options = {
+    limit,
+    include: ["httpMetadata", "customMetadata"]
+  };
+  if (prefix) options.prefix = prefix;
+  if (cursor) options.cursor = cursor;
+
+  const listed = await env.MEDIA.list(options);
+  const objects = (listed.objects || []).map(object => ({
+    key: object.key,
+    size: Number(object.size || 0),
+    etag: object.etag || "",
+    uploaded: object.uploaded instanceof Date ? object.uploaded.toISOString() : String(object.uploaded || ""),
+    http_metadata: {
+      content_type: object.httpMetadata?.contentType || "",
+      cache_control: object.httpMetadata?.cacheControl || ""
+    },
+    custom_metadata: {
+      original_name: object.customMetadata?.originalName || ""
+    }
+  }));
+
+  return json({
+    objects,
+    truncated: Boolean(listed.truncated),
+    cursor: listed.truncated ? (listed.cursor || "") : "",
+    public_media_enabled: isPublicMediaEnabled(env)
+  }, 200, cors);
 }
 
 async function sendContactNotification(env, inquiry) {

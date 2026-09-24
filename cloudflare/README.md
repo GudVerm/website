@@ -16,7 +16,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.2`.
+Die aktuelle Worker-Releasekennung ist `2026-09-24.3`.
 
 ## Secrets
 
@@ -159,3 +159,29 @@ Turnstile bleibt vorerst optional. Rate Limiting, Honeypot, Origin-Prüfung und 
 ## Späterer Schritt: Cloudflare Access
 
 Cloudflare Access wird bewusst noch nicht auf der produktiven Wix-Domain umgesetzt. Die spätere Zielarchitektur soll eine Cloudflare-kontrollierte Admin-Domain/Subdomain verwenden und den technischen Browser-Token für den Kunden ersetzen.
+
+
+## R2-Medienprüfung
+
+Die R2-Medienausgabe bleibt öffentlich deaktiviert. Für die Prüfung existieren ausschließlich mit `CMS_ADMIN_TOKEN` geschützte Audit-Endpunkte:
+
+```text
+GET /api/admin/media
+GET /api/admin/media/<key>
+```
+
+`GET /api/admin/media` liefert Key, Größe, Uploadzeitpunkt, MIME-Type und den gespeicherten Originaldateinamen. Der zweite Endpunkt liefert das konkrete R2-Objekt nur nach erfolgreicher Admin-Authentifizierung.
+
+Für eine lokale, visuelle Gesamtprüfung:
+
+```bash
+CMS_ADMIN_TOKEN="…" npm run media:audit
+```
+
+Unter `cloudflare/.media-audit/` werden anschließend ausschließlich lokal erzeugt:
+
+- `inventory.json`
+- `index.html`
+- lokale Kopien der R2-Objekte zur Sichtprüfung
+
+Der Ordner ist per `.gitignore` ausgeschlossen. Das Audit löscht und verändert keine R2-Dateien und aktiviert die öffentliche Medienausgabe nicht.

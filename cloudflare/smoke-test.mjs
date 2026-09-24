@@ -1,6 +1,6 @@
 const DEFAULT_API = "https://gudelius-cms.gudeliusvermessung.workers.dev";
 const DEFAULT_ORIGIN = "https://gudverm.github.io";
-const DEFAULT_RELEASE = "2026-09-24.2";
+const DEFAULT_RELEASE = "2026-09-24.3";
 
 const api = String(process.env.CMS_API || DEFAULT_API).replace(/\/$/, "");
 const origin = String(process.env.CMS_ALLOWED_ORIGIN || DEFAULT_ORIGIN);
@@ -97,6 +97,13 @@ async function testAdminEndpoints() {
   });
   if (!Array.isArray(inquiries.data?.inquiries)) fail("Admin-Anfragen liefern keine Liste.");
   ok("Admin-Anfragen lesbar");
+
+  const mediaInventory = await call("/api/admin/media?limit=1", {
+    headers: authHeaders()
+  });
+  if (!Array.isArray(mediaInventory.data?.objects)) fail("R2-Inventar liefert keine Objektliste.");
+  if (mediaInventory.data?.public_media_enabled !== false) fail("R2-Inventar meldet öffentliche Medienausgabe unerwartet aktiv.");
+  ok("Geschütztes R2-Inventar lesbar");
 
   const analytics = await call("/api/admin/analytics?period=30&offset_minutes=-120", {
     headers: authHeaders()
