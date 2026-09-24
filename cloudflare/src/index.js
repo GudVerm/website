@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.9";
+const WORKER_RELEASE = "2026-09-24.10";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -529,7 +529,7 @@ async function handleAdminUi(request, env, url) {
     body = body
       .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
       .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-44")
-      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-46")
+      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-47")
       .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
       .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
       .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
