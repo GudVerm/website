@@ -1,7 +1,7 @@
 {
   "name": "gudelius-cms",
   "private": true,
-  "version": "0.3.2",
+  "version": "0.3.3",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -11,7 +11,8 @@
     "deploy:dry": "wrangler deploy --dry-run",
     "smoke:remote": "node smoke-test.mjs",
     "media:audit": "node media-audit.mjs",
-    "media:cleanup": "node media-cleanup.mjs"
+    "media:cleanup": "node media-cleanup.mjs",
+    "images:migrate-wix": "node migrate-wix-images.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.36.0"

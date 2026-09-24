@@ -107,7 +107,7 @@ GET /api/health
 Erwartet:
 
 ```json
-{"ok":true,"service":"gudelius-cms","release":"2026-09-24.2"}
+{"ok":true,"service":"gudelius-cms","release":"2026-09-24.3"}
 ```
 
 Geschützt:
@@ -206,3 +206,22 @@ npm run media:cleanup -- --apply
 ```
 
 Der Apply-Lauf löscht nur die zuvor anhand des Originaldateinamens identifizierten Krokodil-Objekte und prüft anschließend erneut, ob noch solche Objekte vorhanden sind. Die öffentliche R2-Ausgabe bleibt währenddessen deaktiviert.
+
+
+## Wix-Bilder unabhängig machen
+
+Im Repository sind neun eindeutige Wix-Mediendateien als Initial-/Fallbackbilder in Verwendung. Das Skript
+
+```bash
+npm run images:migrate-wix
+```
+
+lädt ausschließlich deren Originaldateien von `static.wixstatic.com`, validiert JPEG-/PNG-Dateisignaturen, legt sie unter `assets/media/` ab und ersetzt anschließend alle Wix-Medien-URLs in HTML/JavaScript durch lokale Repository-Pfade.
+
+Wichtig:
+
+- Quelltexte werden erst geändert, wenn alle neun Downloads erfolgreich und plausibel sind.
+- Wix, DNS, D1 und R2 werden durch das Skript nicht verändert.
+- Die öffentliche R2-Ausgabe bleibt deaktiviert.
+- Nach der Migration muss `static.wixstatic.com` im Projekt vollständig verschwunden sein.
+- Die erzeugten Bilddateien und Quelltextänderungen müssen anschließend gemeinsam committed werden.
