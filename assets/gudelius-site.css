@@ -962,3 +962,82 @@ body.modal-open{overflow:hidden}
 .equipment-grid .equip-card.equip-open:hover{transform:none;box-shadow:none!important}
 .equipment-grid .equip-card.equip-open:hover::after{box-shadow:none}
 .equipment-grid .equip-more{cursor:default}
+
+
+/* Kontakt-Unterseite: kompakter Aufbau analog zu den Leistungs-Unterpunkten */
+.contact-page .contact{
+  padding:82px 0;
+  background:#172026;
+  color:#fff;
+}
+.contact-page .contact-grid{
+  width:min(calc(100% - 36px),980px);
+  margin-inline:auto;
+  min-height:0;
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+  gap:24px;
+  align-items:stretch;
+}
+.contact-page .contact-copy{
+  padding:30px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;
+  background:
+    linear-gradient(rgba(23,32,38,.95),rgba(23,32,38,.95)),
+    var(--contact-image);
+  box-shadow:0 18px 48px rgba(0,0,0,.16);
+}
+.contact-page .contact-copy .section-lead{
+  max-width:520px;
+}
+.contact-page .contact-details{
+  margin-top:28px;
+  gap:16px;
+}
+.contact-page .contact-form{
+  padding:30px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+}
+.contact-page .contact-form h3{
+  font-size:1.45rem;
+}
+.contact-page .contact-form p{
+  margin-bottom:22px;
+}
+.contact-page .field{
+  margin-bottom:13px;
+}
+.contact-page .field textarea{
+  min-height:118px;
+}
+
+@media(max-width:820px){
+  .contact-page .contact{
+    padding:64px 0;
+  }
+  .contact-page .contact-grid{
+    width:min(calc(100% - 28px),680px);
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  .contact-page .contact-copy,
+  .contact-page .contact-form{
+    padding:22px;
+    border-radius:20px;
+  }
+}
+
+@media(max-width:480px){
+  .contact-page .contact{
+    padding:48px 0;
+  }
+  .contact-page .contact-grid{
+    width:calc(100% - 28px);
+  }
+  .contact-page .contact-copy,
+  .contact-page .contact-form{
+    padding:20px 18px;
+  }
+}
