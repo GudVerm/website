@@ -2469,14 +2469,38 @@ function renderCollection(target, items){
 
     title.textContent=item.name;
     detail.textContent=item.detail;
-    img.src=initialMediaSrc(item);
-    img.onerror=()=>{img.onerror=null;img.src=item.fallback};
 
+    const fallbackPlaceholder="../assets/dummy-aussendienst-02.svg";
+    function showFallback(){
+      const fallbackUrl=new URL(item.fallback,document.baseURI).href;
+      img.onerror=()=>{
+        img.onerror=null;
+        img.src=new URL(fallbackPlaceholder,document.baseURI).href;
+        setStatus(status,"Initialbild konnte nicht geladen werden; neutrale Vorschau aktiv.",false);
+      };
+      img.src=fallbackUrl;
+    }
+
+    if(getApi()&&cmsMediaEnabled){
+      img.onerror=showFallback;
+      img.src=mediaUrl(item.key);
+    }else{
+      showFallback();
+    }
+
+    let previewObjectUrl="";
     file.addEventListener("change",()=>{
       const selected=file.files?.[0];
       if(!selected) return;
-      img.src=URL.createObjectURL(selected);
-      setStatus(status,selected.name+" ausgewählt.");
+      if(previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+      previewObjectUrl=URL.createObjectURL(selected);
+      img.onerror=()=>{
+        img.onerror=null;
+        showFallback();
+        setStatus(status,"Die ausgewählte Datei konnte nicht als Bildvorschau geladen werden.",false);
+      };
+      img.src=previewObjectUrl;
+      setStatus(status,selected.name+" ausgewählt · lokale Vorschau.");
     });
 
     upload.addEventListener("click",async()=>{
@@ -2498,8 +2522,13 @@ function renderCollection(target, items){
         });
         const data=await r.json().catch(()=>({}));
         if(!r.ok) throw new Error(data.error||("HTTP "+r.status));
-        img.src=mediaUrl(item.key)+"?v="+Date.now();
-        setStatus(status,"Bild erfolgreich in Cloudflare gespeichert.",true);
+        if(cmsMediaEnabled){
+          img.onerror=showFallback;
+          img.src=mediaUrl(item.key)+"?v="+Date.now();
+          setStatus(status,"Bild erfolgreich in Cloudflare gespeichert.",true);
+        }else{
+          setStatus(status,"Bild erfolgreich in R2 gespeichert. Öffentliche Medienausgabe ist deaktiviert; die lokale Vorschau bleibt sichtbar.",true);
+        }
       }catch(e){
         setStatus(status,"Upload fehlgeschlagen: "+e.message,false);
       }finally{
@@ -2519,9 +2548,13 @@ function renderCollection(target, items){
         });
         const data=await r.json().catch(()=>({}));
         if(!r.ok) throw new Error(data.error||("HTTP "+r.status));
-        img.src=item.fallback;
+        if(previewObjectUrl){
+          URL.revokeObjectURL(previewObjectUrl);
+          previewObjectUrl="";
+        }
         file.value="";
-        setStatus(status,"Cloudflare-Bild gelöscht; Platzhalter wird verwendet.",true);
+        showFallback();
+        setStatus(status,"Cloudflare-Bild gelöscht; Initialbild wird angezeigt.",true);
       }catch(e){
         setStatus(status,"Löschen fehlgeschlagen: "+e.message,false);
       }finally{
