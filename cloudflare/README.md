@@ -207,21 +207,23 @@ npm run media:cleanup -- --apply
 
 Der Apply-Lauf löscht nur die zuvor anhand des Originaldateinamens identifizierten Krokodil-Objekte und prüft anschließend erneut, ob noch solche Objekte vorhanden sind. Die öffentliche R2-Ausgabe bleibt währenddessen deaktiviert.
 
-
 ## Wix-Bilder unabhängig machen
 
-Im Repository sind neun eindeutige Wix-Mediendateien als Initial-/Fallbackbilder in Verwendung. Das Skript
+Das Migrationsskript
 
 ```bash
 npm run images:migrate-wix
 ```
 
-lädt ausschließlich deren Originaldateien von `static.wixstatic.com`, validiert JPEG-/PNG-Dateisignaturen, legt sie unter `assets/media/` ab und ersetzt anschließend alle Wix-Medien-URLs in HTML/JavaScript durch lokale Repository-Pfade.
+sichert die neun tatsächlich verwendeten Wix-Originalbilder zunächst lokal unter `cloudflare/.wix-originals/`. Dieser Ordner ist absichtlich gitignored und dient als lokale Originalsicherung.
 
-Wichtig:
+Für die Website lädt das Skript die bereits von Wix skalierten/komprimierten Web-Varianten, erkennt deren tatsächliches Bildformat anhand der Dateisignatur und speichert sie unter `assets/media/`. Danach werden ausschließlich produktive HTML-/JavaScript-Dateien auf die lokalen Pfade umgestellt.
 
-- Quelltexte werden erst geändert, wenn alle neun Downloads erfolgreich und plausibel sind.
-- Wix, DNS, D1 und R2 werden durch das Skript nicht verändert.
-- Die öffentliche R2-Ausgabe bleibt deaktiviert.
-- Nach der Migration muss `static.wixstatic.com` im Projekt vollständig verschwunden sein.
-- Die erzeugten Bilddateien und Quelltextänderungen müssen anschließend gemeinsam committed werden.
+Der Lauf ist wiederholbar:
+
+- bestehende lokale Bildreferenzen werden auf den aktuellen Dateinamen normalisiert,
+- Dokumentation und Migrationsskript werden nicht als produktive Wix-Abhängigkeit gewertet,
+- `static.wixstatic.com` darf nach dem Lauf in produktiven HTML-/JS-Dateien nicht mehr vorkommen,
+- Wix, DNS, D1 und R2 werden nicht verändert,
+- die öffentliche R2-Ausgabe bleibt deaktiviert,
+- JS-Cache-Versionen werden auf `20260924-34` erhöht.

@@ -1,2 +1,4 @@
 .media-audit/
 .wix-migration-tmp/
+.wix-originals/
+node_modules/
