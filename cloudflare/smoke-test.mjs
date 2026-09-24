@@ -1,6 +1,6 @@
 const DEFAULT_API = "https://gudelius-cms.gudeliusvermessung.workers.dev";
 const DEFAULT_ORIGIN = "https://gudverm.github.io";
-const DEFAULT_RELEASE = "2026-09-24.7";
+const DEFAULT_RELEASE = "2026-09-24.8";
 
 const api = String(process.env.CMS_API || DEFAULT_API).replace(/\/$/, "");
 const origin = String(process.env.CMS_ALLOWED_ORIGIN || DEFAULT_ORIGIN);
@@ -59,6 +59,13 @@ async function testPublicEndpoints() {
 
   await call("/media/__smoke__/not-public",{method:"GET"},[404]);
   ok("Öffentliche R2-Ausgabe bleibt deaktiviert");
+
+  await call("/api/analytics/event", {
+    method:"POST",
+    headers:{origin,"content-type":"text/plain;charset=UTF-8","user-agent":"Mozilla/5.0 Gudelius-Smoke"},
+    body:JSON.stringify({event_type:"__invalid_smoke__",page_path:"/kontakt/",target:"",event_label:""})
+  }, [400]);
+  ok("Analytics akzeptiert Beacon-kompatibles text/plain ohne Testdaten zu speichern");
 }
 
 async function testLegacyAdminDisabled() {
