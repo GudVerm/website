@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.7";
+const WORKER_RELEASE = "2026-09-24.8";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -753,7 +753,7 @@ async function handleAnalyticsEvent(request, env, cors) {
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_ANALYTICS_BYTES) return json({ error: "Analytics payload too large" }, 413, cors);
   if (!isAllowedPublicOrigin(request, env)) return json({ error: "Origin not allowed" }, 403, cors);
-  if (!isJsonRequest(request)) return json({ error: "Content-Type muss application/json sein." }, 415, cors);
+  if (!isAnalyticsRequest(request)) return json({ error: "Content-Type muss application/json oder text/plain sein." }, 415, cors);
   if (await isRateLimited(env.ANALYTICS_RATE_LIMITER, "analytics-events")) {
     return json({ error: "Too many analytics events" }, 429, { ...cors, "retry-after": "60" });
   }
@@ -1046,6 +1046,12 @@ function normalizeContactSource(value) {
 function isJsonRequest(request) {
   const contentType = request.headers.get("content-type") || "";
   return contentType.toLowerCase().split(";")[0].trim() === "application/json";
+}
+
+function isAnalyticsRequest(request) {
+  const contentType = request.headers.get("content-type") || "";
+  const type = contentType.toLowerCase().split(";")[0].trim();
+  return type === "application/json" || type === "text/plain";
 }
 
 async function isRateLimited(binding, key) {
