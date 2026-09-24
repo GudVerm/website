@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
+  const cmsMediaEnabled = window.GUDELIUS_CMS_MEDIA_ENABLED !== false;
   let cmsSiteContentPromise=null;
 
   async function loadCmsSiteContent(){
@@ -132,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyCmsMedia(root = document) {
-    if (!cmsApi) return;
+    if (!cmsApi || !cmsMediaEnabled) return;
     root.querySelectorAll("img[data-cms-media]").forEach((img) => {
       if (img.dataset.cmsApplied === "1") return;
       const fallback = img.currentSrc || img.src;
