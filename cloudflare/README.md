@@ -10,14 +10,14 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 - **Transaktionsmail:** Brevo API über das Secret `BREVO_API_KEY`
 - **Absender:** verifizierter Brevo-Sender `gudeliusvermessung@web.de`
 - **Empfänger:** `gudeliusvermessung@web.de`
-- **Admin-Secret:** `CMS_ADMIN_TOKEN` als Cloudflare Secret
+- **Admin-Zugang:** Cloudflare Access mit One-time PIN; der technische Token-Fallback ist deaktiviert
 - **Erlaubter Browser-Origin:** `ALLOWED_ORIGIN=https://gudverm.github.io`
 - **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false
-ADMIN_TOKEN_FALLBACK_ENABLED=true` bis zur bewussten Medienprüfung
+ADMIN_TOKEN_FALLBACK_ENABLED=false` bis zur bewussten Medienprüfung
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.6`.
+Die aktuelle Worker-Releasekennung ist `2026-09-24.7`.
 
 ## Secrets
 
@@ -274,7 +274,7 @@ GET  /media/<key>   (weiterhin durch PUBLIC_MEDIA_ENABLED=false gesperrt)
 Der Worker akzeptiert für Admin-Endpunkte zwei Authentifizierungswege:
 
 1. Cloudflare Access über `ctx.access`, sobald eine Access-Anwendung den Request vor dem Worker authentifiziert hat.
-2. Den bestehenden `CMS_ADMIN_TOKEN` als technischen Fallback, solange `ADMIN_TOKEN_FALLBACK_ENABLED=true` gesetzt ist.
+2. Den bestehenden `CMS_ADMIN_TOKEN` als technischen Fallback, solange `ADMIN_TOKEN_FALLBACK_ENABLED=false` gesetzt ist.
 
 `GET /api/admin/session` zeigt für Tests `auth_mode: "access"` oder `auth_mode: "token"` an, ohne Secret-Werte auszugeben.
 
@@ -306,7 +306,7 @@ Vorgesehene Access-Pfade:
 /api/admin/*
 ```
 
-`/admin` selbst leitet nur auf `/admin/` weiter. Öffentliche Website-APIs bleiben außerhalb dieser Pfade. Bis der Access-E2E-Test abgeschlossen ist, bleibt `ADMIN_TOKEN_FALLBACK_ENABLED=true`.
+`/admin` selbst leitet nur auf `/admin/` weiter. Öffentliche Website-APIs bleiben außerhalb dieser Pfade. Bis der Access-E2E-Test abgeschlossen ist, bleibt `ADMIN_TOKEN_FALLBACK_ENABLED=false`.
 
 
 ### Access-Verbindungsseite
@@ -314,3 +314,14 @@ Vorgesehene Access-Pfade:
 Im Worker-Admin wird das technische Token-Feld vollständig ausgeblendet. Die Worker-URL ist schreibgeschützt und der Verbindungstest heißt dort `Access-Status prüfen`.
 
 Solange die eigentliche Access-Anwendung noch nicht eingerichtet ist, antwortet `/api/admin/session` erwartungsgemäß mit HTTP 401. Die Oberfläche unterscheidet diesen Zustand jetzt von einem Worker-Ausfall: Wenn `/api/health` erreichbar ist, wird neutral gemeldet, dass Access noch nicht aktiv beziehungsweise noch keine gültige Access-Sitzung vorhanden ist.
+
+
+## Punkt 9E – Cloudflare Access als alleinige Admin-Authentifizierung
+
+Seit Release `2026-09-24.7` ist `ADMIN_TOKEN_FALLBACK_ENABLED=false`. Administrative Requests werden nur noch akzeptiert, wenn Cloudflare Access dem Worker eine gültige `ctx.access`-Sitzung liefert.
+
+Die früheren administrativen Legacy-Routen außerhalb von `/api/admin/*` liefern nun `404`. Ein eventuell noch gespeichertes `CMS_ADMIN_TOKEN` kann diese Sperre nicht umgehen. Der Admin-Healthcheck hängt nicht mehr davon ab, ob dieses Secret vorhanden ist.
+
+Die alte GitHub-Pages-Adminoberfläche verweist auf die Access-geschützte Worker-Adminoberfläche. Öffentliche Endpunkte (`/api/health`, `/api/site`, `POST /api/contact`, `POST /api/analytics/event`) bleiben unverändert öffentlich.
+
+Der Remote-Smoke-Test benötigt keinen Admin-Token mehr. Nach erfolgreichem Produktivtest kann das nicht mehr verwendete Secret mit `npx wrangler secret delete CMS_ADMIN_TOKEN` vollständig entfernt werden.
