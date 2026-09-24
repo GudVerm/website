@@ -2443,6 +2443,36 @@ function techniqueFallbackForGroup(group){
   if(group==="Programme & Arbeitsplatz") return "../assets/dummy-software-01.svg";
   return "../assets/dummy-aussendienst-01.svg";
 }
+
+function techniqueInlinePlaceholder(item){
+  const labels={
+    "trimble-sx12":["Trimble SX12","Scanning-Totalstation","SX12"],
+    "rtk-drohne":["RTK-Drohne","Vermessung & Orthophoto","RTK"],
+    "bbsoft":["BBSOFT","Tiefbau · Vermessung · DGM","BBSOFT"]
+  };
+  const data=labels[item?.slug];
+  if(!data) return "";
+  const [name,category,mark]=data;
+  const esc=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[char]));
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffdf4"/><stop offset="1" stop-color="#e7ece8"/></linearGradient></defs>
+    <rect width="900" height="620" fill="url(#g)"/>
+    <circle cx="760" cy="105" r="150" fill="#e5c533" opacity=".28"/>
+    <circle cx="780" cy="545" r="220" fill="#172026" opacity=".04"/>
+    <rect x="64" y="68" width="132" height="32" rx="16" fill="#e5c533"/>
+    <text x="130" y="89" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="800" fill="#172026">PLATZHALTER</text>
+    <text x="64" y="220" font-family="Arial,sans-serif" font-size="68" font-weight="800" fill="#172026">${esc(mark)}</text>
+    <text x="64" y="310" font-family="Arial,sans-serif" font-size="48" font-weight="800" fill="#172026">${esc(name)}</text>
+    <text x="64" y="357" font-family="Arial,sans-serif" font-size="23" fill="#526067">${esc(category)}</text>
+    <line x1="64" y1="395" x2="590" y2="395" stroke="#c8a900" stroke-width="5"/>
+    <text x="64" y="450" font-family="Arial,sans-serif" font-size="19" fill="#67757b">Noch kein individuelles Gerätebild hinterlegt</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+}
+
+function techniqueFallbackSrc(item){
+  return techniqueInlinePlaceholder(item)||item?.fallback||techniqueFallbackForGroup(item?.group||"Außendienst");
+}
 function normalizeTechniqueManifest(raw){
   if(!Array.isArray(raw)){
     return defaultEquipment.map((item,index)=>({slug:item.slug,group:item.group,order:index+1,visible:true,archived:false}));
@@ -2593,8 +2623,9 @@ function renderTechniqueEditor(item){
   moveUp.disabled=equipment.indexOf(item)===0;
   moveDown.disabled=equipment.indexOf(item)===equipment.length-1;
 
-  img.src=initialMediaSrc(item); img.alt=displayName;
-  img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  const techniqueFallback=techniqueFallbackSrc(item);
+  img.src=cmsMediaEnabled?initialMediaSrc(item):techniqueFallback; img.alt=displayName;
+  img.onerror=()=>{img.onerror=null;img.src=techniqueFallback};
 
   file.addEventListener("change",()=>{
     const selected=file.files?.[0]; if(!selected) return;
@@ -2620,7 +2651,7 @@ function renderTechniqueEditor(item){
     try{
       const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-      img.src=item.fallback; file.value=""; setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
+      img.src=techniqueFallback; file.value=""; setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
     }catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
   });
   save.addEventListener("click",async()=>{
