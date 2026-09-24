@@ -95,6 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if(anchor&&href.includes("#kontakt")){
+      sendAnalyticsEvent("cta_click","contact",anchor.textContent.trim()||"Kontakt");
+      return;
+    }
+
     if(anchor&&anchor.closest("header nav")){
       const label=anchor.textContent.replace(/\s+/g," ").trim().slice(0,140);
       sendAnalyticsEvent("nav_click","navigation",label);

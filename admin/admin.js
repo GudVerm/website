@@ -2477,6 +2477,7 @@ function analyticsActionName(row){
   if(row.event_type==="contact_action"&&row.target==="phone")return "Telefon angeklickt";
   if(row.event_type==="contact_action"&&row.target==="email")return "E-Mail angeklickt";
   if(row.event_type==="form_submit")return "Formular abgeschickt";
+  if(row.event_type==="cta_click"&&row.target==="contact")return row.event_label||"Kontaktbereich geöffnet";
   if(row.event_type==="service_open")return (row.event_label||analyticsServiceNames[row.target]||row.target)+" geöffnet";
   if(row.event_type==="equipment_open")return "Technik geöffnet · "+(row.event_label||row.target);
   if(row.event_type==="cta_click")return row.event_label||"CTA angeklickt";
@@ -2547,7 +2548,7 @@ function renderAnalytics(data){
     {value:row=>analyticsNumber(row.contact_cta),className:"analytics-number"}
   ],"Noch keine Leistungsdaten.");
 
-  const contacts=(data.contact_breakdown||[]).map(row=>({...row,label:row.event_type==="form_submit"?"Formular abgeschickt":row.target==="phone"?"Telefon angeklickt":row.target==="email"?"E-Mail angeklickt":row.target||row.event_type}));
+  const contacts=(data.contact_breakdown||[]).map(row=>({...row,label:row.event_type==="form_submit"?"Formular abgeschickt":row.target==="phone"?"Telefon angeklickt":row.target==="email"?"E-Mail angeklickt":row.event_type==="cta_click"&&row.target==="contact"?"Kontaktbereich / Projekt anfragen":row.target||row.event_type}));
   renderAnalyticsTable(analyticsContactBreakdown,contacts,[
     {value:row=>row.label},
     {value:row=>analyticsNumber(row.count),className:"analytics-number"}

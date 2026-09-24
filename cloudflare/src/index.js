@@ -411,7 +411,7 @@ async function handleAnalyticsAdmin(request, env, cors, url) {
     "SELECT " +
     "COALESCE(SUM(CASE WHEN event_type = 'pageview' THEN 1 ELSE 0 END), 0) AS pageviews, " +
     "COALESCE(SUM(CASE WHEN event_type <> 'pageview' THEN 1 ELSE 0 END), 0) AS interactions, " +
-    "COALESCE(SUM(CASE WHEN event_type IN ('contact_action','form_submit') THEN 1 ELSE 0 END), 0) AS contact_actions " +
+    "COALESCE(SUM(CASE WHEN event_type IN ('contact_action','form_submit') OR (event_type = 'cta_click' AND target = 'contact') THEN 1 ELSE 0 END), 0) AS contact_actions " +
     "FROM analytics_events" + filter.sql
   ).bind(...filter.bindings).first();
 
@@ -436,13 +436,13 @@ async function handleAnalyticsAdmin(request, env, cors, url) {
   const timelineQuery =
     "SELECT strftime('" + bucketFormat + "', datetime(created_at, ?)) AS label, " +
     "COALESCE(SUM(CASE WHEN event_type = 'pageview' THEN 1 ELSE 0 END), 0) AS pageviews, " +
-    "COALESCE(SUM(CASE WHEN event_type IN ('contact_action','form_submit') THEN 1 ELSE 0 END), 0) AS contact_actions " +
+    "COALESCE(SUM(CASE WHEN event_type IN ('contact_action','form_submit') OR (event_type = 'cta_click' AND target = 'contact') THEN 1 ELSE 0 END), 0) AS contact_actions " +
     "FROM analytics_events" + filter.sql + " GROUP BY label ORDER BY label ASC";
   const { results: timeline = [] } = await env.DB.prepare(timelineQuery).bind(localModifier, ...filter.bindings).all();
 
   const contactQuery =
     "SELECT event_type, target, COUNT(*) AS count FROM analytics_events " +
-    filter.wherePrefix + " event_type IN ('contact_action','form_submit') " +
+    filter.wherePrefix + " (event_type IN ('contact_action','form_submit') OR (event_type = 'cta_click' AND target = 'contact')) " +
     "GROUP BY event_type, target ORDER BY count DESC";
   const { results: contactBreakdown = [] } = await env.DB.prepare(contactQuery).bind(...filter.bindings).all();
 
