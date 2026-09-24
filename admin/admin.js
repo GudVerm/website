@@ -259,6 +259,20 @@ function getToken(){
 }
 const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
 function initialMediaSrc(item){return getApi()&&cmsMediaEnabled?mediaUrl(item.key):item.fallback}
+function showMediaModeNotice(){
+  if(cmsMediaEnabled)return;
+  const hasMediaUi=document.querySelector("#startPageGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
+  if(!hasMediaUi)return;
+  const section=hasMediaUi.closest(".admin-section")||document.querySelector(".admin-section");
+  const head=section?.querySelector(".admin-section-head");
+  if(!section||!head||section.querySelector(".media-mode-notice"))return;
+  const notice=document.createElement("div");
+  notice.className="media-mode-notice";
+  notice.setAttribute("role","status");
+  notice.textContent="Bildmodus: Auf der öffentlichen Website sind derzeit bewusst die Initialbilder aktiv. R2-Uploads werden gespeichert, aber erst nach Reaktivierung der Medienausgabe öffentlich angezeigt.";
+  notice.style.cssText="margin:0 0 18px;padding:12px 14px;border:1px solid #e0cf7b;border-radius:12px;background:#fff8cf;color:#5f531d;font-size:.78rem;line-height:1.5;font-weight:750";
+  head.insertAdjacentElement("afterend",notice);
+}
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
 
 if(saveButton){
@@ -2632,7 +2646,7 @@ async function loadAnalytics(){
     const response=await fetch(getApi()+"/api/admin/analytics?period="+encodeURIComponent(analyticsPeriod)+"&offset_minutes="+encodeURIComponent(offset),{headers:{"authorization":"Bearer "+getToken()}});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
-    renderAnalytics(data);setStatus(analyticsStatus,"Statistik geladen · Rohdaten werden maximal "+(data.retention_days||180)+" Tage gespeichert.",true);
+    renderAnalytics(data);setStatus(analyticsStatus,"Statistik geladen · Rohdaten werden maximal "+(data.retention_days||370)+" Tage gespeichert.",true);
     if(analyticsExport)analyticsExport.disabled=false;
   }catch(error){setStatus(analyticsStatus,"Statistik konnte momentan nicht geladen werden: "+error.message,false)}
   finally{analyticsRefresh.disabled=false}
@@ -2678,6 +2692,7 @@ function render(){
   renderCollection(projectGrid, projects);
 }
 
+showMediaModeNotice();
 render();
 setupTechniqueEditor();
 setupProjectEditor();
