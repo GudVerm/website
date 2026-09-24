@@ -828,17 +828,17 @@ body.modal-open{overflow:hidden}
 .project-modal-actions .btn{width:100%}
 @media(max-width:820px){
   .project-modal{padding:14px}
-  .project-modal-dialog{max-height:calc(100vh - 28px);grid-template-columns:1fr;overflow:auto}
-  .project-modal-media{min-height:260px;height:38vh;max-height:360px}
+  .project-modal-dialog{max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);grid-template-columns:1fr;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+  .project-modal-media{min-height:260px;height:38vh;max-height:360px;flex:none}
   .project-modal-media img{min-height:260px}
-  .project-modal-content{padding:30px 24px 26px;overflow:visible}
+  .project-modal-content{padding:30px 24px 26px;overflow:visible;min-height:max-content}
   .project-modal-content h2{font-size:2rem}
 }
 @media(max-width:520px){
   .project-modal{padding:10px}
-  .project-modal-dialog{width:100%;height:calc(100vh - 20px);max-height:calc(100vh - 20px);border:1px solid rgba(255,255,255,.16);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
-  .project-modal-media{height:34vh;min-height:220px}
+  .project-modal-dialog{width:100%;height:calc(100vh - 20px);height:calc(100dvh - 20px);max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid rgba(255,255,255,.16);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+  .project-modal-media{height:34vh;height:34dvh;min-height:220px;flex:none}
   .project-modal-media img{min-height:220px}
   .project-modal-close{right:12px;top:12px}
-  .project-modal-content{padding:24px 18px 24px}
+  .project-modal-content{padding:24px 18px 32px;min-height:max-content}
 }
