@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.6";
+const WORKER_RELEASE = "2026-09-24.7";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -12,6 +12,7 @@ const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unt
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const requestedPathname = url.pathname;
     url.pathname = normalizeAdminRoute(url.pathname, request.method);
     const cors = corsHeaders(request, env);
 
@@ -23,6 +24,10 @@ export default {
     }
 
     try {
+      if (isLegacyAdminRoute(requestedPathname, request.method)) {
+        return json({ error: "Not found" }, 404, cors);
+      }
+
       if (url.pathname === "/api/health" && request.method === "GET") {
         return json({ ok: true, service: "gudelius-cms", release: WORKER_RELEASE }, 200, cors);
       }
@@ -70,7 +75,7 @@ export default {
         if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
         }
-        return handleAdminHealth(env, cors);
+        return handleAdminHealth(env, cors, ctx);
       }
 
       if (url.pathname === "/api/site" && request.method === "GET") {
@@ -523,8 +528,8 @@ async function handleAdminUi(request, env, url) {
   if (contentType.startsWith("text/html")) {
     body = body
       .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
-      .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-43")
-      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-43")
+      .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-44")
+      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-44")
       .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
       .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
       .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
@@ -560,7 +565,7 @@ async function handlePublicAssetProxy(request, env, url) {
   return new Response(request.method === "HEAD" ? null : upstream.body, { status: 200, headers });
 }
 
-async function handleAdminHealth(env, cors) {
+async function handleAdminHealth(env, cors, ctx) {
   let dbOk = false;
   let mediaOk = false;
   let schema = {
@@ -605,8 +610,7 @@ async function handleAdminHealth(env, cors) {
     brevo_api_key: Boolean(env.BREVO_API_KEY),
     brevo_from_email: Boolean(env.BREVO_FROM_EMAIL),
     contact_email_to: Boolean(env.CONTACT_EMAIL_TO),
-    allowed_origin: getAllowedOrigins(env).length > 0,
-    admin_token: Boolean(env.CMS_ADMIN_TOKEN)
+    allowed_origin: getAllowedOrigins(env).length > 0
   };
 
   const ok = Object.values(bindings).every(Boolean) && Object.values(schema).every(Boolean);
@@ -614,7 +618,10 @@ async function handleAdminHealth(env, cors) {
     ok,
     service: "gudelius-cms",
     release: WORKER_RELEASE,
+    auth_mode: ctx?.access ? "access" : "none",
     public_media_enabled: isPublicMediaEnabled(env),
+    admin_token_fallback_enabled: isAdminTokenFallbackEnabled(env),
+    admin_token_configured: Boolean(env.CMS_ADMIN_TOKEN),
     bindings,
     schema
   }, ok ? 200 : 503, cors);
@@ -1107,6 +1114,14 @@ function ascii(bytes, start, end) {
   return String.fromCharCode(...bytes.slice(start, end));
 }
 
+function isLegacyAdminRoute(pathname, method) {
+  if (pathname === "/api/contact" && method === "GET") return true;
+  if (pathname.startsWith("/api/contact/") && method === "PUT") return true;
+  if (pathname.startsWith("/api/content/") && (method === "PUT" || method === "DELETE")) return true;
+  if (pathname.startsWith("/api/media/") && (method === "PUT" || method === "DELETE")) return true;
+  return false;
+}
+
 function normalizeAdminRoute(pathname, method) {
   if (pathname === "/api/admin/inquiries" && method === "GET") {
     return "/api/contact";
@@ -1124,7 +1139,7 @@ function normalizeAdminRoute(pathname, method) {
 }
 
 function isAdminTokenFallbackEnabled(env) {
-  return String(env.ADMIN_TOKEN_FALLBACK_ENABLED ?? "true").trim().toLowerCase() !== "false";
+  return /^(1|true|yes)$/i.test(String(env.ADMIN_TOKEN_FALLBACK_ENABLED || "").trim());
 }
 
 function adminAuthMode(request, env, ctx) {
