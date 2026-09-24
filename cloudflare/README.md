@@ -337,3 +337,8 @@ Kontaktformular-Inhalte werden weiterhin ausschließlich in `contact_requests` g
 ## Admin-Asset-Versionierung nach Kanban-Umbau
 
 Seit Release `2026-09-24.9` schreibt der Worker beim Ausliefern der Access-geschützten Admin-Oberfläche den Admin-JavaScript-Cache auf `admin.js?v=20260924-46` um. Zuvor wurde trotz neuer HTML-Version weiterhin `20260924-44` erzwungen. Dadurch konnten neue UI-Funktionen wie die Umschaltung zwischen Kanban- und Listenansicht im Worker-Admin fehlen, obwohl der aktuelle Quellcode bereits im Repository lag.
+
+
+## Anfragen-Kanban: horizontale Navigation
+
+Seit Release `2026-09-24.10` hat die Access-Adminseite für Anfragen oberhalb des Kanban eine synchronisierte horizontale Scrollleiste. Zusätzlich kann die freie Kanban-Fläche am Desktop per Maus horizontal gezogen und per Pfeiltasten verschoben werden. Karten bleiben weiterhin für den Statuswechsel zwischen den Spalten drag-and-drop-fähig. Auf Touch-Geräten bleibt horizontales Wischen aktiv.
