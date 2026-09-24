@@ -347,3 +347,8 @@ Seit Release `2026-09-24.10` hat die Access-Adminseite für Anfragen oberhalb de
 ## Technik-Admin: cachefeste helle Platzhalter
 
 Seit Release `2026-09-24.11` verwenden Trimble SX12, RTK-Drohne und BBSOFT neue versionierte helle Platzhalterdateien. Der Worker versieht außerdem proxied `/assets/*`-Abrufe mit der Worker-Release als Upstream-Query und liefert sie mit `cache-control: no-store` aus. Damit können alte dunkle SVG-Versionen im Access-Admin nicht mehr aus Browser- oder Proxy-Caches weiterverwendet werden.
+
+
+## Technik-Admin: Inline-Fallback für problematische Vorschauen
+
+Seit Release `2026-09-24.12` erzeugt der Admin für Trimble SX12, RTK-Drohne und BBSOFT den hellen Platzhalter direkt als Data-URI im Browser. Diese drei Vorschauen sind damit vollständig unabhängig von externen SVG-Dateien, GitHub-Pages-Asset-Caches und dem Worker-Asset-Proxy. Das betrifft nur die Admin-Vorschau im Fallback-Modus; echte ausgewählte oder hochgeladene Bilder ersetzen den Platzhalter weiterhin normal.
