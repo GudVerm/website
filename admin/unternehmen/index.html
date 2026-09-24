@@ -44,10 +44,19 @@
         <p>Bilder, Vorstellung und beruflicher Werdegang sind in getrennten Karten organisiert.</p>
       </section>
 
+      <section class="cms-subpanel cms-subpanel-form">
+        <div class="cms-subpanel-head"><span class="cms-subpanel-icon">01</span><div><span class="kicker">Seiteneinstieg</span><h3>Eyebrow, Überschrift & Intro</h3><p>Der große Einstiegstext oben auf der öffentlichen Unternehmensseite.</p></div></div>
+        <div class="text-editor-grid single-column">
+          <label>Eyebrow<input id="companyPageEyebrow" type="text" maxlength="140"></label>
+          <label>Hauptüberschrift<input id="companyPageTitle" type="text" maxlength="220"></label>
+          <label>Intro<textarea id="companyPageLead" rows="4" maxlength="800"></textarea></label>
+        </div>
+      </section>
+
       <div class="cms-group-grid">
         <section class="cms-subpanel">
           <div class="cms-subpanel-head">
-            <span class="cms-subpanel-icon">01</span>
+            <span class="cms-subpanel-icon">02</span>
             <div>
               <span class="kicker">Bilder</span>
               <h3>Unternehmensbilder</h3>
@@ -59,7 +68,7 @@
 
         <section class="cms-subpanel">
           <div class="cms-subpanel-head">
-            <span class="cms-subpanel-icon">02</span>
+            <span class="cms-subpanel-icon">03</span>
             <div>
               <span class="kicker">Vorstellung</span>
               <h3>Kopftext & Person</h3>
@@ -72,11 +81,16 @@
             <label>Name / Qualifikation<input id="companyName" type="text" maxlength="160"></label>
             <label>Beschreibung<textarea id="companyLead" rows="4" maxlength="700"></textarea></label>
           </div>
+          <div class="text-editor-actions">
+            <button id="saveCompanyTexts" type="button">Unternehmenstexte speichern</button>
+            <button id="reloadCompanyTexts" class="secondary" type="button">Neu laden</button>
+            <span id="companyTextStatus" class="status">Fallback-Texte werden angezeigt.</span>
+          </div>
         </section>
       </div>
 
       <section class="cms-subpanel cms-subpanel-form">
-        <div class="cms-subpanel-head"><span class="cms-subpanel-icon">03</span><div><span class="kicker">Werdegang</span><h3>Timeline</h3><p>Berufliche Stationen, Qualifikationen und Meilensteine frei ergänzen und sortieren.</p></div></div>
+        <div class="cms-subpanel-head"><span class="cms-subpanel-icon">04</span><div><span class="kicker">Werdegang</span><h3>Timeline</h3><p>Berufliche Stationen, Qualifikationen und Meilensteine frei ergänzen und sortieren.</p></div></div>
         <div class="timeline-collection-toolbar"><button id="addCompanyTimeline" type="button">+ Station hinzufügen</button><span>Reihenfolge und Sichtbarkeit werden pro Station gepflegt.</span></div>
         <div id="companyTimelineEditor" class="timeline-dynamic-editor" aria-live="polite"></div>
         <div class="text-editor-actions contact-save-actions"><button id="saveCompanyTimeline" type="button">Timeline speichern</button><button id="reloadCompanyTimeline" class="secondary" type="button">Neu laden</button><div id="companyTimelineStatus" class="status">Fallback-Timeline wird angezeigt.</div></div>
@@ -107,6 +121,6 @@
   </template>
 
   <script src="./config.js?v=20260924-31"></script>
-  <script src="./admin.js?v=20260924-31"></script>
+  <script src="./admin.js?v=20260924-32"></script>
 </body>
 </html>
