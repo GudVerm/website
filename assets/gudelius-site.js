@@ -1,6 +1,109 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
 
+
+  function normalizeAnalyticsPath(pathname=window.location.pathname){
+    let path=String(pathname||"/").split("?")[0].split("#")[0].replace(/\/+/g,"/");
+    if(path==="/website") path="/";
+    if(path.startsWith("/website/")) path=path.slice("/website".length);
+    if(!path.startsWith("/")) path="/"+path;
+    if(path.length>1&&!path.endsWith("/")&&!path.includes(".")) path+="/";
+    return path;
+  }
+
+  function sendAnalyticsEvent(eventType,target="",label=""){
+    if(!cmsApi) return;
+    const pagePath=normalizeAnalyticsPath();
+    if(pagePath.startsWith("/admin/")) return;
+
+    const payload={
+      event_type:String(eventType||"").slice(0,40),
+      page_path:pagePath,
+      target:String(target||"").slice(0,80),
+      event_label:String(label||"").slice(0,140)
+    };
+    const body=JSON.stringify(payload);
+    try{
+      if(navigator.sendBeacon){
+        const blob=new Blob([body],{type:"text/plain;charset=UTF-8"});
+        if(navigator.sendBeacon(cmsApi+"/api/analytics/event",blob)) return;
+      }
+      fetch(cmsApi+"/api/analytics/event",{
+        method:"POST",
+        headers:{"content-type":"text/plain;charset=UTF-8"},
+        body,
+        keepalive:true
+      }).catch(()=>{});
+    }catch{}
+  }
+
+  window.gudeliusTrack=sendAnalyticsEvent;
+
+  function serviceSlugFromHref(href){
+    try{
+      const path=new URL(href,window.location.href).pathname;
+      const match=path.match(/\/leistungen\/([^/]+)\/?$/);
+      return match?.[1]||"";
+    }catch{return ""}
+  }
+
+  document.addEventListener("click",(event)=>{
+    const target=event.target.closest("a,button,.service-card");
+    if(!target) return;
+
+    const marked=target.closest("[data-analytics-event]");
+    if(marked){
+      sendAnalyticsEvent(
+        marked.dataset.analyticsEvent,
+        marked.dataset.analyticsTarget||"",
+        marked.dataset.analyticsLabel||marked.textContent.trim()
+      );
+      return;
+    }
+
+    const anchor=target.closest("a");
+    const href=anchor?.getAttribute("href")||"";
+
+    if(anchor&&href.startsWith("tel:")){
+      sendAnalyticsEvent("contact_action","phone","Telefon");
+      return;
+    }
+    if(anchor&&href.startsWith("mailto:")){
+      sendAnalyticsEvent("contact_action","email","E-Mail");
+      return;
+    }
+
+    const serviceCard=target.closest(".service-card");
+    const serviceLink=serviceCard?.dataset.href||href;
+    const serviceSlug=serviceSlugFromHref(serviceLink);
+    if(serviceSlug){
+      const label=serviceCard?.querySelector("h3")?.textContent?.trim()||anchor?.textContent?.trim()||serviceSlug;
+      sendAnalyticsEvent("service_open",serviceSlug,label);
+      return;
+    }
+
+    if(anchor?.classList.contains("flyover-item")){
+      const slug=serviceSlugFromHref(href);
+      if(slug) sendAnalyticsEvent("service_open",slug,anchor.querySelector("strong")?.textContent?.trim()||slug);
+      return;
+    }
+
+    if(anchor?.classList.contains("btn")){
+      if(href.includes("#kontakt")) sendAnalyticsEvent("cta_click","contact",anchor.textContent.trim());
+      else if(href.includes("#leistungen")) sendAnalyticsEvent("cta_click","services",anchor.textContent.trim());
+      else sendAnalyticsEvent("cta_click","button",anchor.textContent.trim());
+      return;
+    }
+
+    if(anchor&&anchor.closest("header nav")){
+      const label=anchor.textContent.replace(/\s+/g," ").trim().slice(0,140);
+      sendAnalyticsEvent("nav_click","navigation",label);
+    }
+  },{passive:true});
+
+  sendAnalyticsEvent("pageview","","");
+
+
   function cmsMediaUrl(key) {
     return cmsApi + "/media/" + key.split("/").map(encodeURIComponent).join("/");
   }
@@ -343,6 +446,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('');
     applyCmsMedia(equipmentGallery);
 
+    sendAnalyticsEvent('equipment_open',key,data.title||data.kicker||key);
+
     equipmentModal.classList.add('open');
     equipmentModal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -425,6 +530,7 @@ async function sendMail(e) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || ("HTTP " + response.status));
 
+    window.gudeliusTrack?.("form_submit","contact-form","Projektanfrage");
     form.reset();
     if (status) {
       status.textContent = "Vielen Dank. Ihre Anfrage wurde erfolgreich übermittelt.";
