@@ -185,3 +185,24 @@ Unter `cloudflare/.media-audit/` werden anschließend ausschließlich lokal erze
 - lokale Kopien der R2-Objekte zur Sichtprüfung
 
 Der Ordner ist per `.gitignore` ausgeschlossen. Das Audit löscht und verändert keine R2-Dateien und aktiviert die öffentliche Medienausgabe nicht.
+
+
+## R2-Krokodilbereinigung
+
+Nach der visuellen Prüfung wurde bestätigt, dass die fehlerhaften R2-Objekte als Originaldatei `krokodil.png` hinterlegt sind.
+
+Der Cleanup läuft standardmäßig nur als Dry-Run:
+
+```bash
+npm run media:cleanup
+```
+
+Dabei werden ausschließlich Objekte mit `custom_metadata.original_name = krokodil.png` als Löschziele markiert. Andere R2-Objekte werden separat als **nicht betroffen** angezeigt und niemals automatisch mitgelöscht.
+
+Erst nach Sichtprüfung der Dry-Run-Liste:
+
+```bash
+npm run media:cleanup -- --apply
+```
+
+Der Apply-Lauf löscht nur die zuvor anhand des Originaldateinamens identifizierten Krokodil-Objekte und prüft anschließend erneut, ob noch solche Objekte vorhanden sind. Die öffentliche R2-Ausgabe bleibt währenddessen deaktiviert.

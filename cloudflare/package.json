@@ -1,7 +1,7 @@
 {
   "name": "gudelius-cms",
   "private": true,
-  "version": "0.3.1",
+  "version": "0.3.2",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
@@ -10,7 +10,8 @@
     "check": "node --check src/index.js && node --check smoke-test.mjs",
     "deploy:dry": "wrangler deploy --dry-run",
     "smoke:remote": "node smoke-test.mjs",
-    "media:audit": "node media-audit.mjs"
+    "media:audit": "node media-audit.mjs",
+    "media:cleanup": "node media-cleanup.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.36.0"
