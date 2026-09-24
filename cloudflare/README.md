@@ -342,3 +342,8 @@ Seit Release `2026-09-24.9` schreibt der Worker beim Ausliefern der Access-gesch
 ## Anfragen-Kanban: horizontale Navigation
 
 Seit Release `2026-09-24.10` hat die Access-Adminseite für Anfragen oberhalb des Kanban eine synchronisierte horizontale Scrollleiste. Zusätzlich kann die freie Kanban-Fläche am Desktop per Maus horizontal gezogen und per Pfeiltasten verschoben werden. Karten bleiben weiterhin für den Statuswechsel zwischen den Spalten drag-and-drop-fähig. Auf Touch-Geräten bleibt horizontales Wischen aktiv.
+
+
+## Technik-Admin: cachefeste helle Platzhalter
+
+Seit Release `2026-09-24.11` verwenden Trimble SX12, RTK-Drohne und BBSOFT neue versionierte helle Platzhalterdateien. Der Worker versieht außerdem proxied `/assets/*`-Abrufe mit der Worker-Release als Upstream-Query und liefert sie mit `cache-control: no-store` aus. Damit können alte dunkle SVG-Versionen im Access-Admin nicht mehr aus Browser- oder Proxy-Caches weiterverwendet werden.
