@@ -125,6 +125,26 @@ GET /api/admin/health
 
 Dieser Check verifiziert D1-Tabellen/Spalten, R2-Binding sowie das Vorhandensein der notwendigen Worker-Bindings, ohne ein Testmedium zu schreiben und ohne eine Test-E-Mail zu versenden.
 
+## Automatisierter Remote-Smoke-Test
+
+Nach dem Cloudflare-Deploy kann der Repository-Stand ohne gespeicherte Secrets geprüft werden:
+
+```bash
+CMS_ADMIN_TOKEN="…" npm run smoke:remote
+```
+
+Der Token wird ausschließlich aus der lokalen Shell-Umgebung gelesen. Optional können `CMS_API`, `CMS_ALLOWED_ORIGIN` und `EXPECTED_RELEASE` überschrieben werden.
+
+Der Standardlauf ist schreibarm: Er prüft Health, öffentliche CMS-Ausgabe, CORS, geschützte Admin-Endpunkte, D1-/R2-Bindings, Analytics ohne persistente Testdaten sowie die Ablehnung einer Datei mit falscher Bildsignatur. Er schreibt kein R2-Testobjekt.
+
+Für den ausdrücklich gewünschten Kontakt-End-to-End-Test:
+
+```bash
+CMS_ADMIN_TOKEN="…" RUN_CONTACT_TEST=1 npm run smoke:remote
+```
+
+Dieser Lauf legt eine eindeutig als Test gekennzeichnete Anfrage an, prüft ihre Sichtbarkeit über den Admin-Endpunkt, prüft `notificationSent: true` und markiert die Anfrage anschließend als `spam`, damit sie nicht in die Projektanfragen-KPI eingeht. Der tatsächliche Eingang der E-Mail im Postfach `gudeliusvermessung@web.de` muss zusätzlich im Zielpostfach bestätigt werden.
+
 ## Funktionsprüfung nach Deploy
 
 Nach dem Deploy nacheinander prüfen:
