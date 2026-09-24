@@ -251,7 +251,13 @@ if(tokenInput){
   if(cmsAccessMode){
     sessionStorage.removeItem("gudelius-cms-token");
     const tokenLabel=tokenInput.closest("label");
-    if(tokenLabel) tokenLabel.hidden=true;
+    if(tokenLabel){
+      tokenLabel.hidden=true;
+      tokenLabel.style.display="none";
+    }
+    if(apiUrlInput) apiUrlInput.readOnly=true;
+    if(saveButton) saveButton.style.display="none";
+    if(testButton) testButton.textContent="Access-Status prüfen";
   }
 }
 
@@ -314,11 +320,26 @@ if(testButton){
     try{
       const headers=adminHeaders();
       const r=await fetch(getApi()+"/api/admin/session",{headers});
+      if(r.status===401 && cmsAccessMode){
+        const health=await fetch(getApi()+"/api/health");
+        if(!health.ok) throw new Error("Healthcheck HTTP "+health.status);
+        setStatus(connectionStatus,"Backend erreichbar. Cloudflare Access ist noch nicht aktiv oder diese Sitzung ist noch nicht über Access angemeldet.");
+        return;
+      }
       if(!r.ok) throw new Error("HTTP "+r.status);
       const data=await r.json();
       const authLabel=data.auth_mode==="access"?"Cloudflare Access":data.auth_mode==="token"?"Admin-Token":"unbekannt";
       setStatus(connectionStatus,data.ok?"Admin-Verbindung erfolgreich · "+authLabel+".":"Unerwartete Antwort.",!!data.ok);
     }catch(e){
+      if(cmsAccessMode){
+        try{
+          const health=await fetch(getApi()+"/api/health");
+          if(health.ok){
+            setStatus(connectionStatus,"Backend erreichbar. Für den Admin ist noch eine gültige Cloudflare-Access-Sitzung erforderlich.");
+            return;
+          }
+        }catch{}
+      }
       setStatus(connectionStatus,"Worker nicht erreichbar: "+e.message,false);
     }
   });

@@ -17,7 +17,7 @@ ADMIN_TOKEN_FALLBACK_ENABLED=true` bis zur bewussten Medienprüfung
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.5`.
+Die aktuelle Worker-Releasekennung ist `2026-09-24.6`.
 
 ## Secrets
 
@@ -307,3 +307,10 @@ Vorgesehene Access-Pfade:
 ```
 
 `/admin` selbst leitet nur auf `/admin/` weiter. Öffentliche Website-APIs bleiben außerhalb dieser Pfade. Bis der Access-E2E-Test abgeschlossen ist, bleibt `ADMIN_TOKEN_FALLBACK_ENABLED=true`.
+
+
+### Access-Verbindungsseite
+
+Im Worker-Admin wird das technische Token-Feld vollständig ausgeblendet. Die Worker-URL ist schreibgeschützt und der Verbindungstest heißt dort `Access-Status prüfen`.
+
+Solange die eigentliche Access-Anwendung noch nicht eingerichtet ist, antwortet `/api/admin/session` erwartungsgemäß mit HTTP 401. Die Oberfläche unterscheidet diesen Zustand jetzt von einem Worker-Ausfall: Wenn `/api/health` erreichbar ist, wird neutral gemeldet, dass Access noch nicht aktiv beziehungsweise noch keine gültige Access-Sitzung vorhanden ist.
