@@ -33,3 +33,17 @@ Diese URL wird anschließend in `admin/config.js` bzw. im Admin-Bereich hinterle
 Schreibzugriffe funktionieren nur mit dem Secret `CMS_ADMIN_TOKEN`. Das Token gehört niemals ins Git-Repository. Der Admin speichert es nur in `sessionStorage` des Browsers.
 
 Später kann die Token-Lösung durch Cloudflare Access ersetzt werden.
+
+
+## Statistik / KPI
+
+Die Website kann anonyme Nutzungsereignisse an `POST /api/analytics/event` senden. Gespeichert werden ausschließlich Event-Typ, normalisierter Seitenpfad, ein kurzes Ziel/Label und der Zeitstempel. Es werden **keine** IP-Adressen, Cookies, persistenten Besucher-IDs, Fingerprints, User-Agent-Zeichenketten oder Kontaktformular-Inhalte in der Analytics-Tabelle gespeichert.
+
+Rohereignisse werden auf **180 Tage** begrenzt. Die Admin-Auswertung unter `GET /api/admin/analytics` ist mit dem bestehenden `CMS_ADMIN_TOKEN` geschützt und liefert ausschließlich aggregierte Kennzahlen.
+
+Nach Änderungen am Worker weiterhin wie bisher im Ordner `cloudflare` deployen:
+
+- `npm run db:init:remote` (idempotent)
+- `npm run deploy`
+
+Die öffentliche Website funktioniert vollständig weiter, wenn der Analytics-Endpunkt nicht erreichbar ist.

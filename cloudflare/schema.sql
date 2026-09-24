@@ -22,3 +22,21 @@ CREATE TABLE IF NOT EXISTS contact_requests (
 
 CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at
   ON contact_requests(created_at);
+
+
+-- Datenschutzfreundliche, anonyme Website-KPI-Ereignisse.
+-- Keine IP-Adresse, keine Cookie-/Besucher-ID, kein User-Agent und keine Formulardaten.
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_type TEXT NOT NULL,
+  page_path TEXT NOT NULL DEFAULT '/',
+  target TEXT NOT NULL DEFAULT '',
+  event_label TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_created_at
+ON analytics_events(created_at);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_type_path
+ON analytics_events(event_type, page_path);
