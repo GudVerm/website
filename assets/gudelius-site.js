@@ -316,6 +316,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
+
+  const projectDisplayTitles={
+    "ingenieur-bauvermessung":"Ingenieur- & Bauvermessung",
+    "3d-laserscanning":"3D-Bestandsaufnahme & Laserscanning",
+    "rtk-drohnenvermessung":"RTK-Drohnenvermessung",
+    "gelaende-gewaesser":"Gelände- & Gewässervermessung",
+    "mobiler-einsatz":"Mobiler Projekteinsatz",
+    "bestand-planung":"Bestandsaufnahme & Planungsgrundlagen"
+  };
+  const projectDisplayMeta={
+    "ingenieur-bauvermessung":"Absteckung · Kontrolle · Bestand",
+    "3d-laserscanning":"Punktwolke · Aufmaß · Dokumentation",
+    "rtk-drohnenvermessung":"Orthophoto · Fläche · Geländedaten",
+    "gelaende-gewaesser":"Topografie · Bestand · Geländemodell",
+    "mobiler-einsatz":"Datenkontrolle · Auswertung vor Ort",
+    "bestand-planung":"Aufmaß · Bestand · Weiterverarbeitung"
+  };
+  function projectDisplayTitle(slug,value){
+    const text=String(value||"").trim();
+    if(!text||text===slug||text.toLowerCase()===slug.replace(/-/g," ")||/^[a-z0-9äöüß]+(?:[- ][a-z0-9äöüß]+)+$/.test(text)){
+      return projectDisplayTitles[slug]||text.replace(/-/g," ").replace(/\b\w/g,char=>char.toUpperCase());
+    }
+    return text;
+  }
+
   async function loadDynamicProjects(){
     const grid=document.querySelector('.projects-grid');
     if(!cmsApi||!grid)return;
@@ -333,12 +358,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if(!items.length){grid.innerHTML='';return}
       grid.innerHTML='';
       items.forEach(entry=>{
-        const slug=entry.slug,fallback=fallbackMap.get(slug)||{},title=typeof content['projekte/'+slug+'/title']==='string'?content['projekte/'+slug+'/title']:slug;
-        const location=typeof content['projekte/'+slug+'/location']==='string'?content['projekte/'+slug+'/location']:'',year=typeof content['projekte/'+slug+'/year']==='string'?content['projekte/'+slug+'/year']:'';
+        const slug=entry.slug,fallback=fallbackMap.get(slug)||{},rawTitle=typeof content['projekte/'+slug+'/title']==='string'?content['projekte/'+slug+'/title']:'';
+        const title=projectDisplayTitle(slug,rawTitle),location=typeof content['projekte/'+slug+'/location']==='string'?content['projekte/'+slug+'/location']:'',year=typeof content['projekte/'+slug+'/year']==='string'?content['projekte/'+slug+'/year']:'';
         const card=document.createElement('div');card.className='project';card.dataset.project=slug;if(entry.featured)card.dataset.featured='true';
         const img=document.createElement('img');img.src=fallback.image||'assets/dummy-aussendienst-02.svg';img.dataset.cmsMedia='projects/'+slug;img.alt=title;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
         const caption=document.createElement('div');caption.className='project-caption';const strong=document.createElement('strong');strong.textContent=title;caption.appendChild(strong);
-        const meta=[location,year].filter(Boolean).join(' · ');if(meta){const small=document.createElement('small');small.textContent=meta;caption.appendChild(small)}
+        const meta=[location,year].filter(Boolean).join(' · ')||projectDisplayMeta[slug]||'';if(meta){const small=document.createElement('small');small.textContent=meta;caption.appendChild(small)}
         card.append(img,caption);grid.appendChild(card);
       });
       const featured=grid.querySelector('[data-featured="true"]');if(featured&&featured!==grid.firstElementChild)grid.prepend(featured);
