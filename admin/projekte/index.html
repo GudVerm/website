@@ -77,10 +77,12 @@
         </section>
         <section class="text-editor-panel technik-text-panel">
           <div class="text-editor-grid">
-            <label class="text-editor-wide"><span>Titel</span><input data-project-field="title" type="text" maxlength="160"></label>
+            <label class="text-editor-wide"><span>Projekttitel · Modal</span><input data-project-field="title" type="text" maxlength="160"></label>
+            <label class="text-editor-wide"><span>Bildüberschrift · Projektkachel</span><input data-project-field="imageTitle" type="text" maxlength="160" placeholder="z. B. 3D-Bestandsaufnahme & Laserscanning"></label>
+            <label class="text-editor-wide"><span>Bildbeschreibung · Projektkachel</span><input data-project-field="imageDescription" type="text" maxlength="220" placeholder="z. B. Punktwolke · Aufmaß · Dokumentation"></label>
             <label><span>Ort</span><input data-project-field="location" type="text" maxlength="140"></label>
             <label><span>Jahr</span><input data-project-field="year" type="text" maxlength="20" placeholder="z. B. 2026"></label>
-            <label class="text-editor-wide"><span>Kurzbeschreibung</span><textarea data-project-field="description" rows="4" maxlength="900"></textarea></label>
+            <label class="text-editor-wide"><span>Projektbeschreibung · Modal</span><textarea data-project-field="description" rows="4" maxlength="900"></textarea></label>
             <fieldset class="text-editor-wide collection-fieldset"><legend>Zugeordnete Leistungen</legend><div class="project-services check-option-grid"></div></fieldset>
             <label class="check-option text-editor-wide"><input data-project-meta="featured" type="checkbox"> Projekt als hervorgehoben markieren</label>
           </div>
@@ -95,6 +97,6 @@
   </template>
 
   <script src="./config.js?v=20260923-20"></script>
-  <script src="./admin.js?v=20260924-25"></script>
+  <script src="./admin.js?v=20260924-30"></script>
 </body>
 </html>
