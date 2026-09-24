@@ -1,6 +1,6 @@
 const DEFAULT_API = "https://gudelius-cms.gudeliusvermessung.workers.dev";
 const DEFAULT_ORIGIN = "https://gudverm.github.io";
-const DEFAULT_RELEASE = "2026-09-24.11";
+const DEFAULT_RELEASE = "2026-09-24.12";
 
 const api = String(process.env.CMS_API || DEFAULT_API).replace(/\/$/, "");
 const origin = String(process.env.CMS_ALLOWED_ORIGIN || DEFAULT_ORIGIN);
