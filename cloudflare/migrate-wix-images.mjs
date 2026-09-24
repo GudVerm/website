@@ -6,7 +6,7 @@ const repoRoot = resolve(cloudflareDir, "..");
 const assetDir = join(repoRoot, "assets", "media");
 const originalDir = join(cloudflareDir, ".wix-originals");
 const tempDir = join(cloudflareDir, ".wix-migration-tmp");
-const CACHE_VERSION = "20260924-34";
+const CACHE_VERSION = "20260924-35";
 
 const assets = [
   {
@@ -179,6 +179,9 @@ async function collectDeployableSourceFiles(dir = repoRoot) {
 function localReference(filePath, asset) {
   const rel = relative(repoRoot, filePath).split(sep).join("/");
   if (rel === "admin/admin.js") return "../assets/media/" + asset.webFile;
+  if (rel.startsWith("leistungen/") && rel.endsWith("/index.html")) {
+    return "../../assets/media/" + asset.webFile;
+  }
   return "assets/media/" + asset.webFile;
 }
 

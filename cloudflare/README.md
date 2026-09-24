@@ -226,4 +226,6 @@ Der Lauf ist wiederholbar:
 - `static.wixstatic.com` darf nach dem Lauf in produktiven HTML-/JS-Dateien nicht mehr vorkommen,
 - Wix, DNS, D1 und R2 werden nicht verändert,
 - die öffentliche R2-Ausgabe bleibt deaktiviert,
-- JS-Cache-Versionen werden auf `20260924-34` erhöht.
+- JS-Cache-Versionen werden auf `20260924-35` erhöht.
+
+Hinweis: Die vier Leistungsseiten liegen zwei Ebenen tief und verwenden deshalb lokale Medienpfade mit `../../assets/media/`; die übrigen öffentlichen Seiten nutzen ihre bestehende Base-URL-Struktur.
