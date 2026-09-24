@@ -199,8 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
+      const legacyCompanyText={
+        "unternehmen/eyebrow":{"Ihr Ansprechpartner":"Persönlicher Ansprechpartner"},
+        "unternehmen/title":{"Persönlich geführt. Direkt erreichbar.":"Vermessung mit direkter Verantwortung."},
+        "unternehmen/lead":{"ist Vermessungsingenieur mit langjähriger Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau.":"steht für persönliche Betreuung, kurze Abstimmungswege und langjährige Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau."}
+      };
       elements.forEach((element) => {
-        const value = content[element.dataset.cmsText];
+        const key=element.dataset.cmsText;
+        let value = content[key];
+        if(typeof value==="string"&&legacyCompanyText[key]?.[value]) value=legacyCompanyText[key][value];
         if (typeof value === "string" && value.trim()) {
           element.textContent = value;
         }
