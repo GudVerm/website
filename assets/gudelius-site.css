@@ -955,3 +955,10 @@ body.modal-open{overflow:hidden}
   .equipment-dialog{max-height:calc(100dvh - 28px)}
   .equipment-device-meta{grid-template-columns:1fr}
 }
+
+
+/* Technik-Gruppenkarten sind Container; nur einzelne Geräte sind klickbar */
+.equipment-grid .equip-card.equip-open{cursor:default}
+.equipment-grid .equip-card.equip-open:hover{transform:none;box-shadow:none!important}
+.equipment-grid .equip-card.equip-open:hover::after{box-shadow:none}
+.equipment-grid .equip-more{cursor:default}
