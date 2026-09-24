@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   function projectDisplayTitle(slug,value){
     const text=String(value||"").trim();
-    if(!text||text===slug||text.toLowerCase()===slug.replace(/-/g," ")||/^[a-z0-9äöüß]+(?:[- ][a-z0-9äöüß]+)+$/.test(text)){
+    if(!text||text===slug||text.toLowerCase()===slug.replace(/-/g," ")||text===text.toLocaleLowerCase("de-DE")||/^[a-z0-9äöüß]+(?:[- ][a-z0-9äöüß]+)+$/.test(text)){
       return projectDisplayTitles[slug]||text.replace(/-/g," ").replace(/\b\w/g,char=>char.toUpperCase());
     }
     return text;
