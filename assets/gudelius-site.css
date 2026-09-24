@@ -842,3 +842,116 @@ body.modal-open{overflow:hidden}
   .project-modal-close{right:12px;top:12px}
   .project-modal-content{padding:24px 18px 32px;min-height:max-content}
 }
+
+
+/* Technik: jedes Gerät / jede Software öffnet ein eigenes Detail-Modal */
+.equip-device-trigger{
+  width:100%;
+  border:0;
+  padding:4px 0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+  border-radius:8px;
+}
+.equip-device-trigger:hover,
+.equip-device-trigger:focus-visible{
+  color:#8a7110;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.equip-preview-trigger{
+  min-width:0;
+  border:0;
+  padding:0;
+  background:transparent;
+  border-radius:10px;
+  cursor:pointer;
+}
+.equip-preview-trigger:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--accent) 62%,white);
+  outline-offset:3px;
+}
+.equip-preview-trigger img{
+  width:100%;
+  height:62px;
+  object-fit:cover;
+  border-radius:9px;
+  border:1px solid #d7ddda;
+  background:#fff;
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.equip-preview-trigger:hover img{transform:translateY(-2px);box-shadow:0 8px 18px rgba(16,30,38,.12)}
+.equipment-dialog{width:min(760px,100%)}
+.equipment-device-grid{grid-template-columns:1fr}
+.equipment-device-card-single{
+  display:grid;
+  grid-template-columns:minmax(230px,.9fr) minmax(0,1.1fr);
+}
+.equipment-device-card-single>img{
+  width:100%;
+  height:100%;
+  min-height:330px;
+  object-fit:contain;
+  padding:18px;
+  background:#fff;
+}
+.equipment-device-card-single .equipment-device-copy{
+  align-self:center;
+  padding:24px;
+}
+
+@media(max-width:800px){
+  .equipment-modal{
+    padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  }
+  .equipment-dialog{
+    width:100%;
+    max-height:calc(100dvh - 32px);
+    border-radius:20px;
+  }
+  .equipment-modal-close{
+    top:12px;
+    margin:12px 12px 0 0;
+  }
+  .equipment-modal-inner{
+    padding:20px 16px 24px;
+  }
+  .equipment-modal-top{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  .equipment-modal h2{
+    font-size:clamp(1.75rem,8vw,2.5rem);
+    padding-right:46px;
+  }
+  .equipment-device-card-single{
+    grid-template-columns:1fr;
+  }
+  .equipment-device-card-single>img{
+    height:220px;
+    min-height:0;
+    padding:14px;
+  }
+  .equipment-device-card-single .equipment-device-copy{
+    padding:18px 16px 20px;
+  }
+  .equipment-device-meta{
+    grid-template-columns:1fr 1fr;
+  }
+  .equipment-modal-note{
+    margin-top:16px;
+    padding-top:14px;
+  }
+  .equip-preview-trigger img{height:54px}
+}
+
+@media(max-width:420px){
+  .equipment-modal{
+    padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+  }
+  .equipment-dialog{max-height:calc(100dvh - 28px)}
+  .equipment-device-meta{grid-template-columns:1fr}
+}
