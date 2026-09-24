@@ -1289,3 +1289,24 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
     justify-content:space-between;
   }
 }
+
+
+/* Anfragen-Schnellfilter: Textkontrast sicherstellen */
+.inquiry-stats .inquiry-stat{
+  background:#fff;
+  color:var(--ink)!important;
+}
+.inquiry-stats .inquiry-stat span{
+  color:var(--muted)!important;
+}
+.inquiry-stats .inquiry-stat strong{
+  color:var(--ink)!important;
+}
+.inquiry-stats .inquiry-stat.active{
+  background:#fff9dc;
+  color:var(--ink)!important;
+}
+.inquiry-stats .inquiry-stat.active span,
+.inquiry-stats .inquiry-stat.active strong{
+  color:var(--ink)!important;
+}
