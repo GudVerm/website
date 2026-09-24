@@ -325,3 +325,10 @@ Die früheren administrativen Legacy-Routen außerhalb von `/api/admin/*` liefer
 Die alte GitHub-Pages-Adminoberfläche verweist auf die Access-geschützte Worker-Adminoberfläche. Öffentliche Endpunkte (`/api/health`, `/api/site`, `POST /api/contact`, `POST /api/analytics/event`) bleiben unverändert öffentlich.
 
 Der Remote-Smoke-Test benötigt keinen Admin-Token mehr. Nach erfolgreichem Produktivtest kann das nicht mehr verwendete Secret mit `npx wrangler secret delete CMS_ADMIN_TOKEN` vollständig entfernt werden.
+
+
+## Kontaktformular / Analytics – Beacon-Kompatibilität
+
+Seit Release `2026-09-24.8` akzeptiert `POST /api/analytics/event` sowohl `application/json` als auch `text/plain`. Das ist absichtlich so, weil die öffentliche Website Analytics-Ereignisse bevorzugt über `navigator.sendBeacon()` sendet. Der Body muss weiterhin gültiges JSON enthalten und durchläuft unverändert die Event-Typ-, Pfad-, Größen-, Origin- und Rate-Limit-Prüfungen.
+
+Kontaktformular-Inhalte werden weiterhin ausschließlich in `contact_requests` gespeichert. Analytics speichert nur `event_type`, normalisierten `page_path`, `target`, `event_label` und `created_at`; Name, E-Mail, Betreff und Nachricht werden nicht in `analytics_events` übernommen.
