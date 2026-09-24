@@ -341,6 +341,134 @@ document.addEventListener('DOMContentLoaded', () => {
     return text;
   }
 
+
+  const projectServiceLabels={
+    "ingenieurvermessung":"Ingenieurvermessung",
+    "gis-bauvermessung":"GIS & Bauvermessung",
+    "3d-laserscanning":"3D-Laserscanning",
+    "drohnenvermessung":"Drohnenvermessung"
+  };
+  const projectFallbackDetails={
+    "ingenieur-bauvermessung":{
+      description:"Präzise Absteckung, Kontrollmessungen und Bestandsaufnahme bilden die verlässliche Datengrundlage für Planung und Bauausführung.",
+      services:["ingenieurvermessung"]
+    },
+    "3d-laserscanning":{
+      description:"Flächenhafte 3D-Erfassung für Bestandsdokumentation, Punktwolken und die anschließende Ableitung von Planungs- und Aufmaßdaten.",
+      services:["3d-laserscanning"]
+    },
+    "rtk-drohnenvermessung":{
+      description:"RTK-gestützte Luftbildaufnahme für Orthophotos, Flächenerfassung und großräumige Geländedaten mit effizienter Aufnahme vor Ort.",
+      services:["drohnenvermessung"]
+    },
+    "gelaende-gewaesser":{
+      description:"Topografische Gelände- und Gewässeraufnahme als Grundlage für Bestandspläne, Geländemodelle und weitere fachliche Auswertungen.",
+      services:["gis-bauvermessung"]
+    },
+    "mobiler-einsatz":{
+      description:"Messung, Datenkontrolle und erste Auswertung direkt im Projektumfeld – für kurze Wege und unmittelbar prüfbare Ergebnisse.",
+      services:["ingenieurvermessung","gis-bauvermessung"]
+    },
+    "bestand-planung":{
+      description:"Strukturierte Bestandsaufnahme zur Erstellung belastbarer Planungsgrundlagen und zur Weiterverarbeitung in CAD- und Projektworkflows.",
+      services:["ingenieurvermessung","3d-laserscanning"]
+    }
+  };
+  const projectModalRecords=new Map();
+  const projectModal=document.getElementById("projectModal");
+  const projectModalClose=document.getElementById("projectModalClose");
+  const projectModalImage=document.getElementById("projectModalImage");
+  const projectModalTitle=document.getElementById("projectModalTitle");
+  const projectModalMeta=document.getElementById("projectModalMeta");
+  const projectModalDescription=document.getElementById("projectModalDescription");
+  const projectModalServices=document.getElementById("projectModalServices");
+  const projectModalTags=document.getElementById("projectModalTags");
+  let projectModalPreviousFocus=null;
+
+  function normalizeProjectServices(value){
+    if(Array.isArray(value))return value.filter(item=>typeof item==="string"&&item.trim());
+    if(typeof value==="string"){
+      try{const parsed=JSON.parse(value);if(Array.isArray(parsed))return parsed.filter(Boolean)}catch{}
+      return value.split(",").map(item=>item.trim()).filter(Boolean);
+    }
+    return [];
+  }
+  function fallbackProjectRecord(card){
+    const slug=card?.dataset.project||card?.querySelector("[data-cms-media]")?.dataset.cmsMedia?.replace(/^projects\//,"")||"";
+    const fallback=projectFallbackDetails[slug]||{};
+    return {
+      slug,
+      title:card?.querySelector(".project-caption strong")?.textContent?.trim()||projectDisplayTitles[slug]||projectDisplayTitle(slug,slug),
+      description:fallback.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung.",
+      location:"",
+      year:"",
+      services:fallback.services||[],
+      image:card?.querySelector("img")?.currentSrc||card?.querySelector("img")?.src||"assets/dummy-aussendienst-02.svg"
+    };
+  }
+  function registerFallbackProjectCards(){
+    document.querySelectorAll(".projects-grid .project").forEach(card=>{
+      const record=fallbackProjectRecord(card);
+      if(record.slug)projectModalRecords.set(record.slug,record);
+      card.dataset.project=record.slug;
+      card.tabIndex=0;
+      card.setAttribute("role","button");
+      card.setAttribute("aria-label","Projekt "+record.title+" öffnen");
+    });
+  }
+  function openProjectModal(card){
+    if(!projectModal||!card)return;
+    const slug=card.dataset.project||"";
+    const base=projectModalRecords.get(slug)||fallbackProjectRecord(card);
+    const image=card.querySelector("img");
+    const record={...base,image:image?.currentSrc||image?.src||base.image};
+
+    projectModalImage.src=record.image||"assets/dummy-aussendienst-02.svg";
+    projectModalImage.alt=record.title||"Projekt";
+    projectModalTitle.textContent=record.title||"Projekt";
+    projectModalDescription.textContent=record.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung.";
+
+    const meta=[record.location,record.year].filter(Boolean);
+    projectModalMeta.innerHTML="";
+    meta.forEach(value=>{const span=document.createElement("span");span.textContent=value;projectModalMeta.appendChild(span)});
+    projectModalMeta.hidden=!meta.length;
+
+    const services=normalizeProjectServices(record.services);
+    projectModalTags.innerHTML="";
+    services.forEach(service=>{
+      const tag=document.createElement("span");
+      tag.textContent=projectServiceLabels[service]||service;
+      projectModalTags.appendChild(tag);
+    });
+    projectModalServices.hidden=!services.length;
+
+    projectModalPreviousFocus=document.activeElement;
+    projectModal.classList.add("open");
+    projectModal.setAttribute("aria-hidden","false");
+    document.body.classList.add("modal-open");
+    projectModalClose?.focus();
+    sendAnalyticsEvent("project_open",slug,record.title||slug);
+  }
+  function closeProjectModal(){
+    if(!projectModal)return;
+    projectModal.classList.remove("open");
+    projectModal.setAttribute("aria-hidden","true");
+    document.body.classList.remove("modal-open");
+    projectModalPreviousFocus?.focus?.();
+  }
+  registerFallbackProjectCards();
+  document.addEventListener("click",event=>{
+    const card=event.target.closest(".projects-grid .project");
+    if(card){openProjectModal(card);return}
+    if(event.target.closest("[data-project-modal-close]")||event.target.closest("#projectModalClose"))closeProjectModal();
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"&&projectModal?.classList.contains("open"))closeProjectModal();
+    if((event.key==="Enter"||event.key===" ")&&event.target.matches(".projects-grid .project")){
+      event.preventDefault();openProjectModal(event.target);
+    }
+  });
+
   async function loadDynamicProjects(){
     const grid=document.querySelector('.projects-grid');
     if(!cmsApi||!grid)return;
@@ -360,11 +488,14 @@ document.addEventListener('DOMContentLoaded', () => {
       items.forEach(entry=>{
         const slug=entry.slug,fallback=fallbackMap.get(slug)||{},rawTitle=typeof content['projekte/'+slug+'/title']==='string'?content['projekte/'+slug+'/title']:'';
         const title=projectDisplayTitle(slug,rawTitle),location=typeof content['projekte/'+slug+'/location']==='string'?content['projekte/'+slug+'/location']:'',year=typeof content['projekte/'+slug+'/year']==='string'?content['projekte/'+slug+'/year']:'';
-        const card=document.createElement('div');card.className='project';card.dataset.project=slug;if(entry.featured)card.dataset.featured='true';
+        const description=typeof content['projekte/'+slug+'/description']==='string'?content['projekte/'+slug+'/description'].trim():'';
+        const services=normalizeProjectServices(content['projekte/'+slug+'/services']);
+        const card=document.createElement('div');card.className='project';card.dataset.project=slug;card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Projekt '+title+' öffnen');if(entry.featured)card.dataset.featured='true';
         const img=document.createElement('img');img.src=fallback.image||'assets/dummy-aussendienst-02.svg';img.dataset.cmsMedia='projects/'+slug;img.alt=title;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
         const caption=document.createElement('div');caption.className='project-caption';const strong=document.createElement('strong');strong.textContent=title;caption.appendChild(strong);
         const meta=[location,year].filter(Boolean).join(' · ')||projectDisplayMeta[slug]||'';if(meta){const small=document.createElement('small');small.textContent=meta;caption.appendChild(small)}
         card.append(img,caption);grid.appendChild(card);
+        projectModalRecords.set(slug,{slug,title,description:description||(projectFallbackDetails[slug]?.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung."),location,year,services:services.length?services:(projectFallbackDetails[slug]?.services||[]),image:img.src});
       });
       const featured=grid.querySelector('[data-featured="true"]');if(featured&&featured!==grid.firstElementChild)grid.prepend(featured);
       applyCmsMedia(grid);
