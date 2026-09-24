@@ -11,52 +11,52 @@ const defaultEquipment = [
   { slug:"bbsoft", group:"Programme & Arbeitsplatz", key:"equipment/bbsoft", name:"BBSOFT", category:"Tiefbau, Vermessung & DGM", detail:"Tiefbau, Vermessung & DGM", manufacturer:"BBSOFT", model:"BBSOFT", description:"Fachsoftware für vermessungsnahe Tiefbauplanung, Geländemodelle und Massenermittlung.", details:"Unterstützt die Bearbeitung von Vermessungsdaten, DGM und projektbezogenen Tiefbauaufgaben.", fallback:"../assets/equipment-bbsoft.svg" },
   { slug:"realworks", group:"Programme & Arbeitsplatz", key:"equipment/realworks", name:"Trimble RealWorks", category:"Punktwolken-Auswertung", detail:"Punktwolken-Auswertung", manufacturer:"Trimble", model:"RealWorks", description:"Software zur Registrierung, Auswertung und Aufbereitung terrestrischer Punktwolken.", details:"Für Scanregistrierung, Punktwolkenanalyse und die Ableitung weiterverwendbarer 2D-/3D-Ergebnisse.", fallback:"../assets/equipment-realworks.svg" },
   { slug:"metashape", group:"Programme & Arbeitsplatz", key:"equipment/metashape", name:"Agisoft Metashape", category:"Photogrammetrie", detail:"Photogrammetrie", manufacturer:"Agisoft", model:"Metashape", description:"Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.", details:"Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.", fallback:"../assets/equipment-metashape.svg" },
-  { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"../assets/media/mobiler-arbeitsplatz.avif" }
+  { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" }
 ];
 let equipment=defaultEquipment.map((item,index)=>({...item,order:index+1,visible:true,archived:false}));
 
 const defaultProjects = [
-  { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/ingenieur-bauvermessung.avif" },
-  { slug:"3d-laserscanning", key:"projects/3d-laserscanning", title:"3D-Laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["3d-laserscanning"], fallback:"../assets/media/3d-laserscanning.avif" },
-  { slug:"rtk-drohnenvermessung", key:"projects/rtk-drohnenvermessung", title:"RTK-Drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["drohnenvermessung"], fallback:"../assets/media/drohnenvermessung.avif" },
-  { slug:"gelaende-gewaesser", key:"projects/gelaende-gewaesser", title:"Gelände & Gewässer", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["gis-bauvermessung"], fallback:"../assets/media/gelaende-gewaesser.avif" },
-  { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"../assets/media/mobiler-arbeitsplatz.avif" },
-  { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/bestand-planung.avif" }
+  { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
+  { slug:"3d-laserscanning", key:"projects/3d-laserscanning", title:"3D-Laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["3d-laserscanning"], fallback:"../assets/media/3d-laserscanning.png" },
+  { slug:"rtk-drohnenvermessung", key:"projects/rtk-drohnenvermessung", title:"RTK-Drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["drohnenvermessung"], fallback:"../assets/media/drohnenvermessung.jpg" },
+  { slug:"gelaende-gewaesser", key:"projects/gelaende-gewaesser", title:"Gelände & Gewässer", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["gis-bauvermessung"], fallback:"../assets/media/gelaende-gewaesser.png" },
+  { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
+  { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/bestand-planung.jpg" }
 ];
 let projects=defaultProjects.map((item,index)=>({...item,order:index+1,visible:true,archived:false,featured:index===0}));
 
 const startPageImages = [
-  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/gelaende-gewaesser.avif" }
+  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/gelaende-gewaesser.png" }
 ];
 
 const serviceImages = [
-  { key:"leistungen/ingenieurvermessung", name:"Ingenieurvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/bestand-planung.avif" },
-  { key:"leistungen/gis-bauvermessung", name:"GIS & Bauvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/gelaende-gewaesser.avif" },
-  { key:"leistungen/3d-laserscanning", name:"3D-Laserscanning", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/3d-laserscanning.avif" },
-  { key:"leistungen/drohnenvermessung", name:"Drohnenvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/drohnenvermessung.avif" }
+  { key:"leistungen/ingenieurvermessung", name:"Ingenieurvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/bestand-planung.jpg" },
+  { key:"leistungen/gis-bauvermessung", name:"GIS & Bauvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/gelaende-gewaesser.png" },
+  { key:"leistungen/3d-laserscanning", name:"3D-Laserscanning", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/3d-laserscanning.png" },
+  { key:"leistungen/drohnenvermessung", name:"Drohnenvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/drohnenvermessung.jpg" }
 ];
 
 const servicePageImages = [
-  { key:"leistungsseiten/ingenieurvermessung/hero", name:"Ingenieurvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/ingenieur-bauvermessung.avif" },
-  { key:"leistungsseiten/ingenieurvermessung/ergebnis-1", name:"Ingenieurvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.avif" },
-  { key:"leistungsseiten/ingenieurvermessung/ergebnis-2", name:"Ingenieurvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.avif" },
+  { key:"leistungsseiten/ingenieurvermessung/hero", name:"Ingenieurvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
+  { key:"leistungsseiten/ingenieurvermessung/ergebnis-1", name:"Ingenieurvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.jpg" },
+  { key:"leistungsseiten/ingenieurvermessung/ergebnis-2", name:"Ingenieurvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
 
-  { key:"leistungsseiten/gis-bauvermessung/hero", name:"GIS & Bauvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/gelaende-gewaesser.avif" },
-  { key:"leistungsseiten/gis-bauvermessung/ergebnis-1", name:"GIS & Bauvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/ingenieur-bauvermessung.avif" },
-  { key:"leistungsseiten/gis-bauvermessung/ergebnis-2", name:"GIS & Bauvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.avif" },
+  { key:"leistungsseiten/gis-bauvermessung/hero", name:"GIS & Bauvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/gelaende-gewaesser.png" },
+  { key:"leistungsseiten/gis-bauvermessung/ergebnis-1", name:"GIS & Bauvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
+  { key:"leistungsseiten/gis-bauvermessung/ergebnis-2", name:"GIS & Bauvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
 
-  { key:"leistungsseiten/3d-laserscanning/hero", name:"3D-Laserscanning · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/3d-laserscanning.avif" },
-  { key:"leistungsseiten/3d-laserscanning/ergebnis-1", name:"3D-Laserscanning · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.avif" },
-  { key:"leistungsseiten/3d-laserscanning/ergebnis-2", name:"3D-Laserscanning · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.avif" },
+  { key:"leistungsseiten/3d-laserscanning/hero", name:"3D-Laserscanning · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/3d-laserscanning.png" },
+  { key:"leistungsseiten/3d-laserscanning/ergebnis-1", name:"3D-Laserscanning · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.jpg" },
+  { key:"leistungsseiten/3d-laserscanning/ergebnis-2", name:"3D-Laserscanning · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
 
-  { key:"leistungsseiten/drohnenvermessung/hero", name:"Drohnenvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/drohnenvermessung.avif" },
-  { key:"leistungsseiten/drohnenvermessung/ergebnis-1", name:"Drohnenvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/gelaende-gewaesser.avif" },
-  { key:"leistungsseiten/drohnenvermessung/ergebnis-2", name:"Drohnenvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.avif" }
+  { key:"leistungsseiten/drohnenvermessung/hero", name:"Drohnenvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/drohnenvermessung.jpg" },
+  { key:"leistungsseiten/drohnenvermessung/ergebnis-1", name:"Drohnenvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/gelaende-gewaesser.png" },
+  { key:"leistungsseiten/drohnenvermessung/ergebnis-2", name:"Drohnenvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" }
 ];
 
 const companyImages = [
-  { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.avif" },
-  { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"../assets/media/pruefsachverstaendiger.avif" }
+  { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
+  { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"../assets/media/pruefsachverstaendiger.jpg" }
 ];
 
 const apiUrlInput=document.getElementById("apiUrl");
