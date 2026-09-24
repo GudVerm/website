@@ -167,6 +167,9 @@ const serviceTextControls=[
   }
 ];
 const companyTextFields={
+  "unternehmen/page-eyebrow":document.getElementById("companyPageEyebrow"),
+  "unternehmen/page-title":document.getElementById("companyPageTitle"),
+  "unternehmen/page-lead":document.getElementById("companyPageLead"),
   "unternehmen/eyebrow":document.getElementById("companyEyebrow"),
   "unternehmen/title":document.getElementById("companyTitle"),
   "unternehmen/name":document.getElementById("companyName"),
@@ -426,16 +429,25 @@ serviceTextControls.forEach(control=>{
 });
 
 const companyTextDefaults={
-  "unternehmen/eyebrow":"Ihr Ansprechpartner",
-  "unternehmen/title":"Persönlich geführt. Direkt erreichbar.",
+  "unternehmen/page-eyebrow":"Vermessungsbüro aus der Jachenau",
+  "unternehmen/page-title":"Persönlich geführt. Präzise gearbeitet.",
+  "unternehmen/page-lead":"GudeliusVermessung steht für direkte Ansprechpartner, moderne Messtechnik und verlässliche Vermessungsdaten – von der ersten Aufnahme bis zur fertigen Planungsgrundlage.",
+  "unternehmen/eyebrow":"Persönlicher Ansprechpartner",
+  "unternehmen/title":"Vermessung mit direkter Verantwortung.",
   "unternehmen/name":"Jost Gudelius, B. Eng. (FH)",
-  "unternehmen/lead":"ist Vermessungsingenieur mit langjähriger Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau.",
+  "unternehmen/lead":"steht für persönliche Betreuung, kurze Abstimmungswege und langjährige Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau.",
   "unternehmen/timeline-1-year":"Seit 2020",
   "unternehmen/timeline-1-text":"GudeliusVermessung",
   "unternehmen/timeline-2-year":"2013 – 2020",
   "unternehmen/timeline-2-text":"Projektleitende Tätigkeit als Vermessungsingenieur",
   "unternehmen/timeline-3-year":"2013",
   "unternehmen/timeline-3-text":"Geoinformatik und Satellitenpositionierung · FH München"
+};
+
+const companyLegacyTextValues={
+  "unternehmen/eyebrow":"Ihr Ansprechpartner",
+  "unternehmen/title":"Persönlich geführt. Direkt erreichbar.",
+  "unternehmen/lead":"ist Vermessungsingenieur mit langjähriger Projekterfahrung im Hoch-, Tief- und Straßenbau. Seit 2020 führt er sein eigenes Vermessungsbüro in Jachenau."
 };
 
 async function loadCompanyTexts(){
@@ -448,7 +460,9 @@ async function loadCompanyTexts(){
     const data=await response.json();
     const content=data.content||{};
     Object.entries(companyTextFields).forEach(([key,field])=>{
-      if(field) field.value=typeof content[key]==="string" ? content[key] : companyTextDefaults[key];
+      if(!field)return;
+      const stored=typeof content[key]==="string"?content[key]:"";
+      field.value=(companyLegacyTextValues[key]&&stored===companyLegacyTextValues[key])?companyTextDefaults[key]:(stored||companyTextDefaults[key]);
     });
     setStatus(companyTextStatus,"Unternehmenstexte geladen.",true);
   }catch(error){
