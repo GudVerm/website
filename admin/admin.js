@@ -98,6 +98,9 @@ const technikCreateCancel=document.getElementById("technikCreateCancel");
 const technikCreateStatus=document.getElementById("technikCreateStatus");
 const inquiriesList=document.getElementById("inquiriesList");
 const inquiryKanban=document.getElementById("inquiryKanban");
+const inquiryKanbanScrollbarWrap=document.getElementById("inquiryKanbanScrollbarWrap");
+const inquiryKanbanScrollbar=document.getElementById("inquiryKanbanScrollbar");
+const inquiryKanbanScrollbarTrack=document.getElementById("inquiryKanbanScrollbarTrack");
 const inquiriesStatus=document.getElementById("inquiriesStatus");
 const inquiryFilter=document.getElementById("inquiryFilter");
 const inquirySearch=document.getElementById("inquirySearch");
@@ -1198,6 +1201,17 @@ function createInquiryCard(inquiry,{kanban=false}={}){
   return card;
 }
 
+function syncInquiryKanbanScroller(){
+  if(!inquiryKanban||!inquiryKanbanScrollbar||!inquiryKanbanScrollbarTrack) return;
+  inquiryKanbanScrollbarTrack.style.width=Math.max(inquiryKanban.scrollWidth,inquiryKanban.clientWidth)+"px";
+  if(Math.abs(inquiryKanbanScrollbar.scrollLeft-inquiryKanban.scrollLeft)>1){
+    inquiryKanbanScrollbar.scrollLeft=inquiryKanban.scrollLeft;
+  }
+  if(inquiryKanbanScrollbarWrap){
+    inquiryKanbanScrollbarWrap.hidden=inquiryView!=="kanban"||inquiryKanban.scrollWidth<=inquiryKanban.clientWidth+2;
+  }
+}
+
 function renderInquiryKanban(){
   if(!inquiryKanban) return;
   inquiryKanban.innerHTML="";
@@ -1263,6 +1277,7 @@ function renderInquiryKanban(){
     column.append(header,body);
     inquiryKanban.appendChild(column);
   }
+  requestAnimationFrame(syncInquiryKanbanScroller);
 }
 
 function renderInquiryList(){
@@ -1317,6 +1332,7 @@ function renderInquiries(){
     inquiryViewList.setAttribute("aria-pressed",isKanban?"false":"true");
   }
   if(inquiryKanban) inquiryKanban.hidden=!isKanban;
+  if(inquiryKanbanScrollbarWrap) inquiryKanbanScrollbarWrap.hidden=!isKanban;
   inquiriesList.hidden=isKanban;
   if(inquiryPagination) inquiryPagination.hidden=isKanban;
 
@@ -1363,6 +1379,58 @@ async function loadInquiries(){
   }finally{
     if(refreshInquiries) refreshInquiries.disabled=false;
   }
+}
+
+if(inquiryKanban&&inquiryKanbanScrollbar){
+  let syncingKanbanScroll=false;
+  inquiryKanban.addEventListener("scroll",()=>{
+    if(syncingKanbanScroll)return;
+    syncingKanbanScroll=true;
+    inquiryKanbanScrollbar.scrollLeft=inquiryKanban.scrollLeft;
+    syncingKanbanScroll=false;
+  },{passive:true});
+  inquiryKanbanScrollbar.addEventListener("scroll",()=>{
+    if(syncingKanbanScroll)return;
+    syncingKanbanScroll=true;
+    inquiryKanban.scrollLeft=inquiryKanbanScrollbar.scrollLeft;
+    syncingKanbanScroll=false;
+  },{passive:true});
+
+  let panActive=false;
+  let panStartX=0;
+  let panStartScroll=0;
+  inquiryKanban.addEventListener("pointerdown",event=>{
+    if(event.pointerType==="touch")return;
+    if(event.target.closest("button,a,input,select,textarea,label,.inquiry-card"))return;
+    panActive=true;
+    panStartX=event.clientX;
+    panStartScroll=inquiryKanban.scrollLeft;
+    inquiryKanban.classList.add("is-panning");
+    inquiryKanban.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  });
+  inquiryKanban.addEventListener("pointermove",event=>{
+    if(!panActive)return;
+    inquiryKanban.scrollLeft=panStartScroll-(event.clientX-panStartX);
+  });
+  const stopPan=event=>{
+    if(!panActive)return;
+    panActive=false;
+    inquiryKanban.classList.remove("is-panning");
+    if(event?.pointerId!=null) inquiryKanban.releasePointerCapture?.(event.pointerId);
+  };
+  inquiryKanban.addEventListener("pointerup",stopPan);
+  inquiryKanban.addEventListener("pointercancel",stopPan);
+  inquiryKanban.addEventListener("keydown",event=>{
+    if(event.key==="ArrowRight"){
+      inquiryKanban.scrollBy({left:280,behavior:"smooth"});
+      event.preventDefault();
+    }else if(event.key==="ArrowLeft"){
+      inquiryKanban.scrollBy({left:-280,behavior:"smooth"});
+      event.preventDefault();
+    }
+  });
+  window.addEventListener("resize",()=>requestAnimationFrame(syncInquiryKanbanScroller),{passive:true});
 }
 
 if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
