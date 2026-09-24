@@ -11,7 +11,8 @@
     "BREVO_FROM_EMAIL": "gudeliusvermessung@web.de",
     "BREVO_FROM_NAME": "GudeliusVermessung",
     "CONTACT_EMAIL_TO": "gudeliusvermessung@web.de",
-    "PUBLIC_MEDIA_ENABLED": "false"
+    "PUBLIC_MEDIA_ENABLED": "false",
+    "ADMIN_TOKEN_FALLBACK_ENABLED": "true"
   },
   "d1_databases": [
     {

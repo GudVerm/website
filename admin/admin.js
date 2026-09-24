@@ -297,10 +297,12 @@ if(testButton){
     if(!getApi()) return setStatus(connectionStatus,"Bitte zuerst die Worker-URL eintragen.",false);
     setStatus(connectionStatus,"Teste Verbindung …");
     try{
-      const r=await fetch(getApi()+"/api/health");
+      const headers=getToken()?{"authorization":"Bearer "+getToken()}:{};
+      const r=await fetch(getApi()+"/api/admin/session",{headers});
       if(!r.ok) throw new Error("HTTP "+r.status);
       const data=await r.json();
-      setStatus(connectionStatus,data.ok?"Cloudflare Worker erreichbar.":"Unerwartete Antwort.",!!data.ok);
+      const authLabel=data.auth_mode==="access"?"Cloudflare Access":data.auth_mode==="token"?"Admin-Token":"unbekannt";
+      setStatus(connectionStatus,data.ok?"Admin-Verbindung erfolgreich · "+authLabel+".":"Unerwartete Antwort.",!!data.ok);
     }catch(e){
       setStatus(connectionStatus,"Worker nicht erreichbar: "+e.message,false);
     }
@@ -314,7 +316,7 @@ const heroTextDefaults={
 };
 
 function contentUrl(key){
-  return getApi()+"/api/content/"+key.split("/").map(encodeURIComponent).join("/");
+  return getApi()+"/api/admin/content/"+key.split("/").map(encodeURIComponent).join("/");
 }
 
 async function loadHeroTexts(){
@@ -674,13 +676,13 @@ function renderProjectEditor(item){
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
     upload.disabled=true;setStatus(mediaStatus,"Upload läuft …");
-    try{const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected});
+    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=mediaUrl(item.key)+"?v="+Date.now();setStatus(mediaStatus,"Projektbild gespeichert.",true)}
     catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
   reset.addEventListener("click",async()=>{
     if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);if(!confirm("Cloudflare-Bild für „"+displayTitle+"“ löschen?"))return;
-    reset.disabled=true;try{const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+    reset.disabled=true;try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=item.fallback;file.value="";setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback aktiv.",true)}
     catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
   });
@@ -735,7 +737,7 @@ function renderProjectEditor(item){
     }
     const cleanupErrors=[];
     try{
-      const mr=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const mr=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
       if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteProjectContent(item)}catch(error){cleanupErrors.push("Texte")}
@@ -948,7 +950,7 @@ function updateInquiryStats(){
 }
 
 async function saveInquiryUpdate(inquiry,payload){
-  const response=await fetch(getApi()+"/api/contact/"+encodeURIComponent(inquiry.id),{
+  const response=await fetch(getApi()+"/api/admin/inquiries/"+encodeURIComponent(inquiry.id),{
     method:"PUT",
     headers:{"authorization":"Bearer "+getToken(),"content-type":"application/json"},
     body:JSON.stringify(payload)
@@ -1132,7 +1134,7 @@ async function loadInquiries(){
   setStatus(inquiriesStatus,"Lade Projektanfragen …");
 
   try{
-    const response=await fetch(getApi()+"/api/contact",{
+    const response=await fetch(getApi()+"/api/admin/inquiries",{
       headers:{"authorization":"Bearer "+getToken()}
     });
     const data=await response.json().catch(()=>({}));
@@ -2301,7 +2303,7 @@ function renderTechniqueEditor(item){
     if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
     upload.disabled=true; setStatus(mediaStatus,"Upload läuft …");
     try{
-      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+      const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
         method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected
       });
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
@@ -2313,7 +2315,7 @@ function renderTechniqueEditor(item){
     if(!confirm("Cloudflare-Bild für „"+displayName+"“ löschen? Der lokale Fallback bleibt erhalten.")) return;
     reset.disabled=true; setStatus(mediaStatus,"Lösche Cloudflare-Bild …");
     try{
-      const response=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
       img.src=item.fallback; file.value=""; setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
     }catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
@@ -2390,7 +2392,7 @@ function renderTechniqueEditor(item){
     }
     const cleanupErrors=[];
     try{
-      const mediaResponse=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const mediaResponse=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
       if(!mediaResponse.ok&&mediaResponse.status!==404){const d=await mediaResponse.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mediaResponse.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteTechniqueContent(item)}catch(error){cleanupErrors.push("Texte")}
@@ -2511,7 +2513,7 @@ function renderCollection(target, items){
       upload.disabled=true;
       setStatus(status,"Upload läuft …");
       try{
-        const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+        const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"PUT",
           headers:{
             "authorization":"Bearer "+getToken(),
@@ -2542,7 +2544,7 @@ function renderCollection(target, items){
       reset.disabled=true;
       setStatus(status,"Lösche Cloudflare-Bild …");
       try{
-        const r=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+        const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"DELETE",
           headers:{"authorization":"Bearer "+getToken()}
         });

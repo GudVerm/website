@@ -12,11 +12,12 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 - **Empfänger:** `gudeliusvermessung@web.de`
 - **Admin-Secret:** `CMS_ADMIN_TOKEN` als Cloudflare Secret
 - **Erlaubter Browser-Origin:** `ALLOWED_ORIGIN=https://gudverm.github.io`
-- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false` bis zur bewussten Medienprüfung
+- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false
+ADMIN_TOKEN_FALLBACK_ENABLED=true` bis zur bewussten Medienprüfung
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.3`.
+Die aktuelle Worker-Releasekennung ist `2026-09-24.4`.
 
 ## Secrets
 
@@ -238,3 +239,55 @@ Die Pfadnormalisierung akzeptiert beliebig viele vorangestellte `../` und schrei
 Die erste lokale Migration verwendete AVIF-Webvarianten. Auf der GitHub-Pages-Testseite konnte der Hero dadurch in einzelnen Browser-/Auslieferungskonstellationen nur als dunkler Hintergrund erscheinen. Das Migrationsskript fordert deshalb ab Version 0.3.7 keine AVIF-Ausgabe mehr an und bricht ab, falls Wix trotzdem AVIF liefert. JPEG, PNG und WebP bleiben zulässig.
 
 Zusätzlich werden nun auch Bild-URLs in `assets/gudelius-site.css` migriert. Damit werden die verbliebenen Wix-Bildreferenzen in den Theme-/Kontakt-Hintergründen ebenfalls lokalisiert.
+
+
+## Cloudflare Access – vorbereiteter Admin-Namespace
+
+Seit Release `2026-09-24.4` liegen alle vom Browser-Admin benötigten geschützten Operationen kanonisch unter `/api/admin/*`:
+
+```text
+GET    /api/admin/session
+GET    /api/admin/health
+GET    /api/admin/analytics
+GET    /api/admin/inquiries
+PUT    /api/admin/inquiries/<id>
+PUT    /api/admin/content/<key>
+DELETE /api/admin/content/<key>
+GET    /api/admin/media
+GET    /api/admin/media/<key>
+PUT    /api/admin/media/<key>
+DELETE /api/admin/media/<key>
+```
+
+Öffentlich bleiben insbesondere:
+
+```text
+GET  /api/health
+GET  /api/site
+POST /api/contact
+POST /api/analytics/event
+GET  /media/<key>   (weiterhin durch PUBLIC_MEDIA_ENABLED=false gesperrt)
+```
+
+### Übergangs-Authentifizierung
+
+Der Worker akzeptiert für Admin-Endpunkte zwei Authentifizierungswege:
+
+1. Cloudflare Access über `ctx.access`, sobald eine Access-Anwendung den Request vor dem Worker authentifiziert hat.
+2. Den bestehenden `CMS_ADMIN_TOKEN` als technischen Fallback, solange `ADMIN_TOKEN_FALLBACK_ENABLED=true` gesetzt ist.
+
+`GET /api/admin/session` zeigt für Tests `auth_mode: "access"` oder `auth_mode: "token"` an, ohne Secret-Werte auszugeben.
+
+Die bisherigen token-geschützten Schreib-/Anfragenrouten außerhalb von `/api/admin/*` bleiben vorübergehend als Legacy-Fallback erhalten. Der GitHub-Pages-Admin verwendet bereits die neuen kanonischen `/api/admin/*`-Routen.
+
+### Spätere Access-Aktivierung
+
+Die vorgesehene Access-Anwendung soll ausschließlich den Pfad
+
+```text
+gudelius-cms.gudeliusvermessung.workers.dev/api/admin/*
+```
+
+schützen. Der gesamte Worker darf nicht pauschal hinter Access gestellt werden, weil `/api/site`, `/api/contact` und Analytics öffentlich erreichbar bleiben müssen.
+
+Nach erfolgreichem Access-E2E-Test kann `ADMIN_TOKEN_FALLBACK_ENABLED=false` gesetzt werden. Erst danach kann der technische Browser-Token aus dem normalen Kunden-Workflow entfernt werden.

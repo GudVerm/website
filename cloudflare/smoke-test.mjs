@@ -1,6 +1,6 @@
 const DEFAULT_API = "https://gudelius-cms.gudeliusvermessung.workers.dev";
 const DEFAULT_ORIGIN = "https://gudverm.github.io";
-const DEFAULT_RELEASE = "2026-09-24.3";
+const DEFAULT_RELEASE = "2026-09-24.4";
 
 const api = String(process.env.CMS_API || DEFAULT_API).replace(/\/$/, "");
 const origin = String(process.env.CMS_ALLOWED_ORIGIN || DEFAULT_ORIGIN);
@@ -77,7 +77,7 @@ async function testPublicEndpoints() {
   }
   ok("CORS erlaubt Test-Origin");
 
-  await call("/api/contact", { method: "GET" }, [401]);
+  await call("/api/admin/inquiries", { method: "GET" }, [401]);
   ok("Anfragen ohne Token geschützt");
 
   await call("/api/admin/analytics", { method: "GET" }, [401]);
@@ -92,11 +92,19 @@ async function testAdminEndpoints() {
   if (adminHealth.data?.public_media_enabled !== false) fail("Öffentliche R2-Ausgabe ist unerwartet aktiviert.");
   ok("D1/R2/Bindings + R2-Ausgabesperre");
 
-  const inquiries = await call("/api/contact", {
+  const session = await call("/api/admin/session", { headers: authHeaders() });
+  if (session.data?.auth_mode !== "token") fail("Admin-Session erkennt den Token-Fallback nicht.");
+  ok("Admin-Session über Token-Fallback");
+
+  const inquiries = await call("/api/admin/inquiries", {
     headers: authHeaders()
   });
   if (!Array.isArray(inquiries.data?.inquiries)) fail("Admin-Anfragen liefern keine Liste.");
-  ok("Admin-Anfragen lesbar");
+  ok("Admin-Anfragen über /api/admin/* lesbar");
+
+  const legacyInquiries = await call("/api/contact", { headers: authHeaders() });
+  if (!Array.isArray(legacyInquiries.data?.inquiries)) fail("Legacy-Anfragenroute funktioniert nicht.");
+  ok("Legacy-Adminroute bleibt als Token-Fallback erhalten");
 
   const mediaInventory = await call("/api/admin/media?limit=1", {
     headers: authHeaders()
@@ -127,7 +135,7 @@ async function testAdminEndpoints() {
   if (!ignoredAnalytics.data?.ignored) fail("Admin-Smoke-Event wurde nicht wie erwartet ignoriert.");
   ok("Analytics-Test ohne persistente Testdaten");
 
-  const invalidMediaPath = "/api/media/__smoke__/invalid-signature";
+  const invalidMediaPath = "/api/admin/media/__smoke__/invalid-signature";
   await call(invalidMediaPath, {
     method: "PUT",
     headers: authHeaders({
@@ -174,7 +182,7 @@ async function testContactEndToEnd() {
     if (!inquiryId) fail("Kontakt-Test wurde nicht mit Anfrage-ID bestätigt.");
     ok("Testanfrage in D1 angenommen");
 
-    const inquiries = await call("/api/contact", {
+    const inquiries = await call("/api/admin/inquiries", {
       headers: authHeaders()
     });
     const found = inquiries.data?.inquiries?.some(item => item.id === inquiryId);
@@ -183,7 +191,7 @@ async function testContactEndToEnd() {
   } finally {
     if (inquiryId) {
       try {
-        await call("/api/contact/" + encodeURIComponent(inquiryId), {
+        await call("/api/admin/inquiries/" + encodeURIComponent(inquiryId), {
           method: "PUT",
           headers: authHeaders({ "content-type": "application/json" }),
           body: JSON.stringify({

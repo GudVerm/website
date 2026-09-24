@@ -4,13 +4,14 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.3";
+const WORKER_RELEASE = "2026-09-24.4";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    url.pathname = normalizeAdminRoute(url.pathname, request.method);
     const cors = corsHeaders(request, env);
 
     if (request.method === "OPTIONS") {
@@ -25,8 +26,32 @@ export default {
         return json({ ok: true, service: "gudelius-cms", release: WORKER_RELEASE }, 200, cors);
       }
 
+      if (url.pathname === "/api/admin/session" && request.method === "GET") {
+        if (!isAuthorized(request, env, ctx)) {
+          return json({ error: "Unauthorized" }, 401, cors);
+        }
+
+        let email = "";
+        if (ctx?.access) {
+          try {
+            const identity = await ctx.access.getIdentity();
+            email = cleanSingleLine(identity?.email, 240);
+          } catch (error) {
+            console.error("Access identity lookup failed:", error);
+          }
+        }
+
+        return json({
+          ok: true,
+          auth_mode: adminAuthMode(request, env, ctx),
+          email,
+          access_aud: ctx?.access?.aud || "",
+          token_fallback_enabled: isAdminTokenFallbackEnabled(env)
+        }, 200, cors);
+      }
+
       if (url.pathname === "/api/admin/health" && request.method === "GET") {
-        if (!isAuthorized(request, env)) {
+        if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
         }
         return handleAdminHealth(env, cors);
@@ -141,7 +166,7 @@ export default {
         }
 
         if (request.method === "GET") {
-          if (!isAuthorized(request, env)) {
+          if (!isAuthorized(request, env, ctx)) {
             return json({ error: "Unauthorized" }, 401, cors);
           }
 
@@ -157,7 +182,7 @@ export default {
       }
 
       if (url.pathname.startsWith("/api/contact/") && request.method === "PUT") {
-        if (!isAuthorized(request, env)) {
+        if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
         }
 
@@ -210,18 +235,18 @@ export default {
       }
 
       if (url.pathname === "/api/admin/analytics" && request.method === "GET") {
-        return handleAnalyticsAdmin(request, env, cors, url);
+        return handleAnalyticsAdmin(request, env, cors, url, ctx);
       }
 
       if (url.pathname === "/api/admin/media" && request.method === "GET") {
-        if (!isAuthorized(request, env)) {
+        if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
         }
         return handleAdminMediaList(env, cors, url);
       }
 
       if (url.pathname.startsWith("/api/admin/media/") && request.method === "GET") {
-        if (!isAuthorized(request, env)) {
+        if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
         }
 
@@ -263,7 +288,7 @@ export default {
         }
 
         if (request.method === "PUT") {
-          if (!isAuthorized(request, env)) {
+          if (!isAuthorized(request, env, ctx)) {
             return json({ error: "Unauthorized" }, 401, cors);
           }
 
@@ -291,7 +316,7 @@ export default {
         }
 
         if (request.method === "DELETE") {
-          if (!isAuthorized(request, env)) return json({ error: "Unauthorized" }, 401, cors);
+          if (!isAuthorized(request, env, ctx)) return json({ error: "Unauthorized" }, 401, cors);
           await env.DB.prepare("DELETE FROM content WHERE key = ?").bind(key).run();
           return json({ ok: true, key }, 200, cors);
         }
@@ -302,7 +327,7 @@ export default {
         if (!key) return json({ error: "Missing media key" }, 400, cors);
 
         if (request.method === "PUT") {
-          if (!isAuthorized(request, env)) {
+          if (!isAuthorized(request, env, ctx)) {
             return json({ error: "Unauthorized" }, 401, cors);
           }
           if (!isSafeMediaKey(key)) {
@@ -355,7 +380,7 @@ export default {
         }
 
         if (request.method === "DELETE") {
-          if (!isAuthorized(request, env)) {
+          if (!isAuthorized(request, env, ctx)) {
             return json({ error: "Unauthorized" }, 401, cors);
           }
 
@@ -622,8 +647,8 @@ async function handleAnalyticsEvent(request, env, cors) {
   return json({ ok: true }, 201, cors);
 }
 
-async function handleAnalyticsAdmin(request, env, cors, url) {
-  if (!isAuthorized(request, env)) return json({ error: "Unauthorized" }, 401, cors);
+async function handleAnalyticsAdmin(request, env, cors, url, ctx) {
+  if (!isAuthorized(request, env, ctx)) return json({ error: "Unauthorized" }, 401, cors);
 
   await ensureAnalyticsTable(env);
   await ensureContactTable(env);
@@ -945,9 +970,34 @@ function ascii(bytes, start, end) {
   return String.fromCharCode(...bytes.slice(start, end));
 }
 
-function isAuthorized(request, env) {
-  if (!env.CMS_ADMIN_TOKEN) return false;
-  return request.headers.get("authorization") === `Bearer ${env.CMS_ADMIN_TOKEN}`;
+function normalizeAdminRoute(pathname, method) {
+  if (pathname === "/api/admin/inquiries" && method === "GET") {
+    return "/api/contact";
+  }
+  if (pathname.startsWith("/api/admin/inquiries/") && method === "PUT") {
+    return "/api/contact/" + pathname.slice("/api/admin/inquiries/".length);
+  }
+  if (pathname.startsWith("/api/admin/content/") && (method === "PUT" || method === "DELETE")) {
+    return "/api/content/" + pathname.slice("/api/admin/content/".length);
+  }
+  if (pathname.startsWith("/api/admin/media/") && (method === "PUT" || method === "DELETE")) {
+    return "/api/media/" + pathname.slice("/api/admin/media/".length);
+  }
+  return pathname;
+}
+
+function isAdminTokenFallbackEnabled(env) {
+  return String(env.ADMIN_TOKEN_FALLBACK_ENABLED ?? "true").trim().toLowerCase() !== "false";
+}
+
+function adminAuthMode(request, env, ctx) {
+  if (ctx?.access) return "access";
+  if (!isAdminTokenFallbackEnabled(env) || !env.CMS_ADMIN_TOKEN) return "none";
+  return request.headers.get("authorization") === `Bearer ${env.CMS_ADMIN_TOKEN}` ? "token" : "none";
+}
+
+function isAuthorized(request, env, ctx) {
+  return adminAuthMode(request, env, ctx) !== "none";
 }
 
 function decodeKey(pathname, prefix) {
