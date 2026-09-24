@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Anfragen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260924-23">
+  <link rel="stylesheet" href="./admin.css?v=20260924-24">
 </head>
 <body data-admin-page="anfragen">
   <header class="admin-header">
@@ -69,7 +69,11 @@
           <div>
             <span class="kicker">Posteingang</span>
             <h3>Projektanfragen</h3>
-            <p>Kompakte Übersicht mit Filtern, Suche und Seitenaufteilung. Details werden erst bei Bedarf geöffnet.</p>
+            <p>Kanban für den Bearbeitungsstatus, mit Suche, Filtern und optionaler Listenansicht.</p>
+          </div>
+          <div class="inquiry-view-toggle" role="group" aria-label="Darstellung">
+            <button id="inquiryViewKanban" class="secondary active" type="button" aria-pressed="true">Kanban</button>
+            <button id="inquiryViewList" class="secondary" type="button" aria-pressed="false">Liste</button>
           </div>
         </div>
 
@@ -77,7 +81,7 @@
           <label class="inquiry-search-label">Suche
             <input id="inquirySearch" type="search" placeholder="Name, E-Mail, Betreff oder Nachricht …">
           </label>
-          <label>Status
+          <label class="inquiry-status-filter">Status
             <select id="inquiryFilter">
               <option value="alle">Alle</option>
               <option value="neu">Neu</option>
@@ -114,12 +118,13 @@
         <div class="inquiry-result-bar">
           <div>
             <strong id="inquiryResultSummary">0 Anfragen</strong>
-            <span>Nur die aktuelle Seite wird aufgeklappt dargestellt.</span>
+            <span id="inquiryResultHint">Status per Spalte oder Auswahl verwalten.</span>
           </div>
           <div id="inquiriesStatus" class="status inquiry-load-status">Anfragen werden geladen …</div>
         </div>
 
-        <div id="inquiriesList" class="inquiry-list" aria-live="polite"></div>
+        <div id="inquiryKanban" class="inquiry-kanban" aria-live="polite"></div>
+        <div id="inquiriesList" class="inquiry-list" aria-live="polite" hidden></div>
 
         <div class="inquiry-pagination" id="inquiryPagination" aria-label="Seitennavigation">
           <button id="inquiryPrevPage" class="secondary" type="button">← Zurück</button>
@@ -153,6 +158,6 @@
   </template>
 
   <script src="./config.js?v=20260924-44"></script>
-  <script src="./admin.js?v=20260924-45"></script>
+  <script src="./admin.js?v=20260924-46"></script>
 </body>
 </html>
