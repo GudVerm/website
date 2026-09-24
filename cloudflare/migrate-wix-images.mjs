@@ -6,7 +6,7 @@ const repoRoot = resolve(cloudflareDir, "..");
 const assetDir = join(repoRoot, "assets", "media");
 const originalDir = join(cloudflareDir, ".wix-originals");
 const tempDir = join(cloudflareDir, ".wix-migration-tmp");
-const CACHE_VERSION = "20260924-36";
+const CACHE_VERSION = "20260924-38";
 
 const assets = [
   {
@@ -78,6 +78,14 @@ function originalUrl(asset) {
   return "https://static.wixstatic.com/media/" + asset.id + asset.originalExt;
 }
 
+function compatibleWebUrl(asset) {
+  return asset.webUrl
+    .replace(/%2Cenc_avif/gi, "")
+    .replace(/,enc_avif/gi, "")
+    .replace(/%2Cenc_auto/gi, "")
+    .replace(/,enc_auto/gi, "");
+}
+
 function detectMime(bytes) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   if (
@@ -117,8 +125,8 @@ async function exists(path) {
 async function fetchImage(url, label) {
   const response = await fetch(url, {
     headers: {
-      "accept": "image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5",
-      "user-agent": "GudeliusVermessung-Wix-Migration/1.1"
+      "accept": "image/png,image/jpeg,image/webp,image/*;q=0.8,*/*;q=0.5",
+      "user-agent": "GudeliusVermessung-Wix-Migration/1.2"
     },
     redirect: "follow"
   });
@@ -148,7 +156,10 @@ async function prepareImages() {
     }
 
     console.log("Lade Web-Version: " + asset.label + " …");
-    const web = await fetchImage(asset.webUrl, asset.label + " Web-Version");
+    const web = await fetchImage(compatibleWebUrl(asset), asset.label + " Web-Version");
+    if (web.mime === "image/avif") {
+      throw new Error(asset.label + ": Web-Version wurde weiterhin als AVIF geliefert. Abbruch, damit kein schwarzes Fallback erneut veröffentlicht wird.");
+    }
     const ext = extensionForMime(web.mime);
     const webFile = asset.base + ext;
     await writeFile(join(tempDir, webFile), web.bytes);
@@ -170,7 +181,7 @@ async function collectDeployableSourceFiles(dir = repoRoot) {
       continue;
     }
     if (!entry.isFile()) continue;
-    if (![".html", ".js"].includes(extname(entry.name).toLowerCase())) continue;
+    if (![".html", ".js", ".css"].includes(extname(entry.name).toLowerCase())) continue;
     files.push(full);
   }
   return files;
@@ -179,6 +190,7 @@ async function collectDeployableSourceFiles(dir = repoRoot) {
 function localReference(filePath, asset) {
   const rel = relative(repoRoot, filePath).split(sep).join("/");
   if (rel === "admin/admin.js") return "../assets/media/" + asset.webFile;
+  if (rel === "assets/gudelius-site.css") return "media/" + asset.webFile;
   if (rel.startsWith("leistungen/") && rel.endsWith("/index.html")) {
     return "../../assets/media/" + asset.webFile;
   }
@@ -200,7 +212,7 @@ function wixRegex(asset) {
 
 function localMediaRegex(asset) {
   return new RegExp(
-    "(?:\\.\\./)*assets/media/" + escapeRegex(asset.base) + "\\.(?:jpg|jpeg|png|webp|avif)",
+    "(?:(?:\\.\\./)*assets/)?media/" + escapeRegex(asset.base) + "\\.(?:jpg|jpeg|png|webp|avif)",
     "g"
   );
 }
@@ -233,6 +245,10 @@ async function planReplacements(prepared) {
       content = content.replace(
         /admin\.js\?v=[0-9A-Za-z._-]+/g,
         "admin.js?v=" + CACHE_VERSION
+      );
+      content = content.replace(
+        /gudelius-site\.css\?v=[0-9A-Za-z._-]+/g,
+        "gudelius-site.css?v=" + CACHE_VERSION
       );
     }
 
@@ -317,8 +333,8 @@ async function main() {
   console.log("");
   console.log("✓ 9 Originalbilder lokal unter cloudflare/.wix-originals/ gesichert.");
   console.log("✓ 9 weboptimierte Varianten unter assets/media/ gespeichert.");
-  console.log("✓ Produktive HTML-/JS-Dateien enthalten keine Wix-Medien-URLs mehr.");
-  console.log("✓ Cache-Version für geänderte JS-Dateien: " + CACHE_VERSION);
+  console.log("✓ Produktive HTML-/JS-/CSS-Dateien enthalten keine Wix-Medien-URLs mehr.");
+  console.log("✓ Cache-Version für geänderte Website-Dateien: " + CACHE_VERSION);
   console.log("✓ Gesamtgröße der Web-Bilder: " + totalWebBytes.toLocaleString("de-DE") + " Byte.");
   console.log("✓ Wix, DNS und R2-Konfiguration wurden nicht verändert.");
   console.log("");

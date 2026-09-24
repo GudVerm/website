@@ -217,17 +217,24 @@ npm run images:migrate-wix
 
 sichert die neun tatsächlich verwendeten Wix-Originalbilder zunächst lokal unter `cloudflare/.wix-originals/`. Dieser Ordner ist absichtlich gitignored und dient als lokale Originalsicherung.
 
-Für die Website lädt das Skript die bereits von Wix skalierten/komprimierten Web-Varianten, erkennt deren tatsächliches Bildformat anhand der Dateisignatur und speichert sie unter `assets/media/`. Danach werden ausschließlich produktive HTML-/JavaScript-Dateien auf die lokalen Pfade umgestellt.
+Für die Website lädt das Skript die bereits von Wix skalierten/komprimierten Web-Varianten, erkennt deren tatsächliches Bildformat anhand der Dateisignatur und speichert sie unter `assets/media/`. Danach werden produktive HTML-, JavaScript- und CSS-Dateien auf die lokalen Pfade umgestellt.
 
 Der Lauf ist wiederholbar:
 
 - bestehende lokale Bildreferenzen werden auf den aktuellen Dateinamen normalisiert,
 - Dokumentation und Migrationsskript werden nicht als produktive Wix-Abhängigkeit gewertet,
-- `static.wixstatic.com` darf nach dem Lauf in produktiven HTML-/JS-Dateien nicht mehr vorkommen,
+- `static.wixstatic.com` darf nach dem Lauf in produktiven HTML-/JS-/CSS-Dateien nicht mehr vorkommen,
 - Wix, DNS, D1 und R2 werden nicht verändert,
 - die öffentliche R2-Ausgabe bleibt deaktiviert,
-- JS-Cache-Versionen werden auf `20260924-36` erhöht.
+- Website-Cache-Versionen werden auf `20260924-38` erhöht.
 
 Hinweis: Die vier Leistungsseiten liegen zwei Ebenen tief und verwenden deshalb lokale Medienpfade mit `../../assets/media/`; die übrigen öffentlichen Seiten nutzen ihre bestehende Base-URL-Struktur.
 
 Die Pfadnormalisierung akzeptiert beliebig viele vorangestellte `../` und schreibt jeden Medienpfad deterministisch auf den für die jeweilige Seite richtigen lokalen Pfad zurück. Dadurch ist auch ein erneuter Lauf nach einer bereits begonnenen Migration sicher.
+
+
+### Browserkompatible Bildausgabe
+
+Die erste lokale Migration verwendete AVIF-Webvarianten. Auf der GitHub-Pages-Testseite konnte der Hero dadurch in einzelnen Browser-/Auslieferungskonstellationen nur als dunkler Hintergrund erscheinen. Das Migrationsskript fordert deshalb ab Version 0.3.7 keine AVIF-Ausgabe mehr an und bricht ab, falls Wix trotzdem AVIF liefert. JPEG, PNG und WebP bleiben zulässig.
+
+Zusätzlich werden nun auch Bild-URLs in `assets/gudelius-site.css` migriert. Damit werden die verbliebenen Wix-Bildreferenzen in den Theme-/Kontakt-Hintergründen ebenfalls lokalisiert.
