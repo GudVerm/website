@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Statistik & KPI · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20260924-21">
+</head>
+<body data-admin-page="statistik">
+  <header class="admin-header">
+    <div><span class="kicker">GudeliusVermessung</span><h1>Website-Admin</h1></div>
+    <div class="admin-header-actions"><a class="ghost" href="./">Übersicht</a><a class="ghost" href="../">Website öffnen ↗</a></div>
+  </header>
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link" data-page="verbindung" href="./verbindung/">Verbindung</a>
+      <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+      <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+      <a class="admin-nav-link" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+      <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+      <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+      <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen</a>
+      <a class="admin-nav-link active" data-page="statistik" href="./statistik/">Statistik</a>
+      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    </div>
+  </nav>
+  <main class="wrap admin-page-wrap">
+    <section id="analyticsDashboard" class="admin-section">
+      <section class="section-head admin-section-head">
+        <div><span class="kicker">Statistik & KPI</span><h2>Wie wird die Website genutzt?</h2></div>
+        <p>Anonyme, aggregierte Auswertung von Seitenaufrufen, relevanten Interaktionen und Kontaktaktionen. Es werden keine individuellen Besucherprofile geführt.</p>
+      </section>
+
+      <section class="cms-subpanel">
+        <div class="analytics-toolbar">
+          <div class="analytics-periods" aria-label="Zeitraum">
+            <button type="button" data-analytics-period="today">Heute</button>
+            <button type="button" data-analytics-period="7">7 Tage</button>
+            <button type="button" class="active" data-analytics-period="30">30 Tage</button>
+            <button type="button" data-analytics-period="year">Dieses Jahr</button>
+            <button type="button" data-analytics-period="all">Gesamt · max. 180 Tage</button>
+          </div>
+          <div class="analytics-toolbar-actions"><button id="analyticsRefresh" class="secondary" type="button">Neu laden</button><button id="analyticsExport" type="button" disabled>Statistik exportieren</button></div>
+        </div>
+        <div id="analyticsStatus" class="status">Statistik wird geladen …</div>
+      </section>
+
+      <section class="analytics-kpi-grid" aria-label="Kennzahlen">
+        <article class="analytics-kpi"><span>Seitenaufrufe</span><strong id="analyticsPageviews">–</strong><small>Keine Unique-Visitor-Schätzung</small></article>
+        <article class="analytics-kpi"><span>Interaktionen</span><strong id="analyticsInteractions">–</strong><small>Relevante Klick- und Öffnungsereignisse</small></article>
+        <article class="analytics-kpi"><span>Kontaktaktionen</span><strong id="analyticsContacts">–</strong><small>Telefon, E-Mail und Formular</small></article>
+        <article class="analytics-kpi"><span>Projektanfragen</span><strong id="analyticsInquiries">–</strong><small>Tatsächlich in D1 eingegangene Anfragen</small></article>
+      </section>
+      <div id="analyticsCompare" class="analytics-compare" hidden></div>
+      <div id="analyticsEmpty" class="analytics-empty" hidden>Noch keine Statistikdaten vorhanden. Sobald Besucher die Website aufrufen, werden hier anonyme Seitenaufrufe und relevante Interaktionen angezeigt.</div>
+
+      <section class="analytics-grid">
+        <article class="analytics-panel full">
+          <div class="analytics-panel-head"><div><h3>Seitenaufrufe im Zeitverlauf</h3><p>Je nach Zeitraum stündlich, täglich oder monatlich zusammengefasst. Gelber Punkt = Kontaktaktion.</p></div></div>
+          <div id="analyticsTimeline" class="analytics-chart"></div>
+        </article>
+        <article class="analytics-panel">
+          <div class="analytics-panel-head"><div><h3>Meistbesuchte Seiten</h3><p>Öffentliche Seiten nach Seitenaufrufen.</p></div></div>
+          <div class="analytics-table-wrap"><table class="analytics-table"><thead><tr><th>Seite</th><th class="analytics-number">Aufrufe</th></tr></thead><tbody id="analyticsTopPages"></tbody></table></div>
+        </article>
+        <article class="analytics-panel">
+          <div class="analytics-panel-head"><div><h3>Häufigste Aktionen</h3><p>Nur geschäftlich relevante Interaktionen.</p></div></div>
+          <div class="analytics-table-wrap"><table class="analytics-table"><thead><tr><th>Aktion</th><th class="analytics-number">Anzahl</th></tr></thead><tbody id="analyticsTopActions"></tbody></table></div>
+        </article>
+        <article class="analytics-panel full">
+          <div class="analytics-panel-head"><div><h3>Interesse an Leistungen</h3><p>Seitenaufrufe, Klicks auf Leistungskacheln und Kontakt-CTA je Leistungsbereich.</p></div></div>
+          <div class="analytics-table-wrap"><table class="analytics-table"><thead><tr><th>Leistung</th><th class="analytics-number">Seitenaufrufe</th><th class="analytics-number">Kachelklicks</th><th class="analytics-number">Kontakt-CTA</th></tr></thead><tbody id="analyticsServices"></tbody></table></div>
+        </article>
+        <article class="analytics-panel">
+          <div class="analytics-panel-head"><div><h3>Kontaktaktionen</h3><p>Website-Aktionen getrennt nach Kanal.</p></div></div>
+          <div class="analytics-table-wrap"><table class="analytics-table"><thead><tr><th>Aktion</th><th class="analytics-number">Anzahl</th></tr></thead><tbody id="analyticsContactBreakdown"></tbody></table></div>
+        </article>
+        <article class="analytics-panel">
+          <div class="analytics-panel-head"><div><h3>Datenschutztechnik</h3><p>Was diese Statistik bewusst nicht macht.</p></div></div>
+          <div class="analytics-note"><strong>Keine Besucherprofile.</strong><br>Keine IP-Adresse in D1, keine Cookie-ID, kein Fingerprinting, kein gespeicherter User-Agent und keine Inhalte aus Kontaktformularen. Rohereignisse werden maximal 180 Tage gespeichert.</div>
+        </article>
+      </section>
+    </section>
+  </main>
+  <script src="./config.js?v=20260923-20"></script>
+  <script src="./admin.js?v=20260924-21"></script>
+</body>
+</html>
