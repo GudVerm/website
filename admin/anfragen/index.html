@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow">
   <base href="../">
   <title>Anfragen · Gudelius Admin</title>
-  <link rel="stylesheet" href="./admin.css?v=20260924-24">
+  <link rel="stylesheet" href="./admin.css?v=20260924-25">
 </head>
 <body data-admin-page="anfragen">
   <header class="admin-header">
@@ -123,7 +123,14 @@
           <div id="inquiriesStatus" class="status inquiry-load-status">Anfragen werden geladen …</div>
         </div>
 
-        <div id="inquiryKanban" class="inquiry-kanban" aria-live="polite"></div>
+        <div class="inquiry-kanban-scrollbar-wrap" id="inquiryKanbanScrollbarWrap">
+          <span>Kanban horizontal verschieben</span>
+          <div id="inquiryKanbanScrollbar" class="inquiry-kanban-scrollbar" aria-label="Horizontale Kanban-Navigation">
+            <div id="inquiryKanbanScrollbarTrack" class="inquiry-kanban-scrollbar-track"></div>
+          </div>
+        </div>
+
+        <div id="inquiryKanban" class="inquiry-kanban" aria-live="polite" tabindex="0"></div>
         <div id="inquiriesList" class="inquiry-list" aria-live="polite" hidden></div>
 
         <div class="inquiry-pagination" id="inquiryPagination" aria-label="Seitennavigation">
@@ -158,6 +165,6 @@
   </template>
 
   <script src="./config.js?v=20260924-44"></script>
-  <script src="./admin.js?v=20260924-46"></script>
+  <script src="./admin.js?v=20260924-47"></script>
 </body>
 </html>
