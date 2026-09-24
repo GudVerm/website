@@ -1,7 +1,8 @@
 const MAX_MEDIA_BYTES = 15 * 1024 * 1024;
 const MAX_CONTENT_BYTES = 1024 * 1024;
+const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
-const ANALYTICS_RETENTION_DAYS = 180;
+const ANALYTICS_RETENTION_DAYS = 370;
 
 export default {
   async fetch(request, env) {
@@ -44,9 +45,20 @@ export default {
 
       if (url.pathname === "/api/contact") {
         if (request.method === "POST") {
+          if (!isAllowedPublicOrigin(request, env)) {
+            return json({ error: "Origin not allowed" }, 403, cors);
+          }
+          const contentLength = Number(request.headers.get("content-length") || 0);
+          if (contentLength > MAX_CONTACT_BYTES) {
+            return json({ error: "Anfrage zu groß." }, 413, cors);
+          }
+          const raw = await request.text();
+          if (new TextEncoder().encode(raw).byteLength > MAX_CONTACT_BYTES) {
+            return json({ error: "Anfrage zu groß." }, 413, cors);
+          }
           let payload;
           try {
-            payload = await request.json();
+            payload = JSON.parse(raw);
           } catch {
             return json({ error: "Ungültige Anfrage." }, 400, cors);
           }
@@ -111,8 +123,7 @@ export default {
           const { results = [] } = await env.DB.prepare(
             `SELECT id, name, email, subject, message, source, status, internal_note, created_at
              FROM contact_requests
-             ORDER BY created_at DESC
-             LIMIT 100`
+             ORDER BY created_at DESC`
           ).all();
 
           return json({ inquiries: results }, 200, cors);
@@ -359,7 +370,7 @@ function escapeHtml(value) {
 async function handleAnalyticsEvent(request, env, cors) {
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_ANALYTICS_BYTES) return json({ error: "Analytics payload too large" }, 413, cors);
-  if (!isAllowedAnalyticsOrigin(request, env)) return json({ error: "Origin not allowed" }, 403, cors);
+  if (!isAllowedPublicOrigin(request, env)) return json({ error: "Origin not allowed" }, 403, cors);
 
   const userAgent = request.headers.get("user-agent") || "";
   if (looksLikeBot(userAgent)) return json({ ok: true, ignored: true }, 202, cors);
@@ -389,9 +400,7 @@ async function handleAnalyticsEvent(request, env, cors) {
     "INSERT INTO analytics_events (event_type, page_path, target, event_label, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"
   ).bind(eventType, pagePath, target, eventLabel).run();
 
-  await env.DB.prepare(
-    "DELETE FROM analytics_events WHERE created_at < datetime('now', ?)"
-  ).bind("-" + ANALYTICS_RETENTION_DAYS + " days").run();
+  await purgeOldAnalytics(env);
 
   return json({ ok: true }, 201, cors);
 }
@@ -401,6 +410,7 @@ async function handleAnalyticsAdmin(request, env, cors, url) {
 
   await ensureAnalyticsTable(env);
   await ensureContactTable(env);
+  await purgeOldAnalytics(env);
 
   const period = normalizeAnalyticsPeriod(url.searchParams.get("period"));
   const offsetMinutes = clampNumber(url.searchParams.get("offset_minutes"), -840, 840, 0);
@@ -416,7 +426,7 @@ async function handleAnalyticsAdmin(request, env, cors, url) {
   ).bind(...filter.bindings).first();
 
   const inquiries = await env.DB.prepare(
-    "SELECT COUNT(*) AS count FROM contact_requests" + filter.sql
+    "SELECT COUNT(*) AS count FROM contact_requests " + filter.wherePrefix + " status <> 'spam'"
   ).bind(...filter.bindings).first();
 
   const topPagesQuery =
@@ -519,9 +529,15 @@ function looksLikeBot(userAgent) {
   return /bot|crawler|spider|headless|lighthouse|pagespeed|uptime|monitor/i.test(userAgent || "");
 }
 
-function isAllowedAnalyticsOrigin(request, env) {
+async function purgeOldAnalytics(env) {
+  await env.DB.prepare(
+    "DELETE FROM analytics_events WHERE created_at < datetime('now', ?)"
+  ).bind("-" + ANALYTICS_RETENTION_DAYS + " days").run();
+}
+
+function isAllowedPublicOrigin(request, env) {
   const origin = request.headers.get("origin") || "";
-  if (!origin) return true;
+  if (!origin || origin === "null") return false;
   const allowed = env.ALLOWED_ORIGIN || "*";
   return allowed === "*" || origin === allowed;
 }
@@ -554,7 +570,7 @@ function analyticsWindow(period, offsetMinutes) {
   else if (period === "7") start = localDateUtc(year, month, day - 6);
   else if (period === "30") start = localDateUtc(year, month, day - 29);
   else if (period === "year") { start = localDateUtc(year, 0, 1); granularity = "month"; }
-  else granularity = "month";
+  else { start = localDateUtc(year, month, day - (ANALYTICS_RETENTION_DAYS - 1)); granularity = "month"; }
 
   let previousStart = null;
   let previousEnd = null;

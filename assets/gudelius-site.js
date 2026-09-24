@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       const response=await fetch(cmsApi+'/api/site');if(!response.ok)return;
       const data=await response.json(),content=data.content||{},manifest=content['projekte/index'];
-      if(!Array.isArray(manifest)||!manifest.length)return;
+      if(!Array.isArray(manifest))return;
       const fallbackMap=new Map(fallbackCards.map(item=>[item.slug,item]));
       const items=manifest.filter(entry=>entry&&typeof entry.slug==='string'&&entry.visible!==false&&entry.archived!==true)
         .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       const response=await fetch(cmsApi+'/api/site');if(!response.ok)return;
       const data=await response.json(),content=data.content||{},manifest=content['technik/index'];
-      if(!Array.isArray(manifest)||!manifest.length)return;
+      if(!Array.isArray(manifest))return;
       const grouped={aussendienst:[],digital:[],software:[]};
       manifest.filter(entry=>entry&&typeof entry.slug==='string'&&entry.visible!==false&&entry.archived!==true)
         .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)).forEach(entry=>{

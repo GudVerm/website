@@ -39,7 +39,7 @@ Später kann die Token-Lösung durch Cloudflare Access ersetzt werden.
 
 Die Website kann anonyme Nutzungsereignisse an `POST /api/analytics/event` senden. Gespeichert werden ausschließlich Event-Typ, normalisierter Seitenpfad, ein kurzes Ziel/Label und der Zeitstempel. Es werden **keine** IP-Adressen, Cookies, persistenten Besucher-IDs, Fingerprints, User-Agent-Zeichenketten oder Kontaktformular-Inhalte in der Analytics-Tabelle gespeichert.
 
-Rohereignisse werden auf **180 Tage** begrenzt. Die Admin-Auswertung unter `GET /api/admin/analytics` ist mit dem bestehenden `CMS_ADMIN_TOKEN` geschützt und liefert ausschließlich aggregierte Kennzahlen.
+Rohereignisse werden auf **370 Tage** begrenzt. Die Admin-Auswertung unter `GET /api/admin/analytics` ist mit dem bestehenden `CMS_ADMIN_TOKEN` geschützt und liefert ausschließlich aggregierte Kennzahlen.
 
 Nach Änderungen am Worker weiterhin wie bisher im Ordner `cloudflare` deployen:
 

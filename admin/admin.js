@@ -565,7 +565,7 @@ function projectValue(item,field){
 function projectFallbackImage(){return "../assets/dummy-aussendienst-02.svg"}
 function projectBySlug(slug){return projects.find(item=>item.slug===slug)||projects[0]||null}
 function normalizeProjectManifest(raw){
-  if(!Array.isArray(raw)||!raw.length){
+  if(!Array.isArray(raw)){
     return defaultProjects.map((item,index)=>({slug:item.slug,order:index+1,visible:true,archived:false,featured:index===0}));
   }
   const seen=new Set();
@@ -680,11 +680,31 @@ function renderProjectEditor(item){
   };
   up.addEventListener("click",()=>move(-1));down.addEventListener("click",()=>move(1));
   remove.addEventListener("click",async()=>{
-    if(!item.archived||!getApi()||!getToken())return;if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;remove.disabled=true;
-    try{const mr=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
-      await deleteProjectContent(item);projects=projects.filter(p=>p.slug!==item.slug);projectFields.forEach(f=>delete projectContentCache[projectContentKey(item,f)]);await saveProjectManifest();activeProjectSlug=projects[0]?.slug||"";refreshProjectSelect();
-      if(projects.length)renderProjectEditor(projects[0]);else projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Lege die erste Referenz an.</p></div>'}
-    catch(error){setStatus(status,"Endgültiges Löschen fehlgeschlagen: "+error.message,false);remove.disabled=false}
+    if(!item.archived||!getApi()||!getToken())return;
+    if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;
+    remove.disabled=true;
+    const previousProjects=projects.slice();
+    projects=projects.filter(p=>p.slug!==item.slug);
+    try{
+      await saveProjectManifest();
+    }catch(error){
+      projects=previousProjects;refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);
+      return setStatus(projectEditor.querySelector(".project-status"),"Löschen abgebrochen: Projekt-Manifest konnte nicht gespeichert werden: "+error.message,false);
+    }
+    const cleanupErrors=[];
+    try{
+      const mr=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
+    }catch(error){cleanupErrors.push("Bild")}
+    try{await deleteProjectContent(item)}catch(error){cleanupErrors.push("Texte")}
+    projectFields.forEach(f=>delete projectContentCache[projectContentKey(item,f)]);
+    activeProjectSlug=projects[0]?.slug||"";refreshProjectSelect();
+    if(projects.length){
+      renderProjectEditor(projects[0]);
+      setStatus(projectEditor.querySelector(".project-status"),cleanupErrors.length?"Projekt entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Projekt endgültig entfernt.",cleanupErrors.length===0);
+    }else{
+      projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Lege die erste Referenz an.</p></div>';
+    }
   });
   projectEditor.appendChild(node);
 }
@@ -692,7 +712,8 @@ async function loadProjectsCms(){
   if(!projectEditor)return;const previous=activeProjectSlug||projectSelect?.value;
   if(!getApi()){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);return setStatus(projectEditor.querySelector(".project-status"),"Worker-URL fehlt; sechs Fallback-Projekte aktiv.",false)}
   try{const r=await fetch(getApi()+"/api/site");if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();projectContentCache=data.content||{};applyProjectManifest(projectContentCache[projectManifestKey]);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];
-    if(current){activeProjectSlug=current.slug;projectSelect.value=current.slug;renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),Array.isArray(projectContentCache[projectManifestKey])?"Projekt-Manifest geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es angelegt.",true)}}
+    if(current){activeProjectSlug=current.slug;projectSelect.value=current.slug;renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),Array.isArray(projectContentCache[projectManifestKey])?"Projekt-Manifest geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es angelegt.",true)}
+    else{activeProjectSlug="";projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Das Projekt-Manifest ist leer. Lege eine neue Referenz an.</p></div>'}}
   catch(error){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),"CMS nicht erreichbar; Fallback-Projekte aktiv: "+error.message,false)}
 }
 function openProjectCreate(){projectCreatePanel.hidden=false;projectCreateTitle.value="";setStatus(projectCreateStatus,"");projectCreateTitle.focus()}
@@ -2076,7 +2097,7 @@ function techniqueFallbackForGroup(group){
   return "../assets/dummy-aussendienst-01.svg";
 }
 function normalizeTechniqueManifest(raw){
-  if(!Array.isArray(raw)||!raw.length){
+  if(!Array.isArray(raw)){
     return defaultEquipment.map((item,index)=>({slug:item.slug,group:item.group,order:index+1,visible:true,archived:false}));
   }
   const seen=new Set();
@@ -2317,15 +2338,28 @@ function renderTechniqueEditor(item){
     if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
     if(!confirm("„"+displayName+"“ endgültig aus dem CMS entfernen? Dieser Schritt kann nicht rückgängig gemacht werden.")) return;
     permanentDelete.disabled=true;
+    const previousEquipment=equipment.slice();
+    equipment=equipment.filter(entry=>entry.slug!==item.slug);
+    try{
+      await saveTechniqueManifest();
+    }catch(error){
+      equipment=previousEquipment;populateTechniqueSelect();technikSelect.value=item.slug;renderTechniqueEditor(item);
+      return setStatus(technikEditor.querySelector(".technik-text-status"),"Löschen abgebrochen: Technik-Manifest konnte nicht gespeichert werden: "+error.message,false);
+    }
+    const cleanupErrors=[];
     try{
       const mediaResponse=await fetch(getApi()+"/api/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
       if(!mediaResponse.ok&&mediaResponse.status!==404){const d=await mediaResponse.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mediaResponse.status))}
-      await deleteTechniqueContent(item);
-      equipment=equipment.filter(entry=>entry.slug!==item.slug); techniqueTextFields.forEach(field=>delete technikContentCache[techniqueContentKey(item,field)]);
-      await saveTechniqueManifest(); activeTechnikSlug=equipment[0]?.slug||""; populateTechniqueSelect();
-      if(equipment.length) renderTechniqueEditor(equipment[0]);
-      else technikEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Lege ein neues Gerät oder eine Software an.</p></div>';
-    }catch(error){setStatus(textStatus,"Endgültiges Löschen fehlgeschlagen: "+error.message,false);permanentDelete.disabled=false}
+    }catch(error){cleanupErrors.push("Bild")}
+    try{await deleteTechniqueContent(item)}catch(error){cleanupErrors.push("Texte")}
+    techniqueTextFields.forEach(field=>delete technikContentCache[techniqueContentKey(item,field)]);
+    activeTechnikSlug=equipment[0]?.slug||"";populateTechniqueSelect();
+    if(equipment.length){
+      renderTechniqueEditor(equipment[0]);
+      setStatus(technikEditor.querySelector(".technik-text-status"),cleanupErrors.length?"Technik-Eintrag entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Technik-Eintrag endgültig entfernt.",cleanupErrors.length===0);
+    }else{
+      technikEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Lege ein neues Gerät oder eine Software an.</p></div>';
+    }
   });
   technikEditor.appendChild(node);
 }
@@ -2343,6 +2377,7 @@ async function loadTechniqueTexts(){
     const data=await response.json(); technikContentCache=data.content||{}; applyTechniqueManifest(technikContentCache[techniqueManifestKey]); populateTechniqueSelect();
     const current=techniqueBySlug(previousSlug)||equipment[0];
     if(current){activeTechnikSlug=current.slug;technikSelect.value=current.slug;renderTechniqueEditor(current);setStatus(technikEditor.querySelector(".technik-text-status"),Array.isArray(technikContentCache[techniqueManifestKey])?"Technik-Manifest und Texte geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es in D1 angelegt.",true)}
+    else{activeTechnikSlug="";technikEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Das Technik-Manifest ist leer. Lege ein neues Gerät oder eine Software an.</p></div>'}
   }catch(error){
     technikContentCache={};applyTechniqueManifest(null);populateTechniqueSelect();const current=techniqueBySlug(previousSlug)||equipment[0];if(current)renderTechniqueEditor(current);
     setStatus(technikEditor.querySelector(".technik-text-status"),"CMS konnte nicht geladen werden; vollständiger Fallback aktiv: "+error.message,false);
