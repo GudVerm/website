@@ -101,12 +101,22 @@ const inquiriesStatus=document.getElementById("inquiriesStatus");
 const inquiryFilter=document.getElementById("inquiryFilter");
 const inquirySearch=document.getElementById("inquirySearch");
 const inquiryPeriod=document.getElementById("inquiryPeriod");
+const inquirySort=document.getElementById("inquirySort");
+const inquiryPageSize=document.getElementById("inquiryPageSize");
+const inquiryResultSummary=document.getElementById("inquiryResultSummary");
+const inquiryPagination=document.getElementById("inquiryPagination");
+const inquiryPrevPage=document.getElementById("inquiryPrevPage");
+const inquiryNextPage=document.getElementById("inquiryNextPage");
+const inquiryPageLabel=document.getElementById("inquiryPageLabel");
 const refreshInquiries=document.getElementById("refreshInquiries");
+const inquiryCountAll=document.getElementById("inquiryCountAll");
 const inquiryCountNew=document.getElementById("inquiryCountNew");
 const inquiryCountProgress=document.getElementById("inquiryCountProgress");
 const inquiryCountDone=document.getElementById("inquiryCountDone");
+const inquiryQuickFilters=[...document.querySelectorAll("[data-inquiry-quick-filter]")];
 const inquiryNavCount=document.getElementById("inquiryNavCount");
 let inquiriesCache=[];
+let inquiryPage=1;
 
 const analyticsDashboard=document.getElementById("analyticsDashboard");
 const analyticsStatus=document.getElementById("analyticsStatus");
@@ -980,6 +990,7 @@ function updateInquiryStats(){
   inquiriesCache.forEach(item=>{
     if(Object.prototype.hasOwnProperty.call(counts,item.status)) counts[item.status]+=1;
   });
+  if(inquiryCountAll) inquiryCountAll.textContent=inquiriesCache.length;
   if(inquiryCountNew) inquiryCountNew.textContent=counts.neu;
   if(inquiryCountProgress) inquiryCountProgress.textContent=counts["in-arbeit"];
   if(inquiryCountDone) inquiryCountDone.textContent=counts.erledigt;
@@ -987,6 +998,12 @@ function updateInquiryStats(){
     inquiryNavCount.textContent=counts.neu;
     inquiryNavCount.hidden=counts.neu===0;
   }
+  const activeStatus=inquiryFilter?.value||"alle";
+  inquiryQuickFilters.forEach(button=>{
+    const active=button.dataset.inquiryQuickFilter===activeStatus;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",active?"true":"false");
+  });
 }
 
 async function saveInquiryUpdate(inquiry,payload){
@@ -1004,20 +1021,49 @@ function filteredInquiries(){
   const status=inquiryFilter?.value||"alle";
   const period=inquiryPeriod?.value||"alle";
   const query=(inquirySearch?.value||"").trim().toLocaleLowerCase("de-DE");
+  const direction=inquirySort?.value==="oldest"?1:-1;
   return inquiriesCache.filter(item=>{
     if(status!=="alle"&&item.status!==status) return false;
     if(!inquiryMatchesPeriod(item,period)) return false;
     if(!query) return true;
-    return [item.name,item.email,item.subject,item.message].some(value=>
+    return [item.name,item.email,item.subject,item.message,item.internal_note].some(value=>
       String(value||"").toLocaleLowerCase("de-DE").includes(query)
     );
+  }).sort((a,b)=>{
+    const aTime=inquiryDate(a.created_at)?.getTime()||0;
+    const bTime=inquiryDate(b.created_at)?.getTime()||0;
+    return (aTime-bTime)*direction;
   });
+}
+
+function resetInquiryPageAndRender(){
+  inquiryPage=1;
+  renderInquiries();
 }
 
 function renderInquiries(){
   if(!inquiriesList) return;
   inquiriesList.innerHTML="";
   const items=filteredInquiries();
+  const pageSize=Math.max(10,Number(inquiryPageSize?.value)||20);
+  const pageCount=Math.max(1,Math.ceil(items.length/pageSize));
+  inquiryPage=Math.min(Math.max(1,inquiryPage),pageCount);
+  const startIndex=(inquiryPage-1)*pageSize;
+  const visibleItems=items.slice(startIndex,startIndex+pageSize);
+
+  if(inquiryResultSummary){
+    if(items.length){
+      const from=startIndex+1;
+      const to=Math.min(startIndex+pageSize,items.length);
+      inquiryResultSummary.textContent=from+"–"+to+" von "+items.length+" Anfragen";
+    }else{
+      inquiryResultSummary.textContent="0 Anfragen";
+    }
+  }
+  if(inquiryPageLabel) inquiryPageLabel.textContent="Seite "+inquiryPage+" von "+pageCount;
+  if(inquiryPrevPage) inquiryPrevPage.disabled=inquiryPage<=1;
+  if(inquiryNextPage) inquiryNextPage.disabled=inquiryPage>=pageCount;
+  if(inquiryPagination) inquiryPagination.hidden=items.length<=pageSize;
 
   if(!items.length){
     const empty=document.createElement("div");
@@ -1026,10 +1072,11 @@ function renderInquiries(){
       ? "Keine Anfragen entsprechen den aktuellen Filtern."
       : "Noch keine Projektanfragen vorhanden.";
     inquiriesList.appendChild(empty);
+    updateInquiryStats();
     return;
   }
 
-  for(const inquiry of items){
+  for(const inquiry of visibleItems){
     const card=document.createElement("article");
     card.className="inquiry-card";
     card.dataset.status=inquiry.status||"neu";
@@ -1053,21 +1100,26 @@ function renderInquiries(){
     meta.className="inquiry-meta";
     const created=document.createElement("span");
     created.textContent=formatInquiryDate(inquiry.created_at);
+    const metaEmail=document.createElement("span");
+    metaEmail.className="inquiry-summary-email";
+    metaEmail.textContent=inquiry.email||"Keine E-Mail";
     const source=document.createElement("span");
     source.textContent="Quelle: "+(inquiry.source||"/");
-    meta.append(created,source);
+    meta.append(created,metaEmail,source);
 
     const toggle=document.createElement("button");
     toggle.type="button";
     toggle.className="secondary inquiry-detail-toggle";
-    toggle.textContent="Details anzeigen";
+    toggle.textContent="Details";
+    toggle.setAttribute("aria-expanded","false");
 
     const detail=document.createElement("div");
     detail.className="inquiry-detail";
     detail.hidden=true;
     toggle.addEventListener("click",()=>{
       detail.hidden=!detail.hidden;
-      toggle.textContent=detail.hidden?"Details anzeigen":"Details ausblenden";
+      toggle.textContent=detail.hidden?"Details":"Details schließen";
+      toggle.setAttribute("aria-expanded",detail.hidden?"false":"true");
     });
 
     const email=document.createElement("a");
@@ -1097,7 +1149,7 @@ function renderInquiries(){
     const noteStatus=document.createElement("span");
     noteStatus.className="status";
     noteSave.addEventListener("click",async()=>{
-      if(!getApi()||!hasAdminAuth()) return setStatus(noteStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+      if(!getApi()||!hasAdminAuth()) return setStatus(noteStatus,"Admin-Anmeldung fehlt.",false);
       noteSave.disabled=true;
       setStatus(noteStatus,"Speichere …");
       try{
@@ -1134,10 +1186,8 @@ function renderInquiries(){
       try{
         await saveInquiryUpdate(inquiry,{status:next});
         inquiry.status=next;
-        card.dataset.status=next;
-        badge.textContent=inquiryStatusLabel(next);
         updateInquiryStats();
-        if((inquiryFilter?.value||"alle")!=="alle") renderInquiries();
+        renderInquiries();
       }catch(error){
         select.value=previous;
         badge.textContent=inquiryStatusLabel(previous);
@@ -1151,14 +1201,15 @@ function renderInquiries(){
     const reply=document.createElement("a");
     reply.className="inquiry-reply";
     reply.href="mailto:"+(inquiry.email||"")+"?subject="+encodeURIComponent("Re: "+(inquiry.subject||"Ihre Anfrage"));
-    reply.textContent="Per E-Mail antworten ↗";
+    reply.textContent="Antworten ↗";
 
     actions.append(statusLabel,toggle,reply);
-    card.append(top,meta,detail,actions);
+    card.append(top,meta,actions,detail);
     inquiriesList.appendChild(card);
   }
-}
 
+  updateInquiryStats();
+}
 async function loadInquiries(){
   if(!inquiriesList||!inquiriesStatus) return;
 
@@ -1166,7 +1217,7 @@ async function loadInquiries(){
     inquiriesCache=[];
     updateInquiryStats();
     inquiriesList.innerHTML="";
-    setStatus(inquiriesStatus,"Zum Laden der Anfragen bitte zuerst Worker-URL und Admin-Token verbinden.",false);
+    setStatus(inquiriesStatus,"Zum Laden der Anfragen ist eine gültige Cloudflare-Access-Sitzung erforderlich.",false);
     return;
   }
 
@@ -1181,6 +1232,7 @@ async function loadInquiries(){
     if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
 
     inquiriesCache=Array.isArray(data.inquiries)?data.inquiries:[];
+    inquiryPage=1;
     updateInquiryStats();
     renderInquiries();
     setStatus(
@@ -1199,9 +1251,17 @@ async function loadInquiries(){
 }
 
 if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
-if(inquiryFilter) inquiryFilter.addEventListener("change",renderInquiries);
-if(inquiryPeriod) inquiryPeriod.addEventListener("change",renderInquiries);
-if(inquirySearch) inquirySearch.addEventListener("input",renderInquiries);
+if(inquiryFilter) inquiryFilter.addEventListener("change",resetInquiryPageAndRender);
+if(inquiryPeriod) inquiryPeriod.addEventListener("change",resetInquiryPageAndRender);
+if(inquirySort) inquirySort.addEventListener("change",resetInquiryPageAndRender);
+if(inquiryPageSize) inquiryPageSize.addEventListener("change",resetInquiryPageAndRender);
+if(inquirySearch) inquirySearch.addEventListener("input",resetInquiryPageAndRender);
+if(inquiryPrevPage) inquiryPrevPage.addEventListener("click",()=>{if(inquiryPage>1){inquiryPage-=1;renderInquiries();window.scrollTo({top:inquiriesList?.offsetTop-130||0,behavior:"smooth"})}});
+if(inquiryNextPage) inquiryNextPage.addEventListener("click",()=>{inquiryPage+=1;renderInquiries();window.scrollTo({top:inquiriesList?.offsetTop-130||0,behavior:"smooth"})});
+inquiryQuickFilters.forEach(button=>button.addEventListener("click",()=>{
+  if(inquiryFilter) inquiryFilter.value=button.dataset.inquiryQuickFilter||"alle";
+  resetInquiryPageAndRender();
+}));
 
 
 
