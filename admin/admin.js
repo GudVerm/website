@@ -1,3 +1,10 @@
+if (window.GUDELIUS_LEGACY_ADMIN_DISABLED === true && window.GUDELIUS_ADMIN_APP_URL) {
+  const page = String(document.body?.dataset?.adminPage || "").trim();
+  const suffix = page && page !== "dashboard" ? page + "/" : "";
+  const target = new URL(suffix, window.GUDELIUS_ADMIN_APP_URL);
+  if (location.href !== target.href) location.replace(target.href);
+}
+
 const defaultEquipment = [
   { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/equipment-trimble-sx12.svg" },
   { slug:"trimble-s6", group:"Außendienst", key:"equipment/trimble-s6", name:"Trimble S6", category:"Robotik-Totalstation", detail:"Robotik-Totalstation", manufacturer:"Trimble", model:"S6", description:"Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.", details:"Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.", fallback:"../assets/equipment-trimble-s6.svg" },
