@@ -2500,7 +2500,11 @@ const analyticsPageNames={
   "/leistungen/3d-laserscanning/":"3D-Laserscanning",
   "/leistungen/drohnenvermessung/":"Drohnenvermessung",
   "/impressum/":"Impressum",
-  "/datenschutz/":"Datenschutz"
+  "/datenschutz/":"Datenschutz",
+  "/projekte/":"Projekte",
+  "/technik/":"Technik",
+  "/unternehmen/":"Unternehmen",
+  "/kontakt/":"Kontakt"
 };
 const analyticsServiceNames={
   "ingenieurvermessung":"Ingenieurvermessung",
