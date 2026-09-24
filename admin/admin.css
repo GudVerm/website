@@ -1310,3 +1310,227 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .inquiry-stats .inquiry-stat.active strong{
   color:var(--ink)!important;
 }
+
+
+/* Anfragen: Farbfix + Kanban */
+.inquiry-stat,
+.inquiry-stat span,
+.inquiry-stat strong{
+  color:var(--ink)!important;
+}
+.inquiry-stat span{
+  color:var(--muted)!important;
+}
+.inquiry-stat.active,
+.inquiry-stat.active span,
+.inquiry-stat.active strong{
+  color:var(--ink)!important;
+}
+.inquiry-view-toggle{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-left:auto;
+}
+.inquiry-view-toggle button{
+  min-width:88px;
+  background:#edf0ed;
+  color:var(--ink);
+}
+.inquiry-view-toggle button.active{
+  background:var(--ink);
+  color:#fff;
+}
+.inquiry-inbox[data-view="kanban"] .inquiry-status-filter,
+.inquiry-inbox[data-view="kanban"] label:has(#inquiryPageSize){
+  display:none;
+}
+.inquiry-kanban{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(250px,1fr));
+  gap:12px;
+  overflow-x:auto;
+  padding:2px 2px 12px;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+}
+.inquiry-kanban[hidden]{
+  display:none;
+}
+.inquiry-kanban-column{
+  min-width:250px;
+  min-height:360px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:#f6f7f4;
+  scroll-snap-align:start;
+  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.inquiry-kanban-column.drag-over{
+  border-color:var(--accent);
+  background:#fff9dc;
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+.inquiry-kanban-column-head{
+  position:sticky;
+  top:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:48px;
+  padding:12px 13px;
+  border-bottom:1px solid var(--line);
+  background:rgba(246,247,244,.96);
+  backdrop-filter:blur(10px);
+}
+.inquiry-kanban-column-head strong{
+  font-size:.8rem;
+}
+.inquiry-kanban-column-head span{
+  display:grid;
+  place-items:center;
+  min-width:25px;
+  height:25px;
+  padding:0 7px;
+  border-radius:999px;
+  background:#fff;
+  color:var(--ink);
+  font-size:.68rem;
+  font-weight:900;
+}
+.inquiry-kanban-column[data-kanban-status="neu"] .inquiry-kanban-column-head{
+  border-top:4px solid var(--accent);
+}
+.inquiry-kanban-column[data-kanban-status="in-arbeit"] .inquiry-kanban-column-head{
+  border-top:4px solid #728a96;
+}
+.inquiry-kanban-column[data-kanban-status="erledigt"] .inquiry-kanban-column-head{
+  border-top:4px solid var(--ok);
+}
+.inquiry-kanban-column[data-kanban-status="archiviert"] .inquiry-kanban-column-head{
+  border-top:4px solid #9a8a75;
+}
+.inquiry-kanban-column[data-kanban-status="spam"] .inquiry-kanban-column-head{
+  border-top:4px solid #9c5b55;
+}
+.inquiry-kanban-column-body{
+  display:grid;
+  align-content:start;
+  gap:9px;
+  min-height:310px;
+  padding:10px;
+}
+.inquiry-kanban-empty{
+  display:grid;
+  place-items:center;
+  min-height:90px;
+  border:1px dashed #cbd2ce;
+  border-radius:11px;
+  color:var(--muted);
+  background:rgba(255,255,255,.55);
+  font-size:.72rem;
+}
+.inquiry-kanban-card{
+  padding:12px;
+  border-left-width:4px;
+  border-radius:12px;
+  cursor:grab;
+  box-shadow:0 3px 10px rgba(20,32,38,.035);
+}
+.inquiry-kanban-card:active{
+  cursor:grabbing;
+}
+.inquiry-kanban-card.is-dragging{
+  opacity:.45;
+  transform:rotate(1deg);
+}
+.inquiry-kanban-card .inquiry-card-top{
+  align-items:flex-start;
+}
+.inquiry-kanban-card .inquiry-status-badge{
+  display:none;
+}
+.inquiry-kanban-card .inquiry-identity strong{
+  font-size:.68rem;
+}
+.inquiry-kanban-card .inquiry-identity h3{
+  margin-top:3px;
+  font-size:.88rem;
+  white-space:normal;
+}
+.inquiry-kanban-card .inquiry-meta{
+  display:grid;
+  gap:3px;
+  margin-top:8px;
+}
+.inquiry-kanban-card .inquiry-summary-email{
+  max-width:100%;
+}
+.inquiry-kanban-card .inquiry-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:9px;
+  padding-top:9px;
+}
+.inquiry-kanban-card .inquiry-actions label{
+  grid-column:1/-1;
+  min-width:0;
+}
+.inquiry-kanban-card .inquiry-detail-toggle,
+.inquiry-kanban-card .inquiry-reply{
+  width:100%;
+  min-height:34px;
+}
+.inquiry-kanban-card .inquiry-detail{
+  margin-top:10px;
+  padding:12px;
+}
+.inquiry-kanban-card .inquiry-note-actions{
+  align-items:stretch;
+  flex-direction:column;
+}
+.inquiry-kanban-card .inquiry-note-actions button{
+  width:100%;
+}
+.inquiry-inbox[data-view="kanban"] .inquiry-pagination{
+  display:none!important;
+}
+
+@media(max-width:900px){
+  .inquiry-head{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .inquiry-view-toggle{
+    width:100%;
+    margin-left:0;
+  }
+  .inquiry-view-toggle button{
+    flex:1;
+  }
+  .inquiry-kanban{
+    grid-template-columns:repeat(5,minmax(270px,82vw));
+    margin-inline:-2px;
+    padding-bottom:14px;
+  }
+  .inquiry-kanban-column{
+    min-width:270px;
+  }
+}
+
+@media(max-width:480px){
+  .inquiry-kanban{
+    grid-template-columns:repeat(5,minmax(260px,84vw));
+    gap:10px;
+  }
+  .inquiry-kanban-column{
+    min-width:260px;
+  }
+  .inquiry-kanban-column-body{
+    padding:9px;
+  }
+}
