@@ -280,13 +280,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (menuBtn && navlinks) {
     menuBtn.addEventListener('click', () => {
-      navlinks.classList.toggle('open');
+      const isOpen=navlinks.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded',String(isOpen));
     });
 
     navlinks.querySelectorAll('a:not(.nav-dropdown-toggle)').forEach((a) => {
       a.addEventListener('click', () => {
         navlinks.classList.remove('open');
-        dropdowns.forEach((dropdown) => dropdown.classList.remove('open'));
+        menuBtn.setAttribute('aria-expanded','false');
+        dropdowns.forEach((dropdown) => {
+          dropdown.classList.remove('open');
+          const toggle=dropdown.querySelector('.nav-dropdown-toggle');
+          if(toggle)toggle.setAttribute('aria-expanded','false');
+        });
       });
     });
   }
@@ -527,8 +533,8 @@ document.addEventListener('DOMContentLoaded', () => {
     aussendienst: {
       kicker: 'Außendienst',
       title: 'Präzise Messtechnik vor Ort.',
-      lead: 'Die Außendienst-Ausstattung folgt der Technikliste der aktuellen Gudelius-Seite. Hersteller- und Produktbilder dienen in der Beta nur als vorläufige Bildmotive.',
-      summary: 'Die eigenen Gerätefotos von Jost ersetzen später diese Hersteller-/Produktbilder eins zu eins.',
+      lead: 'Die Außendienst-Ausstattung verbindet klassische Vermessung mit moderner digitaler Datenerfassung für präzise Ergebnisse direkt im Projekt.',
+      summary: 'Die Geräte sind auf unterschiedliche Aufgaben von Absteckung und Bestandsaufnahme bis zur 3D-Erfassung abgestimmt.',
       devices: [
         { slug:'trimble-sx12', name:'Trimble SX12', category:'Scanning-Totalstation', manufacturer:'Trimble', model:'SX12', description:'Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.', details:'Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.', image:'https://images.ctfassets.net/1nvkn1423yot/7bouK6GUtWnVuxunCfxZML/4bd3307e16c06e17b898f32965eec7db/geo-sx12-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-sx12', source:'https://geospatial.trimble.com/de/products/hardware/trimble-sx12', sourceLabel:'Trimble' },
         { slug:'trimble-s6', name:'Trimble S6', category:'Robotik-Totalstation', manufacturer:'Trimble', model:'S6', description:'Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.', details:'Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.', image:'assets/equipment-trimble-s6.svg', mediaKey:'equipment/trimble-s6', source:'https://help.fieldsystems.trimble.com/trimble-access/latest/de/equipment-supported.htm', sourceLabel:'Trimble · S6 Support' },
@@ -540,19 +546,19 @@ document.addEventListener('DOMContentLoaded', () => {
       kicker: '3D & Drohne',
       title: 'Digitale Erfassung aus Boden und Luft.',
       lead: 'Laserscanning, RTK-Drohne, Wärmebild und photogrammetrische Auswertung bilden den digitalen Technikblock.',
-      summary: 'TX8 und die Drohnenbilder werden später durch die tatsächlich verwendeten Geräteaufnahmen ersetzt.',
+      summary: '3D-Laserscanning, RTK-Drohne und photogrammetrische Auswertung ergänzen die klassische Vermessung um flächenhafte und digitale Datenerfassung.',
       devices: [
         { slug:'trimble-tx8', name:'Trimble TX8 3D-Laserscanner', category:'Terrestrisches 3D-Laserscanning', manufacturer:'Trimble', model:'TX8', description:'Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.', details:'Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.', image:'assets/equipment-trimble-tx8.svg', mediaKey:'equipment/trimble-tx8', source:'https://geospatial.trimble.com/de/support/discontinued-products-technical-support', sourceLabel:'Trimble · TX8 Support' },
-        { slug:'rtk-drohne', name:'RTK-Drohne', category:'Vermessung & Orthophoto', manufacturer:'DJI Enterprise', model:'RTK-Drohne', description:'RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.', details:'Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.', image:'https://www1.djicdn.com/cms/uploads/3185f8d17b7211aad1a326f604fc0022.png', mediaKey:'equipment/rtk-drohne', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
-        { slug:'infrarotkamera', name:'RTK-Drohne mit Infrarotkamera', category:'Thermische Bildaufnahme', manufacturer:'DJI Enterprise', model:'RTK-Drohne mit Infrarotkamera', description:'Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.', details:'Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.', image:'https://www1.djicdn.com/cms/uploads/6a4fe5870d86bb43d58dcc1f364895da.png', mediaKey:'equipment/infrarotkamera', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise · Platzhalter' },
-        { slug:'photogrammetrie', name:'Punktwolken & Photogrammetrie', category:'Workflow / Ergebnisdarstellung', manufacturer:'–', model:'Punktwolken & Photogrammetrie', description:'Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.', details:'Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/photogrammetrie', source:'https://www.agisoft.com/', sourceLabel:'Agisoft · Platzhalter' }
+        { slug:'rtk-drohne', name:'RTK-Drohne', category:'Vermessung & Orthophoto', manufacturer:'DJI Enterprise', model:'RTK-Drohne', description:'RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.', details:'Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.', image:'https://www1.djicdn.com/cms/uploads/3185f8d17b7211aad1a326f604fc0022.png', mediaKey:'equipment/rtk-drohne', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise' },
+        { slug:'infrarotkamera', name:'RTK-Drohne mit Infrarotkamera', category:'Thermische Bildaufnahme', manufacturer:'DJI Enterprise', model:'RTK-Drohne mit Infrarotkamera', description:'Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.', details:'Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.', image:'https://www1.djicdn.com/cms/uploads/6a4fe5870d86bb43d58dcc1f364895da.png', mediaKey:'equipment/infrarotkamera', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise' },
+        { slug:'photogrammetrie', name:'Punktwolken & Photogrammetrie', category:'Workflow / Ergebnisdarstellung', manufacturer:'–', model:'Punktwolken & Photogrammetrie', description:'Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.', details:'Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.', image:'https://www.agisoft.com/images/cloud-try-now.png', mediaKey:'equipment/photogrammetrie', source:'https://www.agisoft.com/', sourceLabel:'Agisoft' }
       ]
     },
     software: {
       kicker: 'Programme & Arbeitsplatz',
       title: 'Auswertung und Datenaufbereitung.',
       lead: 'CAD, Tiefbauplanung, Punktwolken und Photogrammetrie werden mit den auf der Originalseite genannten Programmen abgedeckt.',
-      summary: 'Bei Software zeigen die Platzhalter Hersteller- bzw. Produktmotive. Der mobile Büroarbeitsplatz bleibt als eigener visueller Eintrag erhalten.',
+      summary: 'CAD-, Auswerte- und Photogrammetrie-Software bildet zusammen mit dem mobilen Arbeitsplatz den digitalen Workflow vom Messwert bis zur fertigen Projektgrundlage.',
       devices: [
         { slug:'bricscad', name:'BricsCAD', category:'CAD-Bearbeitung', manufacturer:'Bricsys', model:'BricsCAD', description:'CAD-Software für die zeichnerische Aufbereitung und Weiterbearbeitung von Vermessungsdaten.', details:'Für 2D-/3D-CAD, Bestandspläne und projektbezogene Planbearbeitung.', image:'https://www.bbsoft.de/assets/logo/extern/octave_weiss.webp', mediaKey:'equipment/bricscad', source:'https://bricscad.octave.com/de', sourceLabel:'Octave / BricsCAD' },
         { slug:'bbsoft', name:'BBSOFT', category:'Tiefbau, Vermessung & DGM', manufacturer:'BBSOFT', model:'BBSOFT', description:'Fachsoftware für vermessungsnahe Tiefbauplanung, Geländemodelle und Massenermittlung.', details:'Unterstützt die Bearbeitung von Vermessungsdaten, DGM und projektbezogenen Tiefbauaufgaben.', image:'https://www.bbsoft.de/assets/images/uberuns/bbsoft-planung-computer.webp', mediaKey:'equipment/bbsoft', source:'https://www.bbsoft.de/', sourceLabel:'BBSoft' },
@@ -618,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cmsBase = 'technik/' + device.slug;
         return `
           <article class="equipment-device-card" data-technique="${device.slug}">
-            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${escapeEquipmentHtml(device.name)} Platzhalterbild" loading="lazy" decoding="async" fetchpriority="low">
+            <img src="${device.image}" data-cms-media="${device.mediaKey || ''}" alt="${escapeEquipmentHtml(device.name)}" loading="lazy" decoding="async" fetchpriority="low">
             <div class="equipment-device-copy">
               <span class="equipment-device-category" data-cms-text="${cmsBase}/category">${escapeEquipmentHtml(device.category)}</span>
               <strong data-cms-text="${cmsBase}/name">${escapeEquipmentHtml(device.name)}</strong>
