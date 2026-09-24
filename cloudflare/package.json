@@ -1,7 +1,7 @@
 {
   "name": "gudelius-cms",
   "private": true,
-  "version": "0.3.5",
+  "version": "0.3.6",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

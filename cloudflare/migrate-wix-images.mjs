@@ -6,7 +6,7 @@ const repoRoot = resolve(cloudflareDir, "..");
 const assetDir = join(repoRoot, "assets", "media");
 const originalDir = join(cloudflareDir, ".wix-originals");
 const tempDir = join(cloudflareDir, ".wix-migration-tmp");
-const CACHE_VERSION = "20260924-35";
+const CACHE_VERSION = "20260924-36";
 
 const assets = [
   {
@@ -200,7 +200,7 @@ function wixRegex(asset) {
 
 function localMediaRegex(asset) {
   return new RegExp(
-    "(?:\\.\\./)?assets/media/" + escapeRegex(asset.base) + "\\.(?:jpg|jpeg|png|webp|avif)",
+    "(?:\\.\\./)*assets/media/" + escapeRegex(asset.base) + "\\.(?:jpg|jpeg|png|webp|avif)",
     "g"
   );
 }
