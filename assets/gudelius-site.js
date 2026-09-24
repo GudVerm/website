@@ -152,7 +152,17 @@ document.addEventListener('DOMContentLoaded', () => {
       image.onload = () => {
         const url = cmsMediaUrl(element.dataset.cmsBg);
         if (element.classList.contains("hero")) {
-          element.style.setProperty("--hero-image", `url("${url}")`);
+          const heroImage = element.querySelector(".hero-background");
+          if (heroImage) {
+            const fallback = heroImage.currentSrc || heroImage.src;
+            heroImage.onerror = () => {
+              heroImage.onerror = null;
+              heroImage.src = fallback;
+            };
+            heroImage.src = url;
+          } else {
+            element.style.setProperty("--hero-image", `url("${url}")`);
+          }
         } else if (element.classList.contains("service-hero")) {
           element.style.setProperty("--service-image", `url("${url}")`);
         } else {
