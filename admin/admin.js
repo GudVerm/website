@@ -254,6 +254,8 @@ function getApi(){
 function getToken(){
   return (tokenInput?.value||sessionStorage.getItem("gudelius-cms-token")||"").trim();
 }
+const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
+function initialMediaSrc(item){return getApi()&&cmsMediaEnabled?mediaUrl(item.key):item.fallback}
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
 
 if(saveButton){
@@ -639,7 +641,7 @@ function renderProjectEditor(item){
   const displayTitle=title.value||item.title||item.slug;heading.textContent=displayTitle;indexLabel.textContent=String(projects.indexOf(item)+1).padStart(2,"0");mediaKey.textContent=item.key;orderLabel.textContent=String(projects.indexOf(item)+1);
   visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";visibleBadge.classList.toggle("is-off",item.visible===false);archiveBadge.hidden=!item.archived;
   visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
-  img.src=getApi()?mediaUrl(item.key):item.fallback;img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  img.src=initialMediaSrc(item);img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
   file.addEventListener("change",()=>{const selected=file.files?.[0];if(!selected)return;img.src=URL.createObjectURL(selected);setStatus(mediaStatus,selected.name+" ausgewählt.")});
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
@@ -2258,7 +2260,7 @@ function renderTechniqueEditor(item){
   moveUp.disabled=equipment.indexOf(item)===0;
   moveDown.disabled=equipment.indexOf(item)===equipment.length-1;
 
-  img.src=getApi()?mediaUrl(item.key):item.fallback; img.alt=displayName;
+  img.src=initialMediaSrc(item); img.alt=displayName;
   img.onerror=()=>{img.onerror=null;img.src=item.fallback};
 
   file.addEventListener("change",()=>{
@@ -2439,7 +2441,7 @@ function renderCollection(target, items){
 
     title.textContent=item.name;
     detail.textContent=item.detail;
-    img.src=getApi()?mediaUrl(item.key):item.fallback;
+    img.src=initialMediaSrc(item);
     img.onerror=()=>{img.onerror=null;img.src=item.fallback};
 
     file.addEventListener("change",()=>{
