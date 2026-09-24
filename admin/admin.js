@@ -548,7 +548,16 @@ reloadCompanyTimeline?.addEventListener("click",loadCompanyTimeline);
 
 
 const projectManifestKey="projekte/index";
-const projectFields=["title","description","location","year","services"];
+const projectFields=["title","imageTitle","imageDescription","description","location","year","services"];
+const projectFieldKeyMap={imageTitle:"image-title",imageDescription:"image-description"};
+const projectImageTextDefaults={
+  "ingenieur-bauvermessung":{imageTitle:"Ingenieur- & Bauvermessung",imageDescription:"Absteckung · Kontrolle · Bestand"},
+  "3d-laserscanning":{imageTitle:"3D-Bestandsaufnahme & Laserscanning",imageDescription:"Punktwolke · Aufmaß · Dokumentation"},
+  "rtk-drohnenvermessung":{imageTitle:"RTK-Drohnenvermessung",imageDescription:"Orthophoto · Fläche · Geländedaten"},
+  "gelaende-gewaesser":{imageTitle:"Gelände- & Gewässervermessung",imageDescription:"Topografie · Bestand · Geländemodell"},
+  "mobiler-einsatz":{imageTitle:"Mobiler Projekteinsatz",imageDescription:"Datenkontrolle · Auswertung vor Ort"},
+  "bestand-planung":{imageTitle:"Bestandsaufnahme & Planungsgrundlagen",imageDescription:"Aufmaß · Bestand · Weiterverarbeitung"}
+};
 const projectServiceOptions=[
   ["ingenieurvermessung","Ingenieurvermessung"],
   ["gis-bauvermessung","GIS & Bauvermessung"],
@@ -556,11 +565,14 @@ const projectServiceOptions=[
   ["drohnenvermessung","Drohnenvermessung"]
 ];
 
-function projectContentKey(item,field){return "projekte/"+item.slug+"/"+field}
+function projectContentKey(item,field){return "projekte/"+item.slug+"/"+(projectFieldKeyMap[field]||field)}
 function projectValue(item,field){
   const value=projectContentCache[projectContentKey(item,field)];
   if(field==="services") return Array.isArray(value)?value:(Array.isArray(item.services)?item.services:[]);
-  return typeof value==="string"?value:(item[field]||"");
+  if(typeof value==="string") return value;
+  if(field==="imageTitle") return item.imageTitle||projectImageTextDefaults[item.slug]?.imageTitle||item.title||item.slug;
+  if(field==="imageDescription") return item.imageDescription||projectImageTextDefaults[item.slug]?.imageDescription||"";
+  return item[field]||"";
 }
 function projectFallbackImage(){return "../assets/dummy-aussendienst-02.svg"}
 function projectBySlug(slug){return projects.find(item=>item.slug===slug)||projects[0]||null}
@@ -616,14 +628,14 @@ function renderProjectEditor(item){
   const save=node.querySelector(".project-save"),reload=node.querySelector(".project-reload"),status=node.querySelector(".project-status");
   const visibility=node.querySelector(".project-visibility"),archive=node.querySelector(".project-archive"),duplicate=node.querySelector(".project-duplicate"),remove=node.querySelector(".project-delete");
   const up=node.querySelector(".project-up"),down=node.querySelector(".project-down"),visibleBadge=node.querySelector(".project-visible-badge"),archiveBadge=node.querySelector(".project-archive-badge"),orderLabel=node.querySelector(".project-order");
-  const title=node.querySelector('[data-project-field="title"]'),description=node.querySelector('[data-project-field="description"]'),location=node.querySelector('[data-project-field="location"]'),year=node.querySelector('[data-project-field="year"]'),featured=node.querySelector('[data-project-meta="featured"]');
+  const title=node.querySelector('[data-project-field="title"]'),imageTitle=node.querySelector('[data-project-field="imageTitle"]'),imageDescription=node.querySelector('[data-project-field="imageDescription"]'),description=node.querySelector('[data-project-field="description"]'),location=node.querySelector('[data-project-field="location"]'),year=node.querySelector('[data-project-field="year"]'),featured=node.querySelector('[data-project-meta="featured"]');
   const servicesWrap=node.querySelector(".project-services");
   projectServiceOptions.forEach(([value,label])=>{
     const l=document.createElement("label");l.className="check-option";const input=document.createElement("input");input.type="checkbox";input.value=value;
     input.checked=projectValue(item,"services").includes(value);input.addEventListener("change",()=>setProjectDirty(card,true));l.append(input,document.createTextNode(label));servicesWrap.appendChild(l);
   });
-  title.value=projectValue(item,"title");description.value=projectValue(item,"description");location.value=projectValue(item,"location");year.value=projectValue(item,"year");featured.checked=item.featured===true;
-  [title,description,location,year].forEach(field=>field.addEventListener("input",()=>setProjectDirty(card,true)));featured.addEventListener("change",()=>setProjectDirty(card,true));
+  title.value=projectValue(item,"title");imageTitle.value=projectValue(item,"imageTitle");imageDescription.value=projectValue(item,"imageDescription");description.value=projectValue(item,"description");location.value=projectValue(item,"location");year.value=projectValue(item,"year");featured.checked=item.featured===true;
+  [title,imageTitle,imageDescription,description,location,year].forEach(field=>field.addEventListener("input",()=>setProjectDirty(card,true)));featured.addEventListener("change",()=>setProjectDirty(card,true));
   const displayTitle=title.value||item.title||item.slug;heading.textContent=displayTitle;indexLabel.textContent=String(projects.indexOf(item)+1).padStart(2,"0");mediaKey.textContent=item.key;orderLabel.textContent=String(projects.indexOf(item)+1);
   visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";visibleBadge.classList.toggle("is-off",item.visible===false);archiveBadge.hidden=!item.archived;
   visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
@@ -645,7 +657,7 @@ function renderProjectEditor(item){
   save.addEventListener("click",async()=>{
     if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);save.disabled=true;setStatus(status,"Speichere Projekt …");
     try{
-      const values={title:title.value.trim(),description:description.value.trim(),location:location.value.trim(),year:year.value.trim(),services:[...servicesWrap.querySelectorAll('input:checked')].map(i=>i.value)};
+      const values={title:title.value.trim(),imageTitle:imageTitle.value.trim(),imageDescription:imageDescription.value.trim(),description:description.value.trim(),location:location.value.trim(),year:year.value.trim(),services:[...servicesWrap.querySelectorAll('input:checked')].map(i=>i.value)};
       if(!values.title)throw new Error("Titel darf nicht leer sein.");
       if(featured.checked){projects.forEach(p=>{p.featured=p.slug===item.slug})}else item.featured=false;
       for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
@@ -720,9 +732,9 @@ function openProjectCreate(){projectCreatePanel.hidden=false;projectCreateTitle.
 function closeProjectCreate(){projectCreatePanel.hidden=true;setStatus(projectCreateStatus,"")}
 async function createProject(){
   const title=projectCreateTitle?.value.trim()||"";if(!title)return setStatus(projectCreateStatus,"Bitte einen Projekttitel eingeben.",false);if(!getApi()||!getToken())return setStatus(projectCreateStatus,"Worker-URL und Admin-Token fehlen.",false);
-  const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
+  const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
   projectCreateSave.disabled=true;setStatus(projectCreateStatus,"Lege Projekt an …");
-  try{projects.push(item);const values={title,description:"",location:"",year:"",services:[]};for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
+  try{projects.push(item);const values={title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[]};for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
     await saveProjectManifest();refreshProjectSelect();activeProjectSlug=slug;projectSelect.value=slug;closeProjectCreate();renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),"Neues Projekt angelegt und zunächst ausgeblendet.",true);history.replaceState(null,"","#"+encodeURIComponent(slug))}
   catch(error){projects=projects.filter(p=>p.slug!==slug);setStatus(projectCreateStatus,"Anlegen fehlgeschlagen: "+error.message,false)}finally{projectCreateSave.disabled=false}
 }
