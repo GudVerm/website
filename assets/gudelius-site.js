@@ -490,10 +490,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const title=projectDisplayTitle(slug,rawTitle),location=typeof content['projekte/'+slug+'/location']==='string'?content['projekte/'+slug+'/location']:'',year=typeof content['projekte/'+slug+'/year']==='string'?content['projekte/'+slug+'/year']:'';
         const description=typeof content['projekte/'+slug+'/description']==='string'?content['projekte/'+slug+'/description'].trim():'';
         const services=normalizeProjectServices(content['projekte/'+slug+'/services']);
+        const rawImageTitle=typeof content['projekte/'+slug+'/image-title']==='string'?content['projekte/'+slug+'/image-title'].trim():'';
+        const rawImageDescription=typeof content['projekte/'+slug+'/image-description']==='string'?content['projekte/'+slug+'/image-description'].trim():'';
+        const imageTitle=rawImageTitle||projectDisplayTitles[slug]||title;
+        const imageDescription=rawImageDescription||[location,year].filter(Boolean).join(' · ')||projectDisplayMeta[slug]||'';
         const card=document.createElement('div');card.className='project';card.dataset.project=slug;card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Projekt '+title+' öffnen');if(entry.featured)card.dataset.featured='true';
-        const img=document.createElement('img');img.src=fallback.image||'assets/dummy-aussendienst-02.svg';img.dataset.cmsMedia='projects/'+slug;img.alt=title;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
-        const caption=document.createElement('div');caption.className='project-caption';const strong=document.createElement('strong');strong.textContent=title;caption.appendChild(strong);
-        const meta=[location,year].filter(Boolean).join(' · ')||projectDisplayMeta[slug]||'';if(meta){const small=document.createElement('small');small.textContent=meta;caption.appendChild(small)}
+        const img=document.createElement('img');img.src=fallback.image||'assets/dummy-aussendienst-02.svg';img.dataset.cmsMedia='projects/'+slug;img.alt=imageTitle;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
+        const caption=document.createElement('div');caption.className='project-caption';const strong=document.createElement('strong');strong.textContent=imageTitle;caption.appendChild(strong);
+        if(imageDescription){const small=document.createElement('small');small.textContent=imageDescription;caption.appendChild(small)}
         card.append(img,caption);grid.appendChild(card);
         projectModalRecords.set(slug,{slug,title,description:description||(projectFallbackDetails[slug]?.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung."),location,year,services:services.length?services:(projectFallbackDetails[slug]?.services||[]),image:img.src});
       });
