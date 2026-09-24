@@ -17,7 +17,7 @@ ADMIN_TOKEN_FALLBACK_ENABLED=true` bis zur bewussten Medienprüfung
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.4`.
+Die aktuelle Worker-Releasekennung ist `2026-09-24.5`.
 
 ## Secrets
 
@@ -291,3 +291,19 @@ gudelius-cms.gudeliusvermessung.workers.dev/api/admin/*
 schützen. Der gesamte Worker darf nicht pauschal hinter Access gestellt werden, weil `/api/site`, `/api/contact` und Analytics öffentlich erreichbar bleiben müssen.
 
 Nach erfolgreichem Access-E2E-Test kann `ADMIN_TOKEN_FALLBACK_ENABLED=false` gesetzt werden. Erst danach kann der technische Browser-Token aus dem normalen Kunden-Workflow entfernt werden.
+
+
+## Cloudflare Access – Admin-Oberfläche über den Worker
+
+Seit Release `2026-09-24.5` steht die bestehende Admin-Oberfläche zusätzlich unter `/admin/` am Worker bereit. Der Worker lädt die weiterhin im Repository gepflegten Admin-Dateien serverseitig von der GitHub-Pages-Testseite und liefert sie unter derselben Origin wie `/api/admin/*` aus. Cloudflare Workers Static Assets wird bewusst nicht verwendet, damit `ctx.access` im Worker verfügbar bleibt.
+
+`/admin/config.js` wird dynamisch erzeugt und setzt `GUDELIUS_CMS_USE_ACCESS=true`. Dadurch benötigt die Worker-Adminoberfläche keinen technischen Browser-Token. Die GitHub-Pages-Adminoberfläche bleibt vorübergehend im Token-Fallback-Modus.
+
+Vorgesehene Access-Pfade:
+
+```text
+/admin/*
+/api/admin/*
+```
+
+`/admin` selbst leitet nur auf `/admin/` weiter. Öffentliche Website-APIs bleiben außerhalb dieser Pfade. Bis der Access-E2E-Test abgeschlossen ist, bleibt `ADMIN_TOKEN_FALLBACK_ENABLED=true`.

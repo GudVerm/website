@@ -245,8 +245,14 @@ const serviceContactTextStatus=document.getElementById("serviceContactTextStatus
 if(apiUrlInput){
   apiUrlInput.value=(window.GUDELIUS_CMS_API||localStorage.getItem("gudelius-cms-api")||"").replace(/\/$/,"");
 }
+const cmsAccessMode=window.GUDELIUS_CMS_USE_ACCESS===true;
 if(tokenInput){
-  tokenInput.value=sessionStorage.getItem("gudelius-cms-token")||"";
+  tokenInput.value=cmsAccessMode ? "" : (sessionStorage.getItem("gudelius-cms-token")||"");
+  if(cmsAccessMode){
+    sessionStorage.removeItem("gudelius-cms-token");
+    const tokenLabel=tokenInput.closest("label");
+    if(tokenLabel) tokenLabel.hidden=true;
+  }
 }
 
 function getApi(){
@@ -256,6 +262,11 @@ function getApi(){
 }
 function getToken(){
   return (tokenInput?.value||sessionStorage.getItem("gudelius-cms-token")||"").trim();
+}
+function hasAdminAuth(){ return cmsAccessMode || Boolean(getToken()); }
+function adminHeaders(extra={}){
+  const token=getToken();
+  return token ? {...extra,"authorization":"Bearer "+token} : {...extra};
 }
 const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
 function initialMediaSrc(item){return getApi()&&cmsMediaEnabled?mediaUrl(item.key):item.fallback}
@@ -274,6 +285,10 @@ function showMediaModeNotice(){
   head.insertAdjacentElement("afterend",notice);
 }
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
+
+if(cmsAccessMode && connectionStatus){
+  setStatus(connectionStatus,"Cloudflare Access-Modus aktiv. Kein Admin-Token im Browser erforderlich.",true);
+}
 
 if(saveButton){
   saveButton.addEventListener("click",()=>{
@@ -297,7 +312,7 @@ if(testButton){
     if(!getApi()) return setStatus(connectionStatus,"Bitte zuerst die Worker-URL eintragen.",false);
     setStatus(connectionStatus,"Teste Verbindung …");
     try{
-      const headers=getToken()?{"authorization":"Bearer "+getToken()}:{};
+      const headers=adminHeaders();
       const r=await fetch(getApi()+"/api/admin/session",{headers});
       if(!r.ok) throw new Error("HTTP "+r.status);
       const data=await r.json();
@@ -343,10 +358,7 @@ async function loadHeroTexts(){
 async function saveHeroText(key,value){
   const response=await fetch(contentUrl(key),{
     method:"PUT",
-    headers:{
-      "authorization":"Bearer "+getToken(),
-      "content-type":"application/json"
-    },
+    headers:adminHeaders({"content-type":"application/json"}),
     body:JSON.stringify(value)
   });
   const data=await response.json().catch(()=>({}));
@@ -355,7 +367,7 @@ async function saveHeroText(key,value){
 
 if(saveHeroTexts){
   saveHeroTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(heroTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(heroTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveHeroTexts.disabled=true;
     setStatus(heroTextStatus,"Speichere Texte …");
     try{
@@ -419,8 +431,8 @@ async function loadServiceTexts(){
 serviceTextControls.forEach(control=>{
   if(control.save){
     control.save.addEventListener("click",async()=>{
-      if(!getApi()||!getToken()){
-        return setStatus(control.status,"Worker-URL und Admin-Token fehlen.",false);
+      if(!getApi()||!hasAdminAuth()){
+        return setStatus(control.status,"Worker-URL oder Admin-Anmeldung fehlt.",false);
       }
 
       control.save.disabled=true;
@@ -491,7 +503,7 @@ async function loadCompanyTexts(){
 
 if(saveCompanyTexts){
   saveCompanyTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(companyTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(companyTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveCompanyTexts.disabled=true;
     setStatus(companyTextStatus,"Speichere Unternehmenstexte …");
     try{
@@ -561,7 +573,7 @@ async function loadCompanyTimeline(){
   catch(error){companyTimelineItems=normalizeCompanyTimeline(null);renderCompanyTimeline();setStatus(companyTimelineStatus,"Timeline konnte nicht geladen werden; Fallback aktiv: "+error.message,false)}
 }
 async function persistCompanyTimeline(){
-  if(!getApi()||!getToken())return setStatus(companyTimelineStatus,"Worker-URL und Admin-Token fehlen.",false);
+  if(!getApi()||!hasAdminAuth())return setStatus(companyTimelineStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
   saveCompanyTimeline.disabled=true;setStatus(companyTimelineStatus,"Speichere Timeline …");
   try{
     const normalized=companyTimelineItems.map((item,index)=>({id:item.id||"station-"+(index+1),period:item.period.trim(),text:item.text.trim(),description:item.description.trim(),visible:item.visible!==false}));
@@ -645,7 +657,7 @@ function refreshProjectSelect(){
 }
 function setProjectDirty(card,dirty=true){const badge=card?.querySelector(".project-dirty-badge");if(badge)badge.hidden=!dirty}
 async function deleteProjectContent(item){
-  const headers={"authorization":"Bearer "+getToken()};
+  const headers=adminHeaders();
   for(const field of projectFields){
     const response=await fetch(contentUrl(projectContentKey(item,field)),{method:"DELETE",headers});
     if(!response.ok&&response.status!==404){const data=await response.json().catch(()=>({}));throw new Error(data.error||("HTTP "+response.status))}
@@ -674,20 +686,20 @@ function renderProjectEditor(item){
   img.src=initialMediaSrc(item);img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
   file.addEventListener("change",()=>{const selected=file.files?.[0];if(!selected)return;img.src=URL.createObjectURL(selected);setStatus(mediaStatus,selected.name+" ausgewählt.")});
   upload.addEventListener("click",async()=>{
-    const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     upload.disabled=true;setStatus(mediaStatus,"Upload läuft …");
-    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected});
+    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),body:selected});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=mediaUrl(item.key)+"?v="+Date.now();setStatus(mediaStatus,"Projektbild gespeichert.",true)}
     catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
   reset.addEventListener("click",async()=>{
-    if(!getApi()||!getToken())return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);if(!confirm("Cloudflare-Bild für „"+displayTitle+"“ löschen?"))return;
-    reset.disabled=true;try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+    if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);if(!confirm("Cloudflare-Bild für „"+displayTitle+"“ löschen?"))return;
+    reset.disabled=true;try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=item.fallback;file.value="";setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback aktiv.",true)}
     catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
   });
   save.addEventListener("click",async()=>{
-    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);save.disabled=true;setStatus(status,"Speichere Projekt …");
+    if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);save.disabled=true;setStatus(status,"Speichere Projekt …");
     try{
       const values={title:title.value.trim(),imageTitle:imageTitle.value.trim(),imageDescription:imageDescription.value.trim(),description:description.value.trim(),location:location.value.trim(),year:year.value.trim(),services:[...servicesWrap.querySelectorAll('input:checked')].map(i=>i.value)};
       if(!values.title)throw new Error("Titel darf nicht leer sein.");
@@ -698,18 +710,18 @@ function renderProjectEditor(item){
   });
   reload.addEventListener("click",loadProjectsCms);
   visibility.addEventListener("click",async()=>{
-    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);const old=item.visible;item.visible=item.visible===false;
+    if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);const old=item.visible;item.visible=item.visible===false;
     try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),item.visible?"Projekt ist sichtbar.":"Projekt ist ausgeblendet.",true)}
     catch(error){item.visible=old;setStatus(status,"Sichtbarkeit konnte nicht gespeichert werden: "+error.message,false)}
   });
   archive.addEventListener("click",async()=>{
-    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);if(!item.archived&&!confirm("„"+displayTitle+"“ archivieren?"))return;
+    if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);if(!item.archived&&!confirm("„"+displayTitle+"“ archivieren?"))return;
     const oldA=item.archived,oldV=item.visible;item.archived=!item.archived;if(item.archived)item.visible=false;
     try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),item.archived?"Projekt archiviert.":"Projekt reaktiviert.",true)}
     catch(error){item.archived=oldA;item.visible=oldV;setStatus(status,"Archivstatus konnte nicht gespeichert werden: "+error.message,false)}
   });
   duplicate.addEventListener("click",async()=>{
-    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const copiedTitle=(projectValue(item,"title")||item.title||item.slug)+" Kopie",slug=uniqueProjectSlug(copiedTitle),copy={...item,slug,key:"projects/"+slug,title:copiedTitle,name:copiedTitle,fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
     duplicate.disabled=true;
     try{projects.push(copy);for(const field of projectFields){const value=field==="title"?copiedTitle:projectValue(item,field);projectContentCache[projectContentKey(copy,field)]=value;await saveHeroText(projectContentKey(copy,field),value)}
@@ -717,14 +729,14 @@ function renderProjectEditor(item){
     catch(error){projects=projects.filter(p=>p.slug!==slug);setStatus(status,"Duplizieren fehlgeschlagen: "+error.message,false)}finally{duplicate.disabled=false}
   });
   const move=async direction=>{
-    if(!getApi()||!getToken())return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);const index=projects.indexOf(item),target=index+direction;if(target<0||target>=projects.length)return;
+    if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);const index=projects.indexOf(item),target=index+direction;if(target<0||target>=projects.length)return;
     [projects[index],projects[target]]=[projects[target],projects[index]];
     try{await saveProjectManifest();refreshProjectSelect();projectSelect.value=item.slug;renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),"Reihenfolge gespeichert.",true)}
     catch(error){[projects[index],projects[target]]=[projects[target],projects[index]];setStatus(status,"Reihenfolge konnte nicht gespeichert werden: "+error.message,false)}
   };
   up.addEventListener("click",()=>move(-1));down.addEventListener("click",()=>move(1));
   remove.addEventListener("click",async()=>{
-    if(!item.archived||!getApi()||!getToken())return;
+    if(!item.archived||!getApi()||!hasAdminAuth())return;
     if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;
     remove.disabled=true;
     const previousProjects=projects.slice();
@@ -737,7 +749,7 @@ function renderProjectEditor(item){
     }
     const cleanupErrors=[];
     try{
-      const mr=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const mr=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteProjectContent(item)}catch(error){cleanupErrors.push("Texte")}
@@ -763,7 +775,7 @@ async function loadProjectsCms(){
 function openProjectCreate(){projectCreatePanel.hidden=false;projectCreateTitle.value="";setStatus(projectCreateStatus,"");projectCreateTitle.focus()}
 function closeProjectCreate(){projectCreatePanel.hidden=true;setStatus(projectCreateStatus,"")}
 async function createProject(){
-  const title=projectCreateTitle?.value.trim()||"";if(!title)return setStatus(projectCreateStatus,"Bitte einen Projekttitel eingeben.",false);if(!getApi()||!getToken())return setStatus(projectCreateStatus,"Worker-URL und Admin-Token fehlen.",false);
+  const title=projectCreateTitle?.value.trim()||"";if(!title)return setStatus(projectCreateStatus,"Bitte einen Projekttitel eingeben.",false);if(!getApi()||!hasAdminAuth())return setStatus(projectCreateStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
   const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
   projectCreateSave.disabled=true;setStatus(projectCreateStatus,"Lege Projekt an …");
   try{projects.push(item);const values={title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[]};for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
@@ -842,7 +854,7 @@ async function loadContactTexts(){
 
 if(saveContactTexts){
   saveContactTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(contactTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(contactTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveContactTexts.disabled=true;
     setStatus(contactTextStatus,"Speichere Kontaktdaten …");
     try{
@@ -883,7 +895,7 @@ async function loadServiceContactTexts(){
 
 if(saveServiceContactTexts){
   saveServiceContactTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(serviceContactTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(serviceContactTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveServiceContactTexts.disabled=true;
     setStatus(serviceContactTextStatus,"Speichere Leistungs-Kontakttexte …");
     try{
@@ -952,7 +964,7 @@ function updateInquiryStats(){
 async function saveInquiryUpdate(inquiry,payload){
   const response=await fetch(getApi()+"/api/admin/inquiries/"+encodeURIComponent(inquiry.id),{
     method:"PUT",
-    headers:{"authorization":"Bearer "+getToken(),"content-type":"application/json"},
+    headers:adminHeaders({"content-type":"application/json"}),
     body:JSON.stringify(payload)
   });
   const data=await response.json().catch(()=>({}));
@@ -1057,7 +1069,7 @@ function renderInquiries(){
     const noteStatus=document.createElement("span");
     noteStatus.className="status";
     noteSave.addEventListener("click",async()=>{
-      if(!getApi()||!getToken()) return setStatus(noteStatus,"Worker-URL und Admin-Token fehlen.",false);
+      if(!getApi()||!hasAdminAuth()) return setStatus(noteStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
       noteSave.disabled=true;
       setStatus(noteStatus,"Speichere …");
       try{
@@ -1122,7 +1134,7 @@ function renderInquiries(){
 async function loadInquiries(){
   if(!inquiriesList||!inquiriesStatus) return;
 
-  if(!getApi()||!getToken()){
+  if(!getApi()||!hasAdminAuth()){
     inquiriesCache=[];
     updateInquiryStats();
     inquiriesList.innerHTML="";
@@ -1135,7 +1147,7 @@ async function loadInquiries(){
 
   try{
     const response=await fetch(getApi()+"/api/admin/inquiries",{
-      headers:{"authorization":"Bearer "+getToken()}
+      headers:adminHeaders()
     });
     const data=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
@@ -1348,8 +1360,8 @@ async function saveCmsEntriesInBatches(entries,batchSize=6){
 
 if(saveEngineerPageTexts){
   saveEngineerPageTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()){
-      return setStatus(engineerPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()){
+      return setStatus(engineerPageTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     }
 
     const taskLines=(engineerTasksInput?.value||"")
@@ -1539,8 +1551,8 @@ async function loadGisPageTexts(){
 
 if(saveGisPageTexts){
   saveGisPageTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()){
-      return setStatus(gisPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()){
+      return setStatus(gisPageTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     }
 
     const taskLines=(gisTasksInput?.value||"")
@@ -1724,8 +1736,8 @@ async function loadScanPageTexts(){
 
 if(saveScanPageTexts){
   saveScanPageTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()){
-      return setStatus(scanPageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()){
+      return setStatus(scanPageTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     }
 
     const taskLines=(scanTasksInput?.value||"")
@@ -1908,8 +1920,8 @@ async function loadDronePageTexts(){
 
 if(saveDronePageTexts){
   saveDronePageTexts.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()){
-      return setStatus(dronePageTextStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()){
+      return setStatus(dronePageTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     }
 
     const taskLines=(droneTasksInput?.value||"")
@@ -2226,7 +2238,7 @@ function setTechniqueDirty(card,dirty=true){
   if(badge) badge.hidden=!dirty;
 }
 async function deleteTechniqueContent(item){
-  const headers={"authorization":"Bearer "+getToken()};
+  const headers=adminHeaders();
   for(const field of techniqueTextFields){
     const response=await fetch(contentUrl(techniqueContentKey(item,field)),{method:"DELETE",headers});
     if(!response.ok&&response.status!==404){
@@ -2300,28 +2312,28 @@ function renderTechniqueEditor(item){
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];
     if(!selected) return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);
-    if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     upload.disabled=true; setStatus(mediaStatus,"Upload läuft …");
     try{
       const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
-        method:"PUT",headers:{"authorization":"Bearer "+getToken(),"content-type":selected.type||"application/octet-stream","x-file-name":selected.name},body:selected
+        method:"PUT",headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),body:selected
       });
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
       img.src=mediaUrl(item.key)+"?v="+Date.now(); setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
     }catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
   reset.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(mediaStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     if(!confirm("Cloudflare-Bild für „"+displayName+"“ löschen? Der lokale Fallback bleibt erhalten.")) return;
     reset.disabled=true; setStatus(mediaStatus,"Lösche Cloudflare-Bild …");
     try{
-      const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
       img.src=item.fallback; file.value=""; setStatus(mediaStatus,"Cloudflare-Bild gelöscht; Fallback wird verwendet.",true);
     }catch(error){setStatus(mediaStatus,"Löschen fehlgeschlagen: "+error.message,false)}finally{reset.disabled=false}
   });
   save.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     save.disabled=true; setStatus(textStatus,"Speichere Technik …");
     try{
       const values={}; techniqueTextFields.forEach(field=>{values[field]=fields[field]?.value.trim()||""});
@@ -2335,7 +2347,7 @@ function renderTechniqueEditor(item){
   });
   reload.addEventListener("click",()=>loadTechniqueTexts());
   visibilityButton.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const old=item.visible; item.visible=item.visible===false;
     try{
       await saveTechniqueManifest(); populateTechniqueSelect(); technikSelect.value=item.slug; renderTechniqueEditor(item);
@@ -2343,7 +2355,7 @@ function renderTechniqueEditor(item){
     }catch(error){item.visible=old;setStatus(textStatus,"Sichtbarkeit konnte nicht gespeichert werden: "+error.message,false)}
   });
   archiveButton.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     if(!item.archived&&!confirm("„"+displayName+"“ archivieren? Der Eintrag verschwindet von der öffentlichen Website.")) return;
     const oldArchived=item.archived,oldVisible=item.visible; item.archived=!item.archived; if(item.archived)item.visible=false;
     try{
@@ -2352,7 +2364,7 @@ function renderTechniqueEditor(item){
     }catch(error){item.archived=oldArchived;item.visible=oldVisible;setStatus(textStatus,"Archivstatus konnte nicht gespeichert werden: "+error.message,false)}
   });
   duplicateButton.addEventListener("click",async()=>{
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const copiedName=(techniqueValue(item,"name")||item.name||item.slug)+" Kopie";
     const slug=uniqueTechniqueSlug(copiedName);
     const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:false,archived:false,order:equipment.length+1};
@@ -2368,7 +2380,7 @@ function renderTechniqueEditor(item){
     }catch(error){equipment=equipment.filter(entry=>entry.slug!==slug);setStatus(textStatus,"Duplizieren fehlgeschlagen: "+error.message,false)}finally{duplicateButton.disabled=false}
   });
   const move=async direction=>{
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const index=equipment.indexOf(item),target=index+direction; if(target<0||target>=equipment.length)return;
     [equipment[index],equipment[target]]=[equipment[target],equipment[index]];
     try{
@@ -2379,7 +2391,7 @@ function renderTechniqueEditor(item){
   moveUp.addEventListener("click",()=>move(-1)); moveDown.addEventListener("click",()=>move(1));
   permanentDelete.addEventListener("click",async()=>{
     if(!item.archived) return;
-    if(!getApi()||!getToken()) return setStatus(textStatus,"Worker-URL und Admin-Token fehlen.",false);
+    if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     if(!confirm("„"+displayName+"“ endgültig aus dem CMS entfernen? Dieser Schritt kann nicht rückgängig gemacht werden.")) return;
     permanentDelete.disabled=true;
     const previousEquipment=equipment.slice();
@@ -2392,7 +2404,7 @@ function renderTechniqueEditor(item){
     }
     const cleanupErrors=[];
     try{
-      const mediaResponse=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:{"authorization":"Bearer "+getToken()}});
+      const mediaResponse=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       if(!mediaResponse.ok&&mediaResponse.status!==404){const d=await mediaResponse.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mediaResponse.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteTechniqueContent(item)}catch(error){cleanupErrors.push("Texte")}
@@ -2432,7 +2444,7 @@ function closeTechniqueCreatePanel(){if(!technikCreatePanel)return;technikCreate
 async function createTechnique(){
   const name=technikCreateName?.value.trim()||"",group=technikCreateGroup?.value||"Außendienst";
   if(!name)return setStatus(technikCreateStatus,"Bitte einen Anzeigenamen eingeben.",false);
-  if(!getApi()||!getToken())return setStatus(technikCreateStatus,"Worker-URL und Admin-Token fehlen.",false);
+  if(!getApi()||!hasAdminAuth())return setStatus(technikCreateStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
   const slug=uniqueTechniqueSlug(name);
   const item={slug,group:techniqueGroups.includes(group)?group:"Außendienst",key:"equipment/"+slug,name,category:"",detail:"",manufacturer:"",model:"",description:"",details:"",fallback:techniqueFallbackForGroup(group),visible:false,archived:false,order:equipment.length+1};
   technikCreateSave.disabled=true;setStatus(technikCreateStatus,"Lege Eintrag an …");
@@ -2508,18 +2520,14 @@ function renderCollection(target, items){
     upload.addEventListener("click",async()=>{
       const selected=file.files?.[0];
       if(!selected) return setStatus(status,"Bitte zuerst ein Bild auswählen.",false);
-      if(!getApi()||!getToken()) return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);
+      if(!getApi()||!hasAdminAuth()) return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);
 
       upload.disabled=true;
       setStatus(status,"Upload läuft …");
       try{
         const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"PUT",
-          headers:{
-            "authorization":"Bearer "+getToken(),
-            "content-type":selected.type||"application/octet-stream",
-            "x-file-name":selected.name
-          },
+          headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),
           body:selected
         });
         const data=await r.json().catch(()=>({}));
@@ -2539,14 +2547,14 @@ function renderCollection(target, items){
     });
 
     reset.addEventListener("click",async()=>{
-      if(!getApi()||!getToken()) return setStatus(status,"Worker-URL und Admin-Token fehlen.",false);
+      if(!getApi()||!hasAdminAuth()) return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);
       if(!confirm("Cloudflare-Bild „"+item.name+"“ löschen? Danach wird der hinterlegte Fallback angezeigt.")) return;
       reset.disabled=true;
       setStatus(status,"Lösche Cloudflare-Bild …");
       try{
         const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"DELETE",
-          headers:{"authorization":"Bearer "+getToken()}
+          headers:adminHeaders()
         });
         const data=await r.json().catch(()=>({}));
         if(!r.ok) throw new Error(data.error||("HTTP "+r.status));
@@ -2673,12 +2681,12 @@ function renderAnalytics(data){
 }
 async function loadAnalytics(){
   if(!analyticsDashboard)return;
-  if(!getApi()||!getToken()){setStatus(analyticsStatus,"Zum Laden der Statistik bitte zuerst Worker-URL und Admin-Token verbinden.",false);return}
+  if(!getApi()||!hasAdminAuth()){setStatus(analyticsStatus,"Zum Laden der Statistik bitte zuerst die Admin-Verbindung herstellen.",false);return}
   analyticsRefresh.disabled=true;if(analyticsExport)analyticsExport.disabled=true;
   setStatus(analyticsStatus,"Lade Statistik …");
   try{
     const offset=new Date().getTimezoneOffset();
-    const response=await fetch(getApi()+"/api/admin/analytics?period="+encodeURIComponent(analyticsPeriod)+"&offset_minutes="+encodeURIComponent(offset),{headers:{"authorization":"Bearer "+getToken()}});
+    const response=await fetch(getApi()+"/api/admin/analytics?period="+encodeURIComponent(analyticsPeriod)+"&offset_minutes="+encodeURIComponent(offset),{headers:adminHeaders()});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
     renderAnalytics(data);setStatus(analyticsStatus,"Statistik geladen · Rohdaten werden maximal "+(data.retention_days||370)+" Tage gespeichert.",true);

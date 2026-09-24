@@ -4,9 +4,10 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.4";
+const WORKER_RELEASE = "2026-09-24.5";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,6 +25,21 @@ export default {
     try {
       if (url.pathname === "/api/health" && request.method === "GET") {
         return json({ ok: true, service: "gudelius-cms", release: WORKER_RELEASE }, 200, cors);
+      }
+
+      if (url.pathname === "/admin") {
+        const target = new URL(request.url);
+        target.pathname = "/admin/";
+        target.search = "";
+        return Response.redirect(target.toString(), 308);
+      }
+
+      if (url.pathname.startsWith("/admin/")) {
+        return handleAdminUi(request, env, url);
+      }
+
+      if (url.pathname.startsWith("/assets/") && (request.method === "GET" || request.method === "HEAD")) {
+        return handlePublicAssetProxy(request, env, url);
       }
 
       if (url.pathname === "/api/admin/session" && request.method === "GET") {
@@ -423,6 +439,118 @@ export default {
   }
 };
 
+function normalizeBaseUrl(value, fallback) {
+  const raw = cleanSingleLine(value || fallback, 500).trim();
+  try {
+    const parsed = new URL(raw);
+    parsed.hash = "";
+    parsed.search = "";
+    if (!parsed.pathname.endsWith("/")) parsed.pathname += "/";
+    return parsed.toString();
+  } catch {
+    return fallback;
+  }
+}
+
+function publicSiteUrl(env) {
+  return normalizeBaseUrl(env.PUBLIC_SITE_URL, "https://gudverm.github.io/website/");
+}
+
+function adminAppUrl(env) {
+  return normalizeBaseUrl(env.ADMIN_APP_URL, "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/");
+}
+
+function adminSourcePath(pathname) {
+  if (pathname === "/admin/") return "admin/index.html";
+  if (pathname === "/admin/admin.css") return "admin/admin.css";
+  if (pathname === "/admin/admin.js") return "admin/admin.js";
+  const match = pathname.match(/^\/admin\/([a-z0-9-]+)\/?$/);
+  if (match && ADMIN_PAGE_SLUGS.has(match[1])) return "admin/" + match[1] + "/index.html";
+  return "";
+}
+
+function adminUiHeaders(contentType) {
+  return {
+    "content-type": contentType,
+    "cache-control": "no-store",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "referrer-policy": "no-referrer",
+    "x-robots-tag": "noindex, nofollow, noarchive"
+  };
+}
+
+function renderAdminConfig(env, requestUrl) {
+  const origin = new URL(requestUrl).origin;
+  return [
+    "window.GUDELIUS_CMS_API = " + JSON.stringify(origin) + ";",
+    "window.GUDELIUS_CMS_MEDIA_ENABLED = " + JSON.stringify(isPublicMediaEnabled(env)) + ";",
+    "window.GUDELIUS_CMS_USE_ACCESS = true;",
+    "window.GUDELIUS_PUBLIC_SITE_URL = " + JSON.stringify(publicSiteUrl(env)) + ";"
+  ].join("\n") + "\n";
+}
+
+async function handleAdminUi(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("Method not allowed", { status: 405, headers: { ...adminUiHeaders("text/plain; charset=utf-8"), "allow": "GET, HEAD" } });
+  }
+  if (url.pathname === "/admin/config.js") {
+    return new Response(request.method === "HEAD" ? null : renderAdminConfig(env, request.url), {
+      status: 200,
+      headers: adminUiHeaders("application/javascript; charset=utf-8")
+    });
+  }
+
+  const sourcePath = adminSourcePath(url.pathname);
+  if (!sourcePath) return new Response("Not found", { status: 404, headers: adminUiHeaders("text/plain; charset=utf-8") });
+
+  const sourceUrl = new URL(sourcePath, publicSiteUrl(env));
+  const upstream = await fetch(sourceUrl, { method: "GET", headers: { "user-agent": "GudeliusVermessung-AdminProxy/1.0" }, redirect: "follow" });
+  if (!upstream.ok) {
+    console.error("Admin UI source failed:", sourceUrl.toString(), upstream.status);
+    return new Response("Admin-Oberfläche konnte nicht geladen werden.", {
+      status: upstream.status === 404 ? 404 : 502,
+      headers: adminUiHeaders("text/plain; charset=utf-8")
+    });
+  }
+
+  let body = await upstream.text();
+  const contentType = sourcePath.endsWith(".css") ? "text/css; charset=utf-8"
+    : sourcePath.endsWith(".js") ? "application/javascript; charset=utf-8"
+    : "text/html; charset=utf-8";
+
+  if (contentType.startsWith("text/html")) {
+    body = body
+      .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
+      .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-42")
+      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-42")
+      .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
+      .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
+      .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
+  }
+
+  return new Response(request.method === "HEAD" ? null : body, { status: 200, headers: adminUiHeaders(contentType) });
+}
+
+async function handlePublicAssetProxy(request, env, url) {
+  if (!/^\/assets\/[A-Za-z0-9._~!$&'()*+,;=:@%\/-]+$/.test(url.pathname) || url.pathname.includes("..")) {
+    return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  const sourceUrl = new URL(url.pathname.slice(1), publicSiteUrl(env));
+  const upstream = await fetch(sourceUrl, { method: "GET", headers: { "user-agent": "GudeliusVermessung-AssetProxy/1.0" }, redirect: "follow" });
+  if (!upstream.ok) return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+
+  const headers = new Headers();
+  const type = upstream.headers.get("content-type");
+  if (type) headers.set("content-type", type);
+  const etag = upstream.headers.get("etag");
+  if (etag) headers.set("etag", etag);
+  headers.set("cache-control", "public, max-age=300");
+  headers.set("x-content-type-options", "nosniff");
+  headers.set("cross-origin-resource-policy", "same-origin");
+  return new Response(request.method === "HEAD" ? null : upstream.body, { status: 200, headers });
+}
+
 async function handleAdminHealth(env, cors) {
   let dbOk = false;
   let mediaOk = false;
@@ -530,7 +658,7 @@ async function sendContactNotification(env, inquiry) {
 
   const recipient = env.CONTACT_EMAIL_TO;
   const senderName = cleanSingleLine(env.BREVO_FROM_NAME || "GudeliusVermessung", 120) || "GudeliusVermessung";
-  const adminUrl = "https://gudverm.github.io/website/admin/anfragen/";
+  const adminUrl = new URL("anfragen/", adminAppUrl(env)).toString();
   const subject = `Neue Projektanfrage: ${inquiry.subject}`;
 
   const html = `
