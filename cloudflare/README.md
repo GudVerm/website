@@ -332,3 +332,8 @@ Der Remote-Smoke-Test benötigt keinen Admin-Token mehr. Nach erfolgreichem Prod
 Seit Release `2026-09-24.8` akzeptiert `POST /api/analytics/event` sowohl `application/json` als auch `text/plain`. Das ist absichtlich so, weil die öffentliche Website Analytics-Ereignisse bevorzugt über `navigator.sendBeacon()` sendet. Der Body muss weiterhin gültiges JSON enthalten und durchläuft unverändert die Event-Typ-, Pfad-, Größen-, Origin- und Rate-Limit-Prüfungen.
 
 Kontaktformular-Inhalte werden weiterhin ausschließlich in `contact_requests` gespeichert. Analytics speichert nur `event_type`, normalisierten `page_path`, `target`, `event_label` und `created_at`; Name, E-Mail, Betreff und Nachricht werden nicht in `analytics_events` übernommen.
+
+
+## Admin-Asset-Versionierung nach Kanban-Umbau
+
+Seit Release `2026-09-24.9` schreibt der Worker beim Ausliefern der Access-geschützten Admin-Oberfläche den Admin-JavaScript-Cache auf `admin.js?v=20260924-46` um. Zuvor wurde trotz neuer HTML-Version weiterhin `20260924-44` erzwungen. Dadurch konnten neue UI-Funktionen wie die Umschaltung zwischen Kanban- und Listenansicht im Worker-Admin fehlen, obwohl der aktuelle Quellcode bereits im Repository lag.
