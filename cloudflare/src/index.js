@@ -4,7 +4,8 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.1";
+const WORKER_RELEASE = "2026-09-24.2";
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
 export default {
@@ -408,8 +409,9 @@ async function handleAdminHealth(env, cors) {
   const bindings = {
     db: dbOk,
     media: mediaOk,
-    contact_email: Boolean(env.CONTACT_EMAIL?.send),
-    contact_email_from: Boolean(env.CONTACT_EMAIL_FROM),
+    brevo_api_key: Boolean(env.BREVO_API_KEY),
+    brevo_from_email: Boolean(env.BREVO_FROM_EMAIL),
+    contact_email_to: Boolean(env.CONTACT_EMAIL_TO),
     allowed_origin: getAllowedOrigins(env).length > 0,
     admin_token: Boolean(env.CMS_ADMIN_TOKEN)
   };
@@ -431,28 +433,14 @@ function hasColumns(rows, expected) {
 }
 
 async function sendContactNotification(env, inquiry) {
-  if (!env.CONTACT_EMAIL || !env.CONTACT_EMAIL_FROM) {
-    throw new Error("Email binding or sender is not configured.");
+  if (!env.BREVO_API_KEY || !env.BREVO_FROM_EMAIL || !env.CONTACT_EMAIL_TO) {
+    throw new Error("Brevo API key, sender or recipient is not configured.");
   }
 
-  const recipient = "gudeliusvermessung@web.de";
+  const recipient = env.CONTACT_EMAIL_TO;
+  const senderName = cleanSingleLine(env.BREVO_FROM_NAME || "GudeliusVermessung", 120) || "GudeliusVermessung";
   const adminUrl = "https://gudverm.github.io/website/admin/anfragen/";
   const subject = `Neue Projektanfrage: ${inquiry.subject}`;
-
-  const text = [
-    "Neue Projektanfrage über gudeliusvermessung.de",
-    "",
-    "Name: " + inquiry.name,
-    "E-Mail: " + inquiry.email,
-    "Betreff: " + inquiry.subject,
-    "Quelle: " + inquiry.source,
-    "",
-    "Nachricht:",
-    inquiry.message,
-    "",
-    "Anfrage-ID: " + inquiry.id,
-    "Im CMS öffnen: " + adminUrl
-  ].join("\n");
 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;color:#172026">
@@ -477,14 +465,43 @@ async function sendContactNotification(env, inquiry) {
     </div>
   `;
 
-  await env.CONTACT_EMAIL.send({
-    from: env.CONTACT_EMAIL_FROM,
-    to: recipient,
-    replyTo: inquiry.email,
-    subject,
-    text,
-    html
+  const response = await fetch(BREVO_API_URL, {
+    method: "POST",
+    headers: {
+      "accept": "application/json",
+      "api-key": env.BREVO_API_KEY,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      sender: {
+        name: senderName,
+        email: env.BREVO_FROM_EMAIL
+      },
+      to: [{
+        name: "GudeliusVermessung",
+        email: recipient
+      }],
+      replyTo: {
+        name: inquiry.name,
+        email: inquiry.email
+      },
+      subject,
+      htmlContent: html,
+      tags: ["kontaktformular"]
+    })
   });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    const detail = cleanSingleLine(
+      data?.message || data?.code || ("HTTP " + response.status),
+      300
+    );
+    throw new Error("Brevo API: " + detail);
+  }
+
+  const data = await response.json().catch(() => ({}));
+  return data?.messageId || "";
 }
 
 function escapeHtml(value) {

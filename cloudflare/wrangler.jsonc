@@ -8,7 +8,9 @@
   },
   "vars": {
     "ALLOWED_ORIGIN": "https://gudverm.github.io",
-    "CONTACT_EMAIL_FROM": "website@gudeliusvermessung.de",
+    "BREVO_FROM_EMAIL": "gudeliusvermessung@web.de",
+    "BREVO_FROM_NAME": "GudeliusVermessung",
+    "CONTACT_EMAIL_TO": "gudeliusvermessung@web.de",
     "PUBLIC_MEDIA_ENABLED": "false"
   },
   "d1_databases": [
@@ -16,15 +18,6 @@
       "binding": "DB",
       "database_name": "gudelius-cms-db",
       "database_id": "7942d0c3-e587-4b61-8bc7-6f9b3b8d1029"
-    }
-  ],
-  "send_email": [
-    {
-      "name": "CONTACT_EMAIL",
-      "destination_address": "gudeliusvermessung@web.de",
-      "allowed_sender_addresses": [
-        "website@gudeliusvermessung.de"
-      ]
     }
   ],
   "r2_buckets": [
