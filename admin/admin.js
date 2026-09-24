@@ -2499,7 +2499,8 @@ const analyticsPageNames={
   "/leistungen/gis-bauvermessung/":"GIS & Bauvermessung",
   "/leistungen/3d-laserscanning/":"3D-Laserscanning",
   "/leistungen/drohnenvermessung/":"Drohnenvermessung",
-  "/impressum/":"Impressum"
+  "/impressum/":"Impressum",
+  "/datenschutz/":"Datenschutz"
 };
 const analyticsServiceNames={
   "ingenieurvermessung":"Ingenieurvermessung",

@@ -1,5 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
+  let cmsSiteContentPromise=null;
+
+  async function loadCmsSiteContent(){
+    if(!cmsApi) return null;
+    if(!cmsSiteContentPromise){
+      cmsSiteContentPromise=fetch(cmsApi+"/api/site")
+        .then(async response=>{
+          if(!response.ok) throw new Error("HTTP "+response.status);
+          const data=await response.json();
+          return data.content||{};
+        })
+        .catch(error=>{
+          cmsSiteContentPromise=null;
+          throw error;
+        });
+    }
+    return cmsSiteContentPromise;
+  }
 
 
   function normalizeAnalyticsPath(pathname=window.location.pathname){
@@ -151,13 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
   async function applyCmsText(root = document) {
     if (!cmsApi) return;
     const elements = [...root.querySelectorAll("[data-cms-text]")];
-    if (!elements.length) return;
+    const hasCmsContent=elements.length||root.querySelector("[data-cms-list],[data-cms-timeline],[data-cms-link],[data-cms-placeholder],[data-cms-value]");
+    if (!hasCmsContent) return;
 
     try {
-      const response = await fetch(cmsApi + "/api/site");
-      if (!response.ok) return;
-      const data = await response.json();
-      const content = data.content || {};
+      const content = await loadCmsSiteContent();
+      if(!content) return;
 
       root.querySelectorAll("[data-cms-list]").forEach((container)=>{
         const items=content[container.dataset.cmsList];if(!Array.isArray(items))return;
@@ -306,8 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
       image:card.querySelector('img')?.getAttribute('src')||''
     }));
     try{
-      const response=await fetch(cmsApi+'/api/site');if(!response.ok)return;
-      const data=await response.json(),content=data.content||{},manifest=content['projekte/index'];
+      const content=await loadCmsSiteContent();if(!content)return;
+      const manifest=content['projekte/index'];
       if(!Array.isArray(manifest))return;
       const fallbackMap=new Map(fallbackCards.map(item=>[item.slug,item]));
       const items=manifest.filter(entry=>entry&&typeof entry.slug==='string'&&entry.visible!==false&&entry.archived!==true)
@@ -399,8 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadDynamicTechnique(){
     if(!cmsApi||!document.querySelector('.equip-open[data-equipment]'))return;
     try{
-      const response=await fetch(cmsApi+'/api/site');if(!response.ok)return;
-      const data=await response.json(),content=data.content||{},manifest=content['technik/index'];
+      const content=await loadCmsSiteContent();if(!content)return;
+      const manifest=content['technik/index'];
       if(!Array.isArray(manifest))return;
       const grouped={aussendienst:[],digital:[],software:[]};
       manifest.filter(entry=>entry&&typeof entry.slug==='string'&&entry.visible!==false&&entry.archived!==true)
