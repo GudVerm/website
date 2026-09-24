@@ -1534,3 +1534,75 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
     padding:9px;
   }
 }
+
+
+/* Kanban: obere horizontale Scrollleiste und Greif-Scroll */
+.inquiry-kanban-scrollbar-wrap{
+  display:grid;
+  gap:5px;
+  margin:2px 0 10px;
+}
+.inquiry-kanban-scrollbar-wrap[hidden]{
+  display:none;
+}
+.inquiry-kanban-scrollbar-wrap > span{
+  color:var(--muted);
+  font-size:.68rem;
+  font-weight:850;
+}
+.inquiry-kanban-scrollbar{
+  width:100%;
+  height:18px;
+  overflow-x:scroll;
+  overflow-y:hidden;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#f3f4f1;
+  scrollbar-color:#8d9993 #ecefeb;
+  scrollbar-width:auto;
+}
+.inquiry-kanban-scrollbar-track{
+  height:1px;
+  min-width:100%;
+}
+.inquiry-kanban-scrollbar::-webkit-scrollbar{
+  height:14px;
+}
+.inquiry-kanban-scrollbar::-webkit-scrollbar-track{
+  background:#ecefeb;
+  border-radius:999px;
+}
+.inquiry-kanban-scrollbar::-webkit-scrollbar-thumb{
+  background:#8d9993;
+  border:3px solid #ecefeb;
+  border-radius:999px;
+}
+.inquiry-kanban-scrollbar::-webkit-scrollbar-thumb:hover{
+  background:#66736d;
+}
+.inquiry-kanban{
+  cursor:grab;
+  overscroll-behavior-inline:contain;
+}
+.inquiry-kanban.is-panning{
+  cursor:grabbing;
+  user-select:none;
+  scroll-snap-type:none;
+}
+.inquiry-kanban:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--accent) 42%,transparent);
+  outline-offset:3px;
+}
+.inquiry-kanban-card{
+  cursor:grab;
+}
+
+@media(max-width:900px){
+  .inquiry-kanban-scrollbar-wrap{
+    position:sticky;
+    top:154px;
+    z-index:4;
+    padding:7px 0 3px;
+    background:linear-gradient(#fff 70%,rgba(255,255,255,0));
+  }
+}
