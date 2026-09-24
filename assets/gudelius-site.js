@@ -678,10 +678,10 @@ document.addEventListener('DOMContentLoaded', () => {
     equipmentKicker.textContent=group.kicker;
     equipmentTitle.textContent=device.name;
     equipmentLead.textContent=device.description||'';
-    equipmentSummary.textContent=device.details||group.summary||'';
+    equipmentSummary.textContent=group.summary||device.details||'';
     equipmentTitle.dataset.cmsText=cmsBase+'/name';
     equipmentLead.dataset.cmsText=cmsBase+'/description';
-    equipmentSummary.dataset.cmsText=cmsBase+'/details';
+    delete equipmentSummary.dataset.cmsText;
 
     equipmentGallery.innerHTML=`
       <article class="equipment-device-card equipment-device-card-single" data-technique="${escapeEquipmentHtml(device.slug)}">
