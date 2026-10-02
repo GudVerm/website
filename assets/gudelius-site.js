@@ -540,6 +540,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const equipmentLead = document.getElementById('equipmentModalLead');
   const equipmentSummary = document.getElementById('equipmentModalSummary');
   const equipmentGallery = document.getElementById('equipmentModalGallery');
+  const equipmentPrevDevice = document.getElementById('equipmentPrevDevice');
+  const equipmentNextDevice = document.getElementById('equipmentNextDevice');
+  const equipmentModalPosition = document.getElementById('equipmentModalPosition');
 
   const equipmentData = {
     aussendienst: {
@@ -548,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lead: 'Die Außendienst-Ausstattung verbindet klassische Vermessung mit moderner digitaler Datenerfassung für präzise Ergebnisse direkt im Projekt.',
       summary: 'Die Geräte sind auf unterschiedliche Aufgaben von Absteckung und Bestandsaufnahme bis zur 3D-Erfassung abgestimmt.',
       devices: [
-        { slug:'trimble-sx12', name:'Trimble SX12', category:'Scanning-Totalstation', manufacturer:'Trimble', model:'SX12', description:'Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.', details:'Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.', image:'assets/media/2026-10-02-technik-sx12.webp', mediaKey:'equipment/trimble-sx12', source:'https://geospatial.trimble.com/de/products/hardware/trimble-sx12', sourceLabel:'Trimble' },
+        { slug:'trimble-sx12', name:'Trimble SX12', category:'Scanning-Totalstation', manufacturer:'Trimble', model:'SX12', description:'Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.', details:'Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.', image:'assets/media/2026-10-02-technik-sx12.webp', mediaKey:'equipment/trimble-sx12', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' },
         { slug:'trimble-s6', name:'Trimble S6', category:'Robotik-Totalstation', manufacturer:'Trimble', model:'S6', description:'Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.', details:'Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.', image:'assets/equipment-trimble-s6.svg', mediaKey:'equipment/trimble-s6', source:'https://help.fieldsystems.trimble.com/trimble-access/latest/de/equipment-supported.htm', sourceLabel:'Trimble · S6 Support' },
         { slug:'trimble-r2', name:'Trimble R2 GNSS-Empfänger', category:'GNSS-Positionierung', manufacturer:'Trimble', model:'R2', description:'GNSS-Empfänger für präzise Positionsbestimmung bei Aufnahme und Absteckung.', details:'RTK- und GNSS-gestützte Vermessung für flexible Punktaufnahme im Projektumfeld.', image:'https://www.allnav.com/wp-content/uploads/2020/04/R2_4.jpg', mediaKey:'equipment/trimble-r2', source:'https://www.allnav.com/produkte/gnss-systeme/r2/', sourceLabel:'Trimble-Partner ALLNAV' },
         { slug:'trimble-dini07', name:'Trimble DiNi 07 Ingenieurnivellier', category:'Digitalnivellement', manufacturer:'Trimble', model:'DiNi 07', description:'Digitales Ingenieurnivellier für präzise Höhenmessungen und Höhenübertragungen.', details:'Geeignet für Nivellements, Kontrollmessungen und die nachvollziehbare Bestimmung von Höhenunterschieden.', image:'https://images.ctfassets.net/1nvkn1423yot/64MgxNSI4ha3AwrJajbI1D/bc2639be1307bec5571be1197bd07a1b/geo-dinilevel-productpage-fullbackgroundproducthero-800x960.png', mediaKey:'equipment/trimble-dini07', source:'https://geospatial.trimble.com/de/products/hardware/trimble-dini-level', sourceLabel:'Trimble' }
@@ -560,10 +563,10 @@ document.addEventListener('DOMContentLoaded', () => {
       lead: 'Laserscanning, RTK-Drohne, Wärmebild und photogrammetrische Auswertung bilden den digitalen Technikblock.',
       summary: '3D-Laserscanning, RTK-Drohne und photogrammetrische Auswertung ergänzen die klassische Vermessung um flächenhafte und digitale Datenerfassung.',
       devices: [
-        { slug:'trimble-tx8', name:'Trimble TX8 3D-Laserscanner', category:'Terrestrisches 3D-Laserscanning', manufacturer:'Trimble', model:'TX8', description:'Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.', details:'Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.', image:'assets/media/2026-10-02-technik-tx8.webp', mediaKey:'equipment/trimble-tx8', source:'https://geospatial.trimble.com/de/support/discontinued-products-technical-support', sourceLabel:'Trimble · TX8 Support' },
-        { slug:'rtk-drohne', name:'RTK-Drohne', category:'Vermessung & Orthophoto', manufacturer:'DJI Enterprise', model:'RTK-Drohne', description:'RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.', details:'Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.', image:'assets/media/2026-10-02-technik-rtk-drohne.webp', mediaKey:'equipment/rtk-drohne', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise' },
+        { slug:'trimble-tx8', name:'Trimble TX8 3D-Laserscanner', category:'Terrestrisches 3D-Laserscanning', manufacturer:'Trimble', model:'TX8', description:'Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.', details:'Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.', image:'assets/media/2026-10-02-technik-tx8.webp', mediaKey:'equipment/trimble-tx8', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' },
+        { slug:'rtk-drohne', name:'RTK-Drohne', category:'Vermessung & Orthophoto', manufacturer:'DJI Enterprise', model:'RTK-Drohne', description:'RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.', details:'Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.', image:'assets/media/2026-10-02-technik-digital.webp', mediaKey:'equipment/rtk-drohne', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' },
         { slug:'infrarotkamera', name:'RTK-Drohne mit Infrarotkamera', category:'Thermische Bildaufnahme', manufacturer:'DJI Enterprise', model:'RTK-Drohne mit Infrarotkamera', description:'Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.', details:'Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.', image:'https://www1.djicdn.com/cms/uploads/6a4fe5870d86bb43d58dcc1f364895da.png', mediaKey:'equipment/infrarotkamera', source:'https://enterprise.dji.com/news/detail/matrice-4-series-release', sourceLabel:'DJI Enterprise' },
-        { slug:'photogrammetrie', name:'Punktwolken & Photogrammetrie', category:'Workflow / Ergebnisdarstellung', manufacturer:'–', model:'Punktwolken & Photogrammetrie', description:'Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.', details:'Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.', image:'assets/media/2026-10-02-technik-photogrammetrie.webp', mediaKey:'equipment/photogrammetrie', source:'https://www.agisoft.com/', sourceLabel:'Agisoft' }
+        { slug:'photogrammetrie', name:'Punktwolken & Photogrammetrie', category:'Workflow / Ergebnisdarstellung', manufacturer:'–', model:'Punktwolken & Photogrammetrie', description:'Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.', details:'Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.', image:'assets/media/2026-10-02-technik-photogrammetrie.webp', mediaKey:'equipment/photogrammetrie', source:'https://www.gudeliusvermessung.de/', sourceLabel:'GudeliusVermessung' }
       ]
     },
     software: {
@@ -666,6 +669,45 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
+  function equipmentModalSequence(){
+    return Object.values(equipmentData).flatMap(group=>group.devices||[]).filter(device=>device&&device.slug);
+  }
+
+  function updateEquipmentModalNav(slug){
+    const devices=equipmentModalSequence();
+    const index=devices.findIndex(device=>device.slug===slug);
+    const hasMany=devices.length>1&&index>=0;
+    if(equipmentPrevDevice){
+      equipmentPrevDevice.disabled=!hasMany;
+      if(hasMany){
+        const prev=devices[(index-1+devices.length)%devices.length];
+        equipmentPrevDevice.setAttribute('aria-label','Vorheriges Gerät: '+prev.name);
+        equipmentPrevDevice.title=prev.name;
+      }
+    }
+    if(equipmentNextDevice){
+      equipmentNextDevice.disabled=!hasMany;
+      if(hasMany){
+        const next=devices[(index+1)%devices.length];
+        equipmentNextDevice.setAttribute('aria-label','Nächstes Gerät: '+next.name);
+        equipmentNextDevice.title=next.name;
+      }
+    }
+    if(equipmentModalPosition){
+      equipmentModalPosition.textContent=index>=0?(index+1)+' / '+devices.length:'';
+    }
+  }
+
+  function moveEquipmentModal(step){
+    const devices=equipmentModalSequence();
+    if(devices.length<2)return;
+    const current=equipmentModal?.dataset.device||'';
+    const index=devices.findIndex(device=>device.slug===current);
+    if(index<0)return;
+    const nextIndex=(index+step+devices.length)%devices.length;
+    openEquipmentModal(devices[nextIndex].slug);
+  }
+
   let equipmentModalPreviousFocus=null;
 
   function openEquipmentModal(slug) {
@@ -703,12 +745,14 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCmsMedia(equipmentGallery);
     sendAnalyticsEvent('equipment_open',device.slug,device.name||device.slug);
 
-    equipmentModalPreviousFocus=document.activeElement;
+    const modalWasOpen=equipmentModal.classList.contains('open');
+    if(!modalWasOpen) equipmentModalPreviousFocus=document.activeElement;
     equipmentModal.dataset.device=device.slug;
+    updateEquipmentModalNav(device.slug);
     equipmentModal.classList.add('open');
     equipmentModal.setAttribute('aria-hidden','false');
     document.body.classList.add('modal-open');
-    equipmentClose?.focus();
+    if(!modalWasOpen) equipmentClose?.focus();
   }
 
   function closeEquipmentModal() {
@@ -733,6 +777,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadDynamicTechnique();
 
   if (equipmentClose) equipmentClose.addEventListener('click', closeEquipmentModal);
+  if (equipmentPrevDevice) equipmentPrevDevice.addEventListener('click',()=>moveEquipmentModal(-1));
+  if (equipmentNextDevice) equipmentNextDevice.addEventListener('click',()=>moveEquipmentModal(1));
 
   if (equipmentModal) {
     equipmentModal.addEventListener('click', (event) => {
@@ -741,7 +787,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && equipmentModal?.classList.contains('open')) closeEquipmentModal();
+    if (!equipmentModal?.classList.contains('open')) return;
+    if (event.key === 'Escape') {
+      closeEquipmentModal();
+      return;
+    }
+    if (event.target?.matches?.('input,textarea,select')) return;
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      moveEquipmentModal(-1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      moveEquipmentModal(1);
+    }
   });
 });
 

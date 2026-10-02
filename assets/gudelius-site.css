@@ -1032,3 +1032,77 @@ body.modal-open{overflow:hidden}
     padding:24px;
   }
 }
+
+
+/* Technik 02.10.2026: eigene Fotos klarer zuschneiden und Modal-Navigation */
+.equip-card>img[src*="2026-10-02-"]{
+  object-fit:cover;
+  padding:0;
+  background:#eef0ec;
+}
+.equip-preview-trigger img[src*="2026-10-02-"],
+.equip-preview-strip img[src*="2026-10-02-"]{
+  object-fit:cover;
+  padding:0;
+  background:#eef0ec;
+}
+.equipment-device-card-single>img[src*="2026-10-02-"]{
+  object-fit:cover;
+  padding:0;
+  background:#eef0ec;
+}
+.equipment-device-card-single>img[src*="technik-sx12"]{object-position:center 42%}
+.equipment-device-card-single>img[src*="technik-tx8"]{object-position:center 30%}
+.equipment-device-card-single>img[src*="technik-digital"]{object-position:center 42%}
+.equipment-device-card-single>img[src*="technik-photogrammetrie"]{object-position:center}
+.equipment-device-card-single>img[src*="technik-mobiler-arbeitsplatz"]{object-position:center}
+.equip-card>img[src*="technik-aussendienst"]{object-position:center 45%}
+.equip-card>img[src*="technik-digital"]{object-position:center 42%}
+.equip-card>img[src*="technik-software"]{object-position:center 48%}
+
+.equipment-modal-nav{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+  gap:12px;
+  margin-top:16px;
+}
+.equipment-modal-nav-button{
+  min-height:44px;
+  padding:10px 14px;
+  border:1px solid #d4dad6;
+  border-radius:12px;
+  background:#fff;
+  color:#172026;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:850;
+  cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.equipment-modal-nav-button:first-child{text-align:left}
+.equipment-modal-nav-button:last-child{text-align:right}
+.equipment-modal-nav-button:hover{
+  transform:translateY(-1px);
+  border-color:#c5aa28;
+  background:#fff9dc;
+}
+.equipment-modal-nav-button:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);
+  outline-offset:2px;
+}
+.equipment-modal-nav-button:disabled{opacity:.45;cursor:default;transform:none}
+.equipment-modal-position{
+  min-width:58px;
+  text-align:center;
+  color:#7b868b;
+  font-size:.72rem;
+  font-weight:850;
+}
+@media(max-width:520px){
+  .equipment-modal-nav{grid-template-columns:1fr 1fr}
+  .equipment-modal-position{grid-column:1/-1;grid-row:1;text-align:center}
+  .equipment-modal-nav-button:first-child{grid-column:1;grid-row:2}
+  .equipment-modal-nav-button:last-child{grid-column:2;grid-row:2}
+  .equipment-modal-nav-button{font-size:.72rem;padding:9px 10px}
+}
