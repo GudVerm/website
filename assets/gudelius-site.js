@@ -132,46 +132,94 @@ document.addEventListener('DOMContentLoaded', () => {
     return cmsApi + "/media/" + key.split("/").map(encodeURIComponent).join("/");
   }
 
-  function applyCmsMedia(root = document) {
-    if (!cmsApi || !cmsMediaEnabled) return;
+  function normalizeCmsMediaLayout(value){
+    const source=value&&typeof value==="object"?value:{};
+    const clamp=(number,min,max,fallback)=>{
+      const parsed=Number(number);
+      return Number.isFinite(parsed)?Math.min(max,Math.max(min,parsed)):fallback;
+    };
+    return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,100,240,100)};
+  }
+  function cmsMediaLayout(content,key){return normalizeCmsMediaLayout(content?.["media-layout/"+key])}
+  function applyCmsImageLayout(img,layout){
+    if(!img)return;
+    const value=normalizeCmsMediaLayout(layout);
+    img.style.objectFit="cover";
+    img.style.objectPosition=value.x+"% "+value.y+"%";
+    img.style.transformOrigin=value.x+"% "+value.y+"%";
+    img.style.transform="scale("+(value.zoom/100)+")";
+  }
+  function applyCmsBackgroundLayout(element,layout){
+    const value=normalizeCmsMediaLayout(layout);
+    const position=value.x+"% "+value.y+"%";
+    if(element.classList.contains("service-hero")){
+      element.style.setProperty("--cms-media-position",position);
+      element.style.setProperty("--cms-media-origin",position);
+      element.style.setProperty("--cms-media-scale",String(value.zoom/100));
+    }else{
+      element.style.backgroundPosition=position;
+      element.style.transformOrigin=position;
+      element.style.transform="scale("+(value.zoom/100)+")";
+    }
+  }
+
+  async function applyCmsMedia(root = document) {
+    if (!cmsApi) return;
+    let content={};
+    try{content=await loadCmsSiteContent()||{}}catch{}
+
     root.querySelectorAll("img[data-cms-media]").forEach((img) => {
-      if (img.dataset.cmsApplied === "1") return;
-      const fallback = img.currentSrc || img.src;
-      img.dataset.cmsApplied = "1";
-      img.addEventListener("error", function restoreFallback() {
-        img.removeEventListener("error", restoreFallback);
-        img.src = fallback;
+      const key=img.dataset.cmsMedia||"";
+      if(!key)return;
+      applyCmsImageLayout(img,cmsMediaLayout(content,key));
+      if(!cmsMediaEnabled||img.dataset.cmsApplied==="1")return;
+      const fallback=img.currentSrc||img.src;
+      img.dataset.cmsApplied="1";
+      img.addEventListener("error",function restoreFallback(){
+        img.removeEventListener("error",restoreFallback);
+        img.src=fallback;
       });
-      img.src = cmsMediaUrl(img.dataset.cmsMedia);
+      img.src=cmsMediaUrl(key);
     });
 
     root.querySelectorAll("[data-cms-bg]").forEach((element) => {
-      if (element.dataset.cmsApplied === "1") return;
-      element.dataset.cmsApplied = "1";
-      const image = new Image();
-      image.onload = () => {
-        const url = cmsMediaUrl(element.dataset.cmsBg);
-        if (element.classList.contains("hero")) {
-          const heroImage = element.querySelector(".hero-background");
-          if (heroImage) {
-            const fallback = heroImage.currentSrc || heroImage.src;
-            heroImage.onerror = () => {
-              heroImage.onerror = null;
-              heroImage.src = fallback;
-            };
-            heroImage.src = url;
-          } else {
-            element.style.setProperty("--hero-image", `url("${url}")`);
+      const key=element.dataset.cmsBg||"";
+      if(!key)return;
+      const layout=cmsMediaLayout(content,key);
+
+      if(element.classList.contains("hero")){
+        const heroImage=element.querySelector(".hero-background");
+        if(heroImage)applyCmsImageLayout(heroImage,layout);
+      }else{
+        applyCmsBackgroundLayout(element,layout);
+      }
+
+      if(!cmsMediaEnabled||element.dataset.cmsApplied==="1")return;
+      element.dataset.cmsApplied="1";
+      const url=cmsMediaUrl(key);
+      const image=new Image();
+      image.onload=()=>{
+        if(element.classList.contains("hero")){
+          const heroImage=element.querySelector(".hero-background");
+          if(heroImage){
+            const fallback=heroImage.currentSrc||heroImage.src;
+            heroImage.onerror=()=>{heroImage.onerror=null;heroImage.src=fallback};
+            heroImage.src=url;
+            applyCmsImageLayout(heroImage,layout);
+          }else{
+            element.style.setProperty("--hero-image",`url("${url}")`);
           }
-        } else if (element.classList.contains("service-hero")) {
-          element.style.setProperty("--service-image", `url("${url}")`);
-        } else {
-          element.style.backgroundImage = `url("${url}")`;
+        }else if(element.classList.contains("service-hero")){
+          element.style.setProperty("--service-image",`url("${url}")`);
+          applyCmsBackgroundLayout(element,layout);
+        }else{
+          element.style.backgroundImage=`url("${url}")`;
           element.removeAttribute("data-bg");
           element.classList.remove("lazy-bg");
+          applyCmsBackgroundLayout(element,layout);
         }
       };
-      image.src = cmsMediaUrl(element.dataset.cmsBg);
+      image.src=url;
     });
   }
 

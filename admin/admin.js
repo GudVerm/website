@@ -6,59 +6,59 @@ if (window.GUDELIUS_LEGACY_ADMIN_DISABLED === true && window.GUDELIUS_ADMIN_APP_
 }
 
 const defaultEquipment = [
-  { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/equipment-trimble-sx12-light.svg" },
+  { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/media/2026-10-02-technik-sx12.webp" },
   { slug:"trimble-s6", group:"Außendienst", key:"equipment/trimble-s6", name:"Trimble S6", category:"Robotik-Totalstation", detail:"Robotik-Totalstation", manufacturer:"Trimble", model:"S6", description:"Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.", details:"Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.", fallback:"../assets/equipment-trimble-s6.svg" },
   { slug:"trimble-r2", group:"Außendienst", key:"equipment/trimble-r2", name:"Trimble R2 GNSS-Empfänger", category:"GNSS-Positionierung", detail:"GNSS-Positionierung", manufacturer:"Trimble", model:"R2", description:"GNSS-Empfänger für präzise Positionsbestimmung bei Aufnahme und Absteckung.", details:"RTK- und GNSS-gestützte Vermessung für flexible Punktaufnahme im Projektumfeld.", fallback:"../assets/equipment-trimble-r2.svg" },
   { slug:"trimble-dini07", group:"Außendienst", key:"equipment/trimble-dini07", name:"Trimble DiNi 07 Ingenieurnivellier", category:"Digitalnivellement", detail:"Digitalnivellement", manufacturer:"Trimble", model:"DiNi 07", description:"Digitales Ingenieurnivellier für präzise Höhenmessungen und Höhenübertragungen.", details:"Geeignet für Nivellements, Kontrollmessungen und die nachvollziehbare Bestimmung von Höhenunterschieden.", fallback:"../assets/equipment-trimble-dini07.svg" },
-  { slug:"trimble-tx8", group:"3D & Drohne", key:"equipment/trimble-tx8", name:"Trimble TX8 3D-Laserscanner", category:"Terrestrisches 3D-Laserscanning", detail:"Terrestrisches 3D-Laserscanning", manufacturer:"Trimble", model:"TX8", description:"Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.", details:"Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.", fallback:"../assets/equipment-trimble-tx8.svg" },
-  { slug:"rtk-drohne", group:"3D & Drohne", key:"equipment/rtk-drohne", name:"RTK-Drohne", category:"Vermessung & Orthophoto", detail:"Vermessung & Orthophoto", manufacturer:"DJI Enterprise", model:"RTK-Drohne", description:"RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.", details:"Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.", fallback:"../assets/equipment-rtk-drohne-light.svg" },
+  { slug:"trimble-tx8", group:"3D & Drohne", key:"equipment/trimble-tx8", name:"Trimble TX8 3D-Laserscanner", category:"Terrestrisches 3D-Laserscanning", detail:"Terrestrisches 3D-Laserscanning", manufacturer:"Trimble", model:"TX8", description:"Terrestrischer 3D-Laserscanner für flächenhafte Bestands- und Gebäudedokumentation.", details:"Erzeugt dichte Punktwolken als Grundlage für Bestandspläne, 3D-Auswertung und Dokumentation.", fallback:"../assets/media/2026-10-02-technik-tx8.webp" },
+  { slug:"rtk-drohne", group:"3D & Drohne", key:"equipment/rtk-drohne", name:"RTK-Drohne", category:"Vermessung & Orthophoto", detail:"Vermessung & Orthophoto", manufacturer:"DJI Enterprise", model:"RTK-Drohne", description:"RTK-gestützte Drohne für großflächige Vermessung, Luftbilder und Orthophotos.", details:"Für Geländeaufnahme, Dokumentation und photogrammetrische Auswertung aus der Luft.", fallback:"../assets/media/2026-10-02-technik-digital.webp" },
   { slug:"infrarotkamera", group:"3D & Drohne", key:"equipment/infrarotkamera", name:"RTK-Drohne mit Infrarotkamera", category:"Thermische Bildaufnahme", detail:"Thermische Bildaufnahme", manufacturer:"DJI Enterprise", model:"RTK-Drohne mit Infrarotkamera", description:"Drohnenbasierte Wärmebildaufnahme zur ergänzenden visuellen und thermischen Dokumentation.", details:"Verbindet RTK-gestützte Befliegung mit Infrarotaufnahmen für projektbezogene Inspektionsaufgaben.", fallback:"../assets/equipment-infrarotkamera.svg" },
-  { slug:"photogrammetrie", group:"3D & Drohne", key:"equipment/photogrammetrie", name:"Punktwolken & Photogrammetrie", category:"Workflow / Ergebnisdarstellung", detail:"Workflow / Ergebnisdarstellung", manufacturer:"–", model:"Punktwolken & Photogrammetrie", description:"Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.", details:"Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.", fallback:"../assets/equipment-photogrammetrie.svg" },
+  { slug:"photogrammetrie", group:"3D & Drohne", key:"equipment/photogrammetrie", name:"Punktwolken & Photogrammetrie", category:"Workflow / Ergebnisdarstellung", detail:"Workflow / Ergebnisdarstellung", manufacturer:"–", model:"Punktwolken & Photogrammetrie", description:"Digitaler Workflow zur Ableitung und Aufbereitung räumlicher Daten aus Scan- und Bildmaterial.", details:"Punktwolken, Orthophotos und 3D-Auswertungen werden für Planung, Bestand und Dokumentation weiterverarbeitet.", fallback:"../assets/media/2026-10-02-technik-photogrammetrie.webp" },
   { slug:"bricscad", group:"Programme & Arbeitsplatz", key:"equipment/bricscad", name:"BricsCAD", category:"CAD-Bearbeitung", detail:"CAD-Bearbeitung", manufacturer:"Bricsys", model:"BricsCAD", description:"CAD-Software für die zeichnerische Aufbereitung und Weiterbearbeitung von Vermessungsdaten.", details:"Für 2D-/3D-CAD, Bestandspläne und projektbezogene Planbearbeitung.", fallback:"../assets/equipment-bricscad.svg" },
   { slug:"bbsoft", group:"Programme & Arbeitsplatz", key:"equipment/bbsoft", name:"BBSOFT", category:"Tiefbau, Vermessung & DGM", detail:"Tiefbau, Vermessung & DGM", manufacturer:"BBSOFT", model:"BBSOFT", description:"Fachsoftware für vermessungsnahe Tiefbauplanung, Geländemodelle und Massenermittlung.", details:"Unterstützt die Bearbeitung von Vermessungsdaten, DGM und projektbezogenen Tiefbauaufgaben.", fallback:"../assets/equipment-bbsoft-light.svg" },
   { slug:"realworks", group:"Programme & Arbeitsplatz", key:"equipment/realworks", name:"Trimble RealWorks", category:"Punktwolken-Auswertung", detail:"Punktwolken-Auswertung", manufacturer:"Trimble", model:"RealWorks", description:"Software zur Registrierung, Auswertung und Aufbereitung terrestrischer Punktwolken.", details:"Für Scanregistrierung, Punktwolkenanalyse und die Ableitung weiterverwendbarer 2D-/3D-Ergebnisse.", fallback:"../assets/equipment-realworks.svg" },
   { slug:"metashape", group:"Programme & Arbeitsplatz", key:"equipment/metashape", name:"Agisoft Metashape", category:"Photogrammetrie", detail:"Photogrammetrie", manufacturer:"Agisoft", model:"Metashape", description:"Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.", details:"Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.", fallback:"../assets/equipment-metashape.svg" },
-  { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" }
+  { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"../assets/media/2026-10-02-technik-mobiler-arbeitsplatz.webp" }
 ];
 let equipment=defaultEquipment.map((item,index)=>({...item,order:index+1,visible:true,archived:false}));
 
 const defaultProjects = [
-  { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
-  { slug:"3d-laserscanning", key:"projects/3d-laserscanning", title:"3D-Laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["3d-laserscanning"], fallback:"../assets/media/3d-laserscanning.png" },
-  { slug:"rtk-drohnenvermessung", key:"projects/rtk-drohnenvermessung", title:"RTK-Drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["drohnenvermessung"], fallback:"../assets/media/drohnenvermessung.jpg" },
-  { slug:"gelaende-gewaesser", key:"projects/gelaende-gewaesser", title:"Gelände & Gewässer", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["gis-bauvermessung"], fallback:"../assets/media/gelaende-gewaesser.png" },
-  { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
-  { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/bestand-planung.jpg" }
+  { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/2026-10-02-projekt-ingenieur.webp" },
+  { slug:"3d-laserscanning", key:"projects/3d-laserscanning", title:"3D-Laserscanning", name:"3D-Laserscanning", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["3d-laserscanning"], fallback:"../assets/media/2026-10-02-projekt-3d.webp" },
+  { slug:"rtk-drohnenvermessung", key:"projects/rtk-drohnenvermessung", title:"RTK-Drohnenvermessung", name:"RTK-Drohnenvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["drohnenvermessung"], fallback:"../assets/media/2026-10-02-projekt-drohne.webp" },
+  { slug:"gelaende-gewaesser", key:"projects/gelaende-gewaesser", title:"Gelände & Gewässer", name:"Gelände & Gewässer", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["gis-bauvermessung"], fallback:"../assets/media/2026-10-02-projekt-gelaende.webp" },
+  { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"../assets/media/2026-10-02-projekt-mobil.webp" },
+  { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/2026-10-02-projekt-bestand.webp" }
 ];
 let projects=defaultProjects.map((item,index)=>({...item,order:index+1,visible:true,archived:false,featured:index===0}));
 
 const startPageImages = [
-  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/gelaende-gewaesser.png" }
+  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/home-hero.webp" }
 ];
 
 const serviceImages = [
-  { key:"leistungen/ingenieurvermessung", name:"Ingenieurvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/bestand-planung.jpg" },
-  { key:"leistungen/gis-bauvermessung", name:"GIS & Bauvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/gelaende-gewaesser.png" },
-  { key:"leistungen/3d-laserscanning", name:"3D-Laserscanning", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/3d-laserscanning.png" },
-  { key:"leistungen/drohnenvermessung", name:"Drohnenvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/drohnenvermessung.jpg" }
+  { key:"leistungen/ingenieurvermessung", name:"Ingenieurvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/home-service-ingenieur.webp" },
+  { key:"leistungen/gis-bauvermessung", name:"GIS & Bauvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/home-service-gis.webp" },
+  { key:"leistungen/3d-laserscanning", name:"3D-Laserscanning", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/home-service-3d.webp" },
+  { key:"leistungen/drohnenvermessung", name:"Drohnenvermessung", detail:"Bild der Leistungs-Kachel auf der Startseite", fallback:"../assets/media/home-service-drohne.webp" }
 ];
 
 const servicePageImages = [
-  { key:"leistungsseiten/ingenieurvermessung/hero", name:"Ingenieurvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
-  { key:"leistungsseiten/ingenieurvermessung/ergebnis-1", name:"Ingenieurvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.jpg" },
-  { key:"leistungsseiten/ingenieurvermessung/ergebnis-2", name:"Ingenieurvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
+  { key:"leistungsseiten/ingenieurvermessung/hero", name:"Ingenieurvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/2026-10-02-ingenieur-hero.webp" },
+  { key:"leistungsseiten/ingenieurvermessung/ergebnis-1", name:"Ingenieurvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-ingenieur-ergebnis-1.webp" },
+  { key:"leistungsseiten/ingenieurvermessung/ergebnis-2", name:"Ingenieurvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-ingenieur-ergebnis-2.webp" },
 
-  { key:"leistungsseiten/gis-bauvermessung/hero", name:"GIS & Bauvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/gelaende-gewaesser.png" },
-  { key:"leistungsseiten/gis-bauvermessung/ergebnis-1", name:"GIS & Bauvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/ingenieur-bauvermessung.jpg" },
-  { key:"leistungsseiten/gis-bauvermessung/ergebnis-2", name:"GIS & Bauvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
+  { key:"leistungsseiten/gis-bauvermessung/hero", name:"GIS & Bauvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/2026-10-02-gis-hero.webp" },
+  { key:"leistungsseiten/gis-bauvermessung/ergebnis-1", name:"GIS & Bauvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-gis-ergebnis-1.webp" },
+  { key:"leistungsseiten/gis-bauvermessung/ergebnis-2", name:"GIS & Bauvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-gis-ergebnis-2.webp" },
 
-  { key:"leistungsseiten/3d-laserscanning/hero", name:"3D-Laserscanning · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/3d-laserscanning.png" },
-  { key:"leistungsseiten/3d-laserscanning/ergebnis-1", name:"3D-Laserscanning · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/bestand-planung.jpg" },
-  { key:"leistungsseiten/3d-laserscanning/ergebnis-2", name:"3D-Laserscanning · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" },
+  { key:"leistungsseiten/3d-laserscanning/hero", name:"3D-Laserscanning · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/2026-10-02-3d-hero.webp" },
+  { key:"leistungsseiten/3d-laserscanning/ergebnis-1", name:"3D-Laserscanning · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-3d-ergebnis-1.webp" },
+  { key:"leistungsseiten/3d-laserscanning/ergebnis-2", name:"3D-Laserscanning · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-3d-ergebnis-2.webp" },
 
-  { key:"leistungsseiten/drohnenvermessung/hero", name:"Drohnenvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/drohnenvermessung.jpg" },
-  { key:"leistungsseiten/drohnenvermessung/ergebnis-1", name:"Drohnenvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/gelaende-gewaesser.png" },
-  { key:"leistungsseiten/drohnenvermessung/ergebnis-2", name:"Drohnenvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/mobiler-arbeitsplatz.jpg" }
+  { key:"leistungsseiten/drohnenvermessung/hero", name:"Drohnenvermessung · Hero", detail:"Großes Kopfbild der Unterseite", fallback:"../assets/media/2026-10-02-drohne-hero.webp" },
+  { key:"leistungsseiten/drohnenvermessung/ergebnis-1", name:"Drohnenvermessung · Ergebnis 1", detail:"Erstes Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-drohne-ergebnis-1.webp" },
+  { key:"leistungsseiten/drohnenvermessung/ergebnis-2", name:"Drohnenvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-drohne-ergebnis-2.webp" }
 ];
 
 const companyImages = [
@@ -378,6 +378,158 @@ const heroTextDefaults={
 
 function contentUrl(key){
   return getApi()+"/api/admin/content/"+key.split("/").map(encodeURIComponent).join("/");
+}
+
+const mediaLayoutPrefix="media-layout/";
+let mediaLayoutContentPromise=null;
+let mediaLayoutContentCache={};
+
+function mediaLayoutContentKey(mediaKey){return mediaLayoutPrefix+mediaKey}
+function clampMediaNumber(value,min,max,fallback){
+  const number=Number(value);
+  return Number.isFinite(number)?Math.min(max,Math.max(min,number)):fallback;
+}
+function normalizeMediaLayout(value){
+  const source=value&&typeof value==="object"?value:{};
+  return {
+    x:clampMediaNumber(source.x,0,100,50),
+    y:clampMediaNumber(source.y,0,100,50),
+    zoom:clampMediaNumber(source.zoom,100,240,100)
+  };
+}
+async function loadMediaLayoutContent(){
+  if(!getApi())return {};
+  if(!mediaLayoutContentPromise){
+    mediaLayoutContentPromise=fetch(getApi()+"/api/site")
+      .then(async response=>{
+        if(!response.ok)throw new Error("HTTP "+response.status);
+        const data=await response.json();
+        mediaLayoutContentCache=data.content||{};
+        return mediaLayoutContentCache;
+      })
+      .catch(error=>{mediaLayoutContentPromise=null;throw error});
+  }
+  return mediaLayoutContentPromise;
+}
+function applyAdminMediaLayout(img,layout){
+  const value=normalizeMediaLayout(layout);
+  img.style.objectFit="cover";
+  img.style.objectPosition=value.x+"% "+value.y+"%";
+  img.style.transformOrigin=value.x+"% "+value.y+"%";
+  img.style.transform="scale("+(value.zoom/100)+")";
+}
+async function deleteMediaLayout(mediaKey){
+  const response=await fetch(contentUrl(mediaLayoutContentKey(mediaKey)),{method:"DELETE",headers:adminHeaders()});
+  if(!response.ok&&response.status!==404){
+    const data=await response.json().catch(()=>({}));
+    throw new Error(data.error||("HTTP "+response.status));
+  }
+  delete mediaLayoutContentCache[mediaLayoutContentKey(mediaKey)];
+}
+function attachMediaCropEditor(card,img,item,status){
+  if(!card||!img||!item?.key||card.querySelector(".media-crop-editor"))return;
+  const imageWrap=img.closest(".image-wrap");
+  const body=card.querySelector(".technik-media-body,.card-body")||card;
+  if(!imageWrap||!body)return;
+
+  imageWrap.classList.add("media-crop-stage");
+  if(item.key==="startseite/hero"||/\/hero$/.test(item.key))imageWrap.classList.add("media-crop-stage-hero");
+
+  const editor=document.createElement("div");
+  editor.className="media-crop-editor";
+  editor.innerHTML=`
+    <div class="media-crop-head">
+      <div><strong>Bild-Ausschnitt</strong><span>Bild direkt oben ziehen oder Regler verwenden.</span></div>
+      <span class="media-crop-value">50 / 50 · 100 %</span>
+    </div>
+    <label>Horizontal <input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"></label>
+    <label>Vertikal <input class="media-crop-y" type="range" min="0" max="100" step="1" value="50"></label>
+    <label>Zoom <input class="media-crop-zoom" type="range" min="100" max="240" step="5" value="100"></label>
+    <div class="media-crop-actions">
+      <button type="button" class="secondary media-crop-center">Zentrieren</button>
+      <button type="button" class="media-crop-save">Ausschnitt speichern</button>
+      <button type="button" class="secondary media-crop-reset">Zurücksetzen</button>
+    </div>
+    <div class="media-crop-status status">Ausschnitt wird geladen …</div>
+  `;
+  body.appendChild(editor);
+
+  const xInput=editor.querySelector(".media-crop-x");
+  const yInput=editor.querySelector(".media-crop-y");
+  const zoomInput=editor.querySelector(".media-crop-zoom");
+  const valueLabel=editor.querySelector(".media-crop-value");
+  const cropStatus=editor.querySelector(".media-crop-status");
+  const saveButton=editor.querySelector(".media-crop-save");
+  const resetButton=editor.querySelector(".media-crop-reset");
+  const centerButton=editor.querySelector(".media-crop-center");
+  let layout=normalizeMediaLayout(null);
+
+  function syncControls(){
+    xInput.value=String(Math.round(layout.x));
+    yInput.value=String(Math.round(layout.y));
+    zoomInput.value=String(Math.round(layout.zoom/5)*5);
+    valueLabel.textContent=Math.round(layout.x)+" / "+Math.round(layout.y)+" · "+Math.round(layout.zoom)+" %";
+    applyAdminMediaLayout(img,layout);
+  }
+  function readControls(){
+    layout=normalizeMediaLayout({x:xInput.value,y:yInput.value,zoom:zoomInput.value});
+    syncControls();
+    setStatus(cropStatus,"Nicht gespeicherte Änderung.");
+  }
+  [xInput,yInput,zoomInput].forEach(input=>input.addEventListener("input",readControls));
+
+  let dragging=false,startClientX=0,startClientY=0,startX=50,startY=50;
+  imageWrap.addEventListener("pointerdown",event=>{
+    if(event.button!==undefined&&event.button!==0)return;
+    dragging=true;startClientX=event.clientX;startClientY=event.clientY;startX=layout.x;startY=layout.y;
+    imageWrap.classList.add("is-crop-dragging");
+    imageWrap.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  });
+  imageWrap.addEventListener("pointermove",event=>{
+    if(!dragging)return;
+    const rect=imageWrap.getBoundingClientRect();
+    const factor=Math.max(1,layout.zoom/100);
+    layout=normalizeMediaLayout({
+      ...layout,
+      x:startX-((event.clientX-startClientX)/Math.max(1,rect.width))*100/factor,
+      y:startY-((event.clientY-startClientY)/Math.max(1,rect.height))*100/factor
+    });
+    syncControls();setStatus(cropStatus,"Nicht gespeicherte Änderung.");
+  });
+  const stopDrag=event=>{
+    if(!dragging)return;dragging=false;imageWrap.classList.remove("is-crop-dragging");
+    if(event?.pointerId!==undefined)imageWrap.releasePointerCapture?.(event.pointerId);
+  };
+  imageWrap.addEventListener("pointerup",stopDrag);
+  imageWrap.addEventListener("pointercancel",stopDrag);
+
+  centerButton.addEventListener("click",()=>{layout={...layout,x:50,y:50};syncControls();setStatus(cropStatus,"Zentriert · noch nicht gespeichert.")});
+  saveButton.addEventListener("click",async()=>{
+    if(!getApi()||!hasAdminAuth())return setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    saveButton.disabled=true;setStatus(cropStatus,"Speichere Ausschnitt …");
+    try{
+      const key=mediaLayoutContentKey(item.key);
+      await saveHeroText(key,normalizeMediaLayout(layout));
+      mediaLayoutContentCache[key]=normalizeMediaLayout(layout);
+      setStatus(cropStatus,"Ausschnitt gespeichert.",true);
+    }catch(error){setStatus(cropStatus,"Speichern fehlgeschlagen: "+error.message,false)}
+    finally{saveButton.disabled=false}
+  });
+  resetButton.addEventListener("click",async()=>{
+    if(!getApi()||!hasAdminAuth())return setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    resetButton.disabled=true;setStatus(cropStatus,"Setze Ausschnitt zurück …");
+    try{
+      await deleteMediaLayout(item.key);layout=normalizeMediaLayout(null);syncControls();
+      setStatus(cropStatus,"Ausschnitt auf Standard zurückgesetzt.",true);
+    }catch(error){setStatus(cropStatus,"Zurücksetzen fehlgeschlagen: "+error.message,false)}
+    finally{resetButton.disabled=false}
+  });
+
+  loadMediaLayoutContent().then(content=>{
+    layout=normalizeMediaLayout(content[mediaLayoutContentKey(item.key)]);
+    syncControls();setStatus(cropStatus,content[mediaLayoutContentKey(item.key)]?"Gespeicherter Ausschnitt geladen.":"Standard-Ausschnitt aktiv.",true);
+  }).catch(error=>{syncControls();setStatus(cropStatus,"Ausschnitt konnte nicht geladen werden: "+error.message,false)});
 }
 
 async function loadHeroTexts(){
@@ -730,6 +882,7 @@ function renderProjectEditor(item){
   visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";visibleBadge.classList.toggle("is-off",item.visible===false);archiveBadge.hidden=!item.archived;
   visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
   img.src=initialMediaSrc(item);img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  attachMediaCropEditor(card,img,item,mediaStatus);
   file.addEventListener("change",()=>{const selected=file.files?.[0];if(!selected)return;img.src=URL.createObjectURL(selected);setStatus(mediaStatus,selected.name+" ausgewählt.")});
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
@@ -2626,6 +2779,7 @@ function renderTechniqueEditor(item){
   const techniqueFallback=techniqueFallbackSrc(item);
   img.src=cmsMediaEnabled?initialMediaSrc(item):techniqueFallback; img.alt=displayName;
   img.onerror=()=>{img.onerror=null;img.src=techniqueFallback};
+  attachMediaCropEditor(card,img,item,mediaStatus);
 
   file.addEventListener("change",()=>{
     const selected=file.files?.[0]; if(!selected) return;
@@ -2894,6 +3048,7 @@ function renderCollection(target, items){
       }
     });
 
+    attachMediaCropEditor(card,img,item,status);
     target.appendChild(node);
   }
 }
