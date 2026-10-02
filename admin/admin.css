@@ -1673,3 +1673,23 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   .media-crop-actions{display:grid;grid-template-columns:1fr 1fr}
   .media-crop-actions .media-crop-save{grid-column:1/-1;grid-row:1}
 }
+
+
+/* Crop-Zoom Fix: ueberstimmt alte Technik-/Kartenregeln sicher */
+.media-crop-stage{
+  --media-crop-zoom:1;
+  --media-crop-x:50%;
+  --media-crop-y:50%;
+}
+.media-crop-stage>img,
+.media-crop-stage img{
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  object-fit:cover!important;
+  object-position:var(--media-crop-x) var(--media-crop-y)!important;
+  padding:0!important;
+  margin:0!important;
+  transform:scale(var(--media-crop-zoom))!important;
+  transform-origin:var(--media-crop-x) var(--media-crop-y)!important;
+}

@@ -413,10 +413,18 @@ async function loadMediaLayoutContent(){
 }
 function applyAdminMediaLayout(img,layout){
   const value=normalizeMediaLayout(layout);
+  const stage=img.closest(".media-crop-stage");
   img.style.objectFit="cover";
   img.style.objectPosition=value.x+"% "+value.y+"%";
   img.style.transformOrigin=value.x+"% "+value.y+"%";
-  img.style.transform="scale("+(value.zoom/100)+")";
+  img.style.padding="0";
+  if(stage){
+    stage.style.setProperty("--media-crop-zoom",String(value.zoom/100));
+    stage.style.setProperty("--media-crop-x",value.x+"%");
+    stage.style.setProperty("--media-crop-y",value.y+"%");
+  }else{
+    img.style.transform="scale("+(value.zoom/100)+")";
+  }
 }
 async function deleteMediaLayout(mediaKey){
   const response=await fetch(contentUrl(mediaLayoutContentKey(mediaKey)),{method:"DELETE",headers:adminHeaders()});
