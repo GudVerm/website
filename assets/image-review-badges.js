@@ -45,7 +45,6 @@
     if(!source||source==="none") return true;
     if(EXCLUDE_RE.test(source)) return true;
     if(element.closest(".brand")) return true;
-    if(element.closest(".equipment-modal,.project-modal")) return true;
     return false;
   }
 
@@ -92,7 +91,13 @@
   function position(){
     framePending=false;refresh();
     const vw=innerWidth,vh=innerHeight;
+    const modalOpen=document.body.classList.contains("modal-open");
     for(const [el,entry] of entries){
+      const inOpenModal=!!el.closest(".equipment-modal.open,.project-modal.open");
+      if(modalOpen&&!inOpenModal){
+        entry.badge.style.display="none";
+        continue;
+      }
       const r=el.getBoundingClientRect();
       const visible=r.width>=40&&r.height>=30&&r.bottom>0&&r.right>0&&r.top<vh&&r.left<vw;
       if(!visible){entry.badge.style.display="none";continue}
