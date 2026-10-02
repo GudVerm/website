@@ -8,7 +8,7 @@
   const style = document.createElement("style");
   style.id = "gv-image-review-style";
   style.textContent = `
-    #gv-image-review-layer{position:fixed;inset:0;z-index:2147483000;pointer-events:none;overflow:hidden}
+    #gv-image-review-layer{position:fixed;inset:0;z-index:2147483000;pointer-events:none;overflow:hidden}\n    body.modal-open #gv-image-review-layer{display:none!important}
     .gv-image-review-badge{position:fixed;display:inline-flex;align-items:center;min-height:25px;max-width:min(250px,calc(100vw - 20px));padding:5px 9px;border:1px solid rgba(255,255,255,.38);border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.22);font:800 11px/1.15 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.01em;white-space:nowrap;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
     .gv-image-review-badge.is-old{background:rgba(23,32,39,.92);color:#fff}
     .gv-image-review-badge.is-new{background:rgba(244,190,24,.97);border-color:rgba(23,32,39,.28);color:#172027}
@@ -45,6 +45,7 @@
     if(!source||source==="none") return true;
     if(EXCLUDE_RE.test(source)) return true;
     if(element.closest(".brand")) return true;
+    if(element.closest(".equipment-modal,.project-modal")) return true;
     return false;
   }
 
@@ -76,10 +77,10 @@
         entry.badge.remove();entries.delete(el);continue;
       }
       const source=sourceFor(el);
-      if(!source||source===entry.source) continue;
       if(shouldSkip(el,source)){
         entry.badge.remove();entries.delete(el);continue;
       }
+      if(!source||source===entry.source) continue;
       entry.source=source;
       const newer=isNew(source);
       entry.badge.textContent=newer?`Bild vom ${REVIEW_DATE}`:"Bisheriges Bild";
