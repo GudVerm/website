@@ -3592,6 +3592,15 @@ loadDronePageTexts();
 loadInquiries();
 
 
+const adminNavInner=document.querySelector(".admin-nav-inner");
+if(adminNavInner&&!adminNavInner.querySelector('[data-page="audit"]')){
+  const auditLink=document.createElement("a");
+  auditLink.className="admin-nav-link";
+  auditLink.dataset.page="audit";
+  auditLink.href=(document.body.dataset.adminPage==="dashboard"?"./audit/":"../audit/");
+  auditLink.textContent="Audit-Log";
+  adminNavInner.appendChild(auditLink);
+}
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
 const activeAdminPage=document.body.dataset.adminPage||"";
 
