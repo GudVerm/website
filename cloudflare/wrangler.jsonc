@@ -13,6 +13,7 @@
     "CONTACT_EMAIL_TO": "gudeliusvermessung@web.de",
     "PUBLIC_MEDIA_ENABLED": "false",
     "ADMIN_TOKEN_FALLBACK_ENABLED": "false",
+    "ADMIN_ALLOWED_EMAILS": "gudeliusvermessung@web.de,jost@gudeliusvermessung.de",
     "PUBLIC_SITE_URL": "https://gudverm.github.io/website/",
     "ADMIN_APP_URL": "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/"
   },

@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-09-24.12";
+const WORKER_RELEASE = "2026-10-03.1";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -24,6 +24,20 @@ export default {
     }
 
     try {
+      let adminPrincipal = null;
+      if (isProtectedAdminPath(requestedPathname)) {
+        adminPrincipal = await resolveAdminPrincipal(request, env, ctx);
+        if (!adminPrincipal.authorized) {
+          if (requestedPathname === "/admin" || requestedPathname.startsWith("/admin/")) {
+            return new Response("Zugriff nicht erlaubt.", {
+              status: 403,
+              headers: adminUiHeaders("text/plain; charset=utf-8")
+            });
+          }
+          return json({ error: "Forbidden" }, 403, cors);
+        }
+      }
+
       if (isLegacyAdminRoute(requestedPathname, request.method)) {
         return json({ error: "Not found" }, 404, cors);
       }
@@ -48,24 +62,15 @@ export default {
       }
 
       if (url.pathname === "/api/admin/session" && request.method === "GET") {
-        if (!isAuthorized(request, env, ctx)) {
-          return json({ error: "Unauthorized" }, 401, cors);
-        }
-
-        let email = "";
-        if (ctx?.access) {
-          try {
-            const identity = await ctx.access.getIdentity();
-            email = cleanSingleLine(identity?.email, 240);
-          } catch (error) {
-            console.error("Access identity lookup failed:", error);
-          }
+        const principal = adminPrincipal || await resolveAdminPrincipal(request, env, ctx);
+        if (!principal.authorized) {
+          return json({ error: "Forbidden" }, 403, cors);
         }
 
         return json({
           ok: true,
-          auth_mode: adminAuthMode(request, env, ctx),
-          email,
+          auth_mode: principal.mode,
+          email: principal.email,
           access_aud: ctx?.access?.aud || "",
           token_fallback_enabled: isAdminTokenFallbackEnabled(env)
         }, 200, cors);
@@ -1143,6 +1148,52 @@ function normalizeAdminRoute(pathname, method) {
     return "/api/media/" + pathname.slice("/api/admin/media/".length);
   }
   return pathname;
+}
+
+function isProtectedAdminPath(pathname) {
+  return pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
+}
+
+function allowedAdminEmails(env) {
+  return [...new Set(
+    String(env.ADMIN_ALLOWED_EMAILS || "")
+      .split(",")
+      .map(value => value.trim().toLowerCase())
+      .filter(Boolean)
+  )];
+}
+
+async function accessIdentityEmail(ctx) {
+  if (!ctx?.access) return "";
+  try {
+    const identity = await ctx.access.getIdentity();
+    return cleanSingleLine(identity?.email, 240).trim().toLowerCase();
+  } catch (error) {
+    console.error("Access identity lookup failed:", error);
+    return "";
+  }
+}
+
+async function resolveAdminPrincipal(request, env, ctx) {
+  if (ctx?.access) {
+    const email = await accessIdentityEmail(ctx);
+    const allowed = allowedAdminEmails(env);
+    return {
+      authorized: Boolean(email) && allowed.includes(email),
+      mode: "access",
+      email
+    };
+  }
+
+  if (
+    isAdminTokenFallbackEnabled(env) &&
+    env.CMS_ADMIN_TOKEN &&
+    request.headers.get("authorization") === `Bearer ${env.CMS_ADMIN_TOKEN}`
+  ) {
+    return { authorized: true, mode: "token", email: "" };
+  }
+
+  return { authorized: false, mode: "none", email: "" };
 }
 
 function isAdminTokenFallbackEnabled(env) {

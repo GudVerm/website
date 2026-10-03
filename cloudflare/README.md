@@ -11,6 +11,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 - **Absender:** verifizierter Brevo-Sender `gudeliusvermessung@web.de`
 - **Empfänger:** `gudeliusvermessung@web.de`
 - **Admin-Zugang:** Cloudflare Access mit One-time PIN; der technische Token-Fallback ist deaktiviert
+- **Admin-Allowlist:** zusätzlich serverseitig im Worker auf `gudeliusvermessung@web.de` und `jost@gudeliusvermessung.de` begrenzt (`ADMIN_ALLOWED_EMAILS`)
 - **Erlaubter Browser-Origin:** `ALLOWED_ORIGIN=https://gudverm.github.io`
 - **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false
 ADMIN_TOKEN_FALLBACK_ENABLED=false` bis zur bewussten Medienprüfung
@@ -46,6 +47,7 @@ BREVO_FROM_EMAIL=gudeliusvermessung@web.de
 BREVO_FROM_NAME=GudeliusVermessung
 CONTACT_EMAIL_TO=gudeliusvermessung@web.de
 PUBLIC_MEDIA_ENABLED=false
+ADMIN_ALLOWED_EMAILS=gudeliusvermessung@web.de,jost@gudeliusvermessung.de
 ```
 
 ## Kontaktformular und E-Mail
