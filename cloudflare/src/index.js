@@ -4,10 +4,10 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.4";
+const WORKER_RELEASE = "2026-10-03.5";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
+const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "audit"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -249,6 +249,10 @@ export default {
         ).bind(...values).run();
 
         if (!result.meta?.changes) return json({ error: "Anfrage nicht gefunden." }, 404, cors);
+        await writeAudit(env, adminPrincipal, "anfrage_aktualisiert", "anfragen", id, [
+          hasStatus ? "status" : "",
+          hasNote ? "interne_notiz" : ""
+        ].filter(Boolean).join(","));
         return json({ ok: true, id }, 200, cors);
       }
 
@@ -259,6 +263,12 @@ export default {
 
       if (url.pathname === "/api/admin/analytics" && request.method === "GET") {
         return handleAnalyticsAdmin(request, env, cors, url, ctx);
+      }
+
+      if (url.pathname === "/api/admin/audit" && request.method === "GET") {
+        const principal = adminPrincipal || await resolveAdminPrincipal(request, env, ctx);
+        if (!principal.authorized) return json({ error: "Forbidden" }, 403, cors);
+        return handleAdminAudit(env, cors, url);
       }
 
       if (url.pathname === "/api/admin/media" && request.method === "GET") {
@@ -335,12 +345,26 @@ export default {
                updated_at = CURRENT_TIMESTAMP`
           ).bind(key, JSON.stringify(value)).run();
 
+          await writeAudit(
+            env,
+            adminPrincipal,
+            key.startsWith("media-layout/") ? "crop_gespeichert" : "inhalt_gespeichert",
+            auditAreaFromTarget(key),
+            key
+          );
           return json({ ok: true, key }, 200, cors);
         }
 
         if (request.method === "DELETE") {
           if (!isAuthorized(request, env, ctx)) return json({ error: "Unauthorized" }, 401, cors);
           await env.DB.prepare("DELETE FROM content WHERE key = ?").bind(key).run();
+          await writeAudit(
+            env,
+            adminPrincipal,
+            key.startsWith("media-layout/") ? "crop_zurueckgesetzt" : "inhalt_geloescht",
+            auditAreaFromTarget(key),
+            key
+          );
           return json({ ok: true, key }, 200, cors);
         }
       }
@@ -395,6 +419,7 @@ export default {
             }
           });
 
+          await writeAudit(env, adminPrincipal, "bild_hochgeladen", auditAreaFromTarget(key), key, originalName);
           return json({
             ok: true,
             key,
@@ -408,6 +433,7 @@ export default {
           }
 
           await env.MEDIA.delete(key);
+          await writeAudit(env, adminPrincipal, "bild_geloescht", auditAreaFromTarget(key), key);
           return json({ ok: true, key }, 200, cors);
         }
       }
