@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const mainContent=document.querySelector("main");
+  if(mainContent){
+    if(!mainContent.id)mainContent.id="main-content";
+    if(!document.querySelector(".skip-link")){
+      const skip=document.createElement("a");
+      skip.className="skip-link";
+      skip.href="#"+mainContent.id;
+      skip.textContent="Zum Inhalt springen";
+      document.body.prepend(skip);
+    }
+  }
+
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
   const cmsMediaEnabled = window.GUDELIUS_CMS_MEDIA_ENABLED !== false;
   let cmsSiteContentPromise=null;
