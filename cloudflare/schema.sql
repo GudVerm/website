@@ -45,3 +45,21 @@ ON analytics_events(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_analytics_type_path
 ON analytics_events(event_type, page_path);
+
+
+-- Administratives Audit-Log: keine Passwörter, Tokens oder Formulardaten.
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_email TEXT NOT NULL DEFAULT '',
+  action TEXT NOT NULL,
+  area TEXT NOT NULL,
+  target TEXT NOT NULL DEFAULT '',
+  details TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created_at
+ON audit_log(created_at);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_actor_area
+ON audit_log(actor_email, area);
