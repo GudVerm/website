@@ -1,4 +1,5 @@
 /* Gudelius CMS: statische Fallback-Daten und Medienzuordnungen. */
+(() => {
 const defaultEquipment = [
   { slug:"trimble-sx12", group:"Außendienst", key:"equipment/trimble-sx12", name:"Trimble SX12", category:"Scanning-Totalstation", detail:"Scanning-Totalstation", manufacturer:"Trimble", model:"SX12", description:"Scanning-Totalstation für präzise Vermessung und 3D-Datenerfassung im Außendienst.", details:"Kombiniert klassische Totalstationsmessung mit 3D-Erfassung für Absteckung, Aufnahme und Dokumentation.", fallback:"../assets/media/2026-10-02-technik-sx12.webp" },
   { slug:"trimble-s6", group:"Außendienst", key:"equipment/trimble-s6", name:"Trimble S6", category:"Robotik-Totalstation", detail:"Robotik-Totalstation", manufacturer:"Trimble", model:"S6", description:"Robotik-Totalstation für präzise Winkel- und Streckenmessungen im Außendienst.", details:"Für Absteckung, Bestandsaufnahme und Kontrollmessungen mit motorisierter Messunterstützung.", fallback:"../assets/equipment-trimble-s6.svg" },
@@ -14,7 +15,6 @@ const defaultEquipment = [
   { slug:"metashape", group:"Programme & Arbeitsplatz", key:"equipment/metashape", name:"Agisoft Metashape", category:"Photogrammetrie", detail:"Photogrammetrie", manufacturer:"Agisoft", model:"Metashape", description:"Photogrammetrie-Software zur Verarbeitung georeferenzierter Bilddaten.", details:"Für Bildausrichtung, Punktwolken, Oberflächenmodelle und Orthophotos aus Drohnen- und Kameradaten.", fallback:"../assets/equipment-metashape.svg" },
   { slug:"mobile-arbeitsplatz", group:"Programme & Arbeitsplatz", key:"equipment/mobile-arbeitsplatz", name:"Mobiler Büroarbeitsplatz", category:"Auswertung direkt im Projektumfeld", detail:"Auswertung direkt im Projektumfeld", manufacturer:"GudeliusVermessung", model:"Mobiler Büroarbeitsplatz", description:"Mobiler Arbeitsplatz für Datenkontrolle, Auswertung und Abstimmung direkt im Projektumfeld.", details:"Ermöglicht kurze Wege zwischen Messung, Prüfung und digitaler Weiterverarbeitung vor Ort.", fallback:"../assets/media/2026-10-02-technik-mobiler-arbeitsplatz.webp" }
 ];
-let equipment=defaultEquipment.map((item,index)=>({...item,order:index+1,visible:true,archived:false}));
 
 const defaultProjects = [
   { slug:"ingenieur-bauvermessung", key:"projects/ingenieur-bauvermessung", title:"Ingenieur- & Bauvermessung", name:"Ingenieur- & Bauvermessung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/2026-10-02-projekt-ingenieur.webp" },
@@ -24,7 +24,6 @@ const defaultProjects = [
   { slug:"mobiler-einsatz", key:"projects/mobiler-einsatz", title:"Mobiler Einsatz", name:"Mobiler Einsatz", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:[], fallback:"../assets/media/2026-10-02-projekt-mobil.webp" },
   { slug:"bestand-planung", key:"projects/bestand-planung", title:"Bestand & Planung", name:"Bestand & Planung", detail:"Projektbild auf der Startseite", description:"", location:"", year:"", services:["ingenieurvermessung"], fallback:"../assets/media/2026-10-02-projekt-bestand.webp" }
 ];
-let projects=defaultProjects.map((item,index)=>({...item,order:index+1,visible:true,archived:false,featured:index===0}));
 
 const startPageImages = [
   { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/home-hero.webp" },
@@ -68,3 +67,6 @@ const techniqueGroupImages = [
   { key:"technik/gruppen/3d-drohne", name:"Technik · 3D & Drohne", detail:"Großes Gruppenbild oberhalb der 3D- und Drohnen-Geräte", fallback:"../assets/media/2026-10-02-technik-digital.webp" },
   { key:"technik/gruppen/programme-arbeitsplatz", name:"Technik · Programme & Arbeitsplatz", detail:"Großes Gruppenbild oberhalb der Software- und Arbeitsplatz-Einträge", fallback:"../assets/media/2026-10-02-technik-software.webp" }
 ];
+
+  window.GUDELIUS_ADMIN_DATA = Object.freeze({ defaultEquipment, defaultProjects, startPageImages, serviceImages, servicePageImages, companyImages, techniqueGroupImages });
+})();
