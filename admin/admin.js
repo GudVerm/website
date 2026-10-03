@@ -508,18 +508,51 @@ function attachMediaCropEditor(card,img,item,status){
     const zoom=Math.max(.25,currentLayout.zoom/100);
     const width=naturalW*cover*zoom;
     const height=naturalH*cover*zoom;
+    const radians=(normalizeAngle(currentLayout.rotation)||0)*Math.PI/180;
+    const cos=Math.abs(Math.cos(radians));
+    const sin=Math.abs(Math.sin(radians));
+    const rotatedW=Math.max(1,width*cos+height*sin);
+    const rotatedH=Math.max(1,width*sin+height*cos);
     return {
-      rect,stageW,stageH,width,height,
-      overflowX:Math.max(0,width-stageW),
-      overflowY:Math.max(0,height-stageH)
+      rect,stageW,stageH,width,height,rotatedW,rotatedH,
+      travelX:stageW-rotatedW,
+      travelY:stageH-rotatedH,
+      rotationOffsetX:(rotatedW-width)/2,
+      rotationOffsetY:(rotatedH-height)/2
     };
+  }
+
+  function visualPlacement(currentLayout=layout,metrics=measure(currentLayout)){
+    const visualLeft=metrics.travelX*(currentLayout.x/100);
+    const visualTop=metrics.travelY*(currentLayout.y/100);
+    return {
+      visualLeft,
+      visualTop,
+      elementLeft:visualLeft+metrics.rotationOffsetX,
+      elementTop:visualTop+metrics.rotationOffsetY
+    };
+  }
+
+  function keepAnchor(startLayout,startMetrics,nextLayout,nextMetrics,startPoint,currentPoint=startPoint){
+    const startPlacement=visualPlacement(startLayout,startMetrics);
+    const fractionX=(startPoint.x-startPlacement.visualLeft)/Math.max(1,startMetrics.rotatedW);
+    const fractionY=(startPoint.y-startPlacement.visualTop)/Math.max(1,startMetrics.rotatedH);
+    const nextLeft=currentPoint.x-(fractionX*nextMetrics.rotatedW);
+    const nextTop=currentPoint.y-(fractionY*nextMetrics.rotatedH);
+    const next={...nextLayout};
+    next.x=Math.abs(nextMetrics.travelX)>0.5
+      ? clampMediaNumber((nextLeft/nextMetrics.travelX)*100,0,100,50)
+      : 50;
+    next.y=Math.abs(nextMetrics.travelY)>0.5
+      ? clampMediaNumber((nextTop/nextMetrics.travelY)*100,0,100,50)
+      : 50;
+    return next;
   }
 
   function render(){
     layout=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
     const metrics=measure(layout);
-    const left=metrics.overflowX>0?-(metrics.overflowX*(layout.x/100)):(metrics.stageW-metrics.width)/2;
-    const top=metrics.overflowY>0?-(metrics.overflowY*(layout.y/100)):(metrics.stageH-metrics.height)/2;
+    const placement=visualPlacement(layout,metrics);
 
     img.style.setProperty("position","absolute","important");
     img.style.setProperty("display","block","important");
@@ -527,8 +560,8 @@ function attachMediaCropEditor(card,img,item,status){
     img.style.setProperty("height",metrics.height+"px","important");
     img.style.setProperty("max-width","none","important");
     img.style.setProperty("max-height","none","important");
-    img.style.setProperty("left",left+"px","important");
-    img.style.setProperty("top",top+"px","important");
+    img.style.setProperty("left",placement.elementLeft+"px","important");
+    img.style.setProperty("top",placement.elementTop+"px","important");
     img.style.setProperty("margin","0","important");
     img.style.setProperty("padding","0","important");
     img.style.setProperty("object-fit","fill","important");
@@ -550,11 +583,11 @@ function attachMediaCropEditor(card,img,item,status){
 
   function panBy(dx,dy,startLayout,startMetrics){
     const next={...startLayout};
-    if(startMetrics.overflowX>0.5){
-      next.x=startLayout.x-(dx/startMetrics.overflowX)*100;
+    if(Math.abs(startMetrics.travelX)>0.5){
+      next.x=startLayout.x+(dx/startMetrics.travelX)*100;
     }
-    if(startMetrics.overflowY>0.5){
-      next.y=startLayout.y-(dy/startMetrics.overflowY)*100;
+    if(Math.abs(startMetrics.travelY)>0.5){
+      next.y=startLayout.y+(dy/startMetrics.travelY)*100;
     }
     next.x=clampMediaNumber(next.x,0,100,50);
     next.y=clampMediaNumber(next.y,0,100,50);
@@ -567,14 +600,22 @@ function attachMediaCropEditor(card,img,item,status){
     const rect=imageWrap.getBoundingClientRect();
     const center={x:rect.left+rect.width/2,y:rect.top+rect.height/2};
     const p=pointerPoint(event);
+    const startLayout={...layout};
+    const startMetrics=measure(startLayout);
+    const startPlacement=visualPlacement(startLayout,startMetrics);
+    const imageCenter={
+      x:startPlacement.visualLeft+startMetrics.rotatedW/2,
+      y:startPlacement.visualTop+startMetrics.rotatedH/2
+    };
     handleState={
       type,
       pointerId:event.pointerId,
       center,
       startDistance:Math.max(8,pointDistance(center,p)),
       startAngle:pointAngle(center,p),
-      startZoom:layout.zoom,
-      startRotation:layout.rotation
+      startLayout,
+      startMetrics,
+      imageCenter
     };
     event.currentTarget.setPointerCapture?.(event.pointerId);
     imageWrap.classList.add(type==="zoom"?"is-crop-zooming":"is-crop-rotating");
@@ -583,13 +624,23 @@ function attachMediaCropEditor(card,img,item,status){
   function moveHandle(event,type){
     if(!handleState||handleState.type!==type||handleState.pointerId!==event.pointerId)return;
     const p=pointerPoint(event);
+    let next={...handleState.startLayout};
     if(type==="zoom"){
       const ratio=pointDistance(handleState.center,p)/handleState.startDistance;
-      layout.zoom=clampMediaNumber(handleState.startZoom*ratio,25,300,100);
+      next.zoom=clampMediaNumber(handleState.startLayout.zoom*ratio,25,300,100);
     }else{
       const delta=pointAngle(handleState.center,p)-handleState.startAngle;
-      layout.rotation=normalizeAngle(handleState.startRotation+delta);
+      next.rotation=normalizeAngle(handleState.startLayout.rotation+delta);
     }
+    const nextMetrics=measure(next);
+    layout=keepAnchor(
+      handleState.startLayout,
+      handleState.startMetrics,
+      next,
+      nextMetrics,
+      handleState.imageCenter,
+      handleState.imageCenter
+    );
     markChanged();
   }
 
@@ -613,14 +664,25 @@ function attachMediaCropEditor(card,img,item,status){
   imageWrap.addEventListener("wheel",event=>{
     if(event.target.closest(".media-crop-handle"))return;
     event.preventDefault();
-    const factor=event.deltaY<0?1.08:1/1.08;
-    layout.zoom=clampMediaNumber(layout.zoom*factor,25,300,100);
+    const startLayout={...layout};
+    const startMetrics=measure(startLayout);
+    const anchor={
+      x:event.clientX-startMetrics.rect.left,
+      y:event.clientY-startMetrics.rect.top
+    };
+    const next={
+      ...startLayout,
+      zoom:clampMediaNumber(startLayout.zoom*(event.deltaY<0?1.08:1/1.08),25,300,100)
+    };
+    const nextMetrics=measure(next);
+    layout=keepAnchor(startLayout,startMetrics,next,nextMetrics,anchor,anchor);
     markChanged();
   },{passive:false});
 
   imageWrap.addEventListener("pointerdown",event=>{
     if(event.target.closest(".media-crop-handle"))return;
     if(event.pointerType==="mouse"&&event.button!==0)return;
+    if(pointers.size>=2&&!pointers.has(event.pointerId))return;
     const p=pointerPoint(event);
     pointers.set(event.pointerId,p);
     imageWrap.setPointerCapture?.(event.pointerId);
@@ -630,12 +692,18 @@ function attachMediaCropEditor(card,img,item,status){
       pinchState=null;
     }else if(pointers.size===2){
       const pts=[...pointers.values()].slice(0,2);
+      const startLayout={...layout};
+      const startMetrics=measure(startLayout);
+      const middlePoint=midpoint(pts[0],pts[1]);
       pinchState={
         distance:Math.max(8,pointDistance(pts[0],pts[1])),
         angle:pointAngle(pts[0],pts[1]),
-        middle:midpoint(pts[0],pts[1]),
-        layout:{...layout},
-        metrics:measure(layout)
+        middle:{
+          x:middlePoint.x-startMetrics.rect.left,
+          y:middlePoint.y-startMetrics.rect.top
+        },
+        layout:startLayout,
+        metrics:startMetrics
       };
       panState=null;
     }
@@ -654,20 +722,24 @@ function attachMediaCropEditor(card,img,item,status){
       const currentAngle=pointAngle(pts[0],pts[1]);
       const currentMiddle=midpoint(pts[0],pts[1]);
 
-      layout={
+      const next={
         ...pinchState.layout,
         zoom:clampMediaNumber(pinchState.layout.zoom*(currentDistance/pinchState.distance),25,300,100),
         rotation:normalizeAngle(pinchState.layout.rotation+(currentAngle-pinchState.angle))
       };
-
-      const zoomedMetrics=measure(layout);
-      const dx=currentMiddle.x-pinchState.middle.x;
-      const dy=currentMiddle.y-pinchState.middle.y;
-      const base={...layout};
-      if(zoomedMetrics.overflowX>0.5)base.x=pinchState.layout.x-(dx/zoomedMetrics.overflowX)*100;
-      if(zoomedMetrics.overflowY>0.5)base.y=pinchState.layout.y-(dy/zoomedMetrics.overflowY)*100;
-      layout.x=clampMediaNumber(base.x,0,100,50);
-      layout.y=clampMediaNumber(base.y,0,100,50);
+      const nextMetrics=measure(next);
+      const currentAnchor={
+        x:currentMiddle.x-nextMetrics.rect.left,
+        y:currentMiddle.y-nextMetrics.rect.top
+      };
+      layout=keepAnchor(
+        pinchState.layout,
+        pinchState.metrics,
+        next,
+        nextMetrics,
+        pinchState.middle,
+        currentAnchor
+      );
       markChanged();
       return;
     }
@@ -695,12 +767,32 @@ function attachMediaCropEditor(card,img,item,status){
   }
   imageWrap.addEventListener("pointerup",releasePointer);
   imageWrap.addEventListener("pointercancel",releasePointer);
+  imageWrap.addEventListener("lostpointercapture",event=>{
+    if(pointers.has(event.pointerId))releasePointer(event);
+  });
 
-  function updateFromSliders(){
-    layout.x=clampMediaNumber(xInput.value,0,100,50);
-    layout.y=clampMediaNumber(yInput.value,0,100,50);
-    layout.zoom=clampMediaNumber(zoomInput.value,25,300,100);
-    layout.rotation=normalizeAngle(clampMediaNumber(rotationInput.value,-180,180,0));
+  function updateFromSliders(event){
+    if(event?.target===xInput||event?.target===yInput){
+      layout.x=clampMediaNumber(xInput.value,0,100,50);
+      layout.y=clampMediaNumber(yInput.value,0,100,50);
+      markChanged();
+      return;
+    }
+
+    const startLayout={...layout};
+    const startMetrics=measure(startLayout);
+    const startPlacement=visualPlacement(startLayout,startMetrics);
+    const imageCenter={
+      x:startPlacement.visualLeft+startMetrics.rotatedW/2,
+      y:startPlacement.visualTop+startMetrics.rotatedH/2
+    };
+    const next={
+      ...startLayout,
+      zoom:clampMediaNumber(zoomInput.value,25,300,100),
+      rotation:normalizeAngle(clampMediaNumber(rotationInput.value,-180,180,0))
+    };
+    const nextMetrics=measure(next);
+    layout=keepAnchor(startLayout,startMetrics,next,nextMetrics,imageCenter,imageCenter);
     markChanged();
   }
   [xInput,yInput,zoomInput,rotationInput].forEach(input=>{
