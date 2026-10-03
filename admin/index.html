@@ -26,7 +26,7 @@
       <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
       <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen</a>
       <a class="admin-nav-link" data-page="statistik" href="./statistik/">Statistik</a>
-      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a><a class="admin-nav-link" href="#medien">Medien</a>
     </div>
   </nav>
 
@@ -50,6 +50,122 @@
       <a class="admin-dashboard-card" href="./statistik/"><span class="cms-subpanel-icon">08</span><div><small>KPI</small><h3>Statistik</h3><p>Seitenaufrufe, Klicks und Kontaktaktionen auswerten.</p></div><b>→</b></a>
       <a class="admin-dashboard-card" href="./kontakt/"><span class="cms-subpanel-icon">09</span><div><small>Website</small><h3>Kontakt</h3><p>Kontaktdaten, Formular und Kontakttexte verwalten.</p></div><b>→</b></a>
     </section>
+    <section class="section-head admin-section-head media-library-head" id="medien">
+      <div>
+        <span class="kicker">Medienbibliothek</span>
+        <h2>Alle Website-Bilder auf einen Blick</h2>
+      </div>
+      <p>Vorschau, Medienkey, R2-Status, gespeicherter Bildausschnitt und direkte Verknüpfung zum zuständigen CMS-Bereich.</p>
+    </section>
+
+    <section class="media-library-panel">
+      <div class="media-library-toolbar">
+        <label><span>Suche</span><input id="mediaLibrarySearch" type="search" placeholder="Bild, Bereich oder Medienkey"></label>
+        <label><span>Filter</span><select id="mediaLibraryFilter"><option value="all">Alle</option><option value="r2">Nur R2-Bilder</option><option value="fallback">Nur Fallbackbilder</option><option value="crop">Mit gespeichertem Crop</option><option value="nocrop">Ohne gespeicherten Crop</option></select></label>
+        <div id="mediaLibrarySummary" class="media-library-summary">Lade Medien …</div>
+      </div>
+      <div id="mediaLibraryGrid" class="media-library-grid" aria-live="polite"></div>
+      <div id="mediaLibraryStatus" class="status"></div>
+    </section>
+
+    <style>
+      .media-library-panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(20,32,38,.05)}
+      .media-library-toolbar{display:grid;grid-template-columns:1.4fr .8fr auto;gap:14px;align-items:end;margin-bottom:18px}
+      .media-library-toolbar input,.media-library-toolbar select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fbfbf8;color:var(--ink);font:inherit}
+      .media-library-summary{padding:11px 12px;border-radius:11px;background:#eef0ed;color:#526067;font-size:.75rem;font-weight:850;white-space:nowrap}
+      .media-library-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+      .media-library-card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fbfbf8}
+      .media-library-preview{aspect-ratio:16/10;background:#172026;overflow:hidden}
+      .media-library-preview img{width:100%;height:100%;object-fit:cover}
+      .media-library-body{display:grid;gap:10px;padding:15px}
+      .media-library-body h3{margin:0;font-size:1rem}.media-library-body code{display:block;overflow-wrap:anywhere;color:#59666c;font-size:.68rem}
+      .media-library-meta{display:flex;flex-wrap:wrap;gap:6px}.media-library-pill{padding:5px 7px;border-radius:999px;background:#ecefe9;color:#526067;font-size:.62rem;font-weight:900}
+      .media-library-pill.is-r2{background:#e1f0e5;color:#25643c}.media-library-pill.is-crop{background:#fff2b3;color:#725b00}
+      .media-library-crop{color:#67757b;font-size:.7rem;line-height:1.45}.media-library-actions{display:flex;gap:7px;flex-wrap:wrap}
+      .media-library-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 10px;border-radius:9px;background:#172026;color:#fff;text-decoration:none;font-size:.7rem;font-weight:850}
+      .media-library-actions a.secondary{background:#edf0ed;color:#172026}
+      @media(max-width:900px){.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-library-toolbar{grid-template-columns:1fr 1fr}.media-library-summary{grid-column:1/-1}}
+      @media(max-width:620px){.media-library-grid,.media-library-toolbar{grid-template-columns:1fr}}
+    </style>
+
+    <script>
+      (() => {
+        const catalog=[{"key":"leistungen/3d-laserscanning","name":"3D-Laserscanning","fallback":"../assets/media/home-service-3d.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/3d-laserscanning/ergebnis-1","name":"3D-Laserscanning · Ergebnis 1","fallback":"../assets/media/2026-10-02-3d-ergebnis-1.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/3d-laserscanning/ergebnis-2","name":"3D-Laserscanning · Ergebnis 2","fallback":"../assets/media/2026-10-02-3d-ergebnis-2.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/3d-laserscanning/hero","name":"3D-Laserscanning · Hero","fallback":"../assets/media/2026-10-02-3d-hero.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungen/drohnenvermessung","name":"Drohnenvermessung","fallback":"../assets/media/home-service-drohne.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/drohnenvermessung/ergebnis-1","name":"Drohnenvermessung · Ergebnis 1","fallback":"../assets/media/2026-10-02-drohne-ergebnis-1.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/drohnenvermessung/ergebnis-2","name":"Drohnenvermessung · Ergebnis 2","fallback":"../assets/media/2026-10-02-drohne-ergebnis-2.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/drohnenvermessung/hero","name":"Drohnenvermessung · Hero","fallback":"../assets/media/2026-10-02-drohne-hero.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungen/gis-bauvermessung","name":"GIS & Bauvermessung","fallback":"../assets/media/home-service-gis.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/gis-bauvermessung/ergebnis-1","name":"GIS & Bauvermessung · Ergebnis 1","fallback":"../assets/media/2026-10-02-gis-ergebnis-1.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/gis-bauvermessung/ergebnis-2","name":"GIS & Bauvermessung · Ergebnis 2","fallback":"../assets/media/2026-10-02-gis-ergebnis-2.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/gis-bauvermessung/hero","name":"GIS & Bauvermessung · Hero","fallback":"../assets/media/2026-10-02-gis-hero.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungen/ingenieurvermessung","name":"Ingenieurvermessung","fallback":"../assets/media/home-service-ingenieur.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/ingenieurvermessung/ergebnis-1","name":"Ingenieurvermessung · Ergebnis 1","fallback":"../assets/media/2026-10-02-ingenieur-ergebnis-1.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/ingenieurvermessung/ergebnis-2","name":"Ingenieurvermessung · Ergebnis 2","fallback":"../assets/media/2026-10-02-ingenieur-ergebnis-2.webp","area":"Leistungen","href":"./leistungen/"},{"key":"leistungsseiten/ingenieurvermessung/hero","name":"Ingenieurvermessung · Hero","fallback":"../assets/media/2026-10-02-ingenieur-hero.webp","area":"Leistungen","href":"./leistungen/"},{"key":"projects/3d-laserscanning","name":"3D-Laserscanning","fallback":"../assets/media/2026-10-02-projekt-3d.webp","area":"Projekte","href":"./projekte/"},{"key":"projects/bestand-planung","name":"Bestand & Planung","fallback":"../assets/media/2026-10-02-projekt-bestand.webp","area":"Projekte","href":"./projekte/"},{"key":"projects/gelaende-gewaesser","name":"Gelände & Gewässer","fallback":"../assets/media/2026-10-02-projekt-gelaende.webp","area":"Projekte","href":"./projekte/"},{"key":"projects/ingenieur-bauvermessung","name":"Ingenieur- & Bauvermessung","fallback":"../assets/media/2026-10-02-projekt-ingenieur.webp","area":"Projekte","href":"./projekte/"},{"key":"projects/mobiler-einsatz","name":"Mobiler Einsatz","fallback":"../assets/media/2026-10-02-projekt-mobil.webp","area":"Projekte","href":"./projekte/"},{"key":"projects/rtk-drohnenvermessung","name":"RTK-Drohnenvermessung","fallback":"../assets/media/2026-10-02-projekt-drohne.webp","area":"Projekte","href":"./projekte/"},{"key":"startseite/hero","name":"Hero / Startseitenbild","fallback":"../assets/media/home-hero.webp","area":"Startseite","href":"./startseite/"},{"key":"startseite/projekte","name":"Startseite · Projekte","fallback":"../assets/media/home-projekte.webp","area":"Startseite","href":"./startseite/"},{"key":"startseite/technik","name":"Startseite · Technik","fallback":"../assets/media/home-technik.webp","area":"Startseite","href":"./startseite/"},{"key":"startseite/unternehmen","name":"Startseite · Unternehmen","fallback":"../assets/media/jost-gudelius.jpg","area":"Startseite","href":"./startseite/"},{"key":"equipment/metashape","name":"Agisoft Metashape","fallback":"../assets/equipment-metashape.svg","area":"Technik","href":"./technik/"},{"key":"equipment/bbsoft","name":"BBSOFT","fallback":"../assets/equipment-bbsoft-light.svg","area":"Technik","href":"./technik/"},{"key":"equipment/bricscad","name":"BricsCAD","fallback":"../assets/equipment-bricscad.svg","area":"Technik","href":"./technik/"},{"key":"equipment/mobile-arbeitsplatz","name":"Mobiler Büroarbeitsplatz","fallback":"../assets/media/2026-10-02-technik-mobiler-arbeitsplatz.webp","area":"Technik","href":"./technik/"},{"key":"equipment/photogrammetrie","name":"Punktwolken & Photogrammetrie","fallback":"../assets/media/2026-10-02-technik-photogrammetrie.webp","area":"Technik","href":"./technik/"},{"key":"equipment/rtk-drohne","name":"RTK-Drohne","fallback":"../assets/media/2026-10-02-technik-digital.webp","area":"Technik","href":"./technik/"},{"key":"equipment/infrarotkamera","name":"RTK-Drohne mit Infrarotkamera","fallback":"../assets/equipment-infrarotkamera.svg","area":"Technik","href":"./technik/"},{"key":"technik/gruppen/3d-drohne","name":"Technik · 3D & Drohne","fallback":"../assets/media/2026-10-02-technik-digital.webp","area":"Technik","href":"./technik/"},{"key":"technik/gruppen/aussendienst","name":"Technik · Außendienst","fallback":"../assets/media/2026-10-02-technik-aussendienst.webp","area":"Technik","href":"./technik/"},{"key":"technik/gruppen/programme-arbeitsplatz","name":"Technik · Programme & Arbeitsplatz","fallback":"../assets/media/2026-10-02-technik-software.webp","area":"Technik","href":"./technik/"},{"key":"equipment/trimble-dini07","name":"Trimble DiNi 07 Ingenieurnivellier","fallback":"../assets/equipment-trimble-dini07.svg","area":"Technik","href":"./technik/"},{"key":"equipment/trimble-r2","name":"Trimble R2 GNSS-Empfänger","fallback":"../assets/equipment-trimble-r2.svg","area":"Technik","href":"./technik/"},{"key":"equipment/realworks","name":"Trimble RealWorks","fallback":"../assets/equipment-realworks.svg","area":"Technik","href":"./technik/"},{"key":"equipment/trimble-s6","name":"Trimble S6","fallback":"../assets/equipment-trimble-s6.svg","area":"Technik","href":"./technik/"},{"key":"equipment/trimble-sx12","name":"Trimble SX12","fallback":"../assets/media/2026-10-02-technik-sx12.webp","area":"Technik","href":"./technik/"},{"key":"equipment/trimble-tx8","name":"Trimble TX8 3D-Laserscanner","fallback":"../assets/media/2026-10-02-technik-tx8.webp","area":"Technik","href":"./technik/"},{"key":"unternehmen/jost-gudelius","name":"Jost Gudelius","fallback":"../assets/media/jost-gudelius.jpg","area":"Unternehmen","href":"./unternehmen/"},{"key":"unternehmen/pruefsachverstaendiger","name":"Prüfsachverständiger BayIkaBau","fallback":"../assets/media/pruefsachverstaendiger.jpg","area":"Unternehmen","href":"./unternehmen/"}];
+        const grid=document.getElementById("mediaLibraryGrid");
+        const status=document.getElementById("mediaLibraryStatus");
+        const summary=document.getElementById("mediaLibrarySummary");
+        const search=document.getElementById("mediaLibrarySearch");
+        const filter=document.getElementById("mediaLibraryFilter");
+        if(!grid)return;
+
+        const api=window.GUDELIUS_CMS_API||location.origin;
+        let r2Keys=new Set();
+        let content={};
+
+        const encodeKey=key=>key.split("/").map(encodeURIComponent).join("/");
+        const cropFor=key=>{
+          const value=content["media-layout/"+key];
+          return value&&typeof value==="object"?value:null;
+        };
+        const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+
+        function render(){
+          const q=(search.value||"").trim().toLowerCase();
+          const mode=filter.value;
+          const rows=catalog.filter(item=>{
+            const hasR2=r2Keys.has(item.key), crop=Boolean(cropFor(item.key));
+            if(mode==="r2"&&!hasR2)return false;
+            if(mode==="fallback"&&hasR2)return false;
+            if(mode==="crop"&&!crop)return false;
+            if(mode==="nocrop"&&crop)return false;
+            if(q&&!([item.key,item.name,item.area].join(" ").toLowerCase().includes(q)))return false;
+            return true;
+          });
+          summary.textContent=rows.length+" von "+catalog.length+" Medien";
+          grid.innerHTML=rows.map(item=>{
+            const hasR2=r2Keys.has(item.key);
+            const crop=cropFor(item.key);
+            const preview=hasR2?api+"/api/admin/media/"+encodeKey(item.key):item.fallback;
+            const cropText=crop
+              ? "X "+Math.round(Number(crop.x??50))+" · Y "+Math.round(Number(crop.y??50))+" · Zoom "+Math.round(Number(crop.zoom??100))+" % · Drehung "+Math.round(Number(crop.rotation??0))+"°"
+              : "Standard-Ausschnitt";
+            return '<article class="media-library-card">'+
+              '<div class="media-library-preview"><img src="'+esc(preview)+'" alt="'+esc(item.name)+'" loading="lazy"></div>'+
+              '<div class="media-library-body"><div><span class="kicker">'+esc(item.area)+'</span><h3>'+esc(item.name)+'</h3></div>'+
+              '<code>'+esc(item.key)+'</code>'+
+              '<div class="media-library-meta"><span class="media-library-pill '+(hasR2?'is-r2':'')+'">'+(hasR2?'R2 vorhanden':'Fallback aktiv')+'</span>'+
+              '<span class="media-library-pill '+(crop?'is-crop':'')+'">'+(crop?'Crop gespeichert':'Kein Crop')+'</span></div>'+
+              '<div class="media-library-crop">'+esc(cropText)+'</div>'+
+              '<div class="media-library-actions"><a href="'+esc(item.href)+'">Bearbeiten</a><a class="secondary" href="'+esc(preview)+'" target="_blank" rel="noopener">Bild öffnen</a></div></div></article>';
+          }).join("");
+        }
+
+        async function load(){
+          status.textContent="Medien werden geladen …";
+          try{
+            const [mediaResponse,siteResponse]=await Promise.all([
+              fetch(api+"/api/admin/media?limit=1000",{credentials:"include",cache:"no-store"}),
+              fetch(api+"/api/site",{credentials:"include",cache:"no-store"})
+            ]);
+            const media=await mediaResponse.json().catch(()=>({objects:[]}));
+            const site=await siteResponse.json().catch(()=>({content:{}}));
+            if(!mediaResponse.ok)throw new Error(media.error||("HTTP "+mediaResponse.status));
+            r2Keys=new Set((media.objects||[]).map(item=>item.key));
+            content=site.content||{};
+            status.textContent="Medienbibliothek geladen.";
+            status.className="status ok";
+            render();
+          }catch(error){
+            status.textContent="Medienbibliothek konnte nicht vollständig geladen werden: "+error.message;
+            status.className="status bad";
+            render();
+          }
+        }
+        search.addEventListener("input",render);
+        filter.addEventListener("change",render);
+        load();
+      })();
+    </script>
   </main>
 
   <script src="./config.js?v=20260924-44"></script>
