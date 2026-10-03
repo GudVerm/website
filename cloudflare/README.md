@@ -13,21 +13,22 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 - **Admin-Zugang:** Cloudflare Access mit One-time PIN; der technische Token-Fallback ist deaktiviert
 - **Admin-Allowlist:** zusätzlich serverseitig im Worker auf `gudeliusvermessung@web.de` und `jost@gudeliusvermessung.de` begrenzt (`ADMIN_ALLOWED_EMAILS`)
 - **Erlaubter Browser-Origin:** `ALLOWED_ORIGIN=https://gudverm.github.io`
-- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false
-ADMIN_TOKEN_FALLBACK_ENABLED=false` bis zur bewussten Medienprüfung
+- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false` bis zur bewussten Medienprüfung
+- **Token-Fallback:** `ADMIN_TOKEN_FALLBACK_ENABLED=false`
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung ist `2026-09-24.7`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.6`.
 
 ## Secrets
 
-Folgende Secrets müssen im Cloudflare-Worker gesetzt sein:
+Folgendes Secret wird produktiv benötigt:
 
 ```text
-CMS_ADMIN_TOKEN
 BREVO_API_KEY
 ```
+
+`CMS_ADMIN_TOKEN` ist seit der Access-Umstellung nicht mehr für den Admin-Workflow erforderlich; `ADMIN_TOKEN_FALLBACK_ENABLED=false` bleibt gesetzt.
 
 Prüfung:
 
@@ -88,7 +89,7 @@ Die Schlüssel enthalten keine Formularfelder, IP-Adressen oder Besucherkennunge
 
 ## Upload-Sicherheit
 
-`PUT /api/media/<key>` bleibt mit `CMS_ADMIN_TOKEN` geschützt und prüft:
+`PUT /api/admin/media/<key>` ist über Cloudflare Access und die serverseitige E-Mail-Allowlist geschützt und prüft:
 
 - maximal 15 MiB,
 - JPEG, PNG, WebP oder AVIF,
@@ -117,7 +118,7 @@ Geschützt:
 
 ```text
 GET /api/admin/health
-Authorization: Bearer <CMS_ADMIN_TOKEN>
+Cloudflare-Access-Sitzung erforderlich
 ```
 
 Der geschützte Check prüft D1, R2, `BREVO_API_KEY`, Brevo-Absender, Kontakt-Empfänger, Origin-Konfiguration und Admin-Token. Er verschickt selbst keine E-Mail.
@@ -354,3 +355,18 @@ Seit Release `2026-09-24.11` verwenden Trimble SX12, RTK-Drohne und BBSOFT neue 
 ## Technik-Admin: Inline-Fallback für problematische Vorschauen
 
 Seit Release `2026-09-24.12` erzeugt der Admin für Trimble SX12, RTK-Drohne und BBSOFT den hellen Platzhalter direkt als Data-URI im Browser. Diese drei Vorschauen sind damit vollständig unabhängig von externen SVG-Dateien, GitHub-Pages-Asset-Caches und dem Worker-Asset-Proxy. Das betrifft nur die Admin-Vorschau im Fallback-Modus; echte ausgewählte oder hochgeladene Bilder ersetzen den Platzhalter weiterhin normal.
+
+
+## Audit-Log
+
+Wichtige administrative Änderungen werden in D1 in `audit_log` protokolliert. Gespeichert werden Zeitpunkt, Access-E-Mail, Aktion, Bereich, Ziel-Key und eine kurze technische Detailangabe. Passwörter, Tokens und Inhalte aus Kontaktformularen werden nicht in das Audit-Log geschrieben.
+
+Der Admin stellt die Historie unter `/admin/audit/` bereit; die API lautet `GET /api/admin/audit` und ist Access-geschützt.
+
+## Medienbibliothek
+
+Die zentrale Medienbibliothek im Admin liest den Medienkatalog aus `admin/admin-data.js`, zeigt R2-/Fallback-Status sowie gespeicherte Crop-Werte und verlinkt direkt in den zuständigen CMS-Bereich.
+
+## Turnstile-Vorbereitung
+
+Die Browser-Konfiguration enthält einen optionalen `GUDELIUS_TURNSTILE_SITE_KEY`. Solange dieser leer ist, wird kein Turnstile-Widget geladen. Honeypot, Origin-Prüfung, Größenlimits und Rate Limiting bleiben unabhängig davon aktiv. Die serverseitige Turnstile-Verifikation ist vor einer Aktivierung noch mit dem Secret-Key zu ergänzen und zu deployen.
