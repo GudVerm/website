@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.3";
+const WORKER_RELEASE = "2026-10-03.4";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -472,6 +472,7 @@ function adminSourcePath(pathname) {
   if (pathname === "/admin/admin.css") return "admin/admin.css";
   if (pathname === "/admin/admin.js") return "admin/admin.js";
   if (pathname === "/admin/admin-data.js") return "admin/admin-data.js";
+  if (pathname === "/admin/media-library.js") return "admin/media-library.js";
   const match = pathname.match(/^\/admin\/([a-z0-9-]+)\/?$/);
   if (match && ADMIN_PAGE_SLUGS.has(match[1])) return "admin/" + match[1] + "/index.html";
   return "";
