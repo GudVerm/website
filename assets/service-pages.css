@@ -22,7 +22,7 @@
     var(--service-image);
   background-size:cover;
   background-position:var(--cms-media-position,center);
-  transform:scale(var(--cms-media-scale,1));
+  transform:scale(var(--cms-media-scale,1)) rotate(var(--cms-media-rotation,0deg));
   transform-origin:var(--cms-media-origin,50% 50%);
   z-index:1;
 }

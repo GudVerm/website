@@ -1693,3 +1693,95 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   transform:scale(var(--media-crop-zoom))!important;
   transform-origin:var(--media-crop-x) var(--media-crop-y)!important;
 }
+
+
+/* CMS Bildausschnitt 03.10.2026: direkte Bearbeitung im Bild */
+.media-crop-stage{
+  --media-crop-rotation:0deg;
+  position:relative;
+  overflow:hidden!important;
+  cursor:grab;
+  touch-action:none;
+  outline:none;
+}
+.media-crop-stage:focus-visible{
+  box-shadow:inset 0 0 0 3px rgba(199,168,14,.72);
+}
+.media-crop-stage.is-crop-dragging{cursor:grabbing}
+.media-crop-stage.is-crop-rotating{cursor:crosshair}
+.media-crop-stage>img,
+.media-crop-stage img{
+  transform:scale(var(--media-crop-zoom)) rotate(var(--media-crop-rotation))!important;
+  transform-origin:var(--media-crop-x) var(--media-crop-y)!important;
+  user-select:none!important;
+  -webkit-user-drag:none;
+  pointer-events:none;
+}
+.media-crop-hud{
+  position:absolute;
+  left:10px;
+  right:10px;
+  bottom:10px;
+  z-index:5;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  pointer-events:none;
+}
+.media-crop-hud span,
+.media-crop-hud strong{
+  padding:6px 9px;
+  border-radius:999px;
+  background:rgba(17,28,34,.84);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.2);
+  backdrop-filter:blur(6px);
+  font-size:.62rem;
+  line-height:1.2;
+}
+.media-crop-hud strong{font-variant-numeric:tabular-nums;white-space:nowrap}
+.media-crop-rotate{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:7;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-height:38px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:999px;
+  background:rgba(255,255,255,.94);
+  color:#172026;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+  cursor:crosshair;
+  touch-action:none;
+}
+.media-crop-rotate span{font-size:1.05rem;font-weight:900}
+.media-crop-rotate small{font-size:.62rem;font-weight:900}
+.media-crop-editor-direct{
+  gap:12px;
+}
+.media-crop-direct-help{
+  display:grid;
+  gap:3px;
+  color:#526067;
+}
+.media-crop-direct-help strong{font-size:.8rem;color:#172026}
+.media-crop-direct-help span{font-size:.7rem;line-height:1.45}
+.media-crop-editor-direct .media-crop-actions{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+}
+.media-crop-editor-direct .media-crop-actions button{
+  width:100%;
+}
+@media(max-width:620px){
+  .media-crop-hint{display:none}
+  .media-crop-hud{justify-content:flex-end}
+  .media-crop-rotate small{display:none}
+  .media-crop-rotate{width:40px;height:40px;justify-content:center;padding:0}
+  .media-crop-editor-direct .media-crop-actions{grid-template-columns:1fr}
+}

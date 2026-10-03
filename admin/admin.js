@@ -394,7 +394,8 @@ function normalizeMediaLayout(value){
   return {
     x:clampMediaNumber(source.x,0,100,50),
     y:clampMediaNumber(source.y,0,100,50),
-    zoom:clampMediaNumber(source.zoom,100,240,100)
+    zoom:clampMediaNumber(source.zoom,100,300,100),
+    rotation:clampMediaNumber(source.rotation,-180,180,0)
   };
 }
 async function loadMediaLayoutContent(){
@@ -422,8 +423,9 @@ function applyAdminMediaLayout(img,layout){
     stage.style.setProperty("--media-crop-zoom",String(value.zoom/100));
     stage.style.setProperty("--media-crop-x",value.x+"%");
     stage.style.setProperty("--media-crop-y",value.y+"%");
+    stage.style.setProperty("--media-crop-rotation",value.rotation+"deg");
   }else{
-    img.style.transform="scale("+(value.zoom/100)+")";
+    img.style.transform="scale("+(value.zoom/100)+") rotate("+value.rotation+"deg)";
   }
 }
 async function deleteMediaLayout(mediaKey){
@@ -441,20 +443,31 @@ function attachMediaCropEditor(card,img,item,status){
   if(!imageWrap||!body)return;
 
   imageWrap.classList.add("media-crop-stage");
+  imageWrap.tabIndex=0;
+  imageWrap.setAttribute("role","application");
+  imageWrap.setAttribute("aria-label","Bild-Ausschnitt direkt bearbeiten");
   if(item.key==="startseite/hero"||/\/hero$/.test(item.key))imageWrap.classList.add("media-crop-stage-hero");
 
+  const hud=document.createElement("div");
+  hud.className="media-crop-hud";
+  hud.innerHTML='<span class="media-crop-hint">Ziehen · Mausrad/Pinch = Zoom</span><strong class="media-crop-readout">100 % · 0°</strong>';
+  imageWrap.appendChild(hud);
+
+  const rotateHandle=document.createElement("button");
+  rotateHandle.type="button";
+  rotateHandle.className="media-crop-rotate";
+  rotateHandle.innerHTML='<span aria-hidden="true">↻</span><small>Drehen</small>';
+  rotateHandle.setAttribute("aria-label","Am Griff ziehen, um das Bild zu drehen");
+  imageWrap.appendChild(rotateHandle);
+
   const editor=document.createElement("div");
-  editor.className="media-crop-editor";
+  editor.className="media-crop-editor media-crop-editor-direct";
   editor.innerHTML=`
-    <div class="media-crop-head">
-      <div><strong>Bild-Ausschnitt</strong><span>Bild direkt oben ziehen oder Regler verwenden.</span></div>
-      <span class="media-crop-value">50 / 50 · 100 %</span>
+    <div class="media-crop-direct-help">
+      <strong>Bild direkt bearbeiten</strong>
+      <span>Verschieben: im Bild ziehen · Zoomen: Mausrad oder Zwei-Finger-Geste · Drehen: Drehgriff ziehen oder mit zwei Fingern drehen.</span>
     </div>
-    <label>Horizontal <input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"></label>
-    <label>Vertikal <input class="media-crop-y" type="range" min="0" max="100" step="1" value="50"></label>
-    <label>Zoom <input class="media-crop-zoom" type="range" min="100" max="240" step="5" value="100"></label>
     <div class="media-crop-actions">
-      <button type="button" class="secondary media-crop-center">Zentrieren</button>
       <button type="button" class="media-crop-save">Ausschnitt speichern</button>
       <button type="button" class="secondary media-crop-reset">Zurücksetzen</button>
     </div>
@@ -462,84 +475,177 @@ function attachMediaCropEditor(card,img,item,status){
   `;
   body.appendChild(editor);
 
-  const xInput=editor.querySelector(".media-crop-x");
-  const yInput=editor.querySelector(".media-crop-y");
-  const zoomInput=editor.querySelector(".media-crop-zoom");
-  const valueLabel=editor.querySelector(".media-crop-value");
+  const readout=hud.querySelector(".media-crop-readout");
   const cropStatus=editor.querySelector(".media-crop-status");
   const saveButton=editor.querySelector(".media-crop-save");
   const resetButton=editor.querySelector(".media-crop-reset");
-  const centerButton=editor.querySelector(".media-crop-center");
   let layout=normalizeMediaLayout(null);
+  let dirty=false;
 
-  function syncControls(){
-    xInput.value=String(Math.round(layout.x));
-    yInput.value=String(Math.round(layout.y));
-    zoomInput.value=String(Math.round(layout.zoom/5)*5);
-    valueLabel.textContent=Math.round(layout.x)+" / "+Math.round(layout.y)+" · "+Math.round(layout.zoom)+" %";
+  function normalizeAngle(value){
+    let angle=Number(value)||0;
+    while(angle>180)angle-=360;
+    while(angle<-180)angle+=360;
+    return angle;
+  }
+  function sync(){
+    layout=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
     applyAdminMediaLayout(img,layout);
+    readout.textContent=Math.round(layout.zoom)+" % · "+Math.round(layout.rotation)+"°";
   }
-  function readControls(){
-    layout=normalizeMediaLayout({x:xInput.value,y:yInput.value,zoom:zoomInput.value});
-    syncControls();
-    setStatus(cropStatus,"Nicht gespeicherte Änderung.");
+  function changed(message="Nicht gespeicherte Änderung."){
+    dirty=true;sync();setStatus(cropStatus,message);
   }
-  [xInput,yInput,zoomInput].forEach(input=>input.addEventListener("input",readControls));
 
-  let dragging=false,startClientX=0,startClientY=0,startX=50,startY=50;
+  // Mouse wheel / trackpad: zoom directly over image.
+  imageWrap.addEventListener("wheel",event=>{
+    if(event.target.closest(".media-crop-rotate"))return;
+    event.preventDefault();
+    const step=Math.max(3,Math.min(18,Math.abs(event.deltaY)*0.08));
+    layout.zoom+=event.deltaY<0?step:-step;
+    layout.zoom=clampMediaNumber(layout.zoom,100,300,100);
+    changed();
+  },{passive:false});
+
+  const pointers=new Map();
+  let panStart=null;
+  let gestureStart=null;
+  let rotating=false;
+  let rotationStart=null;
+
+  function point(event){return {x:event.clientX,y:event.clientY}}
+  function distance(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
+  function angle(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
+
+  rotateHandle.addEventListener("pointerdown",event=>{
+    event.preventDefault();event.stopPropagation();
+    rotating=true;
+    const rect=imageWrap.getBoundingClientRect();
+    const center={x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+    rotationStart={pointerAngle:angle(center,point(event)),rotation:layout.rotation};
+    rotateHandle.setPointerCapture?.(event.pointerId);
+    imageWrap.classList.add("is-crop-rotating");
+  });
+  rotateHandle.addEventListener("pointermove",event=>{
+    if(!rotating||!rotationStart)return;
+    const rect=imageWrap.getBoundingClientRect();
+    const center={x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+    const delta=angle(center,point(event))-rotationStart.pointerAngle;
+    layout.rotation=normalizeAngle(rotationStart.rotation+delta);
+    changed();
+  });
+  const stopRotation=event=>{
+    if(!rotating)return;
+    rotating=false;rotationStart=null;
+    rotateHandle.releasePointerCapture?.(event.pointerId);
+    imageWrap.classList.remove("is-crop-rotating");
+  };
+  rotateHandle.addEventListener("pointerup",stopRotation);
+  rotateHandle.addEventListener("pointercancel",stopRotation);
+
   imageWrap.addEventListener("pointerdown",event=>{
-    if(event.button!==undefined&&event.button!==0)return;
-    dragging=true;startClientX=event.clientX;startClientY=event.clientY;startX=layout.x;startY=layout.y;
-    imageWrap.classList.add("is-crop-dragging");
+    if(event.target.closest(".media-crop-rotate"))return;
+    if(event.button!==undefined&&event.pointerType==="mouse"&&event.button!==0)return;
+    pointers.set(event.pointerId,point(event));
     imageWrap.setPointerCapture?.(event.pointerId);
+
+    if(pointers.size===1){
+      panStart={point:point(event),x:layout.x,y:layout.y};
+      gestureStart=null;
+    }else if(pointers.size===2){
+      const pts=[...pointers.values()];
+      gestureStart={
+        distance:Math.max(1,distance(pts[0],pts[1])),
+        angle:angle(pts[0],pts[1]),
+        zoom:layout.zoom,
+        rotation:layout.rotation
+      };
+      panStart=null;
+    }
+    imageWrap.classList.add("is-crop-dragging");
     event.preventDefault();
   });
-  imageWrap.addEventListener("pointermove",event=>{
-    if(!dragging)return;
-    const rect=imageWrap.getBoundingClientRect();
-    const factor=Math.max(1,layout.zoom/100);
-    layout=normalizeMediaLayout({
-      ...layout,
-      x:startX-((event.clientX-startClientX)/Math.max(1,rect.width))*100/factor,
-      y:startY-((event.clientY-startClientY)/Math.max(1,rect.height))*100/factor
-    });
-    syncControls();setStatus(cropStatus,"Nicht gespeicherte Änderung.");
-  });
-  const stopDrag=event=>{
-    if(!dragging)return;dragging=false;imageWrap.classList.remove("is-crop-dragging");
-    if(event?.pointerId!==undefined)imageWrap.releasePointerCapture?.(event.pointerId);
-  };
-  imageWrap.addEventListener("pointerup",stopDrag);
-  imageWrap.addEventListener("pointercancel",stopDrag);
 
-  centerButton.addEventListener("click",()=>{layout={...layout,x:50,y:50};syncControls();setStatus(cropStatus,"Zentriert · noch nicht gespeichert.")});
+  imageWrap.addEventListener("pointermove",event=>{
+    if(!pointers.has(event.pointerId)||rotating)return;
+    pointers.set(event.pointerId,point(event));
+
+    if(pointers.size>=2&&gestureStart){
+      const pts=[...pointers.values()].slice(0,2);
+      const ratio=distance(pts[0],pts[1])/gestureStart.distance;
+      layout.zoom=clampMediaNumber(gestureStart.zoom*ratio,100,300,100);
+      layout.rotation=normalizeAngle(gestureStart.rotation+(angle(pts[0],pts[1])-gestureStart.angle));
+      changed();
+      return;
+    }
+
+    if(pointers.size===1&&panStart){
+      const rect=imageWrap.getBoundingClientRect();
+      const current=point(event);
+      const factor=Math.max(1,layout.zoom/100);
+      layout.x=clampMediaNumber(panStart.x-((current.x-panStart.point.x)/Math.max(1,rect.width))*100/factor,0,100,50);
+      layout.y=clampMediaNumber(panStart.y-((current.y-panStart.point.y)/Math.max(1,rect.height))*100/factor,0,100,50);
+      changed();
+    }
+  });
+
+  function releasePointer(event){
+    pointers.delete(event.pointerId);
+    imageWrap.releasePointerCapture?.(event.pointerId);
+    if(pointers.size===0){
+      panStart=null;gestureStart=null;imageWrap.classList.remove("is-crop-dragging");
+    }else if(pointers.size===1){
+      const remaining=[...pointers.values()][0];
+      panStart={point:remaining,x:layout.x,y:layout.y};
+      gestureStart=null;
+    }
+  }
+  imageWrap.addEventListener("pointerup",releasePointer);
+  imageWrap.addEventListener("pointercancel",releasePointer);
+
+  // Keyboard fallback without sliders.
+  imageWrap.addEventListener("keydown",event=>{
+    const step=event.shiftKey?5:1;
+    if(event.key==="ArrowLeft"){layout.x-=step}
+    else if(event.key==="ArrowRight"){layout.x+=step}
+    else if(event.key==="ArrowUp"){layout.y-=step}
+    else if(event.key==="ArrowDown"){layout.y+=step}
+    else if(event.key==="+"||event.key==="="){layout.zoom+=5}
+    else if(event.key==="-"){layout.zoom-=5}
+    else return;
+    event.preventDefault();changed();
+  });
+
   saveButton.addEventListener("click",async()=>{
     if(!getApi()||!hasAdminAuth())return setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveButton.disabled=true;setStatus(cropStatus,"Speichere Ausschnitt …");
     try{
       const key=mediaLayoutContentKey(item.key);
-      await saveHeroText(key,normalizeMediaLayout(layout));
-      mediaLayoutContentCache[key]=normalizeMediaLayout(layout);
+      const value=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
+      await saveHeroText(key,value);
+      mediaLayoutContentCache[key]=value;layout=value;dirty=false;sync();
       setStatus(cropStatus,"Ausschnitt gespeichert.",true);
     }catch(error){setStatus(cropStatus,"Speichern fehlgeschlagen: "+error.message,false)}
     finally{saveButton.disabled=false}
   });
+
   resetButton.addEventListener("click",async()=>{
     if(!getApi()||!hasAdminAuth())return setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     resetButton.disabled=true;setStatus(cropStatus,"Setze Ausschnitt zurück …");
     try{
-      await deleteMediaLayout(item.key);layout=normalizeMediaLayout(null);syncControls();
-      setStatus(cropStatus,"Ausschnitt auf Standard zurückgesetzt.",true);
+      await deleteMediaLayout(item.key);
+      layout=normalizeMediaLayout(null);dirty=false;sync();
+      setStatus(cropStatus,"Standard-Ausschnitt wiederhergestellt.",true);
     }catch(error){setStatus(cropStatus,"Zurücksetzen fehlgeschlagen: "+error.message,false)}
     finally{resetButton.disabled=false}
   });
 
   loadMediaLayoutContent().then(content=>{
     layout=normalizeMediaLayout(content[mediaLayoutContentKey(item.key)]);
-    syncControls();setStatus(cropStatus,content[mediaLayoutContentKey(item.key)]?"Gespeicherter Ausschnitt geladen.":"Standard-Ausschnitt aktiv.",true);
-  }).catch(error=>{syncControls();setStatus(cropStatus,"Ausschnitt konnte nicht geladen werden: "+error.message,false)});
+    dirty=false;sync();
+    setStatus(cropStatus,content[mediaLayoutContentKey(item.key)]?"Gespeicherter Ausschnitt geladen.":"Standard-Ausschnitt aktiv.",true);
+  }).catch(error=>{sync();setStatus(cropStatus,"Ausschnitt konnte nicht geladen werden: "+error.message,false)});
 }
-
 async function loadHeroTexts(){
   if(!heroTextStatus) return;
   if(!getApi()) return setStatus(heroTextStatus,"Worker-URL fehlt.",false);

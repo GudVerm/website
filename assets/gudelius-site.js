@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const parsed=Number(number);
       return Number.isFinite(parsed)?Math.min(max,Math.max(min,parsed)):fallback;
     };
-    return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,100,240,100)};
+    return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,100,300,100),rotation:clamp(source.rotation,-180,180,0)};
   }
   function cmsMediaLayout(content,key){return normalizeCmsMediaLayout(content?.["media-layout/"+key])}
   function applyCmsImageLayout(img,layout){
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     img.style.objectFit="cover";
     img.style.objectPosition=value.x+"% "+value.y+"%";
     img.style.transformOrigin=value.x+"% "+value.y+"%";
-    img.style.transform="scale("+(value.zoom/100)+")";
+    img.style.transform="scale("+(value.zoom/100)+") rotate("+value.rotation+"deg)";
   }
   function applyCmsBackgroundLayout(element,layout){
     const value=normalizeCmsMediaLayout(layout);
@@ -156,10 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
       element.style.setProperty("--cms-media-position",position);
       element.style.setProperty("--cms-media-origin",position);
       element.style.setProperty("--cms-media-scale",String(value.zoom/100));
+      element.style.setProperty("--cms-media-rotation",value.rotation+"deg");
     }else{
       element.style.backgroundPosition=position;
       element.style.transformOrigin=position;
-      element.style.transform="scale("+(value.zoom/100)+")";
+      element.style.transform="scale("+(value.zoom/100)+") rotate("+value.rotation+"deg)";
     }
   }
 
