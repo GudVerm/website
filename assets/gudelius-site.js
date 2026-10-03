@@ -309,6 +309,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyCmsText();
 
+  const modalFocusableSelector='a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function trapModalFocus(event,modal){
+    if(event.key!=="Tab"||!modal?.classList.contains("open"))return;
+    const focusable=[...modal.querySelectorAll(modalFocusableSelector)].filter(el=>!el.hidden&&el.getClientRects().length);
+    if(!focusable.length){event.preventDefault();return}
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  }
+
   const lazyBackgrounds = document.querySelectorAll('.lazy-bg[data-bg]');
 
   const loadBackground = (element) => {
@@ -369,6 +379,20 @@ document.addEventListener('DOMContentLoaded', () => {
       dropdowns.forEach((item) => item.classList.remove('open'));
       dropdown.classList.toggle('open', willOpen);
       toggle.setAttribute('aria-expanded', String(willOpen));
+    });
+  });
+
+  document.addEventListener('keydown',event=>{
+    if(event.key!=="Escape"||!mobileQuery.matches)return;
+    if(navlinks?.classList.contains("open")){
+      navlinks.classList.remove("open");
+      menuBtn?.setAttribute("aria-expanded","false");
+      menuBtn?.setAttribute("aria-label","Menü öffnen");
+      menuBtn?.focus();
+    }
+    dropdowns.forEach(dropdown=>{
+      dropdown.classList.remove("open");
+      dropdown.querySelector(".nav-dropdown-toggle")?.setAttribute("aria-expanded","false");
     });
   });
 
@@ -532,6 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCmsMedia(projectModal);
     projectModal.classList.add("open");
     projectModal.setAttribute("aria-hidden","false");
+    projectModal.setAttribute("role","dialog");
+    projectModal.setAttribute("aria-modal","true");
     document.body.classList.add("modal-open");
     projectModalClose?.focus();
     sendAnalyticsEvent("project_open",slug,record.title||slug);
@@ -550,7 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(event.target.closest("[data-project-modal-close]")||event.target.closest("#projectModalClose"))closeProjectModal();
   });
   document.addEventListener("keydown",event=>{
-    if(event.key==="Escape"&&projectModal?.classList.contains("open"))closeProjectModal();
+    if(projectModal?.classList.contains("open")){
+      trapModalFocus(event,projectModal);
+      if(event.key==="Escape"){closeProjectModal();return}
+    }
     if((event.key==="Enter"||event.key===" ")&&event.target.matches(".projects-grid .project")){
       event.preventDefault();openProjectModal(event.target);
     }
@@ -824,6 +853,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateEquipmentModalNav(device.slug);
     equipmentModal.classList.add('open');
     equipmentModal.setAttribute('aria-hidden','false');
+    equipmentModal.setAttribute('role','dialog');
+    equipmentModal.setAttribute('aria-modal','true');
     document.body.classList.add('modal-open');
     if(!modalWasOpen) equipmentClose?.focus();
   }
@@ -861,6 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', (event) => {
     if (!equipmentModal?.classList.contains('open')) return;
+    trapModalFocus(event,equipmentModal);
     if (event.key === 'Escape') {
       closeEquipmentModal();
       return;
