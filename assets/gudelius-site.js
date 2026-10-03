@@ -477,7 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
       location:"",
       year:"",
       services:fallback.services||[],
-      image:card?.querySelector("img")?.currentSrc||card?.querySelector("img")?.src||"assets/dummy-aussendienst-02.svg"
+      image:card?.querySelector("img")?.currentSrc||card?.querySelector("img")?.src||"assets/dummy-aussendienst-02.svg",
+      mediaKey:card?.querySelector("img")?.dataset.cmsMedia||""
     };
   }
   function registerFallbackProjectCards(){
@@ -495,10 +496,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const slug=card.dataset.project||"";
     const base=projectModalRecords.get(slug)||fallbackProjectRecord(card);
     const image=card.querySelector("img");
-    const record={...base,image:image?.currentSrc||image?.src||base.image};
+    const record={
+      ...base,
+      image:image?.currentSrc||image?.src||base.image,
+      mediaKey:image?.dataset.cmsMedia||base.mediaKey||""
+    };
 
     projectModalImage.src=record.image||"assets/dummy-aussendienst-02.svg";
     projectModalImage.alt=record.title||"Projekt";
+    if(record.mediaKey){
+      projectModalImage.dataset.cmsMedia=record.mediaKey;
+      delete projectModalImage.dataset.cmsApplied;
+    }else{
+      delete projectModalImage.dataset.cmsMedia;
+      delete projectModalImage.dataset.cmsApplied;
+    }
     projectModalTitle.textContent=record.title||"Projekt";
     projectModalDescription.textContent=record.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung.";
 
@@ -517,6 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     projectModalServices.hidden=!services.length;
 
     projectModalPreviousFocus=document.activeElement;
+    applyCmsMedia(projectModal);
     projectModal.classList.add("open");
     projectModal.setAttribute("aria-hidden","false");
     document.body.classList.add("modal-open");

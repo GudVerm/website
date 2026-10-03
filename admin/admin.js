@@ -33,7 +33,10 @@ const defaultProjects = [
 let projects=defaultProjects.map((item,index)=>({...item,order:index+1,visible:true,archived:false,featured:index===0}));
 
 const startPageImages = [
-  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/home-hero.webp" }
+  { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/home-hero.webp" },
+  { key:"startseite/projekte", name:"Startseite · Projekte", detail:"Bild der großen Projekte-Karte", fallback:"../assets/media/home-projekte.webp" },
+  { key:"startseite/technik", name:"Startseite · Technik", detail:"Bild der großen Technik-Karte", fallback:"../assets/media/home-technik.webp" },
+  { key:"startseite/unternehmen", name:"Startseite · Unternehmen", detail:"Bild der großen Unternehmens-Karte", fallback:"../assets/media/jost-gudelius.jpg" }
 ];
 
 const serviceImages = [
