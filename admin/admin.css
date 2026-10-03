@@ -1844,3 +1844,33 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   .media-crop-handle small{display:none}
   .media-crop-zoom-handle{bottom:46px}
 }
+
+
+/* CMS Cropper: direkte Bedienung plus Schieberegler */
+.media-crop-sliders{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 14px;
+  padding:12px;
+  border:1px solid #d8ded9;
+  border-radius:12px;
+  background:#fff;
+}
+.media-crop-sliders label{
+  display:grid;
+  grid-template-columns:72px minmax(0,1fr);
+  gap:9px;
+  align-items:center;
+  color:#526067;
+  font-size:.7rem;
+  font-weight:850;
+}
+.media-crop-sliders input[type="range"]{
+  width:100%;
+  min-width:0;
+  accent-color:#c7a80e;
+}
+@media(max-width:620px){
+  .media-crop-sliders{grid-template-columns:1fr}
+  .media-crop-sliders label{grid-template-columns:68px minmax(0,1fr)}
+}

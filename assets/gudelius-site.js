@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const parsed=Number(number);
       return Number.isFinite(parsed)?Math.min(max,Math.max(min,parsed)):fallback;
     };
-    return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,100,300,100),rotation:clamp(source.rotation,-180,180,0)};
+    return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,25,300,100),rotation:clamp(source.rotation,-180,180,0)};
   }
   function cmsMediaLayout(content,key){return normalizeCmsMediaLayout(content?.["media-layout/"+key])}
   function applyCmsImageLayout(img,layout){
