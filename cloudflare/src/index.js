@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.5";
+const WORKER_RELEASE = "2026-10-03.6";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "audit"]);
@@ -602,24 +602,28 @@ async function handleAdminHealth(env, cors, ctx) {
   let schema = {
     content: false,
     contact_requests: false,
-    analytics_events: false
+    analytics_events: false,
+    audit_log: false
   };
 
   try {
     await ensureContentTable(env);
     await ensureContactTable(env);
     await ensureAnalyticsTable(env);
+    await ensureAuditTable(env);
 
-    const [contentInfo, contactInfo, analyticsInfo] = await Promise.all([
+    const [contentInfo, contactInfo, analyticsInfo, auditInfo] = await Promise.all([
       env.DB.prepare("PRAGMA table_info(content)").all(),
       env.DB.prepare("PRAGMA table_info(contact_requests)").all(),
-      env.DB.prepare("PRAGMA table_info(analytics_events)").all()
+      env.DB.prepare("PRAGMA table_info(analytics_events)").all(),
+      env.DB.prepare("PRAGMA table_info(audit_log)").all()
     ]);
 
     schema = {
       content: hasColumns(contentInfo.results || [], ["key", "value", "updated_at"]),
       contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "created_at"]),
-      analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"])
+      analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"]),
+      audit_log: hasColumns(auditInfo.results || [], ["id", "actor_email", "action", "area", "target", "details", "created_at"])
     };
     dbOk = Object.values(schema).every(Boolean);
   } catch (error) {
@@ -917,6 +921,71 @@ async function handleAnalyticsAdmin(request, env, cors, url, ctx) {
     contact_breakdown: contactBreakdown,
     timeline
   }, 200, cors);
+}
+
+function auditAreaFromTarget(target) {
+  const value=String(target||"");
+  const raw=value.startsWith("media-layout/")?value.slice("media-layout/".length):value;
+  if(raw.startsWith("startseite/")) return "startseite";
+  if(raw.startsWith("leistungen/")||raw.startsWith("leistungsseiten/")) return "leistungen";
+  if(raw.startsWith("projects/")||raw.startsWith("projekte/")) return "projekte";
+  if(raw.startsWith("equipment/")||raw.startsWith("technik/")) return "technik";
+  if(raw.startsWith("unternehmen/")) return "unternehmen";
+  if(raw.startsWith("kontakt/")) return "kontakt";
+  return "cms";
+}
+
+async function ensureAuditTable(env) {
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS audit_log ("+
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, "+
+    "actor_email TEXT NOT NULL DEFAULT '', "+
+    "action TEXT NOT NULL, "+
+    "area TEXT NOT NULL, "+
+    "target TEXT NOT NULL DEFAULT '', "+
+    "details TEXT NOT NULL DEFAULT '', "+
+    "created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_audit_log_actor_area ON audit_log(actor_email, area)").run();
+}
+
+async function writeAudit(env, principal, action, area, target="", details="") {
+  if(!principal?.authorized) return;
+  try{
+    await ensureAuditTable(env);
+    await env.DB.prepare(
+      "INSERT INTO audit_log (actor_email, action, area, target, details, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
+    ).bind(
+      cleanSingleLine(principal.email||principal.mode||"",240),
+      cleanSingleLine(action,80),
+      cleanSingleLine(area,80),
+      cleanSingleLine(target,240),
+      cleanSingleLine(details,500)
+    ).run();
+  }catch(error){
+    console.error("Audit-Log write failed:",error);
+  }
+}
+
+async function handleAdminAudit(env, cors, url) {
+  await ensureAuditTable(env);
+  const limit=clampNumber(url.searchParams.get("limit"),1,500,100);
+  const actor=cleanSingleLine(url.searchParams.get("actor")||"",240);
+  const area=cleanSingleLine(url.searchParams.get("area")||"",80);
+  const from=cleanSingleLine(url.searchParams.get("from")||"",32);
+  const to=cleanSingleLine(url.searchParams.get("to")||"",32);
+  const clauses=[];
+  const bindings=[];
+  if(actor){clauses.push("actor_email = ?");bindings.push(actor)}
+  if(area){clauses.push("area = ?");bindings.push(area)}
+  if(from){clauses.push("created_at >= ?");bindings.push(from)}
+  if(to){clauses.push("created_at <= ?");bindings.push(to)}
+  const where=clauses.length?" WHERE "+clauses.join(" AND "):"";
+  const {results=[]}=await env.DB.prepare(
+    "SELECT id, actor_email, action, area, target, details, created_at FROM audit_log"+where+" ORDER BY id DESC LIMIT ?"
+  ).bind(...bindings,limit).all();
+  return json({entries:results,limit},200,cors);
 }
 
 async function ensureContentTable(env) {
