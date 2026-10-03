@@ -69,6 +69,12 @@ const companyImages = [
   { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"../assets/media/pruefsachverstaendiger.jpg" }
 ];
 
+const techniqueGroupImages = [
+  { key:"technik/gruppen/aussendienst", name:"Technik · Außendienst", detail:"Großes Gruppenbild oberhalb der Außendienst-Geräte", fallback:"../assets/media/2026-10-02-technik-aussendienst.webp" },
+  { key:"technik/gruppen/3d-drohne", name:"Technik · 3D & Drohne", detail:"Großes Gruppenbild oberhalb der 3D- und Drohnen-Geräte", fallback:"../assets/media/2026-10-02-technik-digital.webp" },
+  { key:"technik/gruppen/programme-arbeitsplatz", name:"Technik · Programme & Arbeitsplatz", detail:"Großes Gruppenbild oberhalb der Software- und Arbeitsplatz-Einträge", fallback:"../assets/media/2026-10-02-technik-software.webp" }
+];
+
 const apiUrlInput=document.getElementById("apiUrl");
 const tokenInput=document.getElementById("adminToken");
 const saveButton=document.getElementById("saveConnection");
@@ -78,6 +84,7 @@ const grid=document.getElementById("equipmentGrid");
 const projectGrid=document.getElementById("projectGrid");
 const startPageGrid=document.getElementById("startPageGrid");
 const companyGrid=document.getElementById("companyGrid");
+const techniqueGroupGrid=document.getElementById("technikGroupGrid");
 const service1Grid=document.getElementById("service1Grid");
 const service2Grid=document.getElementById("service2Grid");
 const service3Grid=document.getElementById("service3Grid");
@@ -3613,6 +3620,7 @@ function render(){
   renderCollection(servicePage4Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/drohnenvermessung/")));
 
   renderCollection(companyGrid, companyImages);
+  renderCollection(techniqueGroupGrid, techniqueGroupImages);
   renderCollection(grid, equipment);
   renderCollection(projectGrid, projects);
 }

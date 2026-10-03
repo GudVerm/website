@@ -44,6 +44,18 @@
         <p>Geräte und Software werden als erweiterbare Sammlung gepflegt. Die 13 bestehenden Einträge bleiben als sichere Fallback-Basis erhalten.</p>
       </section>
 
+      <section class="cms-subpanel">
+        <div class="cms-subpanel-head compact">
+          <span class="cms-subpanel-icon">03</span>
+          <div>
+            <span class="kicker">Gruppenbilder</span>
+            <h3>Übersichtsbilder der Technikbereiche</h3>
+            <p>Diese drei Bilder werden unabhängig von den einzelnen Geräten zugeschnitten und gespeichert.</p>
+          </div>
+        </div>
+        <section id="technikGroupGrid" class="equipment-grid compact-grid" aria-live="polite"></section>
+      </section>
+
       <section class="cms-subpanel technik-picker">
         <div class="cms-subpanel-head compact">
           <span class="cms-subpanel-icon">13</span>
@@ -74,6 +86,28 @@
       <section id="technikEditor" class="technik-editor-host" aria-live="polite"></section>
     </section>
   </main>
+
+  <template id="equipmentTemplate">
+    <article class="equipment-card">
+      <div class="image-wrap">
+        <img alt="">
+        <span class="badge">Bild</span>
+      </div>
+      <div class="card-body">
+        <h3></h3>
+        <p class="detail"></p>
+        <label class="file-label">
+          <span>Neues Bild auswählen</span>
+          <input class="file-input" type="file" accept="image/jpeg,image/png,image/webp,image/avif">
+        </label>
+        <div class="card-actions">
+          <button class="upload" type="button">Bild hochladen</button>
+          <button class="reset secondary" type="button">Cloudflare-Bild löschen</button>
+        </div>
+        <div class="card-status status">Noch kein Upload in dieser Sitzung.</div>
+      </div>
+    </article>
+  </template>
 
   <template id="technikEditorTemplate">
     <article class="cms-subpanel technik-editor-card">
@@ -146,6 +180,6 @@
   </template>
 
   <script src="./config.js?v=20260924-44"></script>
-  <script src="./admin.js?v=20260924-49"></script>
+  <script src="./admin.js?v=20261003-02"></script>
 </body>
 </html>

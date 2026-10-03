@@ -648,6 +648,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const equipmentFallbackBySlug = new Map(Object.values(equipmentData).flatMap(group=>group.devices).map(device=>[device.slug,{...device}]));
   const equipmentGroupKeys = {'Außendienst':'aussendienst','3D & Drohne':'digital','Programme & Arbeitsplatz':'software'};
+  const equipmentGroupMedia = {
+    aussendienst:{image:'assets/media/2026-10-02-technik-aussendienst.webp',mediaKey:'technik/gruppen/aussendienst',alt:'Vermessungstechnik im Außeneinsatz'},
+    digital:{image:'assets/media/2026-10-02-technik-digital.webp',mediaKey:'technik/gruppen/3d-drohne',alt:'RTK-Drohne und Vermessungstechnik im Außeneinsatz'},
+    software:{image:'assets/media/2026-10-02-technik-software.webp',mediaKey:'technik/gruppen/programme-arbeitsplatz',alt:'Arbeitsplatz für Auswertung und Datenaufbereitung'}
+  };
   function escapeEquipmentHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
   function equipmentFallbackImage(group){if(group==='3D & Drohne')return 'assets/dummy-3d-01.svg';if(group==='Programme & Arbeitsplatz')return 'assets/dummy-software-01.svg';return 'assets/dummy-aussendienst-01.svg'}
   function equipmentCmsValue(content,slug,field,fallback=''){const value=content['technik/'+slug+'/'+field];return typeof value==='string'?value:fallback}
@@ -659,7 +664,13 @@ document.addEventListener('DOMContentLoaded', () => {
       card.removeAttribute('role');
       card.removeAttribute('aria-label');
       const main=card.querySelector(':scope > img');
-      if(main){const first=devices[0];delete main.dataset.cmsApplied;main.src=first.image;main.dataset.cmsMedia=first.mediaKey;main.alt=first.name}
+      const groupMedia=equipmentGroupMedia[card.dataset.equipment];
+      if(main&&groupMedia){
+        delete main.dataset.cmsApplied;
+        main.src=groupMedia.image;
+        main.dataset.cmsMedia=groupMedia.mediaKey;
+        main.alt=groupMedia.alt;
+      }
       const list=card.querySelector('.equip-copy ul');
       if(list){
         list.innerHTML='';
