@@ -395,7 +395,7 @@ function normalizeMediaLayout(value){
     x:clampMediaNumber(source.x,0,100,50),
     y:clampMediaNumber(source.y,0,100,50),
     zoom:clampMediaNumber(source.zoom,100,300,100),
-    rotation:clampMediaNumber(source.rotation,-180,180,0)
+    rotation:clampMediaNumber(source.rotation,-3600,3600,0)
   };
 }
 async function loadMediaLayoutContent(){
