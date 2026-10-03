@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.1";
+const WORKER_RELEASE = "2026-10-03.2";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt"]);
@@ -29,10 +29,7 @@ export default {
         adminPrincipal = await resolveAdminPrincipal(request, env, ctx);
         if (!adminPrincipal.authorized) {
           if (requestedPathname === "/admin" || requestedPathname.startsWith("/admin/")) {
-            return new Response("Zugriff nicht erlaubt.", {
-              status: 403,
-              headers: adminUiHeaders("text/plain; charset=utf-8")
-            });
+            return adminAccessDeniedResponse(adminPrincipal);
           }
           return json({ error: "Forbidden" }, 403, cors);
         }
@@ -616,7 +613,8 @@ async function handleAdminHealth(env, cors, ctx) {
     brevo_api_key: Boolean(env.BREVO_API_KEY),
     brevo_from_email: Boolean(env.BREVO_FROM_EMAIL),
     contact_email_to: Boolean(env.CONTACT_EMAIL_TO),
-    allowed_origin: getAllowedOrigins(env).length > 0
+    allowed_origin: getAllowedOrigins(env).length > 0,
+    admin_email_allowlist: allowedAdminEmails(env).length > 0
   };
 
   const ok = Object.values(bindings).every(Boolean) && Object.values(schema).every(Boolean);
@@ -628,6 +626,7 @@ async function handleAdminHealth(env, cors, ctx) {
     public_media_enabled: isPublicMediaEnabled(env),
     admin_token_fallback_enabled: isAdminTokenFallbackEnabled(env),
     admin_token_configured: Boolean(env.CMS_ADMIN_TOKEN),
+    admin_allowed_email_count: allowedAdminEmails(env).length,
     bindings,
     schema
   }, ok ? 200 : 503, cors);
@@ -1152,6 +1151,47 @@ function normalizeAdminRoute(pathname, method) {
 
 function isProtectedAdminPath(pathname) {
   return pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
+}
+
+function adminAccessDeniedResponse(principal) {
+  const email = escapeHtml(cleanSingleLine(principal?.email || "", 240));
+  const identity = email
+    ? `<p class="identity">Aktuelle Access-Sitzung: <strong>${email}</strong></p>`
+    : `<p class="identity">Es konnte keine freigegebene Access-Identität ermittelt werden.</p>`;
+
+  const body = `<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Zugriff nicht erlaubt · Gudelius Admin</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3f1ea;color:#172026;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{width:min(560px,100%);padding:30px;border:1px solid #dce1dd;border-radius:22px;background:#fff;box-shadow:0 16px 46px rgba(20,32,38,.09)}
+    .kicker{color:#9b8320;font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+    h1{margin:8px 0 10px;font-size:clamp(1.8rem,5vw,2.5rem)}p{color:#617077;line-height:1.55}.identity{padding:12px 14px;border-radius:12px;background:#f5f5f0;color:#37444a;overflow-wrap:anywhere}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;border-radius:10px;background:#172026;color:#fff;font-size:.78rem;font-weight:850;text-decoration:none}.btn.secondary{background:#edf0ed;color:#172026}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="kicker">GudeliusVermessung · Admin</div>
+    <h1>Zugriff nicht erlaubt</h1>
+    <p>Dieses Cloudflare-Access-Konto ist für den Adminbereich nicht freigeschaltet.</p>
+    ${identity}
+    <div class="actions">
+      <a class="btn" href="/cdn-cgi/access/logout">Abmelden und anderes Konto verwenden</a>
+      <a class="btn secondary" href="/admin/">Erneut prüfen</a>
+    </div>
+  </main>
+</body>
+</html>`;
+
+  return new Response(body, {
+    status: 403,
+    headers: adminUiHeaders("text/html; charset=utf-8")
+  });
 }
 
 function allowedAdminEmails(env) {

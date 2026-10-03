@@ -321,6 +321,69 @@ if(cmsAccessMode && connectionStatus){
   setStatus(connectionStatus,"Cloudflare Access-Modus aktiv. Kein Admin-Token im Browser erforderlich.",true);
 }
 
+function ensureAdminSessionUi(){
+  if(!cmsAccessMode)return null;
+  const header=document.querySelector(".admin-header");
+  if(!header)return null;
+
+  let actions=header.querySelector(".admin-header-actions");
+  if(!actions){
+    const existing=[...header.children].filter(child=>child!==header.firstElementChild);
+    actions=document.createElement("div");
+    actions.className="admin-header-actions";
+    existing.forEach(child=>actions.appendChild(child));
+    header.appendChild(actions);
+  }
+
+  let session=actions.querySelector(".admin-session");
+  if(session)return session;
+
+  session=document.createElement("div");
+  session.className="admin-session";
+  session.innerHTML=`
+    <div class="admin-session-copy">
+      <span>Angemeldet als</span>
+      <strong class="admin-session-email">wird geprüft …</strong>
+    </div>
+    <a class="admin-session-logout" href="#" rel="nofollow">Abmelden</a>
+  `;
+  actions.appendChild(session);
+
+  const logout=session.querySelector(".admin-session-logout");
+  const logoutUrl=new URL("/cdn-cgi/access/logout",getApi()||location.origin);
+  logout.href=logoutUrl.href;
+  return session;
+}
+
+async function loadAdminSessionUi(){
+  const session=ensureAdminSessionUi();
+  if(!session||!getApi())return;
+  const emailNode=session.querySelector(".admin-session-email");
+  try{
+    const response=await fetch(getApi()+"/api/admin/session",{
+      headers:adminHeaders(),
+      credentials:"include",
+      cache:"no-store"
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok){
+      emailNode.textContent="Sitzung nicht freigegeben";
+      session.classList.add("is-error");
+      return;
+    }
+    const label=(data.email||"Cloudflare Access").trim();
+    emailNode.textContent=label;
+    session.classList.toggle("is-access",data.auth_mode==="access");
+  }catch(error){
+    emailNode.textContent="Sitzung konnte nicht geprüft werden";
+    session.classList.add("is-error");
+  }
+}
+
+if(cmsAccessMode){
+  loadAdminSessionUi();
+}
+
 if(saveButton){
   saveButton.addEventListener("click",()=>{
     const api=getApi();
