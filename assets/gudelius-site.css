@@ -1150,3 +1150,22 @@ body.modal-open{overflow:hidden}
 @media print{
   .image-review-control{display:none!important}
 }
+
+
+/* CMS-Crop: Portrait innerhalb seiner vorgesehenen Bildfläche halten */
+.portrait-frame{
+  width:100%;
+  height:510px;
+  overflow:hidden;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  background:#e9ece9;
+}
+.portrait-frame .portrait{
+  width:100%;
+  height:100%;
+  box-shadow:none;
+}
+@media(max-width:650px){
+  .portrait-frame{height:430px}
+}
