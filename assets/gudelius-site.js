@@ -321,6 +321,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyCmsText();
 
+  function setupTurnstile(){
+    const siteKey=String(window.GUDELIUS_TURNSTILE_SITE_KEY||"").trim();
+    if(!siteKey)return;
+    const forms=[...document.querySelectorAll('form[onsubmit*="sendMail"]')];
+    if(!forms.length)return;
+    forms.forEach(form=>{
+      if(form.querySelector(".cf-turnstile"))return;
+      const widget=document.createElement("div");
+      widget.className="cf-turnstile";
+      widget.dataset.sitekey=siteKey;
+      widget.dataset.theme="auto";
+      const submit=form.querySelector('button[type="submit"]');
+      submit?.before(widget);
+    });
+    if(!document.querySelector('script[data-gudelius-turnstile]')){
+      const script=document.createElement("script");
+      script.src="https://challenges.cloudflare.com/turnstile/v0/api.js";
+      script.async=true;script.defer=true;script.dataset.gudeliusTurnstile="1";
+      document.head.appendChild(script);
+    }
+  }
+  setupTurnstile();
+
   const modalFocusableSelector='a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
   function trapModalFocus(event,modal){
     if(event.key!=="Tab"||!modal?.classList.contains("open"))return;
@@ -939,6 +962,7 @@ async function sendMail(e) {
     subject: form.querySelector("#subject")?.value || "",
     message: form.querySelector("#message")?.value || "",
     website: form.querySelector('[name="website"]')?.value || "",
+    turnstileToken: form.querySelector('[name="cf-turnstile-response"]')?.value || "",
     source: window.location.pathname
   };
 
@@ -964,6 +988,7 @@ async function sendMail(e) {
 
     window.gudeliusTrack?.("form_submit","contact-form","Projektanfrage");
     form.reset();
+    try{window.turnstile?.reset?.()}catch{}
     if (status) {
       status.textContent = "Vielen Dank. Ihre Anfrage wurde erfolgreich übermittelt.";
       status.classList.add("success");
