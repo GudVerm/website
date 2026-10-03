@@ -395,7 +395,7 @@ function normalizeMediaLayout(value){
     x:clampMediaNumber(source.x,0,100,50),
     y:clampMediaNumber(source.y,0,100,50),
     zoom:clampMediaNumber(source.zoom,25,300,100),
-    rotation:clampMediaNumber(source.rotation,-3600,3600,0)
+    rotation:clampMediaNumber(source.rotation,-180,180,0)
   };
 }
 async function loadMediaLayoutContent(){
@@ -412,22 +412,6 @@ async function loadMediaLayoutContent(){
   }
   return mediaLayoutContentPromise;
 }
-function applyAdminMediaLayout(img,layout){
-  const value=normalizeMediaLayout(layout);
-  const stage=img.closest(".media-crop-stage");
-  img.style.objectFit="cover";
-  img.style.objectPosition=value.x+"% "+value.y+"%";
-  img.style.transformOrigin=value.x+"% "+value.y+"%";
-  img.style.padding="0";
-  if(stage){
-    stage.style.setProperty("--media-crop-zoom",String(value.zoom/100));
-    stage.style.setProperty("--media-crop-x",value.x+"%");
-    stage.style.setProperty("--media-crop-y",value.y+"%");
-    stage.style.setProperty("--media-crop-rotation",value.rotation+"deg");
-  }else{
-    img.style.transform="scale("+(value.zoom/100)+") rotate("+value.rotation+"deg)";
-  }
-}
 async function deleteMediaLayout(mediaKey){
   const response=await fetch(contentUrl(mediaLayoutContentKey(mediaKey)),{method:"DELETE",headers:adminHeaders()});
   if(!response.ok&&response.status!==404){
@@ -442,7 +426,7 @@ function attachMediaCropEditor(card,img,item,status){
   const body=card.querySelector(".technik-media-body,.card-body")||card;
   if(!imageWrap||!body)return;
 
-  imageWrap.classList.add("media-crop-stage","media-crop-stage-v2");
+  imageWrap.classList.add("media-crop-stage");
   imageWrap.tabIndex=0;
   imageWrap.setAttribute("role","application");
   imageWrap.setAttribute("aria-label","Bild direkt verschieben, zoomen und drehen");
@@ -472,7 +456,7 @@ function attachMediaCropEditor(card,img,item,status){
   editor.innerHTML=`
     <div class="media-crop-direct-help">
       <strong>Direkt im Bild bearbeiten</strong>
-      <span>Ziehen = verschieben · Zoomgriff unten rechts ziehen oder Mausrad/Pinch · Drehgriff oben rechts ziehen oder Zwei-Finger-Drehung.</span>
+      <span>Ziehen = verschieben · Zoomgriff/Mausrad/Pinch = zoomen · Drehgriff/Zwei-Finger-Geste = drehen · alternativ die Regler verwenden.</span>
     </div>
     <div class="media-crop-sliders">
       <label><span>Horizontal</span><input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"></label>
@@ -498,7 +482,6 @@ function attachMediaCropEditor(card,img,item,status){
   const rotationInput=editor.querySelector(".media-crop-rotation");
 
   let layout=normalizeMediaLayout(null);
-  let lastMetrics=null;
   const pointers=new Map();
   let panState=null;
   let pinchState=null;
@@ -510,7 +493,6 @@ function attachMediaCropEditor(card,img,item,status){
     while(angle<-180)angle+=360;
     return angle;
   }
-  function clamp(value,min,max){return Math.min(max,Math.max(min,value))}
   function pointerPoint(event){return {x:event.clientX,y:event.clientY}}
   function pointDistance(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
   function pointAngle(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
@@ -536,8 +518,6 @@ function attachMediaCropEditor(card,img,item,status){
   function render(){
     layout=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
     const metrics=measure(layout);
-    lastMetrics=metrics;
-
     const left=metrics.overflowX>0?-(metrics.overflowX*(layout.x/100)):(metrics.stageW-metrics.width)/2;
     const top=metrics.overflowY>0?-(metrics.overflowY*(layout.y/100)):(metrics.stageH-metrics.height)/2;
 

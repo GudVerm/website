@@ -1610,119 +1610,41 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 
 /* CMS Bildausschnitt-Editor */
 .media-crop-stage{
-  overflow:hidden;
-  cursor:grab;
-  touch-action:none;
-  user-select:none;
-  background:#172026;
-}
-.media-crop-stage.is-crop-dragging{cursor:grabbing}
-.media-crop-stage img{
-  will-change:transform,object-position;
-  transition:transform .08s linear;
-}
-.media-crop-stage.is-crop-dragging img{transition:none}
-.media-crop-stage-hero{aspect-ratio:16/9}
-.media-crop-editor{
-  display:grid;
-  gap:10px;
-  margin-top:16px;
-  padding:14px;
-  border:1px solid #d8ded9;
-  border-radius:14px;
-  background:#fafaf6;
-}
-.media-crop-head{
-  display:flex;
-  justify-content:space-between;
-  gap:14px;
-  align-items:flex-start;
-}
-.media-crop-head strong{display:block;font-size:.82rem}
-.media-crop-head span{display:block;margin-top:2px;color:var(--muted);font-size:.68rem;line-height:1.35}
-.media-crop-head .media-crop-value{
-  flex:0 0 auto;
-  margin:0;
-  padding:4px 7px;
-  border-radius:999px;
-  background:#ecefe9;
-  color:#435058;
-  font-size:.64rem;
-  font-weight:850;
-}
-.media-crop-editor label{
-  display:grid;
-  grid-template-columns:74px minmax(0,1fr);
-  gap:10px;
-  align-items:center;
-  color:#526067;
-  font-size:.7rem;
-  font-weight:800;
-}
-.media-crop-editor input[type="range"]{
-  width:100%;
-  accent-color:#c7a80e;
-}
-.media-crop-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
-.media-crop-actions button{font-size:.7rem;padding:9px 11px}
-.media-crop-status{margin-top:0}
-@media(max-width:620px){
-  .media-crop-head{display:block}
-  .media-crop-head .media-crop-value{display:inline-block;margin-top:8px}
-  .media-crop-editor label{grid-template-columns:62px minmax(0,1fr)}
-  .media-crop-actions{display:grid;grid-template-columns:1fr 1fr}
-  .media-crop-actions .media-crop-save{grid-column:1/-1;grid-row:1}
-}
-
-
-/* Crop-Zoom Fix: ueberstimmt alte Technik-/Kartenregeln sicher */
-.media-crop-stage{
-  --media-crop-zoom:1;
-  --media-crop-x:50%;
-  --media-crop-y:50%;
-}
-.media-crop-stage>img,
-.media-crop-stage img{
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  object-fit:cover!important;
-  object-position:var(--media-crop-x) var(--media-crop-y)!important;
-  padding:0!important;
-  margin:0!important;
-  transform:scale(var(--media-crop-zoom))!important;
-  transform-origin:var(--media-crop-x) var(--media-crop-y)!important;
-}
-
-
-/* CMS Bildausschnitt 03.10.2026: direkte Bearbeitung im Bild */
-.media-crop-stage{
-  --media-crop-rotation:0deg;
   position:relative;
   overflow:hidden!important;
   cursor:grab;
   touch-action:none;
+  user-select:none;
+  isolation:isolate;
   outline:none;
+  background:#111b21!important;
 }
-.media-crop-stage:focus-visible{
-  box-shadow:inset 0 0 0 3px rgba(199,168,14,.72);
-}
+.media-crop-stage-hero{aspect-ratio:16/9}
 .media-crop-stage.is-crop-dragging{cursor:grabbing}
+.media-crop-stage.is-crop-zooming,
 .media-crop-stage.is-crop-rotating{cursor:crosshair}
-.media-crop-stage>img,
+.media-crop-stage:focus-visible{
+  box-shadow:inset 0 0 0 3px rgba(241,214,90,.9)!important;
+}
 .media-crop-stage img{
-  transform:scale(var(--media-crop-zoom)) rotate(var(--media-crop-rotation))!important;
-  transform-origin:var(--media-crop-x) var(--media-crop-y)!important;
+  pointer-events:none!important;
   user-select:none!important;
-  -webkit-user-drag:none;
+  -webkit-user-drag:none!important;
+  transition:none!important;
+  will-change:left,top,width,height,transform!important;
+  background:transparent!important;
+}
+.media-crop-stage .badge{
+  z-index:6;
   pointer-events:none;
 }
+
 .media-crop-hud{
   position:absolute;
   left:10px;
   right:10px;
   bottom:10px;
-  z-index:5;
+  z-index:10;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -1733,81 +1655,18 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .media-crop-hud strong{
   padding:6px 9px;
   border-radius:999px;
-  background:rgba(17,28,34,.84);
+  background:rgba(17,28,34,.86);
   color:#fff;
   box-shadow:0 4px 14px rgba(0,0,0,.2);
   backdrop-filter:blur(6px);
   font-size:.62rem;
   line-height:1.2;
 }
-.media-crop-hud strong{font-variant-numeric:tabular-nums;white-space:nowrap}
-.media-crop-rotate{
-  position:absolute;
-  top:10px;
-  right:10px;
-  z-index:7;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  min-height:38px;
-  padding:7px 10px;
-  border:1px solid rgba(255,255,255,.6);
-  border-radius:999px;
-  background:rgba(255,255,255,.94);
-  color:#172026;
-  box-shadow:0 6px 18px rgba(0,0,0,.18);
-  cursor:crosshair;
-  touch-action:none;
-}
-.media-crop-rotate span{font-size:1.05rem;font-weight:900}
-.media-crop-rotate small{font-size:.62rem;font-weight:900}
-.media-crop-editor-direct{
-  gap:12px;
-}
-.media-crop-direct-help{
-  display:grid;
-  gap:3px;
-  color:#526067;
-}
-.media-crop-direct-help strong{font-size:.8rem;color:#172026}
-.media-crop-direct-help span{font-size:.7rem;line-height:1.45}
-.media-crop-editor-direct .media-crop-actions{
-  display:grid;
-  grid-template-columns:1.25fr .75fr;
-}
-.media-crop-editor-direct .media-crop-actions button{
-  width:100%;
-}
-@media(max-width:620px){
-  .media-crop-hint{display:none}
-  .media-crop-hud{justify-content:flex-end}
-  .media-crop-rotate small{display:none}
-  .media-crop-rotate{width:40px;height:40px;justify-content:center;padding:0}
-  .media-crop-editor-direct .media-crop-actions{grid-template-columns:1fr}
+.media-crop-hud strong{
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
 }
 
-
-/* CMS Cropper V2: robuste direkte Manipulation */
-.media-crop-stage-v2{
-  position:relative!important;
-  overflow:hidden!important;
-  touch-action:none!important;
-  cursor:grab!important;
-  background:#111b21!important;
-  isolation:isolate;
-}
-.media-crop-stage-v2.is-crop-dragging{cursor:grabbing!important}
-.media-crop-stage-v2 img{
-  pointer-events:none!important;
-  user-select:none!important;
-  -webkit-user-drag:none!important;
-  transition:none!important;
-  will-change:left,top,width,height,transform!important;
-}
-.media-crop-stage-v2 .badge{
-  z-index:6;
-  pointer-events:none;
-}
 .media-crop-handle{
   position:absolute;
   z-index:12;
@@ -1830,23 +1689,24 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .media-crop-handle small{font-size:.62rem;font-weight:900;line-height:1}
 .media-crop-rotate-handle{top:10px;right:10px}
 .media-crop-zoom-handle{right:10px;bottom:48px}
-.media-crop-stage-v2 .media-crop-hud{z-index:10}
-.media-crop-stage-v2:focus-visible{
-  box-shadow:inset 0 0 0 3px rgba(241,214,90,.9)!important;
-}
-@media(max-width:620px){
-  .media-crop-handle{
-    width:42px;
-    height:42px;
-    justify-content:center;
-    padding:0;
-  }
-  .media-crop-handle small{display:none}
-  .media-crop-zoom-handle{bottom:46px}
-}
 
+.media-crop-editor{
+  display:grid;
+  gap:12px;
+  margin-top:16px;
+  padding:14px;
+  border:1px solid #d8ded9;
+  border-radius:14px;
+  background:#fafaf6;
+}
+.media-crop-direct-help{
+  display:grid;
+  gap:3px;
+  color:#526067;
+}
+.media-crop-direct-help strong{font-size:.8rem;color:#172026}
+.media-crop-direct-help span{font-size:.7rem;line-height:1.45}
 
-/* CMS Cropper: direkte Bedienung plus Schieberegler */
 .media-crop-sliders{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -1870,7 +1730,33 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   min-width:0;
   accent-color:#c7a80e;
 }
+
+.media-crop-actions{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:8px;
+  margin-top:2px;
+}
+.media-crop-actions button{
+  width:100%;
+  font-size:.7rem;
+  padding:9px 11px;
+}
+.media-crop-status{margin-top:0}
+
 @media(max-width:620px){
+  .media-crop-hint{display:none}
+  .media-crop-hud{justify-content:flex-end}
+  .media-crop-handle{
+    width:42px;
+    height:42px;
+    justify-content:center;
+    padding:0;
+  }
+  .media-crop-handle small{display:none}
+  .media-crop-zoom-handle{bottom:46px}
   .media-crop-sliders{grid-template-columns:1fr}
   .media-crop-sliders label{grid-template-columns:68px minmax(0,1fr)}
+  .media-crop-actions{grid-template-columns:1fr}
 }
+
