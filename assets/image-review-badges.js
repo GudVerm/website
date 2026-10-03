@@ -2,6 +2,7 @@
   "use strict";
 
   const REVIEW_DATE = "02.10.2026";
+  const STORAGE_KEY = "gudelius-image-review-badges";
   const NEW_IMAGE_RE = /(?:^|\/)(?:home-[^/?#]+\.webp|2026-10-02-[^/?#]+\.webp)(?:[?#].*)?$/i;
   const EXCLUDE_RE = /(?:gudelius-logo|favicon|apple-touch-icon)/i;
 
@@ -24,6 +25,41 @@
 
   const entries=new Map();
   let framePending=false;
+  let reviewEnabled=true;
+
+  function readReviewEnabled(){
+    try{
+      const stored=localStorage.getItem(STORAGE_KEY);
+      return stored===null ? true : stored!=="0";
+    }catch{
+      return true;
+    }
+  }
+
+  function syncReviewToggles(){
+    document.querySelectorAll("[data-image-review-toggle]").forEach(input=>{
+      if(input instanceof HTMLInputElement) input.checked=reviewEnabled;
+    });
+  }
+
+  function setReviewEnabled(enabled,persist=true){
+    reviewEnabled=Boolean(enabled);
+    layer.style.display=reviewEnabled?"":"none";
+    if(persist){
+      try{localStorage.setItem(STORAGE_KEY,reviewEnabled?"1":"0")}catch{}
+    }
+    syncReviewToggles();
+    if(reviewEnabled)schedule();
+  }
+
+  function bindReviewToggles(){
+    document.querySelectorAll("[data-image-review-toggle]").forEach(input=>{
+      if(!(input instanceof HTMLInputElement)||input.dataset.imageReviewBound==="1")return;
+      input.dataset.imageReviewBound="1";
+      input.addEventListener("change",()=>setReviewEnabled(input.checked,true));
+    });
+    syncReviewToggles();
+  }
 
   function sourceFor(element){
     if(element.tagName==="IMG") return element.currentSrc||element.getAttribute("src")||"";
@@ -89,7 +125,9 @@
   }
 
   function position(){
-    framePending=false;refresh();
+    framePending=false;
+    if(!reviewEnabled)return;
+    refresh();
     const vw=innerWidth,vh=innerHeight;
     const modalOpen=document.body.classList.contains("modal-open");
     for(const [el,entry] of entries){
@@ -107,10 +145,13 @@
     }
   }
 
-  function schedule(){if(framePending)return;framePending=true;requestAnimationFrame(position)}
+  function schedule(){if(!reviewEnabled||framePending)return;framePending=true;requestAnimationFrame(position)}
   addEventListener("scroll",schedule,{passive:true});
   addEventListener("resize",schedule,{passive:true});
-  addEventListener("load",()=>{collect();schedule()});
-  new MutationObserver(()=>{collect();schedule()}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","data-bg"]});
+  addEventListener("load",()=>{bindReviewToggles();collect();schedule()});
+  new MutationObserver(()=>{bindReviewToggles();collect();schedule()}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["src","style","data-bg"]});
+  reviewEnabled=readReviewEnabled();
+  bindReviewToggles();
+  setReviewEnabled(reviewEnabled,false);
   collect();
 })();
