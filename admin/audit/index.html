@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Audit-Log · Gudelius Admin</title>
+  <link rel="stylesheet" href="../admin.css?v=20261003-02">
+</head>
+<body data-admin-page="audit">
+  <header class="admin-header">
+    <div><span class="kicker">GudeliusVermessung</span><h1>Audit-Log</h1></div>
+    <a class="ghost" href="../../">Website öffnen ↗</a>
+  </header>
+  <nav class="admin-nav" aria-label="Admin-Bereiche">
+    <div class="admin-nav-inner">
+      <a class="admin-nav-link" data-page="verbindung" href="../verbindung/">Verbindung</a>
+      <a class="admin-nav-link" data-page="startseite" href="../startseite/">Startseite</a>
+      <a class="admin-nav-link" data-page="leistungen" href="../leistungen/">Leistungen</a>
+      <a class="admin-nav-link" data-page="unternehmen" href="../unternehmen/">Unternehmen</a>
+      <a class="admin-nav-link" data-page="technik" href="../technik/">Technik</a>
+      <a class="admin-nav-link" data-page="projekte" href="../projekte/">Projekte</a>
+      <a class="admin-nav-link" data-page="anfragen" href="../anfragen/">Anfragen</a>
+      <a class="admin-nav-link" data-page="statistik" href="../statistik/">Statistik</a>
+      <a class="admin-nav-link" data-page="kontakt" href="../kontakt/">Kontakt</a>
+      <a class="admin-nav-link" data-page="audit" href="./">Audit-Log</a>
+    </div>
+  </nav>
+  <main class="wrap admin-page-wrap">
+    <section class="section-head admin-section-head">
+      <div><span class="kicker">Betrieb</span><h2>Änderungsprotokoll</h2></div>
+      <p>Protokolliert wichtige CMS-Aktionen ohne Passwörter, Tokens oder Inhalte aus Kontaktformularen.</p>
+    </section>
+
+    <section class="cms-subpanel">
+      <div class="cms-subpanel-head compact">
+        <span class="cms-subpanel-icon">LOG</span>
+        <div><span class="kicker">Filter</span><h3>Änderungen durchsuchen</h3><p>Nach Benutzer, Bereich und Zeitraum filtern.</p></div>
+      </div>
+      <div class="text-editor-grid">
+        <label><span>Benutzer</span><select id="auditActor"><option value="">Alle Benutzer</option></select></label>
+        <label><span>Bereich</span><select id="auditArea"><option value="">Alle Bereiche</option><option>startseite</option><option>leistungen</option><option>projekte</option><option>technik</option><option>unternehmen</option><option>kontakt</option><option>anfragen</option><option>cms</option></select></label>
+        <label><span>Von</span><input id="auditFrom" type="date"></label>
+        <label><span>Bis</span><input id="auditTo" type="date"></label>
+      </div>
+      <div class="text-editor-actions">
+        <button id="auditRefresh" type="button">Aktualisieren</button>
+        <button id="auditReset" class="secondary" type="button">Filter zurücksetzen</button>
+        <span id="auditStatus" class="status">Lade Audit-Log …</span>
+      </div>
+    </section>
+
+    <section class="cms-subpanel">
+      <div class="cms-subpanel-head compact">
+        <span class="cms-subpanel-icon">100</span>
+        <div><span class="kicker">Historie</span><h3>Letzte Änderungen</h3><p id="auditSummary">Noch keine Daten geladen.</p></div>
+      </div>
+      <div class="analytics-table-wrap">
+        <table class="analytics-table">
+          <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Aktion</th><th>Bereich</th><th>Ziel</th><th>Details</th></tr></thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="../config.js?v=20260924-44"></script>
+  <script src="../admin-data.js?v=20261003-01"></script>
+  <script src="../admin.js?v=20261003-03"></script>
+  <script src="../audit-log.js?v=20261003-01"></script>
+</body>
+</html>
