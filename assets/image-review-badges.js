@@ -1,3 +1,4 @@
+/* INTERNES BILDPRUEFWERKZEUG: temporaere Kennzeichnung alter/neuer Bilder; Anzeige per Startseiten-Checkbox steuerbar. */
 (() => {
   "use strict";
 
