@@ -23,6 +23,8 @@ jobs:
         run: node quality/static-check.mjs
       - name: Staging-/Produktionskonfiguration prüfen
         run: node quality/environment-check.mjs
+      - name: CMS-/Admin-Verträge prüfen
+        run: node quality/admin-contract-check.mjs
 
   browser-quality:
     needs: static-quality

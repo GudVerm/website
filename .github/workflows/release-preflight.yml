@@ -29,6 +29,10 @@ jobs:
         run: node quality/release-check.mjs
       - name: Statischen Website-Check ausführen
         run: node quality/static-check.mjs
+      - name: Staging-/Produktionskonfiguration prüfen
+        run: node quality/environment-check.mjs
+      - name: CMS-/Admin-Verträge prüfen
+        run: node quality/admin-contract-check.mjs
       - name: Erwartete Releasekennung bestimmen
         id: release
         env:
