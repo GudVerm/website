@@ -211,6 +211,78 @@ function adminHeaders(extra={}){
   const token=getToken();
   return token ? {...extra,"authorization":"Bearer "+token} : {...extra};
 }
+
+const draftCapablePages=new Set(["startseite","leistungen","unternehmen","technik","projekte","kontakt"]);
+const currentAdminPage=document.body?.dataset?.adminPage||"";
+let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
+function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
+async function fetchSiteSnapshot(){
+  const endpoint=cmsDraftMode?"/api/admin/preview-site":"/api/site";
+  return fetch(getApi()+endpoint,{headers:cmsDraftMode?adminHeaders():{},credentials:cmsDraftMode?"include":"same-origin",cache:"no-store"});
+}
+function previewPathForAdminPage(){
+  return {
+    startseite:"index.html",
+    leistungen:"leistungen/ingenieurvermessung/",
+    unternehmen:"unternehmen/",
+    technik:"technik/",
+    projekte:"projekte/",
+    kontakt:"kontakt/"
+  }[currentAdminPage]||"index.html";
+}
+async function refreshDraftToolbar(toolbar){
+  if(!toolbar||!getApi())return;
+  const count=toolbar.querySelector("[data-draft-count]");
+  try{
+    const r=await fetch(getApi()+"/api/admin/drafts",{headers:adminHeaders(),credentials:"include",cache:"no-store"});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
+    if(count)count.textContent=String(data.count||0);
+  }catch{if(count)count.textContent="?"}
+}
+function ensureDraftToolbar(){
+  if(!draftCapablePages.has(currentAdminPage)||!cmsAccessMode)return;
+  const main=document.querySelector("main");
+  if(!main||main.querySelector(".cms-draft-toolbar"))return;
+  const toolbar=document.createElement("section");
+  toolbar.className="cms-draft-toolbar";
+  toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Text- und Strukturänderungen können zuerst als Entwurf gespeichert werden. Medien und Löschaktionen bleiben direkte Änderungen.</span></div>'+
+    '<label class="cms-draft-switch"><input type="checkbox" data-draft-toggle> Entwurfsmodus</label>'+
+    '<span class="cms-draft-count"><b data-draft-count>…</b> Entwürfe</span>'+
+    '<button type="button" class="secondary" data-draft-preview>Vorschau öffnen ↗</button>'+
+    '<button type="button" data-draft-publish>Alle veröffentlichen</button>'+
+    '<button type="button" class="secondary" data-draft-discard>Alle verwerfen</button>';
+  main.prepend(toolbar);
+  const toggle=toolbar.querySelector("[data-draft-toggle]");
+  toggle.checked=cmsDraftMode;
+  toggle.addEventListener("change",()=>{sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");location.reload()});
+  toolbar.querySelector("[data-draft-preview]").addEventListener("click",()=>window.open(getApi()+"/admin/preview/"+previewPathForAdminPage(),"_blank","noopener"));
+  toolbar.querySelector("[data-draft-publish]").addEventListener("click",async event=>{
+    if(!confirm("Alle gespeicherten Entwürfe jetzt veröffentlichen?"))return;
+    const button=event.currentTarget;button.disabled=true;
+    try{
+      const r=await fetch(getApi()+"/api/admin/drafts/publish",{method:"POST",headers:adminHeaders({"content-type":"application/json"}),credentials:"include",body:"{}"});
+      const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
+      alert((data.count||0)+" Entwürfe veröffentlicht.");
+      await refreshDraftToolbar(toolbar);
+      if(cmsDraftMode)location.reload();
+    }catch(error){alert("Veröffentlichen fehlgeschlagen: "+error.message)}finally{button.disabled=false}
+  });
+  toolbar.querySelector("[data-draft-discard]").addEventListener("click",async event=>{
+    if(!confirm("Alle Entwürfe verwerfen? Veröffentlichte Inhalte bleiben unverändert."))return;
+    const button=event.currentTarget;button.disabled=true;
+    try{
+      const r=await fetch(getApi()+"/api/admin/drafts",{method:"DELETE",headers:adminHeaders(),credentials:"include"});
+      if(!r.ok){const data=await r.json().catch(()=>({}));throw new Error(data.error||("HTTP "+r.status))}
+      await refreshDraftToolbar(toolbar);if(cmsDraftMode)location.reload();
+    }catch(error){alert("Verwerfen fehlgeschlagen: "+error.message)}finally{button.disabled=false}
+  });
+  const style=document.createElement("style");
+  style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{padding:7px 9px;border-radius:999px;background:#fff}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}";
+  document.head.appendChild(style);
+  refreshDraftToolbar(toolbar);
+}
+
 const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
 function initialMediaSrc(item){return getApi()&&cmsMediaEnabled?mediaUrl(item.key):item.fallback}
 function showMediaModeNotice(){
@@ -295,6 +367,7 @@ async function loadAdminSessionUi(){
 if(cmsAccessMode){
   loadAdminSessionUi();
 }
+ensureDraftToolbar();
 
 if(saveButton){
   saveButton.addEventListener("click",()=>{
@@ -376,7 +449,7 @@ function normalizeMediaLayout(value){
 async function loadMediaLayoutContent(){
   if(!getApi())return {};
   if(!mediaLayoutContentPromise){
-    mediaLayoutContentPromise=fetch(getApi()+"/api/site")
+    mediaLayoutContentPromise=fetchSiteSnapshot()
       .then(async response=>{
         if(!response.ok)throw new Error("HTTP "+response.status);
         const data=await response.json();
@@ -423,7 +496,7 @@ async function loadHeroTexts(){
   if(!getApi()) return setStatus(heroTextStatus,"Worker-URL fehlt.",false);
   setStatus(heroTextStatus,"Lade Texte …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -440,7 +513,7 @@ async function loadHeroTexts(){
 }
 
 async function saveHeroText(key,value){
-  const response=await fetch(contentUrl(key),{
+  const response=await fetch(cmsDraftMode?draftContentUrl(key):contentUrl(key),{
     method:"PUT",
     headers:adminHeaders({"content-type":"application/json"}),
     body:JSON.stringify(value)
@@ -494,7 +567,7 @@ async function loadServiceTexts(){
   activeControls.forEach(control=>setStatus(control.status,"Lade Kacheltext …"));
 
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -567,7 +640,7 @@ async function loadCompanyTexts(){
   if(!getApi()) return setStatus(companyTextStatus,"Worker-URL fehlt.",false);
   setStatus(companyTextStatus,"Lade Unternehmenstexte …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -653,7 +726,7 @@ async function loadCompanyTimeline(){
   if(!companyTimelineEditor)return;
   if(!getApi()){companyTimelineItems=normalizeCompanyTimeline(null);renderCompanyTimeline();return setStatus(companyTimelineStatus,"Worker-URL fehlt; Fallback-Timeline aktiv.",false)}
   setStatus(companyTimelineStatus,"Lade Timeline …");
-  try{const r=await fetch(getApi()+"/api/site");if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json(),content=data.content||{};companyTimelineItems=normalizeCompanyTimeline(content["unternehmen/timeline"],content);renderCompanyTimeline();setStatus(companyTimelineStatus,Array.isArray(content["unternehmen/timeline"])?"Timeline geladen.":"Legacy-Timeline geladen; beim Speichern wird sie dynamisch.",true)}
+  try{const r=await fetchSiteSnapshot();if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json(),content=data.content||{};companyTimelineItems=normalizeCompanyTimeline(content["unternehmen/timeline"],content);renderCompanyTimeline();setStatus(companyTimelineStatus,Array.isArray(content["unternehmen/timeline"])?"Timeline geladen.":"Legacy-Timeline geladen; beim Speichern wird sie dynamisch.",true)}
   catch(error){companyTimelineItems=normalizeCompanyTimeline(null);renderCompanyTimeline();setStatus(companyTimelineStatus,"Timeline konnte nicht geladen werden; Fallback aktiv: "+error.message,false)}
 }
 async function persistCompanyTimeline(){
@@ -852,7 +925,7 @@ function renderProjectEditor(item){
 async function loadProjectsCms(){
   if(!projectEditor)return;const previous=activeProjectSlug||projectSelect?.value;
   if(!getApi()){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);return setStatus(projectEditor.querySelector(".project-status"),"Worker-URL fehlt; sechs Fallback-Projekte aktiv.",false)}
-  try{const r=await fetch(getApi()+"/api/site");if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();projectContentCache=data.content||{};applyProjectManifest(projectContentCache[projectManifestKey]);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];
+  try{const r=await fetchSiteSnapshot();if(!r.ok)throw new Error("HTTP "+r.status);const data=await r.json();projectContentCache=data.content||{};applyProjectManifest(projectContentCache[projectManifestKey]);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];
     if(current){activeProjectSlug=current.slug;projectSelect.value=current.slug;renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),Array.isArray(projectContentCache[projectManifestKey])?"Projekt-Manifest geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es angelegt.",true)}
     else{activeProjectSlug="";projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Das Projekt-Manifest ist leer. Lege eine neue Referenz an.</p></div>'}}
   catch(error){projectContentCache={};applyProjectManifest(null);refreshProjectSelect();const current=projectBySlug(previous)||projects[0];if(current)renderProjectEditor(current);setStatus(projectEditor.querySelector(".project-status"),"CMS nicht erreichbar; Fallback-Projekte aktiv: "+error.message,false)}
@@ -921,7 +994,7 @@ async function loadContactTexts(){
   if(!getApi()) return setStatus(contactTextStatus,"Worker-URL fehlt.",false);
   setStatus(contactTextStatus,"Lade Kontaktdaten …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -962,7 +1035,7 @@ async function loadServiceContactTexts(){
   if(!getApi()) return setStatus(serviceContactTextStatus,"Worker-URL fehlt.",false);
   setStatus(serviceContactTextStatus,"Lade Leistungs-Kontakttexte …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -1134,7 +1207,7 @@ async function loadEngineerPageTexts(){
 
   setStatus(engineerPageTextStatus,"Lade Ingenieurvermessung …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -1333,7 +1406,7 @@ async function loadGisPageTexts(){
 
   setStatus(gisPageTextStatus,"Lade GIS & Bauvermessung …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -1518,7 +1591,7 @@ async function loadScanPageTexts(){
 
   setStatus(scanPageTextStatus,"Lade 3D-Laserscanning …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -1702,7 +1775,7 @@ async function loadDronePageTexts(){
 
   setStatus(dronePageTextStatus,"Lade Drohnenvermessung …");
   try{
-    const response=await fetch(getApi()+"/api/site");
+    const response=await fetchSiteSnapshot();
     if(!response.ok) throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
@@ -2283,7 +2356,7 @@ async function loadTechniqueTexts(){
   }
   setStatus(technikEditor.querySelector(".technik-text-status"),"Lade Technik …");
   try{
-    const response=await fetch(getApi()+"/api/site"); if(!response.ok)throw new Error("HTTP "+response.status);
+    const response=await fetchSiteSnapshot(); if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json(); technikContentCache=data.content||{}; applyTechniqueManifest(technikContentCache[techniqueManifestKey]); populateTechniqueSelect();
     const current=techniqueBySlug(previousSlug)||equipment[0];
     if(current){activeTechnikSlug=current.slug;technikSelect.value=current.slug;renderTechniqueEditor(current);setStatus(technikEditor.querySelector(".technik-text-status"),Array.isArray(technikContentCache[techniqueManifestKey])?"Technik-Manifest und Texte geladen.":"Fallback-Manifest aktiv; beim nächsten Speichern wird es in D1 angelegt.",true)}

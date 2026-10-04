@@ -12,13 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
+  const cmsSiteEndpoint = String(window.GUDELIUS_CMS_SITE_ENDPOINT || "/api/site");
   const cmsMediaEnabled = window.GUDELIUS_CMS_MEDIA_ENABLED !== false;
   let cmsSiteContentPromise=null;
 
   async function loadCmsSiteContent(){
     if(!cmsApi) return null;
     if(!cmsSiteContentPromise){
-      cmsSiteContentPromise=fetch(cmsApi+"/api/site")
+      cmsSiteContentPromise=fetch(cmsApi+cmsSiteEndpoint,{credentials:"include"})
         .then(async response=>{
           if(!response.ok) throw new Error("HTTP "+response.status);
           const data=await response.json();

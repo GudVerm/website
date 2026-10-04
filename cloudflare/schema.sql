@@ -80,3 +80,15 @@ ON content_history(key, id DESC);
 
 CREATE INDEX IF NOT EXISTS idx_content_history_created_at
 ON content_history(created_at);
+
+
+-- Redaktionelle Entwürfe: werden erst über den geschützten Publish-Endpunkt in content übernommen.
+CREATE TABLE IF NOT EXISTS content_drafts (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  actor_email TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_drafts_updated_at
+ON content_drafts(updated_at);

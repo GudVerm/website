@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-04.1";
+const WORKER_RELEASE = "2026-10-04.2";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -52,6 +52,17 @@ export default {
         return Response.redirect(target.toString(), 308);
       }
 
+      if (url.pathname === "/admin/preview/config.js") {
+        return new Response(request.method === "HEAD" ? null : renderPreviewConfig(env, request.url), {
+          status: 200,
+          headers: adminUiHeaders("application/javascript; charset=utf-8")
+        });
+      }
+
+      if (url.pathname.startsWith("/admin/preview/")) {
+        return handleAdminPreviewUi(request, env, url);
+      }
+
       if (url.pathname.startsWith("/admin/")) {
         return handleAdminUi(request, env, url);
       }
@@ -80,6 +91,41 @@ export default {
           return json({ error: "Unauthorized" }, 401, cors);
         }
         return handleAdminHealth(env, cors, ctx);
+      }
+
+      if (url.pathname === "/api/admin/preview-site" && request.method === "GET") {
+        return handlePreviewSite(env,cors);
+      }
+
+      if (url.pathname === "/api/admin/drafts" && request.method === "GET") {
+        return handleAdminDraftList(env,cors);
+      }
+
+      if (url.pathname === "/api/admin/drafts" && request.method === "DELETE") {
+        await ensureContentDraftTable(env);
+        await env.DB.prepare("DELETE FROM content_drafts").run();
+        await writeAudit(env,adminPrincipal,"entwuerfe_verworfen","cms","content_drafts");
+        return json({ok:true},200,cors);
+      }
+
+      if (url.pathname === "/api/admin/drafts/publish" && request.method === "POST") {
+        return publishContentDrafts(request,env,cors,adminPrincipal);
+      }
+
+      if (url.pathname.startsWith("/api/admin/drafts/")) {
+        const key=decodeKey(url.pathname,"/api/admin/drafts/");
+        if(!key)return json({error:"Missing draft key"},400,cors);
+        if(request.method==="PUT")return saveContentDraft(request,env,cors,key,adminPrincipal);
+        if(request.method==="DELETE"){
+          await ensureContentDraftTable(env);
+          await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(key).run();
+          await writeAudit(env,adminPrincipal,"entwurf_verworfen",auditAreaFromTarget(key),key);
+          return json({ok:true,key},200,cors);
+        }
+      }
+
+      if (url.pathname === "/api/admin/backup" && request.method === "GET") {
+        return handleAdminBackup(env);
       }
 
       if (url.pathname === "/api/site" && request.method === "GET") {
@@ -577,6 +623,32 @@ function renderAdminConfig(env, requestUrl) {
   ].join("\n") + "\n";
 }
 
+function renderPreviewConfig(env, requestUrl) {
+  const origin=new URL(requestUrl).origin;
+  return [
+    "window.GUDELIUS_CMS_API = " + JSON.stringify(origin) + ";",
+    "window.GUDELIUS_CMS_SITE_ENDPOINT = '/api/admin/preview-site';",
+    "window.GUDELIUS_CMS_MEDIA_ENABLED = " + JSON.stringify(isPublicMediaEnabled(env)) + ";",
+    "window.GUDELIUS_CMS_PREVIEW = true;"
+  ].join("\n") + "\n";
+}
+
+async function handleAdminPreviewUi(request,env,url){
+  if(request.method!=="GET"&&request.method!=="HEAD")return new Response("Method not allowed",{status:405,headers:adminUiHeaders("text/plain; charset=utf-8")});
+  const rawPath=decodeURIComponent(url.pathname.slice("/admin/preview/".length));
+  if(rawPath.includes("..")||!/^[-A-Za-z0-9_/.]*$/.test(rawPath))return new Response("Not found",{status:404,headers:adminUiHeaders("text/plain; charset=utf-8")});
+  const sourcePath=rawPath||"index.html";
+  const sourceUrl=new URL(sourcePath,publicSiteUrl(env));
+  const upstream=await fetch(sourceUrl,{headers:{"user-agent":"GudeliusVermessung-PreviewProxy/1.0"},redirect:"follow"});
+  if(!upstream.ok)return new Response("Vorschau konnte nicht geladen werden.",{status:upstream.status===404?404:502,headers:adminUiHeaders("text/plain; charset=utf-8")});
+  let body=await upstream.text();
+  const baseUrl=new URL(".",sourceUrl).toString();
+  body=body.replace(/<head>/i,'<head><base href="'+escapeHtml(baseUrl)+'"><meta name="robots" content="noindex,nofollow,noarchive">')
+    .replace(/<script\s+src=["'][^"']*assets\/cms-config\.js[^"']*["']><\/script>/i,'<script src="/admin/preview/config.js"></script>')
+    .replace(/<body([^>]*)>/i,'<body$1><div style="position:fixed;z-index:2147483000;left:12px;top:12px;padding:8px 12px;border-radius:999px;background:#172026;color:#fff;font:700 12px/1.2 system-ui;box-shadow:0 6px 22px rgba(0,0,0,.25)">CMS-Vorschau · Entwürfe sichtbar</div>');
+  return new Response(request.method==="HEAD"?null:body,{status:200,headers:adminUiHeaders("text/html; charset=utf-8")});
+}
+
 async function handleAdminUi(request, env, url) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return new Response("Method not allowed", { status: 405, headers: { ...adminUiHeaders("text/plain; charset=utf-8"), "allow": "GET, HEAD" } });
@@ -654,6 +726,7 @@ async function handleAdminHealth(env, cors, ctx) {
   let schema = {
     content: false,
     content_history: false,
+    content_drafts: false,
     contact_requests: false,
     analytics_events: false,
     audit_log: false
@@ -662,13 +735,15 @@ async function handleAdminHealth(env, cors, ctx) {
   try {
     await ensureContentTable(env);
     await ensureContentHistoryTable(env);
+    await ensureContentDraftTable(env);
     await ensureContactTable(env);
     await ensureAnalyticsTable(env);
     await ensureAuditTable(env);
 
-    const [contentInfo, historyInfo, contactInfo, analyticsInfo, auditInfo] = await Promise.all([
+    const [contentInfo, historyInfo, draftInfo, contactInfo, analyticsInfo, auditInfo] = await Promise.all([
       env.DB.prepare("PRAGMA table_info(content)").all(),
       env.DB.prepare("PRAGMA table_info(content_history)").all(),
+      env.DB.prepare("PRAGMA table_info(content_drafts)").all(),
       env.DB.prepare("PRAGMA table_info(contact_requests)").all(),
       env.DB.prepare("PRAGMA table_info(analytics_events)").all(),
       env.DB.prepare("PRAGMA table_info(audit_log)").all()
@@ -677,6 +752,7 @@ async function handleAdminHealth(env, cors, ctx) {
     schema = {
       content: hasColumns(contentInfo.results || [], ["key", "value", "updated_at"]),
       content_history: hasColumns(historyInfo.results || [], ["id","key","value","operation","actor_email","created_at"]),
+      content_drafts: hasColumns(draftInfo.results || [], ["key","value","actor_email","updated_at"]),
       contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "created_at"]),
       analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"]),
       audit_log: hasColumns(auditInfo.results || [], ["id", "actor_email", "action", "area", "target", "details", "created_at"])
@@ -1125,6 +1201,113 @@ async function ensureContentTable(env) {
     "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
   ).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_updated_at ON content(updated_at)").run();
+}
+
+
+async function ensureContentDraftTable(env){
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS content_drafts ("+
+    "key TEXT PRIMARY KEY, "+
+    "value TEXT NOT NULL, "+
+    "actor_email TEXT NOT NULL DEFAULT '', "+
+    "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_drafts_updated_at ON content_drafts(updated_at)").run();
+}
+
+async function readSiteContent(env,includeDrafts=false){
+  await ensureContentTable(env);
+  const {results=[]}=await env.DB.prepare("SELECT key,value,updated_at FROM content ORDER BY key").all();
+  const content={};
+  for(const row of results){try{content[row.key]=JSON.parse(row.value)}catch{content[row.key]=row.value}}
+  if(includeDrafts){
+    await ensureContentDraftTable(env);
+    const {results:drafts=[]}=await env.DB.prepare("SELECT key,value FROM content_drafts ORDER BY key").all();
+    for(const row of drafts){try{content[row.key]=JSON.parse(row.value)}catch{content[row.key]=row.value}}
+  }
+  return content;
+}
+
+async function handlePreviewSite(env,cors){
+  const content=await readSiteContent(env,true);
+  return json({content,preview:true},200,cors);
+}
+
+async function handleAdminDraftList(env,cors){
+  await ensureContentDraftTable(env);
+  const {results=[]}=await env.DB.prepare("SELECT key,actor_email,updated_at,LENGTH(value) AS value_size FROM content_drafts ORDER BY updated_at DESC,key").all();
+  return json({drafts:results,count:results.length},200,cors);
+}
+
+async function saveContentDraft(request,env,cors,key,principal){
+  const raw=await request.text();
+  if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES)return json({error:"Content payload too large"},413,cors);
+  let value;try{value=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+  await ensureContentDraftTable(env);
+  await env.DB.prepare(
+    `INSERT INTO content_drafts (key,value,actor_email,updated_at) VALUES (?,?,?,CURRENT_TIMESTAMP)
+     ON CONFLICT(key) DO UPDATE SET value=excluded.value,actor_email=excluded.actor_email,updated_at=CURRENT_TIMESTAMP`
+  ).bind(key,JSON.stringify(value),cleanSingleLine(principal?.email||principal?.mode||"",240)).run();
+  await writeAudit(env,principal,"entwurf_gespeichert",auditAreaFromTarget(key),key);
+  return json({ok:true,key,draft:true},200,cors);
+}
+
+async function publishContentDrafts(request,env,cors,principal){
+  await ensureContentTable(env);await ensureContentDraftTable(env);
+  let requestedKeys=null;
+  const raw=await request.text();
+  if(raw){
+    try{
+      const payload=JSON.parse(raw);
+      if(Array.isArray(payload?.keys))requestedKeys=[...new Set(payload.keys.map(v=>cleanSingleLine(v,240)).filter(Boolean))];
+    }catch{return json({error:"Body must be valid JSON"},400,cors)}
+  }
+  let drafts=[];
+  if(requestedKeys?.length){
+    const placeholders=requestedKeys.map(()=>"?").join(",");
+    const result=await env.DB.prepare("SELECT key,value FROM content_drafts WHERE key IN ("+placeholders+") ORDER BY key").bind(...requestedKeys).all();
+    drafts=result.results||[];
+  }else{
+    const result=await env.DB.prepare("SELECT key,value FROM content_drafts ORDER BY key").all();drafts=result.results||[];
+  }
+  const published=[];
+  for(const draft of drafts){
+    const previous=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(draft.key).first();
+    let previousParsed=null,nextParsed=null;
+    if(previous&&previous.value!==draft.value){await recordContentHistory(env,principal,draft.key,previous.value,"draft_publish");try{previousParsed=JSON.parse(previous.value)}catch{}}
+    try{nextParsed=JSON.parse(draft.value)}catch{}
+    await env.DB.prepare(
+      `INSERT INTO content (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP)
+       ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP`
+    ).bind(draft.key,draft.value).run();
+    await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(draft.key).run();
+    await writeAudit(env,principal,"entwurf_veroeffentlicht",auditAreaFromTarget(draft.key),draft.key);
+    if(isCollectionManifestKey(draft.key))await writeCollectionManifestAudit(env,principal,draft.key,previousParsed,nextParsed);
+    published.push(draft.key);
+  }
+  return json({ok:true,published,count:published.length},200,cors);
+}
+
+async function handleAdminBackup(env){
+  await ensureContentTable(env);await ensureContentDraftTable(env);await ensureContentHistoryTable(env);
+  const [content,drafts,history]=await Promise.all([
+    env.DB.prepare("SELECT key,value,updated_at FROM content ORDER BY key").all(),
+    env.DB.prepare("SELECT key,value,actor_email,updated_at FROM content_drafts ORDER BY key").all(),
+    env.DB.prepare("SELECT id,key,value,operation,actor_email,created_at FROM content_history ORDER BY id DESC LIMIT 2000").all()
+  ]);
+  const body=JSON.stringify({
+    exported_at:new Date().toISOString(),
+    worker_release:WORKER_RELEASE,
+    content:content.results||[],
+    drafts:drafts.results||[],
+    history:history.results||[]
+  },null,2);
+  return new Response(body,{status:200,headers:{
+    "content-type":"application/json; charset=utf-8",
+    "content-disposition":'attachment; filename="gudelius-cms-backup.json"',
+    "cache-control":"no-store",
+    "x-content-type-options":"nosniff"
+  }});
 }
 
 async function ensureContentHistoryTable(env) {
