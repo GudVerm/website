@@ -944,6 +944,38 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+document.addEventListener("DOMContentLoaded",()=>{
+  const forms=[...document.querySelectorAll('form[onsubmit*="sendMail"]')];
+  const serviceLabels={
+    "ingenieurvermessung":"Ingenieurvermessung",
+    "gis-bauvermessung":"GIS & Bauvermessung",
+    "3d-laserscanning":"3D-Laserscanning",
+    "drohnenvermessung":"Drohnenvermessung",
+    "sonstiges":"Allgemeine Projektanfrage"
+  };
+  const requested=new URLSearchParams(location.search).get("service")||"";
+  forms.forEach(form=>{
+    const service=form.querySelector("#service");
+    const subject=form.querySelector("#subject");
+    if(service&&requested&&serviceLabels[requested]){
+      service.value=requested;
+      if(subject&&!subject.value.trim()){subject.value="Anfrage "+serviceLabels[requested];subject.dataset.serviceAuto="1"}
+    }
+    service?.addEventListener("change",()=>{
+      if(!subject)return;
+      const label=serviceLabels[service.value]||"";
+      if(!label)return;
+      if(!subject.value.trim()||subject.dataset.serviceAuto==="1"){subject.value=service.value==="sonstiges"?label:"Anfrage "+label;subject.dataset.serviceAuto="1"}
+    });
+    subject?.addEventListener("input",()=>{delete subject.dataset.serviceAuto});
+    form.querySelectorAll("[required]").forEach(field=>{
+      field.addEventListener("invalid",()=>field.setAttribute("aria-invalid","true"));
+      field.addEventListener("input",()=>{if(field.checkValidity())field.removeAttribute("aria-invalid")});
+      field.addEventListener("blur",()=>field.toggleAttribute("aria-invalid",!field.checkValidity()));
+    });
+  });
+});
+
 async function sendMail(e) {
   e.preventDefault();
 
@@ -996,7 +1028,10 @@ async function sendMail(e) {
     }
   } catch (error) {
     if (status) {
-      status.textContent = "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder nutzen Sie die angegebene E-Mail-Adresse.";
+      const detail=String(error?.message||"");
+      status.textContent = detail && !/^HTTP\s+\d+/i.test(detail)
+        ? detail
+        : "Die Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder nutzen Sie die angegebene E-Mail-Adresse.";
       status.classList.add("error");
     }
     console.error("Kontaktformular:", error);

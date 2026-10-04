@@ -322,3 +322,12 @@
   .scope-grid{grid-template-columns:1fr}
   .scope-item{grid-template-columns:36px 1fr;padding:15px}
 }
+
+.service-faq{background:#fff}
+.faq-list{display:grid;gap:10px;max-width:920px;margin-top:30px}
+.faq-item{border:1px solid var(--line);border-radius:15px;background:#f8f9f7;overflow:hidden}
+.faq-item summary{cursor:pointer;list-style:none;padding:18px 54px 18px 20px;font-weight:850;position:relative}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:1.35rem;color:#806b10}
+.faq-item[open] summary::after{content:"–"}
+.faq-item p{margin:0;padding:0 20px 20px;color:var(--muted);line-height:1.7}
