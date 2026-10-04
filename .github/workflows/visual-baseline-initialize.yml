@@ -1,0 +1,60 @@
+name: Visual baseline initialize
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/visual-baseline-initialize.yml"
+      - "quality/visual-regression.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visual-baseline-initialize
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright und Bildvergleich installieren
+        run: |
+          npm install --no-save --package-lock=false playwright pixelmatch pngjs
+          npx playwright install --with-deps chromium
+      - name: Lokale Website starten
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/gudelius-visual-server.log 2>&1 &
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/gudelius-visual-server.log
+          exit 1
+      - name: Referenzbilder erzeugen
+        env:
+          UPDATE_VISUAL_BASELINES: "1"
+          SITE_URL: http://127.0.0.1:4173/
+        run: node quality/visual-regression.mjs
+      - name: Referenzbilder versionieren
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add quality/visual-baselines
+          if git diff --cached --quiet; then
+            echo "Referenzbilder unverändert."
+          else
+            git commit -m "Visuelle Referenzbilder initialisieren"
+            git push
+          fi
+      - name: Referenzen als Artefakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: quality/visual-baselines/
+          retention-days: 30
