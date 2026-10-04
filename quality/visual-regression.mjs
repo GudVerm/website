@@ -65,7 +65,18 @@ for(const [viewportName,viewport] of viewports){
       const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
       const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
       for(const fraction of [0.25,0.5,0.75,1]){window.scrollTo(0,Math.round(max*fraction));await wait(70)}
-      window.scrollTo(0,0);await wait(150);
+      window.scrollTo(0,0);
+      if(document.fonts?.ready)await document.fonts.ready.catch(()=>{});
+      await Promise.all([...document.images].map(img=>{
+        if(img.complete&&img.naturalWidth>0)return img.decode?.().catch(()=>{});
+        return new Promise(resolve=>{
+          const done=()=>{img.decode?.().catch(()=>{}).finally(resolve)};
+          img.addEventListener("load",done,{once:true});
+          img.addEventListener("error",resolve,{once:true});
+          setTimeout(resolve,3000);
+        });
+      }));
+      await wait(160);
     });
 
     const name=viewportName+"-"+slug+".png";
