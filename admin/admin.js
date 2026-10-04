@@ -411,6 +411,28 @@ function showMediaModeNotice(){
   head.insertAdjacentElement("afterend",notice);
 }
 function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
+async function imageFileDimensions(file){
+  if(!file||!String(file.type||"").startsWith("image/"))return {width:0,height:0};
+  const objectUrl=URL.createObjectURL(file);
+  try{
+    const image=new Image();
+    const result=await new Promise(resolve=>{
+      image.onload=()=>resolve({width:image.naturalWidth||0,height:image.naturalHeight||0});
+      image.onerror=()=>resolve({width:0,height:0});
+      image.src=objectUrl;
+    });
+    return result;
+  }finally{URL.revokeObjectURL(objectUrl)}
+}
+async function mediaUploadHeaders(file){
+  const dimensions=await imageFileDimensions(file);
+  return adminHeaders({
+    "content-type":file.type||"application/octet-stream",
+    "x-file-name":file.name,
+    "x-image-width":String(dimensions.width||0),
+    "x-image-height":String(dimensions.height||0)
+  });
+}
 
 if(cmsAccessMode && connectionStatus){
   setStatus(connectionStatus,"Cloudflare Access-Modus aktiv. Kein Admin-Token im Browser erforderlich.",true);
@@ -1017,7 +1039,7 @@ function renderProjectEditor(item){
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     upload.disabled=true;setStatus(mediaStatus,"Upload läuft …");
-    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),body:selected});
+    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:await mediaUploadHeaders(selected),body:selected});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=mediaUrl(item.key)+"?v="+Date.now();setStatus(mediaStatus,"Projektbild gespeichert.",true)}
     catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
@@ -2426,7 +2448,7 @@ function renderTechniqueEditor(item){
     upload.disabled=true; setStatus(mediaStatus,"Upload läuft …");
     try{
       const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
-        method:"PUT",headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),body:selected
+        method:"PUT",headers:await mediaUploadHeaders(selected),body:selected
       });
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
       img.src=mediaUrl(item.key)+"?v="+Date.now(); setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
@@ -2638,7 +2660,7 @@ function renderCollection(target, items){
       try{
         const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"PUT",
-          headers:adminHeaders({"content-type":selected.type||"application/octet-stream","x-file-name":selected.name}),
+          headers:await mediaUploadHeaders(selected),
           body:selected
         });
         const data=await r.json().catch(()=>({}));

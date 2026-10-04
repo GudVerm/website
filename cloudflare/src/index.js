@@ -517,13 +517,17 @@ export default {
           }
 
           const originalName = sanitizeFileName(request.headers.get("x-file-name"), contentType);
+          const imageWidth=clampNumber(request.headers.get("x-image-width"),1,20000,0);
+          const imageHeight=clampNumber(request.headers.get("x-image-height"),1,20000,0);
           await env.MEDIA.put(key, bytes, {
             httpMetadata: {
               contentType,
               cacheControl: "public, max-age=3600"
             },
             customMetadata: {
-              originalName
+              originalName,
+              imageWidth:imageWidth?String(imageWidth):"",
+              imageHeight:imageHeight?String(imageHeight):""
             }
           });
 
@@ -745,6 +749,8 @@ async function handlePublicAssetProxy(request, env, url) {
   if (type) headers.set("content-type", type);
   const etag = upstream.headers.get("etag");
   if (etag) headers.set("etag", etag);
+  const contentLength=upstream.headers.get("content-length");
+  if(contentLength)headers.set("content-length",contentLength);
   headers.set("cache-control", "no-store");
   headers.set("x-content-type-options", "nosniff");
   headers.set("cross-origin-resource-policy", "same-origin");
@@ -856,7 +862,9 @@ async function handleAdminMediaList(env, cors, url) {
       cache_control: object.httpMetadata?.cacheControl || ""
     },
     custom_metadata: {
-      original_name: object.customMetadata?.originalName || ""
+      original_name: object.customMetadata?.originalName || "",
+      image_width: Number(object.customMetadata?.imageWidth || 0),
+      image_height: Number(object.customMetadata?.imageHeight || 0)
     }
   }));
 

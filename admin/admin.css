@@ -1900,3 +1900,7 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .draft-manager-card-actions{display:flex;gap:8px;flex-wrap:wrap}
 .draft-manager-empty{padding:18px;border:1px dashed #ccd3cd;border-radius:12px;color:#718087;text-align:center}
 @media(max-width:720px){.draft-diff-grid{grid-template-columns:1fr}}
+
+.media-library-pill.is-warning{background:#fff0d8;color:#8a4b08;border-color:#e7c48a}
+.media-library-no-preview{display:grid;place-items:center;min-height:180px;background:#eef0ec;color:#718087;font-size:.75rem;font-weight:800}
+.media-library-context dd{overflow-wrap:anywhere}
