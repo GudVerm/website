@@ -28,7 +28,9 @@
   const inquiryCountAll=document.getElementById("inquiryCountAll");
   const inquiryCountNew=document.getElementById("inquiryCountNew");
   const inquiryCountProgress=document.getElementById("inquiryCountProgress");
+  const inquiryCountWaiting=document.getElementById("inquiryCountWaiting");
   const inquiryCountDone=document.getElementById("inquiryCountDone");
+  const exportInquiriesCsv=document.getElementById("exportInquiriesCsv");
   const inquiryQuickFilters=[...document.querySelectorAll("[data-inquiry-quick-filter]")];
   const inquiryNavCount=document.getElementById("inquiryNavCount");
   let inquiriesCache=[];
@@ -37,6 +39,7 @@
 
   function inquiryStatusLabel(status){
     if(status==="in-arbeit") return "In Arbeit";
+    if(status==="antwort-ausstehend") return "Antwort ausstehend";
     if(status==="erledigt") return "Erledigt";
     if(status==="archiviert") return "Archiviert";
     if(status==="spam") return "Spam";
@@ -69,13 +72,14 @@
   }
   
   function updateInquiryStats(){
-    const counts={neu:0,"in-arbeit":0,erledigt:0};
+    const counts={neu:0,"in-arbeit":0,"antwort-ausstehend":0,erledigt:0};
     inquiriesCache.forEach(item=>{
       if(Object.prototype.hasOwnProperty.call(counts,item.status)) counts[item.status]+=1;
     });
     if(inquiryCountAll) inquiryCountAll.textContent=inquiriesCache.length;
     if(inquiryCountNew) inquiryCountNew.textContent=counts.neu;
     if(inquiryCountProgress) inquiryCountProgress.textContent=counts["in-arbeit"];
+    if(inquiryCountWaiting) inquiryCountWaiting.textContent=counts["antwort-ausstehend"];
     if(inquiryCountDone) inquiryCountDone.textContent=counts.erledigt;
     if(inquiryNavCount){
       inquiryNavCount.textContent=counts.neu;
@@ -109,7 +113,7 @@
       if(!ignoreStatus&&status!=="alle"&&item.status!==status) return false;
       if(!inquiryMatchesPeriod(item,period)) return false;
       if(!query) return true;
-      return [item.name,item.email,item.subject,item.message,item.internal_note].some(value=>
+      return [item.name,item.email,item.subject,item.message,item.internal_note,item.priority,item.follow_up_at].some(value=>
         String(value||"").toLocaleLowerCase("de-DE").includes(query)
       );
     }).sort((a,b)=>{
@@ -138,6 +142,16 @@
     }
   }
   
+  function inquiryPriorityLabel(value){return ({niedrig:"Niedrig",normal:"Normal",hoch:"Hoch",dringend:"Dringend"}[value]||"Normal")}
+  function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d}
+  function daysSince(value){const date=inquiryDate(value);return date?Math.max(0,Math.floor((Date.now()-date.getTime())/86400000)):0}
+  function dueState(inquiry){
+    if(!inquiry.follow_up_at||["erledigt","archiviert","spam"].includes(inquiry.status))return null;
+    const due=new Date(inquiry.follow_up_at+"T00:00:00");if(Number.isNaN(due.getTime()))return null;
+    const delta=Math.round((due.getTime()-startOfToday().getTime())/86400000);
+    return {due,delta,overdue:delta<0,today:delta===0};
+  }
+
   function createInquiryCard(inquiry,{kanban=false}={}){
     const card=document.createElement("article");
     card.className=kanban?"inquiry-card inquiry-kanban-card":"inquiry-card";
@@ -163,10 +177,10 @@
     subject.textContent=inquiry.subject||"Ohne Betreff";
     identity.append(name,subject);
   
-    const badge=document.createElement("span");
-    badge.className="inquiry-status-badge";
-    badge.textContent=inquiryStatusLabel(inquiry.status);
-    top.append(identity,badge);
+    const badges=document.createElement("div");badges.className="inquiry-card-badges";
+    const priorityBadge=document.createElement("span");priorityBadge.className="inquiry-priority-badge priority-"+(inquiry.priority||"normal");priorityBadge.textContent=inquiryPriorityLabel(inquiry.priority);
+    const badge=document.createElement("span");badge.className="inquiry-status-badge";badge.textContent=inquiryStatusLabel(inquiry.status);
+    badges.append(priorityBadge,badge);top.append(identity,badges);
   
     const meta=document.createElement("div");
     meta.className="inquiry-meta";
@@ -178,6 +192,16 @@
     const source=document.createElement("span");
     source.textContent="Quelle: "+(inquiry.source||"/");
     meta.append(created,metaEmail,source);
+    const age=daysSince(inquiry.created_at);
+    if(["neu","antwort-ausstehend"].includes(inquiry.status)&&age>0){
+      const unanswered=document.createElement("span");unanswered.className="inquiry-age";unanswered.textContent="Seit "+age+" Tag"+(age===1?"":"en")+" unbeantwortet";meta.appendChild(unanswered);
+    }
+    const due=dueState(inquiry);
+    if(due){
+      const dueLabel=document.createElement("span");dueLabel.className="inquiry-due"+(due.overdue?" is-overdue":due.today?" is-today":"");
+      dueLabel.textContent=due.overdue?"Überfällig seit "+Math.abs(due.delta)+" Tag"+(Math.abs(due.delta)===1?"":"en"):due.today?"Heute fällig":"Wiedervorlage "+new Intl.DateTimeFormat("de-DE",{dateStyle:"medium"}).format(due.due);
+      meta.appendChild(dueLabel);card.classList.toggle("is-overdue",due.overdue);
+    }
   
     const toggle=document.createElement("button");
     toggle.type="button";
@@ -202,6 +226,23 @@
     message.className="inquiry-message";
     message.textContent=inquiry.message||"";
   
+    const workflowFields=document.createElement("div");workflowFields.className="inquiry-workflow-fields";
+    const priorityLabel=document.createElement("label");priorityLabel.textContent="Priorität";
+    const prioritySelect=document.createElement("select");
+    [["niedrig","Niedrig"],["normal","Normal"],["hoch","Hoch"],["dringend","Dringend"]].forEach(([value,label])=>{const option=document.createElement("option");option.value=value;option.textContent=label;option.selected=value===(inquiry.priority||"normal");prioritySelect.appendChild(option)});
+    priorityLabel.appendChild(prioritySelect);
+    const followLabel=document.createElement("label");followLabel.textContent="Wiedervorlage";
+    const followInput=document.createElement("input");followInput.type="date";followInput.value=inquiry.follow_up_at||"";followLabel.appendChild(followInput);
+    const workflowSave=document.createElement("button");workflowSave.type="button";workflowSave.className="secondary";workflowSave.textContent="Workflow speichern";
+    const workflowStatus=document.createElement("span");workflowStatus.className="status";
+    workflowSave.addEventListener("click",async()=>{
+      workflowSave.disabled=true;setStatus(workflowStatus,"Speichere …");
+      try{await saveInquiryUpdate(inquiry,{priority:prioritySelect.value,follow_up_at:followInput.value});inquiry.priority=prioritySelect.value;inquiry.follow_up_at=followInput.value;setStatus(workflowStatus,"Workflow gespeichert.",true);renderInquiries()}
+      catch(error){setStatus(workflowStatus,"Workflow konnte nicht gespeichert werden: "+error.message,false)}
+      finally{workflowSave.disabled=false}
+    });
+    workflowFields.append(priorityLabel,followLabel,workflowSave,workflowStatus);
+
     const noteLabel=document.createElement("label");
     noteLabel.className="inquiry-note";
     noteLabel.textContent="Interne Notiz";
@@ -235,14 +276,14 @@
       }
     });
     noteActions.append(noteSave,noteStatus);
-    detail.append(email,message,noteLabel,noteActions);
+    detail.append(email,message,workflowFields,noteLabel,noteActions);
   
     const actions=document.createElement("div");
     actions.className="inquiry-actions";
     const statusLabel=document.createElement("label");
     statusLabel.textContent="Status";
     const select=document.createElement("select");
-    [["neu","Neu"],["in-arbeit","In Arbeit"],["erledigt","Erledigt"],["archiviert","Archiviert"],["spam","Spam"]].forEach(([value,label])=>{
+    [["neu","Neu"],["in-arbeit","In Arbeit"],["antwort-ausstehend","Antwort ausstehend"],["erledigt","Erledigt"],["archiviert","Archiviert"],["spam","Spam"]].forEach(([value,label])=>{
       const option=document.createElement("option");
       option.value=value;
       option.textContent=label;
@@ -294,6 +335,7 @@
     const definitions=[
       ["neu","Neu"],
       ["in-arbeit","In Arbeit"],
+      ["antwort-ausstehend","Antwort ausstehend"],
       ["erledigt","Erledigt"],
       ["archiviert","Archiviert"],
       ["spam","Spam"]
@@ -508,6 +550,15 @@
     window.addEventListener("resize",()=>requestAnimationFrame(syncInquiryKanbanScroller),{passive:true});
   }
   
+  function csvCell(value){const text=String(value??"");return '"'+text.replaceAll('"','""')+'"'}
+  function exportCsv(){
+    const rows=[["ID","Name","E-Mail","Betreff","Status","Priorität","Wiedervorlage","Quelle","Erstellt","Interne Notiz","Nachricht"]];
+    inquiriesCache.forEach(item=>rows.push([item.id,item.name,item.email,item.subject,item.status,item.priority||"normal",item.follow_up_at||"",item.source,item.created_at,item.internal_note,item.message]));
+    const csv="\uFEFF"+rows.map(row=>row.map(csvCell).join(";")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="gudelius-anfragen-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+  if(exportInquiriesCsv)exportInquiriesCsv.addEventListener("click",exportCsv);
   if(refreshInquiries) refreshInquiries.addEventListener("click",loadInquiries);
   if(inquiryFilter) inquiryFilter.addEventListener("change",resetInquiryPageAndRender);
   if(inquiryPeriod) inquiryPeriod.addEventListener("change",resetInquiryPageAndRender);

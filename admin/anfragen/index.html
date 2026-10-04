@@ -57,6 +57,10 @@
           <span>In Arbeit</span>
           <strong id="inquiryCountProgress">0</strong>
         </button>
+        <button class="inquiry-stat" type="button" data-inquiry-quick-filter="antwort-ausstehend">
+          <span>Antwort ausstehend</span>
+          <strong id="inquiryCountWaiting">0</strong>
+        </button>
         <button class="inquiry-stat" type="button" data-inquiry-quick-filter="erledigt">
           <span>Erledigt</span>
           <strong id="inquiryCountDone">0</strong>
@@ -86,6 +90,7 @@
               <option value="alle">Alle</option>
               <option value="neu">Neu</option>
               <option value="in-arbeit">In Arbeit</option>
+              <option value="antwort-ausstehend">Antwort ausstehend</option>
               <option value="erledigt">Erledigt</option>
               <option value="archiviert">Archiviert</option>
               <option value="spam">Spam</option>
@@ -113,6 +118,7 @@
             </select>
           </label>
           <button id="refreshInquiries" class="secondary" type="button">Aktualisieren</button>
+          <button id="exportInquiriesCsv" class="secondary" type="button">CSV exportieren</button>
         </div>
 
         <div class="inquiry-result-bar">

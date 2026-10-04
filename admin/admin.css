@@ -1904,3 +1904,12 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .media-library-pill.is-warning{background:#fff0d8;color:#8a4b08;border-color:#e7c48a}
 .media-library-no-preview{display:grid;place-items:center;min-height:180px;background:#eef0ec;color:#718087;font-size:.75rem;font-weight:800}
 .media-library-context dd{overflow-wrap:anywhere}
+
+.inquiry-card-badges{display:flex;align-items:flex-start;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.inquiry-priority-badge{padding:5px 7px;border-radius:999px;background:#edf0ed;color:#526067;font-size:.61rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.inquiry-priority-badge.priority-hoch{background:#fff0d8;color:#8a4b08}.inquiry-priority-badge.priority-dringend{background:#ffe5e2;color:#9b3027}.inquiry-priority-badge.priority-niedrig{background:#eaf3ed;color:#35704a}
+.inquiry-age{color:#8a4b08;font-weight:800}.inquiry-due{font-weight:850;color:#526067}.inquiry-due.is-overdue{color:#a23a32}.inquiry-due.is-today{color:#8a4b08}
+.inquiry-card.is-overdue{border-color:#dfaaa5;box-shadow:inset 3px 0 0 #b94338}
+.inquiry-workflow-fields{display:grid;grid-template-columns:1fr 1fr auto minmax(100px,1fr);gap:9px;align-items:end;margin:0 0 12px;padding:11px;border:1px solid #e0e4df;border-radius:11px;background:#f8f9f7}
+.inquiry-workflow-fields label{display:grid;gap:5px}.inquiry-workflow-fields select,.inquiry-workflow-fields input{min-height:38px;border:1px solid var(--line);border-radius:9px;padding:8px 9px;background:#fff;color:var(--ink);font:inherit;font-size:.75rem}
+@media(max-width:760px){.inquiry-workflow-fields{grid-template-columns:1fr 1fr}.inquiry-workflow-fields button,.inquiry-workflow-fields .status{grid-column:1/-1}}

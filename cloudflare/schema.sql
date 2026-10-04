@@ -22,11 +22,19 @@ CREATE TABLE IF NOT EXISTS contact_requests (
   source TEXT NOT NULL DEFAULT '/',
   status TEXT NOT NULL DEFAULT 'neu',
   internal_note TEXT NOT NULL DEFAULT '',
+  priority TEXT NOT NULL DEFAULT 'normal',
+  follow_up_at TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at
   ON contact_requests(created_at);
+
+CREATE INDEX IF NOT EXISTS idx_contact_requests_follow_up_at
+  ON contact_requests(follow_up_at);
+
+CREATE INDEX IF NOT EXISTS idx_contact_requests_priority
+  ON contact_requests(priority);
 
 
 -- Datenschutzfreundliche, anonyme Website-KPI-Ereignisse.

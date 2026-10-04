@@ -266,7 +266,7 @@ export default {
 
           await ensureContactTable(env);
           const { results = [] } = await env.DB.prepare(
-            `SELECT id, name, email, subject, message, source, status, internal_note, created_at
+            `SELECT id, name, email, subject, message, source, status, internal_note, priority, follow_up_at, created_at
              FROM contact_requests
              ORDER BY created_at DESC`
           ).all();
@@ -301,18 +301,27 @@ export default {
 
         const hasStatus = Object.prototype.hasOwnProperty.call(payload, "status");
         const hasNote = Object.prototype.hasOwnProperty.call(payload, "internal_note");
-        if (!hasStatus && !hasNote) return json({ error: "Keine Änderung übermittelt." }, 400, cors);
+        const hasPriority = Object.prototype.hasOwnProperty.call(payload, "priority");
+        const hasFollowUp = Object.prototype.hasOwnProperty.call(payload, "follow_up_at");
+        if (!hasStatus && !hasNote && !hasPriority && !hasFollowUp) return json({ error: "Keine Änderung übermittelt." }, 400, cors);
 
         const status = hasStatus ? cleanText(payload.status, 30) : "";
         const internalNote = hasNote ? cleanText(payload.internal_note, 2000) : "";
-        const allowedStatuses = new Set(["neu", "in-arbeit", "erledigt", "archiviert", "spam"]);
+        const priority = hasPriority ? cleanSingleLine(payload.priority, 20) : "";
+        const followUpAt = hasFollowUp ? cleanSingleLine(payload.follow_up_at, 10) : "";
+        const allowedStatuses = new Set(["neu", "in-arbeit", "antwort-ausstehend", "erledigt", "archiviert", "spam"]);
+        const allowedPriorities = new Set(["niedrig","normal","hoch","dringend"]);
         if (hasStatus && !allowedStatuses.has(status)) return json({ error: "Ungültiger Status." }, 400, cors);
+        if (hasPriority && !allowedPriorities.has(priority)) return json({ error: "Ungültige Priorität." }, 400, cors);
+        if (hasFollowUp && followUpAt && !/^\d{4}-\d{2}-\d{2}$/.test(followUpAt)) return json({ error: "Ungültiges Wiedervorlagedatum." }, 400, cors);
 
         await ensureContactTable(env);
         const fields = [];
         const values = [];
         if (hasStatus) { fields.push("status = ?"); values.push(status); }
         if (hasNote) { fields.push("internal_note = ?"); values.push(internalNote); }
+        if (hasPriority) { fields.push("priority = ?"); values.push(priority); }
+        if (hasFollowUp) { fields.push("follow_up_at = ?"); values.push(followUpAt); }
         values.push(id);
 
         const result = await env.DB.prepare(
@@ -322,7 +331,9 @@ export default {
         if (!result.meta?.changes) return json({ error: "Anfrage nicht gefunden." }, 404, cors);
         await writeAudit(env, adminPrincipal, "anfrage_aktualisiert", "anfragen", id, [
           hasStatus ? "status" : "",
-          hasNote ? "interne_notiz" : ""
+          hasNote ? "interne_notiz" : "",
+          hasPriority ? "prioritaet" : "",
+          hasFollowUp ? "wiedervorlage" : ""
         ].filter(Boolean).join(","));
         return json({ ok: true, id }, 200, cors);
       }
@@ -790,7 +801,7 @@ async function handleAdminHealth(env, cors, ctx) {
       content: hasColumns(contentInfo.results || [], ["key", "value", "updated_at"]),
       content_history: hasColumns(historyInfo.results || [], ["id","key","value","operation","actor_email","created_at"]),
       content_drafts: hasColumns(draftInfo.results || [], ["key","value","actor_email","updated_at"]),
-      contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "created_at"]),
+      contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "priority", "follow_up_at", "created_at"]),
       analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"]),
       audit_log: hasColumns(auditInfo.results || [], ["id", "actor_email", "action", "area", "target", "details", "created_at"])
     };
@@ -1576,6 +1587,8 @@ async function ensureContactTable(env) {
       source TEXT NOT NULL DEFAULT '/',
       status TEXT NOT NULL DEFAULT 'neu',
       internal_note TEXT NOT NULL DEFAULT '',
+      priority TEXT NOT NULL DEFAULT 'normal',
+      follow_up_at TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )`
   ).run();
@@ -1584,7 +1597,15 @@ async function ensureContactTable(env) {
   if (!results.some(column => column.name === "internal_note")) {
     await env.DB.prepare("ALTER TABLE contact_requests ADD COLUMN internal_note TEXT NOT NULL DEFAULT ''").run();
   }
+  if (!results.some(column => column.name === "priority")) {
+    await env.DB.prepare("ALTER TABLE contact_requests ADD COLUMN priority TEXT NOT NULL DEFAULT 'normal'").run();
+  }
+  if (!results.some(column => column.name === "follow_up_at")) {
+    await env.DB.prepare("ALTER TABLE contact_requests ADD COLUMN follow_up_at TEXT NOT NULL DEFAULT ''").run();
+  }
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_contact_requests_created_at ON contact_requests(created_at)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_contact_requests_follow_up_at ON contact_requests(follow_up_at)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_contact_requests_priority ON contact_requests(priority)").run();
 }
 
 function cleanText(value, maxLength) {
