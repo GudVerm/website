@@ -47,6 +47,9 @@ npm run smoke:remote
 
 Der Worker führt additive D1-Migrationen beim ersten Zugriff idempotent aus; bestehende Anfragen werden nicht gelöscht.
 
+
+- Die visuelle Regression neutralisiert ausschließlich das asynchron geladene Startseiten-Hero-Foto; Hero-Geometrie, Text, Buttons und Überlagerungen bleiben weiterhin Bestandteil des Pixelvergleichs.
+
 ## Manueller Preflight in GitHub
 
 Für einen manuellen Start ausschließlich den Workflow **Release preflight – Manuell starten** verwenden:
