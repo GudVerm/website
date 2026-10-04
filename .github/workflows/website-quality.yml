@@ -47,6 +47,8 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node quality/browser-check.mjs
+      - name: Öffentliche CMS-/CORS-Integration prüfen
+        run: node quality/cms-browser-integration.mjs
       - name: Prüfbericht und Fehler-Screenshots
         if: always()
         uses: actions/upload-artifact@v4

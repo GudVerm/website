@@ -19,7 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadCmsSiteContent(){
     if(!cmsApi) return null;
     if(!cmsSiteContentPromise){
-      cmsSiteContentPromise=fetch(cmsApi+cmsSiteEndpoint,{credentials:"include"})
+      const fetchOptions=window.GUDELIUS_CMS_PREVIEW===true
+        ? {credentials:"include",cache:"no-store"}
+        : {credentials:"omit",cache:"no-store"};
+      cmsSiteContentPromise=fetch(cmsApi+cmsSiteEndpoint,fetchOptions)
         .then(async response=>{
           if(!response.ok) throw new Error("HTTP "+response.status);
           const data=await response.json();
