@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.4`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.5`.
 
 ## Secrets
 
@@ -120,7 +120,7 @@ GET /api/health
 Erwartet:
 
 ```json
-{"ok":true,"service":"gudelius-cms","release":"2026-10-03.8"}
+{"ok":true,"service":"gudelius-cms","release":"2026-10-04.5"}
 ```
 
 Geschützt:
@@ -357,3 +357,41 @@ Medienuploads sowie explizite Lösch-/Archivierungsaktionen bleiben direkte admi
 Der Workflow `.github/workflows/website-monitor.yml` prüft alle sechs Stunden die öffentliche GitHub-Pages-Website, den öffentlichen Worker-Healthcheck und den lesenden Zugriff auf `/api/site`. Fehler werden als fehlgeschlagener GitHub-Actions-Lauf sichtbar; es werden dafür keine zusätzlichen Secrets benötigt.
 
 Die Admin-Startseite zeigt live den Backendstatus, die Worker-Releasekennung, neue/gesamte Anfragen, vorhandene Entwürfe, die Zahl der R2-Objekte und die letzten Audit-Ereignisse. Von dort kann außerdem der Access-geschützte CMS-Backup-Export direkt heruntergeladen werden.
+
+
+## Release 2026-10-04.5 – Admin- und Qualitätsausbau
+
+Dieses Release bündelt alle Worker-/D1-relevanten Änderungen des aktuellen Ausbaus:
+
+- Entwurfs-API liefert Live- und Entwurfswerte gemeinsam.
+- Mehrere ausgewählte Entwürfe können Access-geschützt verworfen werden; Veröffentlichung unterstützt weiterhin Key-Auswahl und versioniert den vorherigen Live-Wert.
+- R2-Uploads können Bildbreite/-höhe als nicht-sensitive Custom Metadata speichern; das Inventar gibt Dateigröße, Typ, Uploadzeit und diese Abmessungen zurück.
+- `contact_requests` erhält additiv `priority` und `follow_up_at`. Bestehende Tabellen werden per `PRAGMA table_info` geprüft und ausschließlich um fehlende Spalten ergänzt.
+- Gültige Prioritäten: `niedrig`, `normal`, `hoch`, `dringend`.
+- Der zusätzliche Status `antwort-ausstehend` ist zulässig.
+- Audit-Logging bleibt für Anfrageänderungen, Entwurfspublish/-verwerfen und Inhaltsänderungen aktiv.
+
+### D1-Migration
+
+Die Migration ist nicht destruktiv. Beim Aufruf von `ensureContactTable()` werden nur fehlende Spalten ergänzt:
+
+```text
+priority     TEXT NOT NULL DEFAULT 'normal'
+follow_up_at TEXT NOT NULL DEFAULT ''
+```
+
+Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
+
+### Neue Admin-Funktionen
+
+- Cropper-Zielvorschau für Hero/Karte/Portrait/Mobil mit identischer XY-/Zoom-/Drehlogik wie das Frontend.
+- zentrale Warnung vor ungespeicherten Änderungen.
+- Entwurfsmanager mit Live↔Entwurf-Differenz, Einzeln-/Mehrfach-Publish und -Verwerfen.
+- Medienbibliothek mit Größe, Abmessungen, Typ, Verwendung, Crop, Fallback/R2 und Filtern für ungenutzte/große/externe Medien.
+- Anfrageverwaltung mit Priorität, Wiedervorlage, Überfälligkeitsanzeige, „seit X Tagen unbeantwortet“, Status „Antwort ausstehend“ und lokalem CSV-Export.
+
+### Quality-Workflows
+
+`Website quality` enthält zusätzlich visuelle Regression, axe-core/WCAG, Staging-/Produktionsprüfung und CMS-/Admin-Vertragsprüfung. Referenzbilder liegen versioniert unter `quality/visual-baselines/`; Abweichungen erzeugen Diff-Artefakte statt automatisch akzeptiert zu werden.
+
+`Visual baseline initialize` ist ausschließlich zur bewussten Initialisierung/Aktualisierung von Referenzen vorgesehen. Eine Änderung der Website akzeptiert visuelle Abweichungen nicht automatisch.
