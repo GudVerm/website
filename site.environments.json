@@ -1,0 +1,22 @@
+{
+  "active_environment": "staging",
+  "cms_api": "https://gudelius-cms.gudeliusvermessung.workers.dev",
+  "admin_url": "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/",
+  "environments": {
+    "staging": {
+      "public_base": "https://gudverm.github.io/website/",
+      "allowed_origin": "https://gudverm.github.io",
+      "indexable": false,
+      "robots_file": "robots.txt",
+      "sitemap_public": false
+    },
+    "production": {
+      "public_base": "https://gudeliusvermessung.de/",
+      "allowed_origin": "https://gudeliusvermessung.de",
+      "indexable": true,
+      "robots_file": "robots.production.txt",
+      "sitemap_public": true,
+      "sitemap_url": "https://gudeliusvermessung.de/sitemap.xml"
+    }
+  }
+}

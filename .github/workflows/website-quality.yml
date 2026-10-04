@@ -21,6 +21,8 @@ jobs:
         run: node quality/release-check.mjs
       - name: Statischer Website-Check
         run: node quality/static-check.mjs
+      - name: Staging-/Produktionskonfiguration prüfen
+        run: node quality/environment-check.mjs
 
   browser-quality:
     needs: static-quality
