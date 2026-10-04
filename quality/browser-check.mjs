@@ -60,6 +60,11 @@ for(const [viewportName,viewport] of viewports){
 
     const metrics=await page.evaluate(()=>{
       const root=document.documentElement;
+      const vw=root.clientWidth;
+      const offenders=[...document.querySelectorAll("body *")].map(el=>{
+        const rect=el.getBoundingClientRect();
+        return {tag:el.tagName.toLowerCase(),className:String(el.className||"").slice(0,120),left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
+      }).filter(item=>item.width>0&&(item.left < -4 || item.right > vw+4)).slice(0,12);
       const broken=[...document.images].filter(img=>img.complete&&img.naturalWidth===0).map(img=>img.currentSrc||img.src);
       const oversized=[...document.images].filter(img=>img.clientWidth>0&&img.naturalWidth>0&&img.naturalWidth/img.clientWidth>3.5).map(img=>({
         src:img.currentSrc||img.src,natural:img.naturalWidth,rendered:Math.round(img.clientWidth)
@@ -72,6 +77,7 @@ for(const [viewportName,viewport] of viewports){
       const largestImage=Math.max(0,...resources.filter(r=>r.initiatorType==="img").map(r=>r.transferSize));
       return {
         overflow:Math.max(0,root.scrollWidth-root.clientWidth),
+        offenders,
         broken,
         oversized,
         imageBytes,
@@ -84,7 +90,7 @@ for(const [viewportName,viewport] of viewports){
 
     const prefix=viewportName+"/"+slug;
     if(response&&!response.ok())failures.push(prefix+": HTTP "+response.status());
-    if(metrics.overflow>4)failures.push(prefix+": horizontales Überlaufen um "+metrics.overflow+"px");
+    if(metrics.overflow>4)failures.push(prefix+": horizontales Überlaufen um "+metrics.overflow+"px; Elemente: "+metrics.offenders.map(item=>item.tag+"."+item.className+" ["+item.left+".."+item.right+"]").join(" | "));
     if(metrics.broken.length)failures.push(prefix+": kaputte Bilder: "+metrics.broken.join(", "));
     if(pageErrors.length)failures.push(prefix+": Browserfehler: "+pageErrors.join(" | "));
     const relevantConsole=consoleErrors.filter(message=>!/favicon|quality-stub|Failed to load resource/i.test(message));

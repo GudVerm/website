@@ -107,8 +107,10 @@
       font-weight:850;
     }
     @media(max-width:880px){
-      .legal-layout{grid-template-columns:1fr}
+      .legal-layout{grid-template-columns:minmax(0,1fr)}
+      .legal-layout>*{min-width:0}
       .legal-left{position:static}
+      .legal-card,.legal-value{overflow-wrap:anywhere;word-break:normal}
     }
     @media(max-width:650px){
       .legal-hero{padding:68px 0 52px}
