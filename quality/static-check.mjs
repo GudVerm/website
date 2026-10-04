@@ -55,7 +55,7 @@ for(const page of publicPages){
   const full=join(root,page);
   if(!existsSync(full)){fail(page+": Datei fehlt");continue}
   const html=read(page);
-  if(/[�ÃÂ]/.test(html))fail(page+": verdächtige Zeichencodierung");
+  if(/\uFFFD|\u00C3[\u0080-\u00BF]|\u00C2[\u0080-\u00BF]/.test(html))fail(page+": verdächtige Zeichencodierung");
   if((html.match(/<h1\b/gi)||[]).length!==1)fail(page+": genau eine H1 erwartet");
   if(!/<meta\s+name=["']description["'][^>]*content=["'][^"']+/i.test(html))fail(page+": Meta-Description fehlt");
   if(!/<meta\s+name=["']robots["'][^>]*content=["'][^"']+/i.test(html))fail(page+": robots-Meta fehlt");
@@ -88,8 +88,8 @@ for(const full of files){
   const ext=extname(full).toLowerCase();
   if([".html",".css",".js",".mjs",".json",".md",".xml",".txt"].includes(ext)){
     const text=readFileSync(full,"utf8");
-    if(/[�ÃÂ]/.test(text))fail(rel+": verdächtige Zeichencodierung");
-    if([".html",".css",".js",".mjs"].includes(ext)&&/static\.wixstatic\.com/i.test(text))fail(rel+": produktive Wix-Referenz gefunden");
+    if(/\uFFFD|\u00C3[\u0080-\u00BF]|\u00C2[\u0080-\u00BF]/.test(text))fail(rel+": verdächtige Zeichencodierung");
+    if([".html",".css",".js",".mjs"].includes(ext)&&rel!=="cloudflare/migrate-wix-images.mjs"&&/static\.wixstatic\.com/i.test(text))fail(rel+": produktive Wix-Referenz gefunden");
   }
   if([".js",".mjs"].includes(ext)){
     const result=spawnSync(process.execPath,["--check",full],{encoding:"utf8"});
