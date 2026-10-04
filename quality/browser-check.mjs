@@ -96,6 +96,15 @@ for(const [viewportName,viewport] of viewports){
     const relevantConsole=consoleErrors.filter(message=>!/favicon|quality-stub|Failed to load resource/i.test(message));
     if(relevantConsole.length)failures.push(prefix+": console.error: "+relevantConsole.join(" | "));
     if(metrics.h1!==1)failures.push(prefix+": "+metrics.h1+" H1-Elemente");
+    if(slug==="start"){
+      const pathCardClip=await page.evaluate(()=>[...document.querySelectorAll(".home-path-card")].every(card=>{
+        const media=card.querySelector(".home-path-media");
+        const img=media?.querySelector("img");
+        const copy=card.querySelector(".home-path-copy");
+        return !!media&&!!img&&!!copy&&getComputedStyle(media).overflow==="hidden"&&Number(getComputedStyle(copy).zIndex)>=2;
+      }));
+      if(!pathCardClip)failures.push(prefix+": Startseiten-Karten besitzen keine sichere Medien-Clipping-Grenze");
+    }
     if(metrics.totalBytes>3*1024*1024)failures.push(prefix+": Seitenbudget > 3 MiB ("+Math.round(metrics.totalBytes/1024)+" KiB)");
     if(metrics.largestImage>800*1024)failures.push(prefix+": einzelnes geladenes Bild > 800 KiB");
 
