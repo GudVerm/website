@@ -214,6 +214,95 @@ function adminHeaders(extra={}){
 
 const draftCapablePages=new Set(["startseite","leistungen","unternehmen","technik","projekte","kontakt"]);
 const currentAdminPage=document.body?.dataset?.adminPage||"";
+
+/* Zentraler, abschnittsbezogener Dirty-State. */
+const adminDirtyKeys=new Set();
+const adminDirtyScopeIds=new WeakMap();
+let adminDirtyScopeSeq=0;
+function dirtyScopeFor(element){
+  return element?.closest?.(".project-editor-card,.equipment-card,.service-department,.admin-section,.cms-subpanel,.panel,main")||document.querySelector("main")||document.body;
+}
+function dirtyScopeId(scope){
+  if(!scope)return "page";
+  if(!adminDirtyScopeIds.has(scope))adminDirtyScopeIds.set(scope,"scope-"+(++adminDirtyScopeSeq));
+  return adminDirtyScopeIds.get(scope);
+}
+function dirtyKey(element,type="fields"){return dirtyScopeId(dirtyScopeFor(element))+":"+type}
+function updateAdminDirtyUi(){
+  const indicator=document.querySelector(".admin-global-dirty");
+  const dirty=adminDirtyKeys.size>0;
+  document.body.classList.toggle("has-unsaved-admin-changes",dirty);
+  if(indicator){
+    indicator.hidden=!dirty;
+    indicator.querySelector("b").textContent=String(adminDirtyKeys.size);
+  }
+}
+function markAdminDirty(element,type="fields"){
+  if(!draftCapablePages.has(currentAdminPage))return;
+  adminDirtyKeys.add(dirtyKey(element,type));
+  updateAdminDirtyUi();
+}
+function clearAdminDirty(element,type="fields"){
+  adminDirtyKeys.delete(dirtyKey(element,type));
+  updateAdminDirtyUi();
+}
+function clearAllAdminDirty(){adminDirtyKeys.clear();updateAdminDirtyUi()}
+function hasAdminDirty(){return adminDirtyKeys.size>0}
+function ensureAdminDirtyUi(){
+  if(!draftCapablePages.has(currentAdminPage))return;
+  const actions=document.querySelector(".admin-header-actions")||document.querySelector(".admin-header");
+  if(!actions||actions.querySelector(".admin-global-dirty"))return;
+  const indicator=document.createElement("span");
+  indicator.className="admin-global-dirty";
+  indicator.hidden=true;
+  indicator.innerHTML='<i aria-hidden="true"></i><span>Ungespeichert</span><b>0</b>';
+  indicator.setAttribute("role","status");
+  indicator.setAttribute("aria-live","polite");
+  actions.prepend(indicator);
+}
+function shouldTrackAdminField(target){
+  if(!draftCapablePages.has(currentAdminPage)||!target?.matches?.("input,textarea,select"))return false;
+  if(target.closest(".cms-draft-toolbar"))return false;
+  if(target.matches('input[type="search"],input[type="hidden"]'))return false;
+  if(target.closest(".media-crop-editor"))return false;
+  return Boolean(target.closest("main"));
+}
+document.addEventListener("input",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
+document.addEventListener("change",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
+document.addEventListener("cms-crop-dirty-change",event=>{
+  if(event.detail?.dirty)markAdminDirty(event.target,"crop");
+  else clearAdminDirty(event.target,"crop");
+});
+window.addEventListener("beforeunload",event=>{
+  if(!hasAdminDirty())return;
+  event.preventDefault();
+  event.returnValue="";
+});
+document.addEventListener("click",event=>{
+  if(!hasAdminDirty())return;
+  const link=event.target.closest?.("a[href]");
+  if(!link||link.target==="_blank"||link.hasAttribute("download"))return;
+  const href=link.getAttribute("href")||"";
+  if(!href||href.startsWith("#")||href.startsWith("javascript:"))return;
+  if(!confirm("Es gibt noch nicht gespeicherte Änderungen. Seite wirklich verlassen und Änderungen verwerfen?")){
+    event.preventDefault();event.stopImmediatePropagation();
+  }else clearAllAdminDirty();
+},true);
+["projectSelect","technikSelect"].forEach(id=>{
+  const select=document.getElementById(id);
+  if(!select)return;
+  let previous=select.value;
+  select.addEventListener("focus",()=>{previous=select.value});
+  select.addEventListener("pointerdown",()=>{previous=select.value});
+  select.addEventListener("change",event=>{
+    if(!hasAdminDirty()){previous=select.value;return}
+    if(!confirm("Es gibt noch nicht gespeicherte Änderungen. Datensatz wechseln und Änderungen verwerfen?")){
+      event.preventDefault();event.stopImmediatePropagation();select.value=previous;
+    }else{clearAllAdminDirty();previous=select.value}
+  },true);
+});
+ensureAdminDirtyUi();
+
 let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 async function fetchSiteSnapshot(){
@@ -2107,7 +2196,11 @@ function setStatus(el,text,ok){
   if(!el) return;
   el.textContent=text;
   el.classList.remove("ok","bad");
-  if(ok===true) el.classList.add("ok");
+  if(ok===true){
+    el.classList.add("ok");
+    if(el.classList.contains("media-crop-status"))clearAdminDirty(el,"crop");
+    else if(el.closest("main"))clearAdminDirty(el,"fields");
+  }
   if(ok===false) el.classList.add("bad");
 }
 
