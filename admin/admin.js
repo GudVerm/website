@@ -256,7 +256,29 @@ function ensureDraftToolbar(){
   const toggle=toolbar.querySelector("[data-draft-toggle]");
   toggle.checked=cmsDraftMode;
   toggle.addEventListener("change",()=>{sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");location.reload()});
-  toolbar.querySelector("[data-draft-preview]").addEventListener("click",()=>window.open(getApi()+"/admin/preview/"+previewPathForAdminPage(),"_blank","noopener"));
+  toolbar.querySelector("[data-draft-preview]").addEventListener("click",async event=>{
+    const button=event.currentTarget;
+    button.disabled=true;
+    const originalLabel=button.textContent;
+    try{
+      if(cmsDraftMode){
+        button.textContent="Speichere Bildausschnitte …";
+        const savedCrops=await saveAllPendingMediaCrops();
+        await refreshDraftToolbar(toolbar);
+        if(savedCrops>0)button.textContent=savedCrops+" Ausschnitt"+(savedCrops===1?"":"e")+" gespeichert …";
+      }else if(hasPendingMediaCrops()){
+        alert("Der Bildausschnitt ist noch nicht gespeichert. Aktiviere den Entwurfsmodus oder speichere den Ausschnitt zuerst, damit er in der Vorschau erscheint.");
+        return;
+      }
+      const previewUrl=getApi()+"/admin/preview/"+previewPathForAdminPage()+"?v="+Date.now();
+      window.open(previewUrl,"_blank","noopener");
+    }catch(error){
+      alert("Vorschau konnte nicht vorbereitet werden: "+error.message);
+    }finally{
+      button.disabled=false;
+      button.textContent=originalLabel;
+    }
+  });
   toolbar.querySelector("[data-draft-publish]").addEventListener("click",async event=>{
     if(!confirm("Alle gespeicherten Entwürfe jetzt veröffentlichen?"))return;
     const button=event.currentTarget;button.disabled=true;
@@ -474,6 +496,7 @@ async function saveMediaLayout(mediaKey,value){
   mediaLayoutContentCache[key]=value;
 }
 const mediaCropControllers=new WeakMap();
+const activeMediaCropControllers=new Set();
 function attachMediaCropEditor(card,img,item,status){
   const cropper=window.GUDELIUS_CROPPER;
   if(!cropper?.attach)throw new Error("cropper.js wurde nicht geladen.");
@@ -491,8 +514,30 @@ function attachMediaCropEditor(card,img,item,status){
       saveMediaLayout
     }
   });
-  if(controller)mediaCropControllers.set(card,controller);
+  if(controller){
+    mediaCropControllers.set(card,controller);
+    activeMediaCropControllers.add({card,controller});
+  }
   return controller;
+}
+function activeDirtyMediaCrops(){
+  const dirty=[];
+  for(const entry of [...activeMediaCropControllers]){
+    if(!entry.card?.isConnected){
+      activeMediaCropControllers.delete(entry);
+      continue;
+    }
+    if(entry.controller?.isDirty?.())dirty.push(entry);
+  }
+  return dirty;
+}
+function hasPendingMediaCrops(){
+  return activeDirtyMediaCrops().length>0;
+}
+async function saveAllPendingMediaCrops(){
+  const dirty=activeDirtyMediaCrops();
+  for(const entry of dirty)await entry.controller.save();
+  return dirty.length;
 }
 async function savePendingMediaCrop(card){
   const controller=mediaCropControllers.get(card);
