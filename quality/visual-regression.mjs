@@ -6,6 +6,7 @@ import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 
 const root=resolve(import.meta.dirname,"..");
+const baselineRevision="2026-10-04.5-aa"; void baselineRevision;
 const base=(process.env.SITE_URL||"http://127.0.0.1:4173/").replace(/\/?$/,"/");
 const update=process.env.UPDATE_VISUAL_BASELINES==="1";
 const baselineDir=resolve(root,"quality/visual-baselines");
