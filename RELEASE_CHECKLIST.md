@@ -1,4 +1,6 @@
 # GudeliusVermessung – Release-Ablauf
+> Abschlussregel: Visuelle Baselines werden nur bewusst über den Baseline-Workflow aktualisiert; der normale Quality-Lauf akzeptiert Bildabweichungen niemals automatisch.
+
 
 Der Release-Prozess verwendet die zentrale Worker-Releasekennung aus `release.json`. Die aktive Website-Umgebung kommt aus `site.environments.json`.
 
