@@ -4,8 +4,9 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.6";
+const WORKER_RELEASE = "2026-10-03.7";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "audit"]);
 
@@ -154,6 +155,19 @@ export default {
 
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return json({ error: "Bitte eine gültige E-Mail-Adresse angeben." }, 400, cors);
+          }
+
+          const turnstile = await verifyTurnstileToken(request, env, payload.turnstileToken);
+          if (!turnstile.success) {
+            return json(
+              {
+                error: turnstile.transient
+                  ? "Die Sicherheitsprüfung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es erneut."
+                  : "Die Sicherheitsprüfung ist fehlgeschlagen. Bitte bestätigen Sie die Anfrage erneut."
+              },
+              turnstile.transient ? 503 : 400,
+              cors
+            );
           }
 
           await ensureContactTable(env);
@@ -659,6 +673,7 @@ async function handleAdminHealth(env, cors, ctx) {
     admin_token_fallback_enabled: isAdminTokenFallbackEnabled(env),
     admin_token_configured: Boolean(env.CMS_ADMIN_TOKEN),
     admin_allowed_email_count: allowedAdminEmails(env).length,
+    turnstile_enabled: Boolean(String(env.TURNSTILE_SECRET_KEY || "").trim()),
     bindings,
     schema
   }, ok ? 200 : 503, cors);
@@ -1148,6 +1163,53 @@ function normalizeContactSource(value) {
 function isJsonRequest(request) {
   const contentType = request.headers.get("content-type") || "";
   return contentType.toLowerCase().split(";")[0].trim() === "application/json";
+}
+
+async function verifyTurnstileToken(request, env, token) {
+  const secret = cleanSingleLine(env.TURNSTILE_SECRET_KEY, 2048);
+  if (!secret) return { success: true, enabled: false, transient: false };
+
+  const responseToken = cleanText(token, 2049);
+  if (!responseToken || responseToken.length > 2048) {
+    return { success: false, enabled: true, transient: false };
+  }
+
+  const body = new URLSearchParams();
+  body.set("secret", secret);
+  body.set("response", responseToken);
+  body.set("idempotency_key", crypto.randomUUID());
+
+  const remoteIp = cleanSingleLine(request.headers.get("cf-connecting-ip") || "", 80);
+  if (remoteIp) body.set("remoteip", remoteIp);
+
+  try {
+    const response = await fetch(TURNSTILE_VERIFY_URL, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    });
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok || !result || result.success !== true) {
+      const errorCodes = Array.isArray(result?.["error-codes"])
+        ? result["error-codes"].map(code => cleanSingleLine(code, 80)).filter(Boolean)
+        : [];
+      console.warn("Turnstile validation rejected contact request:", errorCodes.join(",") || "unknown");
+      return {
+        success: false,
+        enabled: true,
+        transient: response.status === 429 || response.status >= 500 || !result
+      };
+    }
+
+    return { success: true, enabled: true, transient: false };
+  } catch (error) {
+    console.error(
+      "Turnstile validation unavailable:",
+      error instanceof Error ? error.message : "request failed"
+    );
+    return { success: false, enabled: true, transient: true };
+  }
 }
 
 function isAnalyticsRequest(request) {

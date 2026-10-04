@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.6`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.7`.
 
 ## Secrets
 
@@ -27,6 +27,14 @@ Folgendes Secret wird produktiv benötigt:
 ```text
 BREVO_API_KEY
 ```
+
+Für die optionale Turnstile-Aktivierung wird zusätzlich benötigt:
+
+```text
+TURNSTILE_SECRET_KEY
+```
+
+Solange `TURNSTILE_SECRET_KEY` nicht gesetzt ist, bleibt Turnstile serverseitig deaktiviert; Honeypot, Origin-Prüfung, Größenlimits und Rate Limiting bleiben weiterhin aktiv.
 
 `CMS_ADMIN_TOKEN` ist seit der Access-Umstellung nicht mehr für den Admin-Workflow erforderlich; `ADMIN_TOKEN_FALLBACK_ENABLED=false` bleibt gesetzt.
 
@@ -60,10 +68,11 @@ ADMIN_ALLOWED_EMAILS=gudeliusvermessung@web.de,jost@gudeliusvermessung.de
 3. begrenzt den Request auf 16 KiB,
 4. verwendet das bestehende Honeypot-Feld,
 5. validiert Pflichtfelder und E-Mail-Adresse,
-6. speichert die Anfrage zuerst in D1,
-7. sendet danach die Benachrichtigung über Brevos Transactional-Email-API,
-8. setzt die Formularadresse als `Reply-To`,
-9. speichert keine Formularinhalte in der Analytics-Tabelle.
+6. validiert bei gesetztem `TURNSTILE_SECRET_KEY` den Browser-Token serverseitig über Cloudflare Siteverify,
+7. speichert die Anfrage zuerst in D1,
+8. sendet danach die Benachrichtigung über Brevos Transactional-Email-API,
+9. setzt die Formularadresse als `Reply-To`,
+10. speichert keine Formularinhalte in der Analytics-Tabelle.
 
 Ein Fehler beim E-Mail-Versand löscht die bereits gespeicherte D1-Anfrage nicht.
 
@@ -367,6 +376,18 @@ Der Admin stellt die Historie unter `/admin/audit/` bereit; die API lautet `GET 
 
 Die zentrale Medienbibliothek im Admin liest den Medienkatalog aus `admin/admin-data.js`, zeigt R2-/Fallback-Status sowie gespeicherte Crop-Werte und verlinkt direkt in den zuständigen CMS-Bereich.
 
-## Turnstile-Vorbereitung
+## Turnstile
 
-Die Browser-Konfiguration enthält einen optionalen `GUDELIUS_TURNSTILE_SITE_KEY`. Solange dieser leer ist, wird kein Turnstile-Widget geladen. Honeypot, Origin-Prüfung, Größenlimits und Rate Limiting bleiben unabhängig davon aktiv. Die serverseitige Turnstile-Verifikation ist vor einer Aktivierung noch mit dem Secret-Key zu ergänzen und zu deployen.
+Die Browser-Konfiguration enthält einen optionalen `GUDELIUS_TURNSTILE_SITE_KEY`. Solange dieser leer ist, wird kein Turnstile-Widget geladen. Honeypot, Origin-Prüfung, Größenlimits und Rate Limiting bleiben unabhängig davon aktiv.
+
+Der Worker unterstützt die serverseitige Verifikation über Cloudflare Siteverify. Sie wird automatisch aktiv, sobald das Secret `TURNSTILE_SECRET_KEY` gesetzt ist. Ab diesem Zeitpunkt wird jede normale Kontaktanfrage ohne gültigen Turnstile-Token abgewiesen; Honeypot-Treffer werden weiterhin neutral beantwortet.
+
+Aktivierungsreihenfolge, damit es keinen Formularausfall gibt:
+
+1. Turnstile-Widget in Cloudflare für die tatsächlich verwendeten Website-Hosts anlegen.
+2. Den öffentlichen Site-Key in `assets/cms-config.js` als `GUDELIUS_TURNSTILE_SITE_KEY` setzen und die Website veröffentlichen.
+3. `npx wrangler secret put TURNSTILE_SECRET_KEY` ausführen.
+4. Den Worker mit `npm run deploy` deployen.
+5. Das Kontaktformular End-to-End testen.
+
+Beim Deaktivieren zuerst das Worker-Secret entfernen und deployen, erst danach den öffentlichen Site-Key leeren. Secret-Werte werden niemals in Git oder Dokumentation eingetragen.
