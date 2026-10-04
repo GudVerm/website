@@ -1,6 +1,10 @@
 name: Release preflight
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-preflight.yml"
   workflow_dispatch:
     inputs:
       expected_release:
