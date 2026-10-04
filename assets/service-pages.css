@@ -154,7 +154,7 @@
   display:block;
   font-size:.72rem;
   letter-spacing:.14em;
-  color:#8b7316;
+  color:#765900;
   margin-bottom:14px;
 }
 .process-step h3{font-size:1.08rem;margin-bottom:8px}
@@ -200,7 +200,7 @@
 .related-card small{
   display:block;
   font-weight:900;
-  color:#9b7f10;
+  color:#765900;
   letter-spacing:.12em;
   margin-bottom:12px;
 }
@@ -312,7 +312,7 @@
 }
 .scope-note{
   margin-top:18px;
-  color:#7c878b;
+  color:#59666c;
   font-size:.75rem;
 }
 @media(max-width:900px){
@@ -331,3 +331,5 @@
 .faq-item summary::after{content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:1.35rem;color:#806b10}
 .faq-item[open] summary::after{content:"–"}
 .faq-item p{margin:0;padding:0 20px 20px;color:var(--muted);line-height:1.7}
+
+.detail-band>.container>.eyebrow{color:#e5c533}
