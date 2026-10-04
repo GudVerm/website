@@ -492,7 +492,28 @@ async function deleteMediaLayout(mediaKey){
 }
 async function saveMediaLayout(mediaKey,value){
   const key=mediaLayoutContentKey(mediaKey);
-  await saveHeroText(key,value);
+  const response=await fetch(contentUrl(key),{
+    method:"PUT",
+    headers:adminHeaders({"content-type":"application/json"}),
+    body:JSON.stringify(value)
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+
+  // Crops sind Medienzustand und gelten sofort. Alte Entwurfswerte für denselben
+  // media-layout-Key würden die Access-Vorschau sonst über den Live-Wert legen.
+  if(cmsAccessMode){
+    const draftResponse=await fetch(draftContentUrl(key),{
+      method:"DELETE",
+      headers:adminHeaders(),
+      credentials:"include"
+    });
+    if(!draftResponse.ok&&draftResponse.status!==404){
+      const draftData=await draftResponse.json().catch(()=>({}));
+      throw new Error(draftData.error||("Alter Crop-Entwurf konnte nicht entfernt werden (HTTP "+draftResponse.status+")."));
+    }
+  }
+
   mediaLayoutContentCache[key]=value;
 }
 const mediaCropControllers=new WeakMap();
