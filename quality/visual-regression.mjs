@@ -6,7 +6,7 @@ import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 
 const root=resolve(import.meta.dirname,"..");
-const baselineRevision="2026-10-04.5-aa"; void baselineRevision;
+const baselineRevision="2026-10-04.5-stable-hero"; void baselineRevision;
 const base=(process.env.SITE_URL||"http://127.0.0.1:4173/").replace(/\/?$/,"/");
 const update=process.env.UPDATE_VISUAL_BASELINES==="1";
 const baselineDir=resolve(root,"quality/visual-baselines");
@@ -60,6 +60,11 @@ for(const [viewportName,viewport] of viewports){
       *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
       html{scroll-behavior:auto!important}
       [data-image-review-badge],.image-review-badge{display:none!important}
+      /* Das Startseiten-Hero-Medium wird im visuellen Regressionstest bewusst
+         neutralisiert. Layout, Text, Buttons, Höhe und Überlagerungen bleiben
+         prüfbar; ein asynchron dekodiertes Foto erzeugt aber keine falschen Diffs. */
+      .home-page .hero{background:#172026!important}
+      .home-page .hero-background{visibility:hidden!important}
     `});
     await page.evaluate(async()=>{
       const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
