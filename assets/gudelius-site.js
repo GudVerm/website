@@ -188,11 +188,17 @@ document.addEventListener('DOMContentLoaded', () => {
       applyCmsImageLayout(img,cmsMediaLayout(content,key));
       if(!cmsMediaEnabled||img.dataset.cmsApplied==="1")return;
       const fallback=img.currentSrc||img.src;
+      const fallbackSrcset=img.getAttribute("srcset");
+      const fallbackSizes=img.getAttribute("sizes");
       img.dataset.cmsApplied="1";
       img.addEventListener("error",function restoreFallback(){
         img.removeEventListener("error",restoreFallback);
         img.src=fallback;
+        if(fallbackSrcset)img.setAttribute("srcset",fallbackSrcset);else img.removeAttribute("srcset");
+        if(fallbackSizes)img.setAttribute("sizes",fallbackSizes);else img.removeAttribute("sizes");
       });
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
       img.src=cmsMediaUrl(key);
     });
 
@@ -217,7 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const heroImage=element.querySelector(".hero-background");
           if(heroImage){
             const fallback=heroImage.currentSrc||heroImage.src;
-            heroImage.onerror=()=>{heroImage.onerror=null;heroImage.src=fallback};
+            const fallbackSrcset=heroImage.getAttribute("srcset");
+            const fallbackSizes=heroImage.getAttribute("sizes");
+            heroImage.onerror=()=>{heroImage.onerror=null;heroImage.src=fallback;if(fallbackSrcset)heroImage.setAttribute("srcset",fallbackSrcset);else heroImage.removeAttribute("srcset");if(fallbackSizes)heroImage.setAttribute("sizes",fallbackSizes);else heroImage.removeAttribute("sizes")};
+            heroImage.removeAttribute("srcset");
+            heroImage.removeAttribute("sizes");
             heroImage.src=url;
             applyCmsImageLayout(heroImage,layout);
           }else{
