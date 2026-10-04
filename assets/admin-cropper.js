@@ -52,10 +52,10 @@
         <span>Ziehen = verschieben · Zoomgriff/Mausrad/Pinch = zoomen · Drehgriff/Zwei-Finger-Geste = drehen · alternativ die Regler verwenden.</span>
       </div>
       <div class="media-crop-sliders">
-        <label><span>Horizontal</span><input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"></label>
-        <label><span>Vertikal</span><input class="media-crop-y" type="range" min="0" max="100" step="1" value="50"></label>
-        <label><span>Zoom</span><input class="media-crop-zoom" type="range" min="25" max="300" step="5" value="100"></label>
-        <label><span>Drehung</span><input class="media-crop-rotation" type="range" min="-180" max="180" step="1" value="0"></label>
+        <label><span>Horizontal</span><input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"><output class="media-crop-value media-crop-x-value" for="">50 %</output></label>
+        <label><span>Vertikal</span><input class="media-crop-y" type="range" min="0" max="100" step="1" value="50"><output class="media-crop-value media-crop-y-value" for="">50 %</output></label>
+        <label><span>Zoom</span><input class="media-crop-zoom" type="range" min="25" max="300" step="5" value="100"><output class="media-crop-value media-crop-zoom-value" for="">100 %</output></label>
+        <label><span>Drehung</span><input class="media-crop-rotation" type="range" min="-180" max="180" step="1" value="0"><output class="media-crop-value media-crop-rotation-value" for="">0°</output></label>
       </div>
       <div class="media-crop-actions">
         <button type="button" class="media-crop-save">Ausschnitt speichern</button>
@@ -73,6 +73,10 @@
     const yInput=editor.querySelector(".media-crop-y");
     const zoomInput=editor.querySelector(".media-crop-zoom");
     const rotationInput=editor.querySelector(".media-crop-rotation");
+    const xValue=editor.querySelector(".media-crop-x-value");
+    const yValue=editor.querySelector(".media-crop-y-value");
+    const zoomValue=editor.querySelector(".media-crop-zoom-value");
+    const rotationValue=editor.querySelector(".media-crop-rotation-value");
   
     let layout=normalizeMediaLayout(null);
     let savedLayout=normalizeMediaLayout(null);
@@ -197,10 +201,18 @@
       img.style.setProperty("transform","rotate("+layout.rotation+"deg)","important");
   
       readout.textContent=Math.round(layout.zoom)+" % · "+Math.round(layout.rotation)+"°";
-      xInput.value=String(Math.round(layout.x));
-      yInput.value=String(Math.round(layout.y));
+      const roundedX=Math.round(layout.x);
+      const roundedY=Math.round(layout.y);
+      const roundedZoom=Math.round(layout.zoom);
+      const roundedRotation=Math.round(layout.rotation);
+      xInput.value=String(roundedX);
+      yInput.value=String(roundedY);
       zoomInput.value=String(Math.round(layout.zoom/5)*5);
-      rotationInput.value=String(Math.round(layout.rotation));
+      rotationInput.value=String(roundedRotation);
+      xValue.textContent=roundedX+" %";
+      yValue.textContent=roundedY+" %";
+      zoomValue.textContent=roundedZoom+" %";
+      rotationValue.textContent=roundedRotation+"°";
     }
   
     function markChanged(message="Nicht gespeicherte Änderung."){
