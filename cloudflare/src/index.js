@@ -512,7 +512,6 @@ function adminSourcePath(pathname) {
   if (pathname === "/admin/admin.css") return "admin/admin.css";
   if (pathname === "/admin/admin.js") return "admin/admin.js";
   if (pathname === "/admin/admin-data.js") return "admin/admin-data.js";
-  if (pathname === "/admin/cropper.js") return "admin/cropper.js";
   if (pathname === "/admin/media-library.js") return "admin/media-library.js";
   const match = pathname.match(/^\/admin\/([a-z0-9-]+)\/?$/);
   if (match && ADMIN_PAGE_SLUGS.has(match[1])) return "admin/" + match[1] + "/index.html";
