@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Release-Konsistenz prüfen
+        run: node quality/release-check.mjs
       - name: Statischer Website-Check
         run: node quality/static-check.mjs
 
