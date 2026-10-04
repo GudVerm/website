@@ -32,7 +32,7 @@ jobs:
           node-version: "22"
       - name: Playwright und Bildvergleich installieren
         run: |
-          npm install --no-save --package-lock=false playwright pixelmatch pngjs
+          npm install --no-save --package-lock=false playwright pixelmatch pngjs axe-core
           npx playwright install --with-deps chromium
       - name: Lokale Website starten
         run: |
@@ -53,6 +53,10 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node quality/visual-regression.mjs
+      - name: Accessibility prüfen
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node quality/accessibility-check.mjs
       - name: Prüfbericht und Fehler-Screenshots
         if: always()
         uses: actions/upload-artifact@v4
