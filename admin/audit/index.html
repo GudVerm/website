@@ -63,6 +63,21 @@
       </div>
     </section>
 
+    <section class="cms-subpanel" id="draftManager">
+      <div class="cms-subpanel-head compact">
+        <span class="cms-subpanel-icon">D</span>
+        <div><span class="kicker">Entwürfe</span><h3>Gezielt veröffentlichen oder verwerfen</h3><p>Live- und Entwurfsstand vergleichen, einzeln oder als Auswahl bearbeiten.</p></div>
+      </div>
+      <div class="draft-manager-actions">
+        <label class="draft-select-all"><input id="draftSelectAll" type="checkbox"> Alle auswählen</label>
+        <button id="draftPublishSelected" type="button">Auswahl veröffentlichen</button>
+        <button id="draftDiscardSelected" class="secondary" type="button">Auswahl verwerfen</button>
+        <button id="draftRefresh" class="secondary" type="button">Aktualisieren</button>
+        <span id="draftStatus" class="status">Lade Entwürfe …</span>
+      </div>
+      <div id="draftCards" class="draft-manager-list" aria-live="polite"></div>
+    </section>
+
     <section class="cms-subpanel">
       <div class="cms-subpanel-head compact">
         <span class="cms-subpanel-icon">↶</span>
@@ -116,7 +131,11 @@
     technik_angelegt:"Technik angelegt",
     technik_geaendert:"Technik geändert",
     technik_geloescht:"Technik gelöscht",
-    version_wiederhergestellt:"Version wiederhergestellt"
+    version_wiederhergestellt:"Version wiederhergestellt",
+    entwurf_gespeichert:"Entwurf gespeichert",
+    entwurf_veroeffentlicht:"Entwurf veröffentlicht",
+    entwurf_verworfen:"Entwurf verworfen",
+    entwuerfe_verworfen:"Alle Entwürfe verworfen"
   }[value]||value||"–");
 
   function query(){
@@ -173,6 +192,104 @@
   [actor,area,from,to].forEach(control=>control.addEventListener("change",load));
   reset.addEventListener("click",()=>{actor.value="";area.value="";from.value="";to.value="";load()});
 
+  const draftCards=document.getElementById("draftCards");
+  const draftStatus=document.getElementById("draftStatus");
+  const draftSelectAll=document.getElementById("draftSelectAll");
+  const draftPublishSelected=document.getElementById("draftPublishSelected");
+  const draftDiscardSelected=document.getElementById("draftDiscardSelected");
+  const draftRefresh=document.getElementById("draftRefresh");
+  let currentDrafts=[];
+
+  function valueText(value){
+    if(value===undefined)return "—";
+    if(value===null)return "null";
+    if(typeof value==="string")return value;
+    try{return JSON.stringify(value,null,2)}catch{return String(value)}
+  }
+  function diffSummary(live,draft,hasLive){
+    if(!hasLive)return "Neuer Inhalt – noch kein Live-Wert";
+    if(typeof live==="object"&&live&&typeof draft==="object"&&draft&&!Array.isArray(live)&&!Array.isArray(draft)){
+      const keys=[...new Set([...Object.keys(live),...Object.keys(draft)])];
+      const changed=keys.filter(key=>JSON.stringify(live[key])!==JSON.stringify(draft[key]));
+      return changed.length?"Geänderte Felder: "+changed.join(", "):"Keine inhaltliche Differenz";
+    }
+    if(Array.isArray(live)&&Array.isArray(draft))return "Liste: "+live.length+" → "+draft.length+" Einträge";
+    return valueText(live)===valueText(draft)?"Keine inhaltliche Differenz":"Wert geändert";
+  }
+  function selectedDraftKeys(){
+    return [...draftCards.querySelectorAll('input[data-draft-key]:checked')].map(input=>input.dataset.draftKey);
+  }
+  function renderDrafts(){
+    if(!currentDrafts.length){
+      draftCards.innerHTML='<div class="draft-manager-empty">Keine offenen Entwürfe.</div>';
+      draftSelectAll.checked=false;draftSelectAll.indeterminate=false;return;
+    }
+    draftCards.innerHTML=currentDrafts.map(draft=>{
+      const key=esc(draft.key);
+      const live=esc(valueText(draft.live_value));
+      const next=esc(valueText(draft.draft_value));
+      return '<article class="draft-manager-card">'+
+        '<div class="draft-manager-card-head"><label><input type="checkbox" data-draft-key="'+key+'"> <code>'+key+'</code></label><span>'+esc(draft.actor_email||"–")+' · '+esc(draft.updated_at||"")+'</span></div>'+
+        '<strong class="draft-diff-summary">'+esc(diffSummary(draft.live_value,draft.draft_value,draft.has_live_value))+'</strong>'+
+        '<details class="draft-diff"><summary>Live ↔ Entwurf vergleichen</summary><div class="draft-diff-grid"><div><b>Live</b><pre>'+live+'</pre></div><div><b>Entwurf</b><pre>'+next+'</pre></div></div></details>'+
+        '<div class="draft-manager-card-actions"><button type="button" data-draft-publish="'+key+'">Veröffentlichen</button><button type="button" class="secondary" data-draft-discard="'+key+'">Verwerfen</button></div>'+
+      '</article>';
+    }).join("");
+    draftCards.querySelectorAll("[data-draft-publish]").forEach(button=>button.addEventListener("click",()=>publishDrafts([button.dataset.draftPublish])));
+    draftCards.querySelectorAll("[data-draft-discard]").forEach(button=>button.addEventListener("click",()=>discardDrafts([button.dataset.draftDiscard])));
+    draftCards.querySelectorAll("input[data-draft-key]").forEach(input=>input.addEventListener("change",syncDraftSelection));
+    syncDraftSelection();
+  }
+  function syncDraftSelection(){
+    const boxes=[...draftCards.querySelectorAll("input[data-draft-key]")];
+    const selected=boxes.filter(box=>box.checked).length;
+    draftSelectAll.checked=boxes.length>0&&selected===boxes.length;
+    draftSelectAll.indeterminate=selected>0&&selected<boxes.length;
+    draftPublishSelected.disabled=selected===0;
+    draftDiscardSelected.disabled=selected===0;
+  }
+  async function loadDrafts(){
+    draftRefresh.disabled=true;draftStatus.textContent="Lade Entwürfe …";draftStatus.className="status";
+    try{
+      const response=await fetch(api+"/api/admin/drafts",{credentials:"include",cache:"no-store"});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+      currentDrafts=Array.isArray(data.drafts)?data.drafts:[];
+      renderDrafts();
+      draftStatus.textContent=currentDrafts.length+" offene Entwürfe.";draftStatus.className="status ok";
+    }catch(error){
+      currentDrafts=[];renderDrafts();draftStatus.textContent="Entwürfe konnten nicht geladen werden: "+error.message;draftStatus.className="status bad";
+    }finally{draftRefresh.disabled=false}
+  }
+  async function publishDrafts(keys){
+    if(!keys.length)return;
+    if(!confirm(keys.length+" Entwurf"+(keys.length===1?"":"e")+" veröffentlichen? Vorherige Live-Werte werden versioniert."))return;
+    draftStatus.textContent="Veröffentliche …";draftStatus.className="status";
+    try{
+      const response=await fetch(api+"/api/admin/drafts/publish",{method:"POST",credentials:"include",headers:{"content-type":"application/json"},body:JSON.stringify({keys})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+      draftStatus.textContent=(data.count||0)+" Entwürfe veröffentlicht.";draftStatus.className="status ok";
+      await Promise.all([load(),loadDrafts(),loadHistory()]);
+    }catch(error){draftStatus.textContent="Veröffentlichen fehlgeschlagen: "+error.message;draftStatus.className="status bad"}
+  }
+  async function discardDrafts(keys){
+    if(!keys.length)return;
+    if(!confirm(keys.length+" Entwurf"+(keys.length===1?"":"e")+" wirklich verwerfen? Live-Inhalte bleiben unverändert."))return;
+    draftStatus.textContent="Verwerfe …";draftStatus.className="status";
+    try{
+      const response=await fetch(api+"/api/admin/drafts/discard",{method:"POST",credentials:"include",headers:{"content-type":"application/json"},body:JSON.stringify({keys})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+      draftStatus.textContent=(data.count||0)+" Entwürfe verworfen.";draftStatus.className="status ok";
+      await Promise.all([load(),loadDrafts()]);
+    }catch(error){draftStatus.textContent="Verwerfen fehlgeschlagen: "+error.message;draftStatus.className="status bad"}
+  }
+  draftSelectAll?.addEventListener("change",()=>{draftCards.querySelectorAll("input[data-draft-key]").forEach(box=>box.checked=draftSelectAll.checked);syncDraftSelection()});
+  draftPublishSelected?.addEventListener("click",()=>publishDrafts(selectedDraftKeys()));
+  draftDiscardSelected?.addEventListener("click",()=>discardDrafts(selectedDraftKeys()));
+  draftRefresh?.addEventListener("click",loadDrafts);
+
   const historyRows=document.getElementById("historyRows");
   const historyStatus=document.getElementById("historyStatus");
   const historyQuery=document.getElementById("historyQuery");
@@ -226,6 +343,7 @@
   historyRefresh?.addEventListener("click",loadHistory);
   historyQuery?.addEventListener("input",()=>{clearTimeout(historyQuery._timer);historyQuery._timer=setTimeout(loadHistory,250)});
   load();
+  loadDrafts();
   loadHistory();
 })();
 </script>

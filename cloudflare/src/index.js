@@ -118,6 +118,10 @@ export default {
         return publishContentDrafts(request,env,cors,adminPrincipal);
       }
 
+      if (url.pathname === "/api/admin/drafts/discard" && request.method === "POST") {
+        return discardContentDrafts(request,env,cors,adminPrincipal);
+      }
+
       if (url.pathname.startsWith("/api/admin/drafts/")) {
         const key=decodeKey(url.pathname,"/api/admin/drafts/");
         if(!key)return json({error:"Missing draft key"},400,cors);
@@ -1260,10 +1264,28 @@ async function handlePreviewSite(env,cors){
   return json({content,preview:true},200,cors);
 }
 
+function parseStoredContentValue(raw){
+  if(raw===null||raw===undefined)return null;
+  try{return JSON.parse(raw)}catch{return raw}
+}
+
 async function handleAdminDraftList(env,cors){
+  await ensureContentTable(env);
   await ensureContentDraftTable(env);
-  const {results=[]}=await env.DB.prepare("SELECT key,actor_email,updated_at,LENGTH(value) AS value_size FROM content_drafts ORDER BY updated_at DESC,key").all();
-  return json({drafts:results,count:results.length},200,cors);
+  const {results=[]}=await env.DB.prepare(
+    "SELECT d.key,d.value AS draft_value,d.actor_email,d.updated_at,LENGTH(d.value) AS value_size,c.value AS live_value "+
+    "FROM content_drafts d LEFT JOIN content c ON c.key=d.key ORDER BY d.updated_at DESC,d.key"
+  ).all();
+  const drafts=results.map(row=>({
+    key:row.key,
+    actor_email:row.actor_email,
+    updated_at:row.updated_at,
+    value_size:row.value_size,
+    live_value:parseStoredContentValue(row.live_value),
+    draft_value:parseStoredContentValue(row.draft_value),
+    has_live_value:row.live_value!==null&&row.live_value!==undefined
+  }));
+  return json({drafts,count:drafts.length},200,cors);
 }
 
 async function saveContentDraft(request,env,cors,key,principal){
@@ -1277,6 +1299,21 @@ async function saveContentDraft(request,env,cors,key,principal){
   ).bind(key,JSON.stringify(value),cleanSingleLine(principal?.email||principal?.mode||"",240)).run();
   await writeAudit(env,principal,"entwurf_gespeichert",auditAreaFromTarget(key),key);
   return json({ok:true,key,draft:true},200,cors);
+}
+
+async function discardContentDrafts(request,env,cors,principal){
+  await ensureContentDraftTable(env);
+  let payload;
+  try{payload=JSON.parse(await request.text()||"{}")}catch{return json({error:"Body must be valid JSON"},400,cors)}
+  const keys=Array.isArray(payload?.keys)?[...new Set(payload.keys.map(v=>cleanSingleLine(v,240)).filter(Boolean))]:[];
+  if(!keys.length)return json({error:"Keine Entwürfe ausgewählt."},400,cors);
+  const placeholders=keys.map(()=>"?").join(",");
+  const {results=[]}=await env.DB.prepare("SELECT key FROM content_drafts WHERE key IN ("+placeholders+")").bind(...keys).all();
+  if(results.length){
+    await env.DB.prepare("DELETE FROM content_drafts WHERE key IN ("+placeholders+")").bind(...keys).run();
+    for(const row of results)await writeAudit(env,principal,"entwurf_verworfen",auditAreaFromTarget(row.key),row.key,"Mehrfachauswahl");
+  }
+  return json({ok:true,discarded:results.map(row=>row.key),count:results.length},200,cors);
 }
 
 async function publishContentDrafts(request,env,cors,principal){
