@@ -46,8 +46,14 @@ for(const [viewportName,viewport] of viewports){
 
     let response=null;
     try{
-      response=await page.goto(new URL(path,base).href,{waitUntil:"networkidle",timeout:30000});
-      await page.waitForTimeout(100);
+      response=await page.goto(new URL(path,base).href,{waitUntil:"load",timeout:20000});
+      await page.evaluate(async()=>{
+        const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+        const max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+        for(const fraction of [0.25,0.5,0.75,1]){window.scrollTo(0,Math.round(max*fraction));await sleep(80)}
+        window.scrollTo(0,0);
+        await sleep(120);
+      });
     }catch(error){
       failures.push(viewportName+"/"+slug+": Navigation fehlgeschlagen: "+error.message);
     }
