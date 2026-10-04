@@ -1,0 +1,55 @@
+name: Website quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Statischer Website-Check
+        run: node quality/static-check.mjs
+
+  browser-quality:
+    needs: static-quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright installieren
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+      - name: Lokale Website starten
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/gudelius-quality-server.log 2>&1 &
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/gudelius-quality-server.log
+          exit 1
+      - name: Mobile-, Tablet- und Desktop-Check
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node quality/browser-check.mjs
+      - name: Prüfbericht und Fehler-Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-quality-report
+          path: quality-artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
