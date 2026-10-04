@@ -75,6 +75,8 @@
     const rotationInput=editor.querySelector(".media-crop-rotation");
   
     let layout=normalizeMediaLayout(null);
+    let savedLayout=normalizeMediaLayout(null);
+    let cropDirty=false;
     const pointers=new Map();
     let panState=null;
     let pinchState=null;
@@ -90,6 +92,38 @@
     function pointDistance(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
     function pointAngle(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI}
     function midpoint(a,b){return {x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+    function canonicalLayout(value){
+      const normalized=normalizeMediaLayout({...value,rotation:normalizeAngle(value?.rotation)});
+      return {
+        x:Number(normalized.x),
+        y:Number(normalized.y),
+        zoom:Number(normalized.zoom),
+        rotation:Number(normalized.rotation)
+      };
+    }
+    function sameLayout(a,b){
+      const left=canonicalLayout(a),right=canonicalLayout(b);
+      return ["x","y","zoom","rotation"].every(key=>Math.abs(left[key]-right[key])<0.01);
+    }
+    function setDirtyState(nextDirty){
+      const next=Boolean(nextDirty);
+      if(cropDirty===next)return;
+      cropDirty=next;
+      card.classList.toggle("has-unsaved-crop",cropDirty);
+      saveButton.classList.toggle("is-dirty",cropDirty);
+      saveButton.textContent=cropDirty?"Ausschnitt speichern •":"Ausschnitt gespeichert";
+      saveButton.disabled=!cropDirty;
+      card.dispatchEvent(new CustomEvent("cms-crop-dirty-change",{
+        bubbles:true,
+        detail:{dirty:cropDirty,key:item.key,layout:canonicalLayout(layout)}
+      }));
+    }
+    function syncDirtyState(message="Nicht gespeicherte Änderung."){
+      const changed=!sameLayout(layout,savedLayout);
+      setDirtyState(changed);
+      if(changed)setStatus(cropStatus,message);
+      else setStatus(cropStatus,"Ausschnitt entspricht dem gespeicherten Stand.",true);
+    }
   
     function measure(currentLayout=layout){
       const rect=imageWrap.getBoundingClientRect();
@@ -171,7 +205,7 @@
   
     function markChanged(message="Nicht gespeicherte Änderung."){
       render();
-      setStatus(cropStatus,message);
+      syncDirtyState(message);
     }
   
     function panBy(dx,dy,startLayout,startMetrics){
@@ -420,21 +454,33 @@
       window.addEventListener("resize",rerender);
     }
   
-    saveButton.addEventListener("click",async()=>{
-      if(!getApi()||!hasAdminAuth())return setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    async function saveCurrentCrop(){
+      if(!cropDirty)return canonicalLayout(savedLayout);
+      if(!getApi()||!hasAdminAuth()){
+        setStatus(cropStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+        throw new Error("Worker-URL oder Admin-Anmeldung fehlt.");
+      }
       saveButton.disabled=true;
       setStatus(cropStatus,"Speichere Ausschnitt …");
       try{
-        const value=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
+        const value=canonicalLayout(layout);
         await saveMediaLayout(item.key,value);
         layout=value;
+        savedLayout={...value};
         render();
+        setDirtyState(false);
         setStatus(cropStatus,"Ausschnitt gespeichert.",true);
+        return value;
       }catch(error){
         setStatus(cropStatus,"Speichern fehlgeschlagen: "+error.message,false);
+        throw error;
       }finally{
-        saveButton.disabled=false;
+        saveButton.disabled=!cropDirty;
       }
+    }
+
+    saveButton.addEventListener("click",()=>{
+      saveCurrentCrop().catch(()=>{});
     });
   
     resetButton.addEventListener("click",async()=>{
@@ -444,7 +490,9 @@
       try{
         await deleteMediaLayout(item.key);
         layout=normalizeMediaLayout(null);
+        savedLayout=canonicalLayout(layout);
         render();
+        setDirtyState(false);
         setStatus(cropStatus,"Standard-Ausschnitt wiederhergestellt.",true);
       }catch(error){
         setStatus(cropStatus,"Zurücksetzen fehlgeschlagen: "+error.message,false);
@@ -453,13 +501,28 @@
       }
     });
   
+    saveButton.disabled=true;
+    saveButton.textContent="Ausschnitt gespeichert";
+
     loadMediaLayoutContent().then(content=>{
-      layout=normalizeMediaLayout(content[mediaLayoutContentKey(item.key)]);
+      layout=canonicalLayout(content[mediaLayoutContentKey(item.key)]);
+      savedLayout={...layout};
       render();
+      setDirtyState(false);
+      saveButton.disabled=true;
       setStatus(cropStatus,content[mediaLayoutContentKey(item.key)]?"Gespeicherter Ausschnitt geladen.":"Standard-Ausschnitt aktiv.",true);
     }).catch(error=>{
       render();
+      saveButton.disabled=false;
+      saveButton.textContent="Ausschnitt speichern";
       setStatus(cropStatus,"Ausschnitt konnte nicht geladen werden: "+error.message,false);
+    });
+
+    return Object.freeze({
+      save:saveCurrentCrop,
+      isDirty:()=>cropDirty,
+      getLayout:()=>canonicalLayout(layout),
+      getSavedLayout:()=>canonicalLayout(savedLayout)
     });
   }
 

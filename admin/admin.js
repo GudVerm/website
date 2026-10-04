@@ -473,10 +473,11 @@ async function saveMediaLayout(mediaKey,value){
   await saveHeroText(key,value);
   mediaLayoutContentCache[key]=value;
 }
+const mediaCropControllers=new WeakMap();
 function attachMediaCropEditor(card,img,item,status){
   const cropper=window.GUDELIUS_CROPPER;
   if(!cropper?.attach)throw new Error("cropper.js wurde nicht geladen.");
-  return cropper.attach({
+  const controller=cropper.attach({
     card,img,item,status,
     dependencies:{
       normalizeMediaLayout,
@@ -490,6 +491,12 @@ function attachMediaCropEditor(card,img,item,status){
       saveMediaLayout
     }
   });
+  if(controller)mediaCropControllers.set(card,controller);
+  return controller;
+}
+async function savePendingMediaCrop(card){
+  const controller=mediaCropControllers.get(card);
+  if(controller?.isDirty?.())await controller.save();
 }
 async function loadHeroTexts(){
   if(!heroTextStatus) return;
@@ -812,7 +819,13 @@ function refreshProjectSelect(){
   });
   const next=projects.some(item=>item.slug===current)?current:(projects[0]?.slug||"");projectSelect.value=next;activeProjectSlug=next;
 }
-function setProjectDirty(card,dirty=true){const badge=card?.querySelector(".project-dirty-badge");if(badge)badge.hidden=!dirty}
+function setProjectDirty(card,dirty=true,source="content"){
+  if(!card)return;
+  if(source==="crop")card.dataset.projectCropDirty=dirty?"1":"0";
+  else card.dataset.projectContentDirty=dirty?"1":"0";
+  const badge=card.querySelector(".project-dirty-badge");
+  if(badge)badge.hidden=!(card.dataset.projectContentDirty==="1"||card.dataset.projectCropDirty==="1");
+}
 async function deleteProjectContent(item){
   const headers=adminHeaders();
   for(const field of projectFields){
@@ -842,6 +855,9 @@ function renderProjectEditor(item){
   visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
   img.src=initialMediaSrc(item);img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
   attachMediaCropEditor(card,img,item,mediaStatus);
+  card.addEventListener("cms-crop-dirty-change",event=>{
+    setProjectDirty(card,Boolean(event.detail?.dirty),"crop");
+  });
   file.addEventListener("change",()=>{const selected=file.files?.[0];if(!selected)return;img.src=URL.createObjectURL(selected);setStatus(mediaStatus,selected.name+" ausgewählt.")});
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
@@ -863,7 +879,9 @@ function renderProjectEditor(item){
       if(!values.title)throw new Error("Titel darf nicht leer sein.");
       if(featured.checked){projects.forEach(p=>{p.featured=p.slug===item.slug})}else item.featured=false;
       for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
-      await saveProjectManifest();heading.textContent=values.title;img.alt=values.title;refreshProjectSelect();projectSelect.value=item.slug;setProjectDirty(card,false);setStatus(status,"Projekt erfolgreich gespeichert.",true);
+      await saveProjectManifest();
+      await savePendingMediaCrop(card);
+      heading.textContent=values.title;img.alt=values.title;refreshProjectSelect();projectSelect.value=item.slug;setProjectDirty(card,false,"content");setStatus(status,"Projekt erfolgreich gespeichert.",true);
     }catch(error){setStatus(status,"Speichern fehlgeschlagen: "+error.message,false)}finally{save.disabled=false}
   });
   reload.addEventListener("click",loadProjectsCms);
@@ -2158,9 +2176,12 @@ function populateTechniqueSelect(){
   technikSelect.value=next;
   activeTechnikSlug=next;
 }
-function setTechniqueDirty(card,dirty=true){
-  const badge=card?.querySelector(".technik-dirty-badge");
-  if(badge) badge.hidden=!dirty;
+function setTechniqueDirty(card,dirty=true,source="content"){
+  if(!card)return;
+  if(source==="crop")card.dataset.technikCropDirty=dirty?"1":"0";
+  else card.dataset.technikContentDirty=dirty?"1":"0";
+  const badge=card.querySelector(".technik-dirty-badge");
+  if(badge)badge.hidden=!(card.dataset.technikContentDirty==="1"||card.dataset.technikCropDirty==="1");
 }
 async function deleteTechniqueContent(item){
   const headers=adminHeaders();
@@ -2231,6 +2252,9 @@ function renderTechniqueEditor(item){
   img.src=cmsMediaEnabled?initialMediaSrc(item):techniqueFallback; img.alt=displayName;
   img.onerror=()=>{img.onerror=null;img.src=techniqueFallback};
   attachMediaCropEditor(card,img,item,mediaStatus);
+  card.addEventListener("cms-crop-dirty-change",event=>{
+    setTechniqueDirty(card,Boolean(event.detail?.dirty),"crop");
+  });
 
   file.addEventListener("change",()=>{
     const selected=file.files?.[0]; if(!selected) return;
@@ -2268,8 +2292,9 @@ function renderTechniqueEditor(item){
       await Promise.all(techniqueTextFields.map(field=>saveHeroText(techniqueContentKey(item,field),values[field])));
       techniqueTextFields.forEach(field=>{technikContentCache[techniqueContentKey(item,field)]=values[field]});
       await saveTechniqueManifest();
+      await savePendingMediaCrop(card);
       heading.textContent=values.name||item.name||item.slug; categoryLabel.textContent=values.category||item.category||"Technik"; img.alt=values.name||item.name||item.slug;
-      populateTechniqueSelect(); technikSelect.value=item.slug; setTechniqueDirty(card,false); setStatus(textStatus,"Technik-Eintrag erfolgreich gespeichert.",true);
+      populateTechniqueSelect(); technikSelect.value=item.slug; setTechniqueDirty(card,false,"content"); setStatus(textStatus,"Technik-Eintrag erfolgreich gespeichert.",true);
     }catch(error){setStatus(textStatus,"Speichern fehlgeschlagen: "+error.message,false)}finally{save.disabled=false}
   });
   reload.addEventListener("click",()=>loadTechniqueTexts());
