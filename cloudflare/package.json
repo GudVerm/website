@@ -10,8 +10,6 @@
     "check": "node --check src/index.js && node --check smoke-test.mjs",
     "deploy:dry": "wrangler deploy --dry-run",
     "smoke:remote": "node smoke-test.mjs",
-    "media:audit": "node media-audit.mjs",
-    "media:cleanup": "node media-cleanup.mjs",
     "images:migrate-wix": "node migrate-wix-images.mjs"
   },
   "devDependencies": {

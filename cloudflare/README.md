@@ -120,7 +120,7 @@ GET /api/health
 Erwartet:
 
 ```json
-{"ok":true,"service":"gudelius-cms","release":"2026-09-24.3"}
+{"ok":true,"service":"gudelius-cms","release":"2026-10-03.8"}
 ```
 
 Geschützt:
@@ -130,7 +130,7 @@ GET /api/admin/health
 Cloudflare-Access-Sitzung erforderlich
 ```
 
-Der geschützte Check prüft D1, R2, `BREVO_API_KEY`, Brevo-Absender, Kontakt-Empfänger, Origin-Konfiguration und Admin-Token. Er verschickt selbst keine E-Mail.
+Der geschützte Check prüft D1, R2, `BREVO_API_KEY`, Brevo-Absender, Kontakt-Empfänger, Origin-Konfiguration sowie die Access-/Allowlist-Konfiguration. Ein vorhandenes altes `CMS_ADMIN_TOKEN` ist nicht erforderlich. Der Check verschickt selbst keine E-Mail.
 
 ## Lokale Prüfung und Deploy
 
@@ -147,19 +147,15 @@ Ein erneutes `npm run db:init:remote` ist nur erforderlich, wenn das D1-Basissch
 
 ## Automatisierter Remote-Smoke-Test
 
-Standardtest:
+Der aktuelle Remote-Smoke-Test benötigt keinen Admin-Token:
 
 ```bash
-CMS_ADMIN_TOKEN="…" npm run smoke:remote
+npm run smoke:remote
 ```
 
-Kontakt-End-to-End:
+Er prüft den öffentlichen Healthcheck samt erwarteter Worker-Release, `/api/site`, CORS, die deaktivierte öffentliche R2-Ausgabe, Beacon-kompatible Analytics, abgeschaltete Legacy-Adminrouten und die Access-Grenze vor `/api/admin/*`.
 
-```bash
-CMS_ADMIN_TOKEN="…" RUN_CONTACT_TEST=1 npm run smoke:remote
-```
-
-Der E2E-Test erzeugt eine eindeutig gekennzeichnete Anfrage, prüft D1 und Admin-Anzeige, erwartet `notificationSent: true` und markiert die Testanfrage anschließend als `spam`, damit sie nicht in die Projektanfragen-KPI eingeht. Der tatsächliche E-Mail-Eingang muss zusätzlich im Zielpostfach bestätigt werden.
+Der Test meldet für `/api/admin/session` zusätzlich den manuellen Browser-Check, weil eine persönliche Cloudflare-Access-Sitzung nicht aus einem unbeaufsichtigten CLI-Test übernommen werden soll. Ein vollständiger Kontakt-End-to-End-Test mit D1/Brevo bleibt Teil des Pre-Launch-Checks und wird bewusst nicht automatisch mit Testanfragen im Produktivbestand ausgeführt.
 
 ## Analytics / Datenschutz
 
@@ -169,56 +165,15 @@ In D1 werden für Analytics ausschließlich Event-Typ, normalisierter Seitenpfad
 
 Turnstile bleibt vorerst optional. Rate Limiting, Honeypot, Origin-Prüfung und Größenlimits sind bereits aktiv.
 
-## Späterer Schritt: Cloudflare Access
+## Cloudflare Access – aktueller Stand
 
-Cloudflare Access wird bewusst noch nicht auf der produktiven Wix-Domain umgesetzt. Die spätere Zielarchitektur soll eine Cloudflare-kontrollierte Admin-Domain/Subdomain verwenden und den technischen Browser-Token für den Kunden ersetzen.
-
+Cloudflare Access ist auf der Worker-Adminadresse aktiv und schützt `/admin/*` sowie `/api/admin/*`. Die öffentliche Wix-Produktivdomain wird davon nicht berührt. Der technische Browser-Token ist deaktiviert; die serverseitige E-Mail-Allowlist bleibt als zusätzliche Schranke aktiv.
 
 ## R2-Medienprüfung
 
-Die R2-Medienausgabe bleibt öffentlich deaktiviert. Für die Prüfung existieren ausschließlich mit `CMS_ADMIN_TOKEN` geschützte Audit-Endpunkte:
+Die öffentliche R2-Medienausgabe bleibt mit `PUBLIC_MEDIA_ENABLED=false` deaktiviert. Das geschützte Inventar und die Einzelvorschau stehen im Access-Admin über die zentrale Medienbibliothek zur Verfügung.
 
-```text
-GET /api/admin/media
-GET /api/admin/media/<key>
-```
-
-`GET /api/admin/media` liefert Key, Größe, Uploadzeitpunkt, MIME-Type und den gespeicherten Originaldateinamen. Der zweite Endpunkt liefert das konkrete R2-Objekt nur nach erfolgreicher Admin-Authentifizierung.
-
-Für eine lokale, visuelle Gesamtprüfung:
-
-```bash
-CMS_ADMIN_TOKEN="…" npm run media:audit
-```
-
-Unter `cloudflare/.media-audit/` werden anschließend ausschließlich lokal erzeugt:
-
-- `inventory.json`
-- `index.html`
-- lokale Kopien der R2-Objekte zur Sichtprüfung
-
-Der Ordner ist per `.gitignore` ausgeschlossen. Das Audit löscht und verändert keine R2-Dateien und aktiviert die öffentliche Medienausgabe nicht.
-
-
-## R2-Krokodilbereinigung
-
-Nach der visuellen Prüfung wurde bestätigt, dass die fehlerhaften R2-Objekte als Originaldatei `krokodil.png` hinterlegt sind.
-
-Der Cleanup läuft standardmäßig nur als Dry-Run:
-
-```bash
-npm run media:cleanup
-```
-
-Dabei werden ausschließlich Objekte mit `custom_metadata.original_name = krokodil.png` als Löschziele markiert. Andere R2-Objekte werden separat als **nicht betroffen** angezeigt und niemals automatisch mitgelöscht.
-
-Erst nach Sichtprüfung der Dry-Run-Liste:
-
-```bash
-npm run media:cleanup -- --apply
-```
-
-Der Apply-Lauf löscht nur die zuvor anhand des Originaldateinamens identifizierten Krokodil-Objekte und prüft anschließend erneut, ob noch solche Objekte vorhanden sind. Die öffentliche R2-Ausgabe bleibt währenddessen deaktiviert.
+Die früheren CLI-Skripte `media-audit.mjs` und `media-cleanup.mjs` wurden entfernt: Sie basierten auf dem inzwischen deaktivierten `CMS_ADMIN_TOKEN` und waren nach der Access-Umstellung nicht mehr funktionsfähig. Die historische Krokodilbereinigung ist abgeschlossen; weitere R2-Änderungen erfolgen nur gezielt über die geschützten Admin-Endpunkte bzw. die Medienbibliothek.
 
 ## Wix-Bilder unabhängig machen
 
@@ -281,35 +236,21 @@ POST /api/analytics/event
 GET  /media/<key>   (weiterhin durch PUBLIC_MEDIA_ENABLED=false gesperrt)
 ```
 
-### Übergangs-Authentifizierung
+### Übergangs-Authentifizierung – abgeschlossen
 
-Der Worker akzeptiert für Admin-Endpunkte zwei Authentifizierungswege:
+Die frühere Übergangsphase mit technischem Browser-Token ist beendet. `ADMIN_TOKEN_FALLBACK_ENABLED=false` bleibt gesetzt; administrative Requests werden nur mit gültiger Cloudflare-Access-Sitzung und erlaubter E-Mail-Adresse akzeptiert.
 
-1. Cloudflare Access über `ctx.access`, sobald eine Access-Anwendung den Request vor dem Worker authentifiziert hat.
-2. Den bestehenden `CMS_ADMIN_TOKEN` als technischen Fallback, solange `ADMIN_TOKEN_FALLBACK_ENABLED=false` gesetzt ist.
+`GET /api/admin/session` zeigt den aktiven Authentifizierungsmodus an, ohne Secret-Werte auszugeben. Die früheren administrativen Legacy-Routen außerhalb von `/api/admin/*` sind abgeschaltet und liefern `404`.
 
-`GET /api/admin/session` zeigt für Tests `auth_mode: "access"` oder `auth_mode: "token"` an, ohne Secret-Werte auszugeben.
+### Access-Aktivierung – abgeschlossen
 
-Die bisherigen token-geschützten Schreib-/Anfragenrouten außerhalb von `/api/admin/*` bleiben vorübergehend als Legacy-Fallback erhalten. Der GitHub-Pages-Admin verwendet bereits die neuen kanonischen `/api/admin/*`-Routen.
-
-### Spätere Access-Aktivierung
-
-Die vorgesehene Access-Anwendung soll ausschließlich den Pfad
-
-```text
-gudelius-cms.gudeliusvermessung.workers.dev/api/admin/*
-```
-
-schützen. Der gesamte Worker darf nicht pauschal hinter Access gestellt werden, weil `/api/site`, `/api/contact` und Analytics öffentlich erreichbar bleiben müssen.
-
-Nach erfolgreichem Access-E2E-Test kann `ADMIN_TOKEN_FALLBACK_ENABLED=false` gesetzt werden. Erst danach kann der technische Browser-Token aus dem normalen Kunden-Workflow entfernt werden.
-
+Die Access-Anwendung schützt `/admin/*` und `/api/admin/*`; öffentliche APIs wie `/api/site`, `/api/contact` und `/api/analytics/event` bleiben erreichbar. Zusätzlich prüft der Worker die erlaubten Admin-E-Mail-Adressen serverseitig. Der Token-Fallback bleibt deaktiviert.
 
 ## Cloudflare Access – Admin-Oberfläche über den Worker
 
 Seit Release `2026-09-24.5` steht die bestehende Admin-Oberfläche zusätzlich unter `/admin/` am Worker bereit. Der Worker lädt die weiterhin im Repository gepflegten Admin-Dateien serverseitig von der GitHub-Pages-Testseite und liefert sie unter derselben Origin wie `/api/admin/*` aus. Cloudflare Workers Static Assets wird bewusst nicht verwendet, damit `ctx.access` im Worker verfügbar bleibt.
 
-`/admin/config.js` wird dynamisch erzeugt und setzt `GUDELIUS_CMS_USE_ACCESS=true`. Dadurch benötigt die Worker-Adminoberfläche keinen technischen Browser-Token. Die GitHub-Pages-Adminoberfläche bleibt vorübergehend im Token-Fallback-Modus.
+`/admin/config.js` wird dynamisch erzeugt und setzt `GUDELIUS_CMS_USE_ACCESS=true`. Dadurch benötigt die Worker-Adminoberfläche keinen technischen Browser-Token. Die GitHub-Pages-Adminoberfläche verweist auf die Access-geschützte Worker-Adminoberfläche; ein Token-Fallback wird nicht verwendet.
 
 Vorgesehene Access-Pfade:
 
