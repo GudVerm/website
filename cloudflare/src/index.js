@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-04.2";
+const WORKER_RELEASE = "2026-10-04.3";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -42,7 +42,13 @@ export default {
       }
 
       if (url.pathname === "/api/health" && request.method === "GET") {
-        return json({ ok: true, service: "gudelius-cms", release: WORKER_RELEASE }, 200, cors);
+        return json({
+          ok: true,
+          service: "gudelius-cms",
+          release: WORKER_RELEASE,
+          contact_configured: Boolean(env.BREVO_API_KEY && env.BREVO_FROM_EMAIL && env.CONTACT_EMAIL_TO),
+          turnstile_configured: Boolean(env.TURNSTILE_SECRET_KEY)
+        }, 200, cors);
       }
 
       if (url.pathname === "/admin") {
@@ -597,6 +603,7 @@ function adminSourcePath(pathname) {
   if (pathname === "/admin/admin.js") return "admin/admin.js";
   if (pathname === "/admin/admin-data.js") return "admin/admin-data.js";
   if (pathname === "/admin/media-library.js") return "admin/media-library.js";
+  if (pathname === "/admin/admin-dashboard.js") return "admin/admin-dashboard.js";
   const match = pathname.match(/^\/admin\/([a-z0-9-]+)\/?$/);
   if (match && ADMIN_PAGE_SLUGS.has(match[1])) return "admin/" + match[1] + "/index.html";
   return "";

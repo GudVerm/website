@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.2`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.3`.
 
 ## Secrets
 
@@ -350,3 +350,10 @@ Die Schaltfläche **Vorschau öffnen** lädt die jeweilige öffentliche Seite Ac
 Medienuploads sowie explizite Lösch-/Archivierungsaktionen bleiben direkte administrative Änderungen und werden nicht durch den Entwurfsmodus verzögert.
 
 `GET /api/admin/backup` erzeugt einen Access-geschützten JSON-Export aus veröffentlichten CMS-Inhalten, Entwürfen und Inhaltsversionen. Kontaktanfragen und deren personenbezogene Inhalte sind bewusst nicht Teil dieses CMS-Backups.
+
+
+## Monitoring und Admin-Dashboard
+
+Der Workflow `.github/workflows/website-monitor.yml` prüft alle sechs Stunden die öffentliche GitHub-Pages-Website, den öffentlichen Worker-Healthcheck und den lesenden Zugriff auf `/api/site`. Fehler werden als fehlgeschlagener GitHub-Actions-Lauf sichtbar; es werden dafür keine zusätzlichen Secrets benötigt.
+
+Die Admin-Startseite zeigt live den Backendstatus, die Worker-Releasekennung, neue/gesamte Anfragen, vorhandene Entwürfe, die Zahl der R2-Objekte und die letzten Audit-Ereignisse. Von dort kann außerdem der Access-geschützte CMS-Backup-Export direkt heruntergeladen werden.

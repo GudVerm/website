@@ -39,6 +39,27 @@
       <p>Jeder Bereich hat jetzt eine eigene Seite. Dadurch bleibt der Admin auch mit weiteren CMS-Funktionen übersichtlich.</p>
     </section>
 
+    <section class="dashboard-live" aria-labelledby="dashboardLiveTitle">
+      <div class="dashboard-live-head">
+        <div><span class="kicker">Heute</span><h2 id="dashboardLiveTitle">Betriebsübersicht</h2></div>
+        <div class="dashboard-live-actions">
+          <button id="dashboardRefresh" type="button" class="secondary">Aktualisieren</button>
+          <a id="dashboardBackup" class="ghost" href="#" download>CMS-Backup herunterladen</a>
+        </div>
+      </div>
+      <div class="dashboard-kpis">
+        <a class="dashboard-kpi" href="./anfragen/"><span>Neue Anfragen</span><strong id="dashboardNewInquiries">…</strong><small id="dashboardInquiryNote">wird geladen</small></a>
+        <a class="dashboard-kpi" href="./audit/"><span>Entwürfe</span><strong id="dashboardDrafts">…</strong><small>noch nicht veröffentlicht</small></a>
+        <a class="dashboard-kpi" href="#medien"><span>R2-Medien</span><strong id="dashboardMedia">…</strong><small id="dashboardMediaNote">Inventar</small></a>
+        <div class="dashboard-kpi"><span>Backend</span><strong id="dashboardHealth">…</strong><small id="dashboardRelease">Worker wird geprüft</small></div>
+      </div>
+      <div class="dashboard-recent">
+        <div class="dashboard-recent-head"><h3>Letzte Änderungen</h3><a href="./audit/">Audit-Log öffnen →</a></div>
+        <div id="dashboardRecentChanges" class="dashboard-change-list" aria-live="polite">Änderungen werden geladen …</div>
+      </div>
+      <div id="dashboardLiveStatus" class="status"></div>
+    </section>
+
     <section class="admin-dashboard-grid">
       <a class="admin-dashboard-card" href="./verbindung/"><span class="cms-subpanel-icon">01</span><div><small>System</small><h3>Verbindung</h3><p>Cloudflare Worker und Access-Sitzung prüfen.</p></div><b>→</b></a>
       <a class="admin-dashboard-card" href="./startseite/"><span class="cms-subpanel-icon">02</span><div><small>Website</small><h3>Startseite</h3><p>Hero-Bild und Einstiegstexte bearbeiten.</p></div><b>→</b></a>
@@ -87,6 +108,11 @@
       .media-library-actions a.secondary{background:#edf0ed;color:#172026}
       @media(max-width:900px){.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-library-toolbar{grid-template-columns:1fr 1fr}.media-library-summary{grid-column:1/-1}}
       @media(max-width:620px){.media-library-grid,.media-library-toolbar{grid-template-columns:1fr}}
+      .dashboard-live{margin:0 0 26px;padding:22px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 10px 30px rgba(20,32,38,.05)}
+      .dashboard-live-head,.dashboard-recent-head{display:flex;align-items:center;justify-content:space-between;gap:18px}.dashboard-live-head h2{margin:2px 0 0}.dashboard-live-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+      .dashboard-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.dashboard-kpi{display:grid;gap:3px;min-width:0;padding:16px;border:1px solid #e2e5df;border-radius:15px;background:#fbfbf8}.dashboard-kpi span{font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#6a757a}.dashboard-kpi strong{font-size:1.75rem;color:#172026}.dashboard-kpi small{color:#718087;overflow-wrap:anywhere}
+      .dashboard-kpi.is-ok strong{color:#257144}.dashboard-kpi.is-bad strong{color:#a23a32}.dashboard-recent{padding-top:16px;border-top:1px solid #e5e7e2}.dashboard-recent-head h3{margin:0}.dashboard-recent-head a{font-size:.75rem;font-weight:850}.dashboard-change-list{display:grid;gap:7px;margin-top:12px}.dashboard-change{display:grid;grid-template-columns:minmax(130px,.7fr) minmax(0,1.5fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:11px;background:#f5f6f3;font-size:.75rem}.dashboard-change code{overflow-wrap:anywhere}.dashboard-change time{color:#718087;white-space:nowrap}
+      @media(max-width:900px){.dashboard-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.dashboard-live-head,.dashboard-recent-head{align-items:flex-start;flex-direction:column}.dashboard-kpis{grid-template-columns:1fr}.dashboard-change{grid-template-columns:1fr}.dashboard-change time{white-space:normal}}
     </style>
 
 
@@ -95,6 +121,7 @@
   <script src="./config.js?v=20260924-44"></script>
   <script src="./admin-data.js?v=20261003-01"></script>
   <script src="./admin.js?v=20261003-03"></script>
+  <script src="./admin-dashboard.js?v=20261004-01"></script>
   <script src="./media-library.js?v=20261003-01"></script>
 </body>
 </html>
