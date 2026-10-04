@@ -4,7 +4,7 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.7";
+const WORKER_RELEASE = "2026-10-03.8";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -351,6 +351,16 @@ export default {
             return json({ error: "Body must be valid JSON" }, 400, cors);
           }
 
+          let previousManifestValue = null;
+          let hadPreviousManifest = false;
+          if (isCollectionManifestKey(key)) {
+            const previous = await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
+            if (previous) {
+              hadPreviousManifest = true;
+              try { previousManifestValue = JSON.parse(previous.value); } catch {}
+            }
+          }
+
           await env.DB.prepare(
             `INSERT INTO content (key, value, updated_at)
              VALUES (?, ?, CURRENT_TIMESTAMP)
@@ -366,6 +376,15 @@ export default {
             auditAreaFromTarget(key),
             key
           );
+          if (isCollectionManifestKey(key)) {
+            await writeCollectionManifestAudit(
+              env,
+              adminPrincipal,
+              key,
+              hadPreviousManifest ? previousManifestValue : null,
+              value
+            );
+          }
           return json({ ok: true, key }, 200, cors);
         }
 
@@ -948,6 +967,78 @@ function auditAreaFromTarget(target) {
   if(raw.startsWith("unternehmen/")) return "unternehmen";
   if(raw.startsWith("kontakt/")) return "kontakt";
   return "cms";
+}
+
+function isCollectionManifestKey(key) {
+  return key === "projekte/index" || key === "technik/index";
+}
+
+function manifestSlugSet(value) {
+  if (!Array.isArray(value)) return null;
+  return new Set(
+    value
+      .map(item => cleanSingleLine(item?.slug, 120))
+      .filter(Boolean)
+  );
+}
+
+async function writeCollectionManifestAudit(env, principal, key, previousValue, nextValue) {
+  const config = key === "projekte/index"
+    ? { area: "projekte", noun: "projekt", prefix: "projekte/" }
+    : key === "technik/index"
+      ? { area: "technik", noun: "technik", prefix: "technik/" }
+      : null;
+  if (!config) return;
+
+  const next = manifestSlugSet(nextValue);
+  if (!next) return;
+  const previous = manifestSlugSet(previousValue);
+
+  if (!previous) {
+    await writeAudit(
+      env,
+      principal,
+      config.noun + "_geaendert",
+      config.area,
+      key,
+      "manifest_initialisiert"
+    );
+    return;
+  }
+
+  const added = [...next].filter(slug => !previous.has(slug));
+  const removed = [...previous].filter(slug => !next.has(slug));
+
+  for (const slug of added) {
+    await writeAudit(
+      env,
+      principal,
+      config.noun + "_angelegt",
+      config.area,
+      config.prefix + slug,
+      "manifest"
+    );
+  }
+  for (const slug of removed) {
+    await writeAudit(
+      env,
+      principal,
+      config.noun + "_geloescht",
+      config.area,
+      config.prefix + slug,
+      "manifest"
+    );
+  }
+  if (!added.length && !removed.length) {
+    await writeAudit(
+      env,
+      principal,
+      config.noun + "_geaendert",
+      config.area,
+      key,
+      "manifest"
+    );
+  }
 }
 
 async function ensureAuditTable(env) {

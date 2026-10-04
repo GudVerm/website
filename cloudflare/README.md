@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.7`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.8`.
 
 ## Secrets
 
@@ -368,7 +368,7 @@ Seit Release `2026-09-24.12` erzeugt der Admin für Trimble SX12, RTK-Drohne und
 
 ## Audit-Log
 
-Wichtige administrative Änderungen werden in D1 in `audit_log` protokolliert. Gespeichert werden Zeitpunkt, Access-E-Mail, Aktion, Bereich, Ziel-Key und eine kurze technische Detailangabe. Passwörter, Tokens und Inhalte aus Kontaktformularen werden nicht in das Audit-Log geschrieben.
+Wichtige administrative Änderungen werden in D1 in `audit_log` protokolliert. Gespeichert werden Zeitpunkt, Access-E-Mail, Aktion, Bereich, Ziel-Key und eine kurze technische Detailangabe. Passwörter, Tokens und Inhalte aus Kontaktformularen werden nicht in das Audit-Log geschrieben. Änderungen an den Projekt- und Technik-Manifesten werden zusätzlich als `angelegt`, `geändert` oder `gelöscht` klassifiziert; geloggt werden dabei nur Slug/Key und technische Aktion, keine redaktionellen Inhalte.
 
 Der Admin stellt die Historie unter `/admin/audit/` bereit; die API lautet `GET /api/admin/audit` und ist Access-geschützt.
 
