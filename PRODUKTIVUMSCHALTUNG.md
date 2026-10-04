@@ -41,6 +41,17 @@ CNAME www -> gudverm.github.io
 
 Quelle: GitHub Pages – Managing a custom domain.
 
+## GitHub-Pages-Domain vorab verifizieren
+
+Vor dem eigentlichen Cutover die Domain in den GitHub-Pages-Einstellungen des Kontos bzw. der Organisation verifizieren. GitHub zeigt dafür einen individuellen DNS-TXT-Challenge-Record an.
+
+- ausschließlich den von GitHub angezeigten TXT-Namen und -Wert verwenden
+- den TXT-Record nach erfolgreicher Verifikation dauerhaft bestehen lassen
+- keine Wildcard-DNS-Records wie `*.gudeliusvermessung.de` für GitHub Pages verwenden
+- erst nach erfolgreicher Verifikation die Custom Domain im Repository setzen
+
+Die Verifikation ändert die bestehende Wix-Auslieferung nicht und reduziert das Risiko einer Domain-Übernahme bei späteren GitHub-Pages-Konfigurationsänderungen.
+
 ## Vor dem Cutover zwingend sichern
 
 Vor jeder DNS- oder Nameserveränderung einen vollständigen Export/Screenshot der aktuellen Zone erstellen.
@@ -67,17 +78,18 @@ Mindestens sichern:
 
 1. Aktuelle DNS-Zone vollständig sichern.
 2. Mail-Records vollständig in Cloudflare nachbilden und gegen den Export vergleichen.
-3. In GitHub → Repository Settings → Pages die Custom Domain `gudeliusvermessung.de` setzen.
-4. Erst danach Website-DNS auf GitHub Pages umstellen.
-5. Apex-A-Records auf die vier GitHub-Pages-IPv4-Adressen setzen.
-6. Optional die vier GitHub-Pages-AAAA-Records ergänzen.
-7. `www` als CNAME auf `gudverm.github.io` setzen.
-8. Für den ersten Cutover Website-Records zunächst **DNS only** betreiben.
-9. DNS-Propagation prüfen.
-10. GitHub-Pages-Zertifikat abwarten und anschließend **Enforce HTTPS** aktivieren.
-11. Apex und `www` prüfen; `www` soll auf die gewählte Canonical-Domain umleiten.
-12. Erst nach stabiler HTTPS-Auslieferung optional Cloudflare-Proxy für die Website bewerten/aktivieren.
-13. Wix erst nach erfolgreicher Nachkontrolle und Ablauf der Rollback-Frist deaktivieren.
+3. `gudeliusvermessung.de` mit dem von GitHub angezeigten TXT-Challenge-Record verifizieren.
+4. In GitHub → Repository Settings → Pages die Custom Domain `gudeliusvermessung.de` setzen.
+5. Erst danach Website-DNS auf GitHub Pages umstellen.
+6. Apex-A-Records auf die vier GitHub-Pages-IPv4-Adressen setzen.
+7. Optional die vier GitHub-Pages-AAAA-Records ergänzen.
+8. `www` als CNAME auf `gudverm.github.io` setzen.
+9. Für den ersten Cutover Website-Records zunächst **DNS only** betreiben.
+10. DNS-Propagation prüfen.
+11. GitHub-Pages-Zertifikat abwarten und anschließend **Enforce HTTPS** aktivieren.
+12. Apex und `www` prüfen; `www` soll auf die gewählte Canonical-Domain umleiten.
+13. Erst nach stabiler HTTPS-Auslieferung optional Cloudflare-Proxy für die Website bewerten/aktivieren.
+14. Wix erst nach erfolgreicher Nachkontrolle und Ablauf der Rollback-Frist deaktivieren.
 
 ## Code-/SEO-Schritte unmittelbar zum Produktivstart
 
