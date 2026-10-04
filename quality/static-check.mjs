@@ -104,7 +104,7 @@ for(const full of files){
     const result=spawnSync(process.execPath,["--check",full],{encoding:"utf8"});
     if(result.status!==0)fail(rel+": JavaScript-Syntaxfehler: "+(result.stderr||result.stdout).trim());
   }
-  if([".jpg",".jpeg",".png",".webp",".avif"].includes(ext)){
+  if([".jpg",".jpeg",".png",".webp",".avif"].includes(ext)&&!rel.startsWith("quality/visual-baselines/")){
     const bytes=statSync(full).size;
     if(bytes>2*1024*1024)fail(rel+": Bild größer als 2 MiB ("+Math.round(bytes/1024)+" KiB)");
     else if(bytes>1024*1024)warn(rel+": großes Bild ("+Math.round(bytes/1024)+" KiB)");
