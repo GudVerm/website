@@ -44,6 +44,42 @@
     rotateHandle.setAttribute("aria-label","Drehgriff ziehen");
     imageWrap.appendChild(rotateHandle);
   
+    function targetProfilesForKey(key){
+      if(key==="startseite/hero")return [
+        {id:"hero",label:"Hero 16:9",ratio:16/9},
+        {id:"hero-wide",label:"Hero breit",ratio:21/9},
+        {id:"mobile",label:"Mobil",ratio:390/300}
+      ];
+      if(/^startseite\/(projekte|technik|unternehmen)$/.test(key))return [
+        {id:"card",label:"Karte",ratio:4/3},
+        {id:"card-mobile",label:"Karte mobil",ratio:390/190},
+        {id:"portrait",label:"Portrait",ratio:4/5}
+      ];
+      if(/^projects\//.test(key))return [
+        {id:"project",label:"Projektkarte",ratio:4/3},
+        {id:"project-wide",label:"Projekt breit",ratio:16/9},
+        {id:"mobile",label:"Mobil",ratio:390/260}
+      ];
+      if(/^technik\/|^equipment\//.test(key))return [
+        {id:"technik",label:"Technik",ratio:16/10},
+        {id:"square",label:"Quadrat",ratio:1},
+        {id:"mobile",label:"Mobil",ratio:390/240}
+      ];
+      if(/^leistungsseiten\/.*\/hero$/.test(key))return [
+        {id:"service-hero",label:"Leistungs-Hero",ratio:16/9},
+        {id:"service-wide",label:"Hero breit",ratio:2},
+        {id:"mobile",label:"Mobil",ratio:390/300}
+      ];
+      return [
+        {id:"landscape",label:"16:9",ratio:16/9},
+        {id:"card",label:"Karte",ratio:4/3},
+        {id:"portrait",label:"Portrait",ratio:4/5},
+        {id:"mobile",label:"Mobil",ratio:390/300}
+      ];
+    }
+    const targetProfiles=targetProfilesForKey(item.key);
+    let activeTarget=targetProfiles[0];
+
     const editor=document.createElement("div");
     editor.className="media-crop-editor media-crop-editor-direct";
     editor.innerHTML=`
@@ -51,6 +87,17 @@
         <strong>Direkt im Bild bearbeiten</strong>
         <span>Ziehen = verschieben · Zoomgriff/Mausrad/Pinch = zoomen · Drehgriff/Zwei-Finger-Geste = drehen · alternativ die Regler verwenden.</span>
       </div>
+      <section class="media-crop-target" aria-label="Zielvorschau">
+        <div class="media-crop-target-head">
+          <div><strong>Zielvorschau</strong><span>Darstellung wie auf der Website</span></div>
+          <button type="button" class="secondary media-crop-recommend">Empfohlenen Ausschnitt verwenden</button>
+        </div>
+        <div class="media-crop-target-tabs" role="tablist">
+          ${targetProfiles.map((profile,index)=>'<button type="button" role="tab" class="media-crop-target-tab'+(index===0?' is-active':'')+'" data-target-id="'+profile.id+'">'+profile.label+'</button>').join("")}
+        </div>
+        <div class="media-crop-target-frame"><img class="media-crop-target-image" alt="" aria-hidden="true"></div>
+        <div class="media-crop-target-readout"></div>
+      </section>
       <div class="media-crop-sliders">
         <label><span>Horizontal</span><input class="media-crop-x" type="range" min="0" max="100" step="1" value="50"><output class="media-crop-value media-crop-x-value" for="">50 %</output></label>
         <label><span>Vertikal</span><input class="media-crop-y" type="range" min="0" max="100" step="1" value="50"><output class="media-crop-value media-crop-y-value" for="">50 %</output></label>
@@ -77,6 +124,12 @@
     const yValue=editor.querySelector(".media-crop-y-value");
     const zoomValue=editor.querySelector(".media-crop-zoom-value");
     const rotationValue=editor.querySelector(".media-crop-rotation-value");
+    const targetFrame=editor.querySelector(".media-crop-target-frame");
+    const targetImage=editor.querySelector(".media-crop-target-image");
+    const targetReadout=editor.querySelector(".media-crop-target-readout");
+    const recommendButton=editor.querySelector(".media-crop-recommend");
+    const targetTabs=[...editor.querySelectorAll(".media-crop-target-tab")];
+    targetImage.src=img.currentSrc||img.src;
   
     let layout=normalizeMediaLayout(null);
     let savedLayout=normalizeMediaLayout(null);
@@ -180,6 +233,30 @@
       return next;
     }
   
+    function renderTargetPreview(){
+      if(!targetFrame||!targetImage||!activeTarget)return;
+      targetFrame.style.aspectRatio=String(activeTarget.ratio);
+      targetImage.style.objectFit="cover";
+      targetImage.style.objectPosition=layout.x+"% "+layout.y+"%";
+      targetImage.style.transformOrigin=layout.x+"% "+layout.y+"%";
+      targetImage.style.transform="scale("+(layout.zoom/100)+") rotate("+layout.rotation+"deg)";
+      targetReadout.textContent=activeTarget.label+" · "+Math.round(layout.zoom)+" % · "+Math.round(layout.rotation)+"° · X "+Math.round(layout.x)+" % · Y "+Math.round(layout.y)+" %";
+    }
+    function recommendedLayout(profile=activeTarget){
+      const frameRatio=Math.max(.2,Number(profile?.ratio)||1);
+      const naturalW=Math.max(1,img.naturalWidth||1600);
+      const naturalH=Math.max(1,img.naturalHeight||900);
+      const naturalRatio=naturalW/naturalH;
+      let coverW,coverH;
+      if(naturalRatio>=frameRatio){coverH=1;coverW=naturalRatio/frameRatio}
+      else{coverW=1;coverH=frameRatio/naturalRatio}
+      const radians=Math.abs(normalizeAngle(layout.rotation))*Math.PI/180;
+      const cos=Math.abs(Math.cos(radians)),sin=Math.abs(Math.sin(radians));
+      const needW=cos+sin/frameRatio;
+      const needH=cos+sin*frameRatio;
+      const scale=Math.max(needW/coverW,needH/coverH,1);
+      return canonicalLayout({...layout,x:50,y:50,zoom:Math.min(300,Math.max(100,Math.ceil(scale*105)))});
+    }
     function render(){
       layout=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
       const metrics=measure(layout);
@@ -213,6 +290,7 @@
       yValue.textContent=roundedY+" %";
       zoomValue.textContent=roundedZoom+" %";
       rotationValue.textContent=roundedRotation+"°";
+      renderTargetPreview();
     }
   
     function markChanged(message="Nicht gespeicherte Änderung."){
@@ -434,6 +512,20 @@
       layout=keepAnchor(startLayout,startMetrics,next,nextMetrics,imageCenter,imageCenter);
       markChanged();
     }
+    targetTabs.forEach(button=>{
+      button.addEventListener("click",()=>{
+        const profile=targetProfiles.find(entry=>entry.id===button.dataset.targetId);
+        if(!profile)return;
+        activeTarget=profile;
+        targetTabs.forEach(tab=>tab.classList.toggle("is-active",tab===button));
+        renderTargetPreview();
+      });
+    });
+    recommendButton.addEventListener("click",()=>{
+      layout=recommendedLayout(activeTarget);
+      markChanged("Empfohlener Ausschnitt für „"+activeTarget.label+"“ gesetzt.");
+    });
+
     [xInput,yInput,zoomInput,rotationInput].forEach(input=>{
       input.addEventListener("input",updateFromSliders);
     });
@@ -458,7 +550,7 @@
     });
   
     const rerender=()=>requestAnimationFrame(render);
-    img.addEventListener("load",rerender);
+    img.addEventListener("load",()=>{targetImage.src=img.currentSrc||img.src;rerender()});
     if("ResizeObserver" in window){
       const resizeObserver=new ResizeObserver(rerender);
       resizeObserver.observe(imageWrap);
