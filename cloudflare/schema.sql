@@ -63,3 +63,20 @@ ON audit_log(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_audit_log_actor_area
 ON audit_log(actor_email, area);
+
+
+-- Versionierung der CMS-Inhalte: speichert jeweils den vorherigen Wert vor Änderungen/Löschungen.
+CREATE TABLE IF NOT EXISTS content_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  actor_email TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_history_key_id
+ON content_history(key, id DESC);
+
+CREATE INDEX IF NOT EXISTS idx_content_history_created_at
+ON content_history(created_at);

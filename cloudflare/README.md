@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-03.8`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.1`.
 
 ## Secrets
 
@@ -332,3 +332,10 @@ Aktivierungsreihenfolge, damit es keinen Formularausfall gibt:
 5. Das Kontaktformular End-to-End testen.
 
 Beim Deaktivieren zuerst das Worker-Secret entfernen und deployen, erst danach den öffentlichen Site-Key leeren. Secret-Werte werden niemals in Git oder Dokumentation eingetragen.
+
+
+## CMS-Versionierung und Wiederherstellung
+
+Vor jeder Änderung eines bereits vorhandenen CMS-Keys sowie vor jeder Löschung speichert der Worker den vorherigen Wert in D1 in `content_history`. Die Historie ist auf die jüngsten 2000 Snapshots begrenzt.
+
+Im Access-geschützten Audit-Bereich können Versionen nach Key gesucht und wiederhergestellt werden. Vor einer Wiederherstellung wird der aktuelle Stand ebenfalls als `restore_backup` gesichert, sodass auch ein versehentliches Zurücksetzen wieder rückgängig gemacht werden kann. Wiederherstellungen werden zusätzlich im Audit-Log protokolliert. Kontaktanfragen, Passwörter und Tokens sind nicht Bestandteil dieser Inhaltsversionierung.

@@ -4,7 +4,8 @@ const MAX_CONTACT_BYTES = 16 * 1024;
 const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
-const WORKER_RELEASE = "2026-10-03.8";
+const CONTENT_HISTORY_LIMIT = 2000;
+const WORKER_RELEASE = "2026-10-04.1";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -285,6 +286,21 @@ export default {
         return handleAdminAudit(env, cors, url);
       }
 
+      if (url.pathname === "/api/admin/history" && request.method === "GET") {
+        const principal = adminPrincipal || await resolveAdminPrincipal(request, env, ctx);
+        if (!principal.authorized) return json({ error: "Forbidden" }, 403, cors);
+        return handleAdminContentHistory(env, cors, url);
+      }
+
+      if (url.pathname.startsWith("/api/admin/history/") && url.pathname.endsWith("/restore") && request.method === "POST") {
+        const principal = adminPrincipal || await resolveAdminPrincipal(request, env, ctx);
+        if (!principal.authorized) return json({ error: "Forbidden" }, 403, cors);
+        const rawId=url.pathname.slice("/api/admin/history/".length,-"/restore".length);
+        const id=Number(rawId);
+        if(!Number.isInteger(id)||id<=0)return json({error:"Ungültige Versions-ID."},400,cors);
+        return restoreContentHistory(env,cors,id,principal);
+      }
+
       if (url.pathname === "/api/admin/media" && request.method === "GET") {
         if (!isAuthorized(request, env, ctx)) {
           return json({ error: "Unauthorized" }, 401, cors);
@@ -351,14 +367,15 @@ export default {
             return json({ error: "Body must be valid JSON" }, 400, cors);
           }
 
+          const serializedValue=JSON.stringify(value);
+          const previous = await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
           let previousManifestValue = null;
-          let hadPreviousManifest = false;
-          if (isCollectionManifestKey(key)) {
-            const previous = await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
-            if (previous) {
-              hadPreviousManifest = true;
-              try { previousManifestValue = JSON.parse(previous.value); } catch {}
-            }
+          const hadPreviousManifest = Boolean(previous)&&isCollectionManifestKey(key);
+          if (hadPreviousManifest) {
+            try { previousManifestValue = JSON.parse(previous.value); } catch {}
+          }
+          if (previous && previous.value !== serializedValue) {
+            await recordContentHistory(env,adminPrincipal,key,previous.value,"update");
           }
 
           await env.DB.prepare(
@@ -367,7 +384,7 @@ export default {
              ON CONFLICT(key) DO UPDATE SET
                value = excluded.value,
                updated_at = CURRENT_TIMESTAMP`
-          ).bind(key, JSON.stringify(value)).run();
+          ).bind(key, serializedValue).run();
 
           await writeAudit(
             env,
@@ -390,6 +407,8 @@ export default {
 
         if (request.method === "DELETE") {
           if (!isAuthorized(request, env, ctx)) return json({ error: "Unauthorized" }, 401, cors);
+          const previous=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
+          if(previous)await recordContentHistory(env,adminPrincipal,key,previous.value,"delete");
           await env.DB.prepare("DELETE FROM content WHERE key = ?").bind(key).run();
           await writeAudit(
             env,
@@ -634,6 +653,7 @@ async function handleAdminHealth(env, cors, ctx) {
   let mediaOk = false;
   let schema = {
     content: false,
+    content_history: false,
     contact_requests: false,
     analytics_events: false,
     audit_log: false
@@ -641,12 +661,14 @@ async function handleAdminHealth(env, cors, ctx) {
 
   try {
     await ensureContentTable(env);
+    await ensureContentHistoryTable(env);
     await ensureContactTable(env);
     await ensureAnalyticsTable(env);
     await ensureAuditTable(env);
 
-    const [contentInfo, contactInfo, analyticsInfo, auditInfo] = await Promise.all([
+    const [contentInfo, historyInfo, contactInfo, analyticsInfo, auditInfo] = await Promise.all([
       env.DB.prepare("PRAGMA table_info(content)").all(),
+      env.DB.prepare("PRAGMA table_info(content_history)").all(),
       env.DB.prepare("PRAGMA table_info(contact_requests)").all(),
       env.DB.prepare("PRAGMA table_info(analytics_events)").all(),
       env.DB.prepare("PRAGMA table_info(audit_log)").all()
@@ -654,6 +676,7 @@ async function handleAdminHealth(env, cors, ctx) {
 
     schema = {
       content: hasColumns(contentInfo.results || [], ["key", "value", "updated_at"]),
+      content_history: hasColumns(historyInfo.results || [], ["id","key","value","operation","actor_email","created_at"]),
       contact_requests: hasColumns(contactInfo.results || [], ["id", "name", "email", "subject", "message", "source", "status", "internal_note", "created_at"]),
       analytics_events: hasColumns(analyticsInfo.results || [], ["id", "event_type", "page_path", "target", "event_label", "created_at"]),
       audit_log: hasColumns(auditInfo.results || [], ["id", "actor_email", "action", "area", "target", "details", "created_at"])
@@ -1102,6 +1125,80 @@ async function ensureContentTable(env) {
     "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
   ).run();
   await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_updated_at ON content(updated_at)").run();
+}
+
+async function ensureContentHistoryTable(env) {
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS content_history ("+
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, "+
+    "key TEXT NOT NULL, "+
+    "value TEXT NOT NULL, "+
+    "operation TEXT NOT NULL, "+
+    "actor_email TEXT NOT NULL DEFAULT '', "+
+    "created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+  ).run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_history_key_id ON content_history(key,id DESC)").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_content_history_created_at ON content_history(created_at)").run();
+}
+
+async function recordContentHistory(env, principal, key, serializedValue, operation) {
+  if(typeof serializedValue!=="string")return;
+  await ensureContentHistoryTable(env);
+  await env.DB.prepare(
+    "INSERT INTO content_history (key,value,operation,actor_email,created_at) VALUES (?,?,?,?,CURRENT_TIMESTAMP)"
+  ).bind(
+    cleanSingleLine(key,240),
+    serializedValue,
+    cleanSingleLine(operation,40),
+    cleanSingleLine(principal?.email||principal?.mode||"",240)
+  ).run();
+  await env.DB.prepare(
+    "DELETE FROM content_history WHERE id NOT IN (SELECT id FROM content_history ORDER BY id DESC LIMIT ?)"
+  ).bind(CONTENT_HISTORY_LIMIT).run();
+}
+
+async function handleAdminContentHistory(env,cors,url){
+  await ensureContentHistoryTable(env);
+  const limit=clampNumber(url.searchParams.get("limit"),1,200,100);
+  const query=cleanSingleLine(url.searchParams.get("q")||"",240);
+  const clauses=[],bindings=[];
+  if(query){clauses.push("key LIKE ?");bindings.push("%"+query+"%")}
+  const where=clauses.length?" WHERE "+clauses.join(" AND "):"";
+  const {results=[]}=await env.DB.prepare(
+    "SELECT id,key,operation,actor_email,created_at,LENGTH(value) AS value_size FROM content_history"+
+    where+" ORDER BY id DESC LIMIT ?"
+  ).bind(...bindings,limit).all();
+  return json({versions:results,limit},200,cors);
+}
+
+async function restoreContentHistory(env,cors,id,principal){
+  await ensureContentTable(env);
+  await ensureContentHistoryTable(env);
+  const version=await env.DB.prepare(
+    "SELECT id,key,value,operation,actor_email,created_at FROM content_history WHERE id = ?"
+  ).bind(id).first();
+  if(!version)return json({error:"Version nicht gefunden."},404,cors);
+
+  const current=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(version.key).first();
+  let currentParsed=null,restoredParsed=null;
+  if(current&&current.value!==version.value){
+    await recordContentHistory(env,principal,version.key,current.value,"restore_backup");
+    try{currentParsed=JSON.parse(current.value)}catch{}
+  }
+  try{restoredParsed=JSON.parse(version.value)}catch{}
+
+  await env.DB.prepare(
+    `INSERT INTO content (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP)
+     ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP`
+  ).bind(version.key,version.value).run();
+
+  await writeAudit(
+    env,principal,"version_wiederhergestellt",auditAreaFromTarget(version.key),version.key,"history_id="+id
+  );
+  if(isCollectionManifestKey(version.key)){
+    await writeCollectionManifestAudit(env,principal,version.key,currentParsed,restoredParsed);
+  }
+  return json({ok:true,key:version.key,history_id:id},200,cors);
 }
 
 async function ensureAnalyticsTable(env) {

@@ -62,6 +62,26 @@
         </table>
       </div>
     </section>
+
+    <section class="cms-subpanel">
+      <div class="cms-subpanel-head compact">
+        <span class="cms-subpanel-icon">↶</span>
+        <div><span class="kicker">Versionen</span><h3>Frühere CMS-Stände wiederherstellen</h3><p>Vor jeder Änderung oder Löschung wird der vorherige Wert automatisch gesichert.</p></div>
+      </div>
+      <div class="text-editor-grid">
+        <label><span>Key suchen</span><input id="historyQuery" type="search" placeholder="z. B. startseite/hero-title"></label>
+      </div>
+      <div class="text-editor-actions">
+        <button id="historyRefresh" type="button">Versionen laden</button>
+        <span id="historyStatus" class="status">Noch keine Versionen geladen.</span>
+      </div>
+      <div class="analytics-table-wrap">
+        <table class="analytics-table">
+          <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Key</th><th>Typ</th><th>Größe</th><th>Aktion</th></tr></thead>
+          <tbody id="historyRows"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
   <script src="../config.js?v=20260924-44"></script>
   <script src="../admin-data.js?v=20261003-01"></script>
@@ -95,7 +115,8 @@
     projekt_geloescht:"Projekt gelöscht",
     technik_angelegt:"Technik angelegt",
     technik_geaendert:"Technik geändert",
-    technik_geloescht:"Technik gelöscht"
+    technik_geloescht:"Technik gelöscht",
+    version_wiederhergestellt:"Version wiederhergestellt"
   }[value]||value||"–");
 
   function query(){
@@ -151,7 +172,61 @@
   refresh.addEventListener("click",load);
   [actor,area,from,to].forEach(control=>control.addEventListener("change",load));
   reset.addEventListener("click",()=>{actor.value="";area.value="";from.value="";to.value="";load()});
+
+  const historyRows=document.getElementById("historyRows");
+  const historyStatus=document.getElementById("historyStatus");
+  const historyQuery=document.getElementById("historyQuery");
+  const historyRefresh=document.getElementById("historyRefresh");
+  const historyLabel=value=>({update:"Vor Änderung",delete:"Vor Löschung",restore_backup:"Vor Wiederherstellung"}[value]||value||"–");
+  const sizeLabel=value=>{const n=Number(value||0);return n<1024?n+" B":(n/1024).toFixed(n<10240?1:0)+" KB"};
+
+  async function loadHistory(){
+    if(!historyRows||!historyStatus||!historyRefresh)return;
+    historyRefresh.disabled=true;historyStatus.textContent="Lade Versionen …";historyStatus.className="status";
+    try{
+      const params=new URLSearchParams({limit:"100"});
+      if(historyQuery?.value.trim())params.set("q",historyQuery.value.trim());
+      const response=await fetch(api+"/api/admin/history?"+params.toString(),{credentials:"include",cache:"no-store"});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+      const versions=Array.isArray(data.versions)?data.versions:[];
+      historyRows.innerHTML="";
+      for(const version of versions){
+        const tr=document.createElement("tr");
+        [version.created_at||"",version.actor_email||"–",version.key||"–",historyLabel(version.operation),sizeLabel(version.value_size)].forEach((value,index)=>{
+          const td=document.createElement("td");
+          if(index===2){const code=document.createElement("code");code.textContent=value;td.appendChild(code)}else td.textContent=value;
+          tr.appendChild(td);
+        });
+        const action=document.createElement("td");
+        const button=document.createElement("button");button.type="button";button.className="secondary";button.textContent="Wiederherstellen";
+        button.addEventListener("click",async()=>{
+          if(!confirm("Version für „"+version.key+"“ wiederherstellen? Der aktuelle Stand wird vorher ebenfalls als Version gesichert."))return;
+          button.disabled=true;historyStatus.textContent="Version wird wiederhergestellt …";historyStatus.className="status";
+          try{
+            const response=await fetch(api+"/api/admin/history/"+encodeURIComponent(version.id)+"/restore",{method:"POST",credentials:"include"});
+            const data=await response.json().catch(()=>({}));
+            if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+            historyStatus.textContent="Version wiederhergestellt: "+data.key;historyStatus.className="status ok";
+            await Promise.all([load(),loadHistory()]);
+          }catch(error){
+            historyStatus.textContent="Wiederherstellung fehlgeschlagen: "+error.message;historyStatus.className="status bad";
+          }finally{button.disabled=false}
+        });
+        action.appendChild(button);tr.appendChild(action);historyRows.appendChild(tr);
+      }
+      if(!versions.length)historyRows.innerHTML='<tr><td colspan="6">Keine gespeicherten Versionen gefunden.</td></tr>';
+      historyStatus.textContent=versions.length+" Versionen angezeigt.";historyStatus.className="status ok";
+    }catch(error){
+      historyRows.innerHTML='<tr><td colspan="6">Versionen konnten nicht geladen werden.</td></tr>';
+      historyStatus.textContent="Versionen konnten nicht geladen werden: "+error.message;historyStatus.className="status bad";
+    }finally{historyRefresh.disabled=false}
+  }
+
+  historyRefresh?.addEventListener("click",loadHistory);
+  historyQuery?.addEventListener("input",()=>{clearTimeout(historyQuery._timer);historyQuery._timer=setTimeout(loadHistory,250)});
   load();
+  loadHistory();
 })();
 </script>
 </body>
