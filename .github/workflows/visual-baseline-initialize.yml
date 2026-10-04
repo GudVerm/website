@@ -1,4 +1,5 @@
 name: Visual baseline initialize
+# refresh: service-contact-aa-20261004
 
 on:
   push:
