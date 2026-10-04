@@ -47,6 +47,18 @@ npm run smoke:remote
 
 Der Worker führt additive D1-Migrationen beim ersten Zugriff idempotent aus; bestehende Anfragen werden nicht gelöscht.
 
+## Manueller Preflight in GitHub
+
+Für einen manuellen Start ausschließlich den Workflow **Release preflight – Manuell starten** verwenden:
+
+1. GitHub → **Actions**
+2. Links **Release preflight – Manuell starten** auswählen
+3. Rechts oben **Run workflow**
+4. Branch **main**
+5. Noch einmal **Run workflow**
+
+Der Workflow besitzt absichtlich keine Eingabefelder und liest die erwartete Worker-Version immer direkt aus `release.json`.
+
 ## 4. Release preflight
 
 Nach dem Worker-Deploy in GitHub Actions **Release preflight** auf `main` starten. Ohne Eingabe verwendet er `release.json`.

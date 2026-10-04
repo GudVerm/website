@@ -1,0 +1,74 @@
+name: Release preflight – Manuell starten
+run-name: Manueller Release-Preflight · ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Release preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Releasekennung aus release.json lesen
+        id: release
+        run: |
+          RELEASE="$(node -p "require('./release.json').worker_release")"
+          echo "value=$RELEASE" >> "$GITHUB_OUTPUT"
+          echo "Prüfe Release $RELEASE"
+
+      - name: Repository-Versionen abgleichen
+        run: node quality/release-check.mjs
+
+      - name: Statischen Website-Check ausführen
+        run: node quality/static-check.mjs
+
+      - name: Staging-/Produktionskonfiguration prüfen
+        run: node quality/environment-check.mjs
+
+      - name: CMS-/Admin-Verträge prüfen
+        run: node quality/admin-contract-check.mjs
+
+      - name: GitHub Pages prüfen
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 20 https://gudverm.github.io/website/ -o /tmp/site.html
+          grep -q "Gudelius" /tmp/site.html
+
+      - name: Deployten Worker abgleichen
+        env:
+          EXPECTED_RELEASE: ${{ steps.release.outputs.value }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 20 https://gudelius-cms.gudeliusvermessung.workers.dev/api/health -o /tmp/health.json
+          node - <<'NODE'
+          const fs=require("fs");
+          const health=JSON.parse(fs.readFileSync("/tmp/health.json","utf8"));
+          const expected=process.env.EXPECTED_RELEASE;
+          if(!health.ok)throw new Error("Worker meldet nicht ok.");
+          if(health.release!==expected)throw new Error("Deployte Worker-Version "+health.release+" stimmt nicht mit "+expected+" überein.");
+          if(health.contact_configured!==true)throw new Error("Kontakt-E-Mail-Konfiguration ist nicht vollständig.");
+          console.log("Worker-Release bestätigt:",health.release);
+          NODE
+
+      - name: Öffentliche CMS-Daten prüfen
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 20 https://gudelius-cms.gudeliusvermessung.workers.dev/api/site -o /tmp/site-data.json
+          node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("/tmp/site-data.json","utf8"));if(!d.content||typeof d.content!=="object")process.exit(1);console.log("CMS keys:",Object.keys(d.content).length)'
+
+      - name: Ergebnis
+        run: |
+          echo "### Release-Preflight erfolgreich" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Worker: ${{ steps.release.outputs.value }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- GitHub Pages erreichbar" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Repository-Versionen konsistent" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Kontaktkonfiguration vorhanden" >> "$GITHUB_STEP_SUMMARY"
