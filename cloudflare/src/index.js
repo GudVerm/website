@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-04.3";
+const WORKER_RELEASE = "2026-10-04.4";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -671,8 +671,18 @@ async function handleAdminUi(request, env, url) {
   if (!sourcePath) return new Response("Not found", { status: 404, headers: adminUiHeaders("text/plain; charset=utf-8") });
 
   const sourceUrl = new URL(sourcePath, publicSiteUrl(env));
+  const requestedVersion=url.searchParams.get("v");
+  if(requestedVersion)sourceUrl.searchParams.set("v",requestedVersion);
   sourceUrl.searchParams.set("worker_release", WORKER_RELEASE);
-  const upstream = await fetch(sourceUrl, { method: "GET", headers: { "user-agent": "GudeliusVermessung-AdminProxy/1.0" }, redirect: "follow" });
+  const upstream = await fetch(sourceUrl, {
+    method: "GET",
+    headers: {
+      "user-agent": "GudeliusVermessung-AdminProxy/1.0",
+      "cache-control": "no-cache"
+    },
+    redirect: "follow",
+    cache: "no-store"
+  });
   if (!upstream.ok) {
     console.error("Admin UI source failed:", sourceUrl.toString(), upstream.status);
     return new Response("Admin-Oberfläche konnte nicht geladen werden.", {
@@ -712,8 +722,18 @@ async function handlePublicAssetProxy(request, env, url) {
     return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
   }
   const sourceUrl = new URL(url.pathname.slice(1), publicSiteUrl(env));
+  const requestedVersion=url.searchParams.get("v");
+  if(requestedVersion)sourceUrl.searchParams.set("v",requestedVersion);
   sourceUrl.searchParams.set("worker_release", WORKER_RELEASE);
-  const upstream = await fetch(sourceUrl, { method: "GET", headers: { "user-agent": "GudeliusVermessung-AssetProxy/1.0" }, redirect: "follow" });
+  const upstream = await fetch(sourceUrl, {
+    method: "GET",
+    headers: {
+      "user-agent": "GudeliusVermessung-AssetProxy/1.0",
+      "cache-control": "no-cache"
+    },
+    redirect: "follow",
+    cache: "no-store"
+  });
   if (!upstream.ok) return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
 
   const headers = new Headers();
