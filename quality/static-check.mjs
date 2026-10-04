@@ -91,6 +91,15 @@ for(const full of files){
     if(/\uFFFD|\u00C3[\u0080-\u00BF]|\u00C2[\u0080-\u00BF]/.test(text))fail(rel+": verdächtige Zeichencodierung");
     if([".html",".css",".js",".mjs"].includes(ext)&&rel!=="cloudflare/migrate-wix-images.mjs"&&/static\.wixstatic\.com/i.test(text))fail(rel+": produktive Wix-Referenz gefunden");
   }
+  if(ext===".css"){
+    const css=readFileSync(full,"utf8");
+    for(const match of css.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/gi)){
+      const raw=match[2].trim();
+      if(!raw||/^(?:data:|https?:|#)/i.test(raw))continue;
+      const target=resolve(root,relative(root,join(root,rel,"..")),raw);
+      if(!existsSync(target))fail(rel+": CSS-Asset fehlt -> "+raw);
+    }
+  }
   if([".js",".mjs"].includes(ext)){
     const result=spawnSync(process.execPath,["--check",full],{encoding:"utf8"});
     if(result.status!==0)fail(rel+": JavaScript-Syntaxfehler: "+(result.stderr||result.stdout).trim());
