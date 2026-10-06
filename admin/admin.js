@@ -311,8 +311,27 @@ ensureAdminDirtyUi();
 let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
+const knownDraftKeys=new Set();
+function renderDraftToolbarCount(toolbar=document.querySelector(".cms-draft-toolbar"),serverCount=null){
+  if(!toolbar)return;
+  const count=toolbar.querySelector("[data-draft-count]");
+  if(!count)return;
+  const numeric=Number.isFinite(Number(serverCount))?Number(serverCount):knownDraftKeys.size;
+  count.textContent=String(Math.max(0,numeric));
+  count.closest(".cms-draft-count")?.setAttribute("aria-label",numeric+" gespeicherte Entwürfe");
+}
+function registerDraftKey(key){
+  if(!cmsDraftMode||!key)return;
+  knownDraftKeys.add(key);
+  renderDraftToolbarCount();
+}
+function unregisterDraftKeys(keys){
+  for(const key of keys||[])knownDraftKeys.delete(key);
+  renderDraftToolbarCount();
+}
 function scheduleDraftToolbarRefresh(){
   if(!cmsDraftMode)return;
+  renderDraftToolbarCount();
   clearTimeout(draftToolbarRefreshTimer);
   draftToolbarRefreshTimer=setTimeout(()=>{
     refreshDraftToolbar(document.querySelector(".cms-draft-toolbar"));
@@ -378,8 +397,19 @@ async function refreshDraftToolbar(toolbar){
     const r=await fetch(getApi()+"/api/admin/drafts",{headers:adminHeaders(),credentials:"include",cache:"no-store"});
     const data=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
-    if(count)count.textContent=String(data.count||0);
-  }catch{if(count)count.textContent="?"}
+    const drafts=Array.isArray(data.drafts)?data.drafts:[];
+    if(drafts.length){
+      knownDraftKeys.clear();
+      for(const draft of drafts)if(draft?.key)knownDraftKeys.add(draft.key);
+    }else if(Number(data.count)===0){
+      knownDraftKeys.clear();
+    }
+    const serverCount=Array.isArray(data.drafts)?drafts.length:Number(data.count||0);
+    renderDraftToolbarCount(toolbar,serverCount);
+  }catch{
+    if(count&&knownDraftKeys.size===0)count.textContent="?";
+    else renderDraftToolbarCount(toolbar);
+  }
 }
 function ensureDraftToolbar(){
   if(!draftCapablePages.has(currentAdminPage)||!cmsAccessMode)return;
@@ -389,7 +419,7 @@ function ensureDraftToolbar(){
   toolbar.className="cms-draft-toolbar";
   toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Texte, Strukturen sowie Bildausschnitt, Zoom und Drehung werden im Entwurfsmodus erst als Entwurf gespeichert. Bilddatei-Uploads bleiben direkte Medienänderungen.</span></div>'+
     '<label class="cms-draft-switch"><input type="checkbox" data-draft-toggle> Entwurfsmodus</label>'+
-    '<span class="cms-draft-count"><b data-draft-count>…</b> Entwürfe</span>'+
+    '<span class="cms-draft-count" role="status" aria-live="polite"><b data-draft-count>…</b> Entwürfe</span>'+
     '<button type="button" class="secondary" data-draft-preview>Vorschau öffnen ↗</button>'+
     '<button type="button" data-draft-publish>Alle veröffentlichen</button>'+
     '<button type="button" class="secondary" data-draft-discard>Alle verwerfen</button>';
@@ -681,6 +711,7 @@ async function saveMediaLayout(mediaKey,value){
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
   mediaLayoutContentCache[key]=value;
+  if(cmsDraftMode)registerDraftKey(key);
   scheduleDraftToolbarRefresh();
 }
 const mediaCropControllers=new WeakMap();
@@ -761,6 +792,7 @@ async function saveHeroText(key,value){
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+  if(cmsDraftMode)registerDraftKey(key);
   scheduleDraftToolbarRefresh();
 }
 
