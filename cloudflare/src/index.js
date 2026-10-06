@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-06.1";
+const WORKER_RELEASE = "2026-10-06.2";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -669,7 +669,10 @@ async function handleAdminPreviewUi(request,env,url){
   if(!upstream.ok)return new Response("Vorschau konnte nicht geladen werden.",{status:upstream.status===404?404:502,headers:adminUiHeaders("text/plain; charset=utf-8")});
   let body=await upstream.text();
   const baseUrl=new URL(".",sourceUrl).toString();
-  body=body.replace(/<head>/i,'<head><base href="'+escapeHtml(baseUrl)+'"><meta name="robots" content="noindex,nofollow,noarchive">')
+  const previewContent=await readSiteContent(env,true);
+  const previewJson=JSON.stringify(previewContent).replace(/</g,"\\u003c").replace(/-->/g,"--\\u003e");
+  const previewBootstrap='<script>window.GUDELIUS_CMS_PREVIEW_CONTENT='+previewJson+';<\/script>';
+  body=body.replace(/<head>/i,'<head><base href="'+escapeHtml(baseUrl)+'"><meta name="robots" content="noindex,nofollow,noarchive">'+previewBootstrap)
     .replace(/<script\s+src=["'][^"']*assets\/cms-config\.js[^"']*["']><\/script>/i,'<script src="/admin/preview/config.js"></script>')
     .replace(/<body([^>]*)>/i,'<body$1><div style="position:fixed;z-index:2147483000;left:12px;top:12px;padding:8px 12px;border-radius:999px;background:#172026;color:#fff;font:700 12px/1.2 system-ui;box-shadow:0 6px 22px rgba(0,0,0,.25)">CMS-Vorschau · Entwürfe sichtbar</div>');
   return new Response(request.method==="HEAD"?null:body,{status:200,headers:adminUiHeaders("text/html; charset=utf-8")});

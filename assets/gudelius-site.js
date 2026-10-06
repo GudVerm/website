@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let cmsSiteContentPromise=null;
 
   async function loadCmsSiteContent(){
+    if(window.GUDELIUS_CMS_PREVIEW===true&&window.GUDELIUS_CMS_PREVIEW_CONTENT&&typeof window.GUDELIUS_CMS_PREVIEW_CONTENT==="object"){
+      return window.GUDELIUS_CMS_PREVIEW_CONTENT;
+    }
     if(!cmsApi) return null;
     if(!cmsSiteContentPromise){
       const fetchOptions=window.GUDELIUS_CMS_PREVIEW===true
