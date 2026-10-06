@@ -2,6 +2,10 @@ name: Release preflight – Manuell starten
 run-name: Manueller Release-Preflight · ${{ github.ref_name }}
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-preflight-manual.yml"
   workflow_dispatch:
 
 permissions:
