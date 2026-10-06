@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-04.5";
+const WORKER_RELEASE = "2026-10-06.1";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -718,8 +718,8 @@ async function handleAdminUi(request, env, url) {
   if (contentType.startsWith("text/html")) {
     body = body
       .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
-      .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v=20260924-44")
-      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v=20260924-49")
+      .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v="+WORKER_RELEASE)
+      .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v="+WORKER_RELEASE)
       .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
       .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
       .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
@@ -1317,7 +1317,8 @@ async function saveContentDraft(request,env,cors,key,principal){
      ON CONFLICT(key) DO UPDATE SET value=excluded.value,actor_email=excluded.actor_email,updated_at=CURRENT_TIMESTAMP`
   ).bind(key,JSON.stringify(value),cleanSingleLine(principal?.email||principal?.mode||"",240)).run();
   await writeAudit(env,principal,"entwurf_gespeichert",auditAreaFromTarget(key),key);
-  return json({ok:true,key,draft:true},200,cors);
+  const countRow=await env.DB.prepare("SELECT COUNT(*) AS count FROM content_drafts").first();
+  return json({ok:true,key,draft:true,count:Number(countRow?.count||0)},200,cors);
 }
 
 async function discardContentDrafts(request,env,cors,principal){

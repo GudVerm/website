@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-04.5`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-06.1`.
 
 ## Secrets
 
@@ -395,3 +395,10 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 `Website quality` enthält zusätzlich visuelle Regression, axe-core/WCAG, Staging-/Produktionsprüfung und CMS-/Admin-Vertragsprüfung. Referenzbilder liegen versioniert unter `quality/visual-baselines/`; Abweichungen erzeugen Diff-Artefakte statt automatisch akzeptiert zu werden.
 
 `Visual baseline initialize` ist ausschließlich zur bewussten Initialisierung/Aktualisierung von Referenzen vorgesehen. Eine Änderung der Website akzeptiert visuelle Abweichungen nicht automatisch.
+
+
+## Release 2026-10-06.1 – Autoritativer Entwurfszähler
+
+- Jeder erfolgreiche Draft-Speichervorgang liefert die tatsächliche Anzahl der D1-Einträge in `content_drafts`.
+- Der Admin übernimmt diese Anzahl sofort und validiert zusätzlich `draft:true`.
+- Der Admin-Proxy versioniert `admin.js` und `config.js` mit der Worker-Releasekennung statt mit fest verdrahteten Altwerten.

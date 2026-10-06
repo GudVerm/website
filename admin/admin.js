@@ -320,10 +320,11 @@ function renderDraftToolbarCount(toolbar=document.querySelector(".cms-draft-tool
   count.textContent=String(Math.max(0,numeric));
   count.closest(".cms-draft-count")?.setAttribute("aria-label",numeric+" gespeicherte Entwürfe");
 }
-function registerDraftKey(key){
+function registerDraftKey(key,authoritativeCount=null){
   if(!cmsDraftMode||!key)return;
   knownDraftKeys.add(key);
-  renderDraftToolbarCount();
+  if(Number.isFinite(Number(authoritativeCount)))renderDraftToolbarCount(undefined,Number(authoritativeCount));
+  else renderDraftToolbarCount();
 }
 function unregisterDraftKeys(keys){
   for(const key of keys||[])knownDraftKeys.delete(key);
@@ -405,7 +406,7 @@ async function refreshDraftToolbar(toolbar){
       knownDraftKeys.clear();
     }
     const serverCount=Array.isArray(data.drafts)?drafts.length:Number(data.count||0);
-    renderDraftToolbarCount(toolbar,serverCount);
+    renderDraftToolbarCount(toolbar,Math.max(serverCount,knownDraftKeys.size));
   }catch{
     if(count&&knownDraftKeys.size===0)count.textContent="?";
     else renderDraftToolbarCount(toolbar);
@@ -710,8 +711,9 @@ async function saveMediaLayout(mediaKey,value){
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+  if(cmsDraftMode&&data.draft!==true)throw new Error("Worker hat die Bildlayout-Änderung nicht als Entwurf bestätigt.");
   mediaLayoutContentCache[key]=value;
-  if(cmsDraftMode)registerDraftKey(key);
+  if(cmsDraftMode)registerDraftKey(key,data.count);
   scheduleDraftToolbarRefresh();
 }
 const mediaCropControllers=new WeakMap();
@@ -792,7 +794,8 @@ async function saveHeroText(key,value){
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-  if(cmsDraftMode)registerDraftKey(key);
+  if(cmsDraftMode&&data.draft!==true)throw new Error("Worker hat die Textänderung nicht als Entwurf bestätigt.");
+  if(cmsDraftMode)registerDraftKey(key,data.count);
   scheduleDraftToolbarRefresh();
 }
 
