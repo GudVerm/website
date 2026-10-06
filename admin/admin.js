@@ -217,6 +217,7 @@ const currentAdminPage=document.body?.dataset?.adminPage||"";
 
 /* Zentraler, abschnittsbezogener Dirty-State. */
 const adminDirtyKeys=new Set();
+const adminDirtyScopes=new Map();
 const adminDirtyScopeIds=new WeakMap();
 let adminDirtyScopeSeq=0;
 function dirtyScopeFor(element){
@@ -239,14 +240,18 @@ function updateAdminDirtyUi(){
 }
 function markAdminDirty(element,type="fields"){
   if(!draftCapablePages.has(currentAdminPage))return;
-  adminDirtyKeys.add(dirtyKey(element,type));
+  const key=dirtyKey(element,type);
+  adminDirtyKeys.add(key);
+  adminDirtyScopes.set(key,dirtyScopeFor(element));
   updateAdminDirtyUi();
 }
 function clearAdminDirty(element,type="fields"){
-  adminDirtyKeys.delete(dirtyKey(element,type));
+  const key=dirtyKey(element,type);
+  adminDirtyKeys.delete(key);
+  adminDirtyScopes.delete(key);
   updateAdminDirtyUi();
 }
-function clearAllAdminDirty(){adminDirtyKeys.clear();updateAdminDirtyUi()}
+function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();updateAdminDirtyUi()}
 function hasAdminDirty(){return adminDirtyKeys.size>0}
 function ensureAdminDirtyUi(){
   if(!draftCapablePages.has(currentAdminPage))return;
@@ -305,6 +310,53 @@ ensureAdminDirtyUi();
 
 let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
+let draftToolbarRefreshTimer=null;
+function scheduleDraftToolbarRefresh(){
+  if(!cmsDraftMode)return;
+  clearTimeout(draftToolbarRefreshTimer);
+  draftToolbarRefreshTimer=setTimeout(()=>{
+    refreshDraftToolbar(document.querySelector(".cms-draft-toolbar"));
+  },120);
+}
+const draftFieldSaveSelector=[
+  "#saveHeroTexts","#saveService1Texts","#saveService2Texts","#saveService3Texts","#saveService4Texts",
+  "#saveEngineerPageTexts","#saveGisPageTexts","#saveScanPageTexts","#saveDronePageTexts",
+  "#saveCompanyTexts","#saveCompanyTimeline","#saveContactTexts","#saveServiceContactTexts",
+  ".project-save",".technik-save"
+].join(",");
+function visibleEnabledSaveButton(scope){
+  return [...(scope?.querySelectorAll?.(draftFieldSaveSelector)||[])].find(button=>{
+    if(button.disabled||button.hidden)return false;
+    const style=getComputedStyle(button);
+    return style.display!=="none"&&style.visibility!=="hidden";
+  })||null;
+}
+async function waitForDirtyKeyToClear(key,timeout=12000){
+  const started=Date.now();
+  while(adminDirtyKeys.has(key)){
+    if(Date.now()-started>timeout)throw new Error("Änderung konnte nicht automatisch als Entwurf gespeichert werden.");
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+}
+async function savePendingDraftFieldChanges(){
+  if(!cmsDraftMode)return 0;
+  const entries=[...adminDirtyKeys]
+    .filter(key=>key.endsWith(":fields"))
+    .map(key=>({key,scope:adminDirtyScopes.get(key)}))
+    .filter(entry=>entry.scope?.isConnected);
+  const handled=new Set();
+  let saved=0;
+  for(const entry of entries){
+    if(!adminDirtyKeys.has(entry.key)||handled.has(entry.scope))continue;
+    const button=visibleEnabledSaveButton(entry.scope);
+    if(!button)continue;
+    handled.add(entry.scope);
+    button.click();
+    await waitForDirtyKeyToClear(entry.key);
+    saved++;
+  }
+  return saved;
+}
 async function fetchSiteSnapshot(){
   const endpoint=cmsDraftMode?"/api/admin/preview-site":"/api/site";
   return fetch(getApi()+endpoint,{headers:cmsDraftMode?adminHeaders():{},credentials:cmsDraftMode?"include":"same-origin",cache:"no-store"});
@@ -335,7 +387,7 @@ function ensureDraftToolbar(){
   if(!main||main.querySelector(".cms-draft-toolbar"))return;
   const toolbar=document.createElement("section");
   toolbar.className="cms-draft-toolbar";
-  toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Text- und Strukturänderungen können zuerst als Entwurf gespeichert werden. Medien und Löschaktionen bleiben direkte Änderungen.</span></div>'+
+  toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Texte, Strukturen sowie Bildausschnitt, Zoom und Drehung werden im Entwurfsmodus erst als Entwurf gespeichert. Bilddatei-Uploads bleiben direkte Medienänderungen.</span></div>'+
     '<label class="cms-draft-switch"><input type="checkbox" data-draft-toggle> Entwurfsmodus</label>'+
     '<span class="cms-draft-count"><b data-draft-count>…</b> Entwürfe</span>'+
     '<button type="button" class="secondary" data-draft-preview>Vorschau öffnen ↗</button>'+
@@ -351,10 +403,12 @@ function ensureDraftToolbar(){
     const originalLabel=button.textContent;
     try{
       if(cmsDraftMode){
-        button.textContent="Speichere Bildausschnitte …";
+        button.textContent="Speichere Änderungen …";
+        const savedFields=await savePendingDraftFieldChanges();
         const savedCrops=await saveAllPendingMediaCrops();
         await refreshDraftToolbar(toolbar);
-        if(savedCrops>0)button.textContent=savedCrops+" Ausschnitt"+(savedCrops===1?"":"e")+" gespeichert …";
+        const savedTotal=savedFields+savedCrops;
+        if(savedTotal>0)button.textContent=savedTotal+" Änderung"+(savedTotal===1?"":"en")+" als Entwurf gespeichert …";
       }else if(hasPendingMediaCrops()){
         alert("Der Bildausschnitt ist noch nicht gespeichert. Aktiviere den Entwurfsmodus oder speichere den Ausschnitt zuerst, damit er in der Vorschau erscheint.");
         return;
@@ -594,38 +648,40 @@ async function loadMediaLayoutContent(){
   return mediaLayoutContentPromise;
 }
 async function deleteMediaLayout(mediaKey){
-  const response=await fetch(contentUrl(mediaLayoutContentKey(mediaKey)),{method:"DELETE",headers:adminHeaders()});
+  const key=mediaLayoutContentKey(mediaKey);
+  if(cmsDraftMode){
+    const standard=normalizeMediaLayout(null);
+    const response=await fetch(draftContentUrl(key),{
+      method:"PUT",
+      headers:adminHeaders({"content-type":"application/json"}),
+      credentials:"include",
+      body:JSON.stringify(standard)
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
+    mediaLayoutContentCache[key]=standard;
+    scheduleDraftToolbarRefresh();
+    return;
+  }
+  const response=await fetch(contentUrl(key),{method:"DELETE",headers:adminHeaders()});
   if(!response.ok&&response.status!==404){
     const data=await response.json().catch(()=>({}));
     throw new Error(data.error||("HTTP "+response.status));
   }
-  delete mediaLayoutContentCache[mediaLayoutContentKey(mediaKey)];
+  delete mediaLayoutContentCache[key];
 }
 async function saveMediaLayout(mediaKey,value){
   const key=mediaLayoutContentKey(mediaKey);
-  const response=await fetch(contentUrl(key),{
+  const response=await fetch(cmsDraftMode?draftContentUrl(key):contentUrl(key),{
     method:"PUT",
     headers:adminHeaders({"content-type":"application/json"}),
+    credentials:cmsDraftMode?"include":"same-origin",
     body:JSON.stringify(value)
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
-
-  // Crops sind Medienzustand und gelten sofort. Alte Entwurfswerte für denselben
-  // media-layout-Key würden die Access-Vorschau sonst über den Live-Wert legen.
-  if(cmsAccessMode){
-    const draftResponse=await fetch(draftContentUrl(key),{
-      method:"DELETE",
-      headers:adminHeaders(),
-      credentials:"include"
-    });
-    if(!draftResponse.ok&&draftResponse.status!==404){
-      const draftData=await draftResponse.json().catch(()=>({}));
-      throw new Error(draftData.error||("Alter Crop-Entwurf konnte nicht entfernt werden (HTTP "+draftResponse.status+")."));
-    }
-  }
-
   mediaLayoutContentCache[key]=value;
+  scheduleDraftToolbarRefresh();
 }
 const mediaCropControllers=new WeakMap();
 const activeMediaCropControllers=new Set();
@@ -700,10 +756,12 @@ async function saveHeroText(key,value){
   const response=await fetch(cmsDraftMode?draftContentUrl(key):contentUrl(key),{
     method:"PUT",
     headers:adminHeaders({"content-type":"application/json"}),
+    credentials:cmsDraftMode?"include":"same-origin",
     body:JSON.stringify(value)
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
+  scheduleDraftToolbarRefresh();
 }
 
 if(saveHeroTexts){

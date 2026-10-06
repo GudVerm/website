@@ -20,6 +20,9 @@ contains("assets/admin-cropper.js","Empfohlenen Ausschnitt verwenden","Cropper-E
 contains("assets/admin-cropper.js","media-crop-x-value","Cropper-Zahlenwerte fehlen.");
 contains("assets/admin-cropper.js","cms-crop-dirty-change","Crop-Dirty-Event fehlt.");
 contains("admin/admin.js","beforeunload","Schutz vor Verlassen mit offenen Änderungen fehlt.");
+contains("admin/admin.js","cmsDraftMode?draftContentUrl(key):contentUrl(key)","Text-/Layout-Speicherung ist nicht draft-aware.");
+contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert offene Textänderungen nicht als Entwurf.");
+contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen","Entwurfsmodus-Hinweis für Bildlayouts fehlt.");
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
 
 const media=read("admin/media-library.js");
