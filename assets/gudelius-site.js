@@ -554,6 +554,16 @@ document.addEventListener('DOMContentLoaded', () => {
       mediaKey:card?.querySelector("img")?.dataset.cmsMedia||""
     };
   }
+  function projectCardLabelId(slug){
+    return "project-card-label-"+String(slug||"projekt").replace(/[^a-z0-9_-]+/gi,"-");
+  }
+  function applyProjectCardAccessibleName(card,slug){
+    const caption=card?.querySelector(".project-caption");
+    if(!card||!caption)return;
+    if(!caption.id)caption.id=projectCardLabelId(slug);
+    card.setAttribute("aria-labelledby",caption.id);
+    card.removeAttribute("aria-label");
+  }
   function registerFallbackProjectCards(){
     document.querySelectorAll(".projects-grid .project").forEach(card=>{
       const record=fallbackProjectRecord(card);
@@ -561,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
       card.dataset.project=record.slug;
       card.tabIndex=0;
       card.setAttribute("role","button");
-      card.setAttribute("aria-label","Projekt "+record.title+" öffnen");
+      applyProjectCardAccessibleName(card,record.slug);
     });
   }
   function openProjectModal(card){
@@ -659,11 +669,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawImageDescription=typeof content['projekte/'+slug+'/image-description']==='string'?content['projekte/'+slug+'/image-description'].trim():'';
         const imageTitle=rawImageTitle||projectDisplayTitles[slug]||title;
         const imageDescription=rawImageDescription||[location,year].filter(Boolean).join(' · ')||projectDisplayMeta[slug]||'';
-        const card=document.createElement('div');card.className='project';card.dataset.project=slug;card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Projekt '+title+' öffnen');if(entry.featured)card.dataset.featured='true';
+        const card=document.createElement('div');card.className='project';card.dataset.project=slug;card.tabIndex=0;card.setAttribute('role','button');if(entry.featured)card.dataset.featured='true';
         const img=document.createElement('img');img.src=fallback.image||'assets/dummy-aussendienst-02.svg';img.dataset.cmsMedia='projects/'+slug;img.alt=imageTitle;img.loading='lazy';img.decoding='async';img.fetchPriority='low';
-        const caption=document.createElement('div');caption.className='project-caption';const strong=document.createElement('strong');strong.textContent=imageTitle;caption.appendChild(strong);
+        const caption=document.createElement('div');caption.className='project-caption';caption.id=projectCardLabelId(slug);const strong=document.createElement('strong');strong.textContent=imageTitle;caption.appendChild(strong);
         if(imageDescription){const small=document.createElement('small');small.textContent=imageDescription;caption.appendChild(small)}
-        card.append(img,caption);grid.appendChild(card);
+        card.append(img,caption);applyProjectCardAccessibleName(card,slug);grid.appendChild(card);
         projectModalRecords.set(slug,{slug,title,description:description||(projectFallbackDetails[slug]?.description||"Ein ausgewähltes Referenzprojekt von GudeliusVermessung."),location,year,services:services.length?services:(projectFallbackDetails[slug]?.services||[]),image:img.src});
       });
       const featured=grid.querySelector('[data-featured="true"]');if(featured&&featured!==grid.firstElementChild)grid.prepend(featured);
