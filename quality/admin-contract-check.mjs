@@ -55,6 +55,11 @@ contains("admin/admin.js",'credentials:"include"',"Admin-Medienupload sendet kei
 contains("assets/cms-config.js","GUDELIUS_CMS_MEDIA_ENABLED = true","Öffentliche CMS-Medien sind im Site-Config weiterhin deaktiviert.");
 contains("cloudflare/wrangler.jsonc",'"PUBLIC_MEDIA_ENABLED": "true"',"Öffentliche R2-Medienausgabe ist im Worker weiterhin deaktiviert.");
 contains("index.html",'data-cms-bg="leistungen/ingenieurvermessung"',"Leistungsbilder sind auf der Live-Startseite nicht an CMS-Medienkeys gebunden.");
+contains("admin/startseite/index.html","Vier Leistungs-Kacheln der Startseite","Die vier Leistungs-Kacheln fehlen im Startseiten-Admin.");
+contains("admin/startseite/index.html",'id="service1Grid"',"Ingenieurvermessungs-Kachel fehlt im Startseiten-Admin.");
+check(!read("admin/leistungen/index.html").includes("<strong>Startseiten-Kachel</strong>"),"Startseiten-Leistungskacheln sind weiterhin im Leistungen-Admin eingebettet.");
+contains("admin/admin.js",'if(raw.startsWith("leistungen/"))return "startseite";',"Entwurfs-Sprünge für Startseiten-Leistungskacheln führen nicht zur Startseite.");
+contains("admin/media-library.js",'withArea(data.serviceImages,"Startseite","./startseite/")',"Medienbibliothek verlinkt Startseiten-Leistungskacheln weiterhin zum Leistungen-Admin.");
 contains("cloudflare/src/index.js",'url: new URL("/api/admin/media/" + encodePath(key), url).toString()', "Admin-Medienupload liefert weiterhin einen ungeschützten/öffentlichen Medienpfad zurück.");
 contains("cloudflare/src/index.js",'url.pathname.startsWith("/api/admin/media/") && request.method === "GET"',"Geschützter GET-Endpunkt für Admin-Medien fehlt.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_MEDIA_ENDPOINT = '/api/admin/media';","Preview verwendet nicht den geschützten Medien-Endpunkt.");
