@@ -140,6 +140,7 @@ contains("admin/admin-data.js",'key:"projekte/hero"',"Projekt-Hero fehlt im Medi
 contains("admin/admin-data.js",'key:"technik/hero"',"Technik-Hero fehlt im Medienkatalog.");
 contains("admin/admin-data.js",'key:"kontakt/hero"',"Kontakt-Hero fehlt im Medienkatalog.");
 contains("admin/projekte/index.html",'id="projectHeroGrid"',"Projekt-Hero kann im Admin nicht bearbeitet werden.");
+contains("admin/projekte/index.html",'id="equipmentTemplate"',"Projekt-Hero-Renderer benötigt das generische equipmentTemplate.");
 contains("admin/technik/index.html",'id="techniqueHeroGrid"',"Technik-Hero kann im Admin nicht bearbeitet werden.");
 contains("admin/kontakt/index.html",'id="contactHeroGrid"',"Kontakt-Hero kann im Admin nicht bearbeitet werden.");
 contains("admin/kontakt/index.html","admin-cropper.js","Kontakt-Admin lädt den Bildausschnitt-Editor nicht.");
