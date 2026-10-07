@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.3`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.4`.
 
 ## Secrets
 
@@ -439,3 +439,11 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Das öffentliche Impressum liest die editierbaren rechtlichen Angaben über `impressum/*`-CMS-Keys.
 - Admin-Navigation normalisiert Audit- und Impressum-Links auf die geschützten Worker-Pfade `/admin/audit/` und `/admin/impressum/`.
 - Veröffentlichungen im Audit-Log werden mit der Inhalts-Historie verknüpft. Beim Hover/Fokus kann der Admin den rekonstruierten Vorher-/Nachher-Stand der jeweiligen Veröffentlichung sehen.
+
+
+## Release 2026-10-07.4 – Echte Draft-Differenzen und leere CMS-Werte
+
+- Entwürfe werden nur noch gespeichert, wenn ihr Wert tatsächlich vom Live-Stand abweicht.
+- Bereits vorhandene Entwürfe ohne inhaltliche Differenz werden beim Laden der Draft-Liste automatisch bereinigt.
+- Der Impressum-Editor vergleicht vor dem Speichern mit dem aktuellen CMS-/Entwurfsstand und schreibt nur geänderte Felder.
+- Explizit leere CMS-Textwerte überschreiben statische Fallback-Texte. Damit sind bewusst gelöschte Texte auch in der Vorschau und nach Veröffentlichung wirklich leer.
