@@ -248,6 +248,7 @@ const currentAdminPage=document.body?.dataset?.adminPage||"";
 const adminDirtyKeys=new Set();
 const adminDirtyScopes=new Map();
 const adminDirtyDetails=new Map();
+const adminDirtyElements=new Map();
 const adminDirtyScopeIds=new WeakMap();
 let adminDirtyScopeSeq=0;
 function dirtyScopeFor(element){
@@ -310,39 +311,73 @@ function dirtyFieldLabel(element){
 function dirtyDetailLabel(element,type){
   return type==="crop"?"Bildausschnitt":dirtyFieldLabel(element);
 }
+let adminChangeHighlightTimer=null;
+function adminHighlightNode(element){
+  if(!element)return null;
+  if(element.matches?.("input,textarea,select"))return element.closest("label")||element;
+  if(element.matches?.(".media-crop-x,.media-crop-y,.media-crop-zoom,.media-crop-rotation"))return element.closest("label")||element;
+  return element;
+}
+function clearAdminChangeHighlights(){
+  document.querySelectorAll(".admin-change-highlight").forEach(node=>node.classList.remove("admin-change-highlight"));
+  clearTimeout(adminChangeHighlightTimer);
+}
+function focusAdminChangeTargets(elements){
+  const targets=[...new Set([...(elements||[])].map(adminHighlightNode).filter(node=>node?.isConnected))];
+  if(!targets.length)return false;
+  clearAdminChangeHighlights();
+  targets.forEach(node=>node.classList.add("admin-change-highlight"));
+  const first=targets[0];
+  first.scrollIntoView({behavior:"smooth",block:"center"});
+  const focusTarget=first.matches?.("input,textarea,select,button")?first:first.querySelector?.("input,textarea,select,button,[tabindex]");
+  setTimeout(()=>focusTarget?.focus?.({preventScroll:true}),350);
+  adminChangeHighlightTimer=setTimeout(clearAdminChangeHighlights,8000);
+  return true;
+}
 function renderAdminDirtyTooltip(indicator){
   const tooltip=indicator?.querySelector(".admin-global-dirty-tooltip");
   if(!tooltip)return;
   tooltip.innerHTML="";
   const title=document.createElement("strong");
   title.className="admin-global-dirty-tooltip-title";
-  title.textContent="Offene Änderungen";
+  title.textContent="Offene Änderungen · anklicken zum Anzeigen";
   tooltip.appendChild(title);
 
   const grouped=new Map();
   for(const key of adminDirtyKeys){
     const scope=adminDirtyScopes.get(key);
     const scopeId=dirtyScopeId(scope);
-    if(!grouped.has(scopeId))grouped.set(scopeId,{label:dirtyScopeLabel(scope),details:new Set()});
+    if(!grouped.has(scopeId))grouped.set(scopeId,{label:dirtyScopeLabel(scope),details:new Set(),elements:new Set(),scope});
     const group=grouped.get(scopeId);
     const details=adminDirtyDetails.get(key);
     if(details?.size)for(const detail of details)group.details.add(detail);
     else group.details.add(key.endsWith(":crop")?"Bildausschnitt":"Inhalte");
+    const elements=adminDirtyElements.get(key);
+    if(elements?.size)for(const element of elements)group.elements.add(element);
   }
 
   for(const group of grouped.values()){
-    const row=document.createElement("div");
+    const row=document.createElement("button");
+    row.type="button";
     row.className="admin-global-dirty-tooltip-row";
+    row.title="Zu dieser Änderung springen";
     const section=document.createElement("b");
     section.textContent=group.label;
     const details=document.createElement("span");
     details.textContent=[...group.details].join(", ");
-    row.append(section,details);
+    const jump=document.createElement("small");
+    jump.textContent="Anzeigen →";
+    row.append(section,details,jump);
+    row.addEventListener("click",event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      focusAdminChangeTargets(group.elements.size?group.elements:[group.scope]);
+    });
     tooltip.appendChild(row);
   }
 
   const summary=[...grouped.values()].map(group=>group.label+": "+[...group.details].join(", ")).join("; ");
-  indicator.setAttribute("aria-label","Ungespeichert. "+summary);
+  indicator.setAttribute("aria-label","Ungespeichert. "+summary+". Einträge können angeklickt werden.");
 }
 function updateAdminDirtyUi(){
   const indicator=document.querySelector(".admin-global-dirty");
@@ -361,6 +396,8 @@ function markAdminDirty(element,type="fields"){
   adminDirtyScopes.set(key,dirtyScopeFor(element));
   if(!adminDirtyDetails.has(key))adminDirtyDetails.set(key,new Set());
   adminDirtyDetails.get(key).add(dirtyDetailLabel(element,type));
+  if(!adminDirtyElements.has(key))adminDirtyElements.set(key,new Set());
+  adminDirtyElements.get(key).add(element);
   updateAdminDirtyUi();
 }
 function clearAdminDirty(element,type="fields"){
@@ -368,6 +405,7 @@ function clearAdminDirty(element,type="fields"){
   adminDirtyKeys.delete(key);
   adminDirtyScopes.delete(key);
   adminDirtyDetails.delete(key);
+  adminDirtyElements.delete(key);
   updateAdminDirtyUi();
 }
 function clearAdminDirtyForElements(elements,type="fields"){
@@ -378,10 +416,11 @@ function clearAdminDirtyForElements(elements,type="fields"){
     if(adminDirtyKeys.delete(key))changed=true;
     adminDirtyScopes.delete(key);
     adminDirtyDetails.delete(key);
+    adminDirtyElements.delete(key);
   }
   if(changed)updateAdminDirtyUi();
 }
-function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();adminDirtyDetails.clear();updateAdminDirtyUi()}
+function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();adminDirtyDetails.clear();adminDirtyElements.clear();updateAdminDirtyUi()}
 function hasAdminDirty(){return adminDirtyKeys.size>0}
 function ensureAdminDirtyUi(){
   if(!draftCapablePages.has(currentAdminPage))return;
@@ -504,6 +543,151 @@ function draftChangeSummary(draft){
   if(JSON.stringify(live)===JSON.stringify(next))return "Keine inhaltliche Differenz";
   return draftValuePreview(live)+" → "+draftValuePreview(next);
 }
+function draftAdminPageForKey(key){
+  const raw=String(key||"").replace(/^media-layout\//,"");
+  if(raw.startsWith("projects/")||raw.startsWith("projekte/"))return "projekte";
+  if(raw.startsWith("equipment/")||raw.startsWith("technik/"))return "technik";
+  if(raw.startsWith("leistungsseiten/")||raw.startsWith("leistungen/"))return "leistungen";
+  if(raw.startsWith("unternehmen/"))return "unternehmen";
+  if(raw.startsWith("kontakt/"))return "kontakt";
+  if(raw.startsWith("impressum/"))return "impressum";
+  if(raw.startsWith("startseite/"))return "startseite";
+  return "";
+}
+function staticDraftTarget(key){
+  const maps=[serviceTextFields,companyTextFields,contactTextFields,imprintTextFields,serviceContactTextFields];
+  for(const map of maps){
+    const target=map?.[key];
+    if(target)return target;
+  }
+  const heroMap={
+    "startseite/hero-eyebrow":heroEyebrow,
+    "startseite/hero-title":heroTitle,
+    "startseite/hero-lead":heroLead
+  };
+  if(heroMap[key])return heroMap[key];
+  if(key==="unternehmen/timeline")return companyTimelineEditor;
+  const groups=[];
+  try{groups.push(engineerPageFields,gisPageFields,scanPageFields,dronePageFields)}catch{}
+  for(const fields of groups){
+    for(const entry of fields||[]){
+      if(entry?.[0]===key)return document.getElementById(entry[1]);
+    }
+  }
+  return null;
+}
+function confirmDraftRecordSwitch(kind,name){
+  if(!hasAdminDirty())return true;
+  return confirm("Es gibt noch nicht gespeicherte Änderungen. Zu "+kind+" „"+name+"“ springen und diese Änderungen verwerfen?");
+}
+function ensureProjectDraftRecord(slug){
+  if(currentAdminPage!=="projekte")return false;
+  const item=projectBySlug(slug);
+  if(!item)return false;
+  if(activeProjectSlug!==slug){
+    if(!confirmDraftRecordSwitch("Projekt",item.title||item.name||slug))return false;
+    clearAllAdminDirty();
+    activeProjectSlug=slug;
+    if(projectSelect)projectSelect.value=slug;
+    renderProjectEditor(item);
+  }
+  return true;
+}
+function ensureTechniqueDraftRecord(slug){
+  if(currentAdminPage!=="technik")return false;
+  const item=techniqueBySlug(slug);
+  if(!item)return false;
+  if(activeTechnikSlug!==slug){
+    if(!confirmDraftRecordSwitch("Technik",techniqueValue(item,"name")||item.name||slug))return false;
+    clearAllAdminDirty();
+    activeTechnikSlug=slug;
+    if(technikSelect)technikSelect.value=slug;
+    renderTechniqueEditor(item);
+  }
+  return true;
+}
+function cropDraftTargets(mediaKey,draft){
+  if(mediaKey.startsWith("projects/"))ensureProjectDraftRecord(mediaKey.split("/")[1]||"");
+  if(mediaKey.startsWith("equipment/"))ensureTechniqueDraftRecord(mediaKey.split("/")[1]||"");
+  const card=document.querySelector('[data-media-key="'+CSS.escape(mediaKey)+'"]');
+  const editor=card?.querySelector(".media-crop-editor")||card;
+  if(!editor)return [];
+  const live=draft?.live_value,next=draft?.draft_value;
+  if(live&&next&&typeof live==="object"&&typeof next==="object"){
+    const classMap={x:".media-crop-x",y:".media-crop-y",zoom:".media-crop-zoom",rotation:".media-crop-rotation"};
+    const changed=Object.keys(classMap).filter(name=>JSON.stringify(live[name])!==JSON.stringify(next[name]));
+    const fields=changed.map(name=>editor.querySelector(classMap[name])).filter(Boolean);
+    if(fields.length)return fields;
+  }
+  return [editor];
+}
+function draftTargetElements(key,draft){
+  const raw=String(key||"");
+  if(raw.startsWith("media-layout/"))return cropDraftTargets(raw.slice("media-layout/".length),draft);
+  if(raw==="projekte/index")return [projectSelect||projectEditor].filter(Boolean);
+  if(raw==="technik/index")return [technikSelect||technikEditor].filter(Boolean);
+
+  if(raw.startsWith("projekte/")){
+    const parts=raw.split("/"),slug=parts[1],field=parts.slice(2).join("/");
+    if(!ensureProjectDraftRecord(slug))return [];
+    const card=document.querySelector('.project-editor-card[data-project-slug="'+CSS.escape(slug)+'"]')||document.querySelector(".project-editor-card");
+    if(!card)return [];
+    const fieldMap={"image-title":"imageTitle","image-description":"imageDescription"};
+    if(field==="services")return [card.querySelector(".project-services")].filter(Boolean);
+    const target=card.querySelector('[data-project-field="'+CSS.escape(fieldMap[field]||field)+'"]');
+    return [target||card].filter(Boolean);
+  }
+
+  if(raw.startsWith("technik/")&&raw!=="technik/index"){
+    const parts=raw.split("/"),slug=parts[1],field=parts.slice(2).join("/");
+    if(parts[1]==="gruppen"){
+      const card=document.querySelector('[data-media-key="'+CSS.escape(raw)+'"]');
+      return [card||document.querySelector("#technikGroupGrid")].filter(Boolean);
+    }
+    if(!ensureTechniqueDraftRecord(slug))return [];
+    const card=document.querySelector('.technik-editor-card[data-technik-slug="'+CSS.escape(slug)+'"]')||document.querySelector(".technik-editor-card");
+    if(!card)return [];
+    if(field==="group")return [card.querySelector('[data-technique-meta="group"]')||card].filter(Boolean);
+    const target=card.querySelector('[data-technique-field="'+CSS.escape(field)+'"]');
+    return [target||card].filter(Boolean);
+  }
+
+  const direct=staticDraftTarget(raw);
+  if(direct)return [direct];
+
+  const mediaCard=document.querySelector('[data-media-key="'+CSS.escape(raw.replace(/^media-layout\//,""))+'"]');
+  return [mediaCard].filter(Boolean);
+}
+function jumpToDraftKey(key,draft){
+  const targetPage=draftAdminPageForKey(key);
+  if(targetPage&&targetPage!==currentAdminPage){
+    sessionStorage.setItem("gudelius-admin-pending-draft-jump",key);
+    const clearTimer=setTimeout(()=>sessionStorage.removeItem("gudelius-admin-pending-draft-jump"),2500);
+    location.href=adminAreaUrl(targetPage);
+    window.addEventListener("pagehide",()=>clearTimeout(clearTimer),{once:true});
+    return;
+  }
+  const targets=draftTargetElements(key,draft);
+  if(!focusAdminChangeTargets(targets)){
+    const fallback=document.querySelector("main");
+    if(fallback)focusAdminChangeTargets([fallback]);
+  }
+}
+function consumePendingDraftJump(attempt=0){
+  const key=sessionStorage.getItem("gudelius-admin-pending-draft-jump");
+  if(!key)return;
+  const targetPage=draftAdminPageForKey(key);
+  if(targetPage&&targetPage!==currentAdminPage)return;
+  const draft=knownDraftRecords.get(key);
+  const targets=draftTargetElements(key,draft);
+  if(targets.length){
+    sessionStorage.removeItem("gudelius-admin-pending-draft-jump");
+    focusAdminChangeTargets(targets);
+    return;
+  }
+  if(attempt<24)setTimeout(()=>consumePendingDraftJump(attempt+1),250);
+}
+
 function renderDraftToolbarDetails(toolbar=document.querySelector(".cms-draft-toolbar")){
   const badge=toolbar?.querySelector(".cms-draft-count");
   const tooltip=badge?.querySelector(".cms-draft-tooltip");
@@ -511,7 +695,7 @@ function renderDraftToolbarDetails(toolbar=document.querySelector(".cms-draft-to
   tooltip.innerHTML="";
   const title=document.createElement("strong");
   title.className="cms-draft-tooltip-title";
-  title.textContent="Änderungen in Entwürfen";
+  title.textContent="Änderungen in Entwürfen · anklicken zum Anzeigen";
   tooltip.appendChild(title);
   if(!knownDraftKeys.size){
     const empty=document.createElement("span");
@@ -522,13 +706,22 @@ function renderDraftToolbarDetails(toolbar=document.querySelector(".cms-draft-to
   }
   for(const key of knownDraftKeys){
     const draft=knownDraftRecords.get(key);
-    const row=document.createElement("div");
+    const row=document.createElement("button");
+    row.type="button";
     row.className="cms-draft-tooltip-row";
+    row.title="Zu dieser Entwurfsänderung springen";
     const label=document.createElement("b");
     label.textContent=draftKeyLabel(key);
     const summary=document.createElement("span");
     summary.textContent=draftChangeSummary(draft);
-    row.append(label,summary);
+    const jump=document.createElement("small");
+    jump.textContent="Anzeigen →";
+    row.append(label,summary,jump);
+    row.addEventListener("click",event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      jumpToDraftKey(key,draft);
+    });
     tooltip.appendChild(row);
   }
 }
@@ -706,7 +899,7 @@ function ensureDraftToolbar(){
     }catch(error){alert("Verwerfen fehlgeschlagen: "+error.message)}finally{button.disabled=false}
   });
   const style=document.createElement("style");
-  style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{position:relative;padding:7px 9px;border-radius:999px;background:#fff;cursor:help;outline:none}.cms-draft-count:focus-visible{box-shadow:0 0 0 3px rgba(155,131,32,.24)}.cms-draft-tooltip{position:absolute;z-index:130;top:calc(100% + 9px);right:0;display:grid;gap:8px;width:max-content;min-width:300px;max-width:min(480px,calc(100vw - 28px));padding:12px 13px;border:1px solid #d9deda;border-radius:12px;background:#172026;color:#fff;box-shadow:0 14px 36px rgba(20,32,38,.22);white-space:normal;text-align:left;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}.cms-draft-count:hover .cms-draft-tooltip,.cms-draft-count:focus .cms-draft-tooltip,.cms-draft-count:focus-within .cms-draft-tooltip{opacity:1;visibility:visible;transform:translateY(0)}.cms-draft-tooltip::before{content:'';position:absolute;top:-6px;right:18px;width:10px;height:10px;background:#172026;border-left:1px solid #d9deda;border-top:1px solid #d9deda;transform:rotate(45deg)}.cms-draft-tooltip-title{position:relative;z-index:1;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#f0d64f}.cms-draft-tooltip-row{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.14)}.cms-draft-tooltip-row b{font-size:.74rem;color:#fff;line-height:1.35}.cms-draft-tooltip-row span,.cms-draft-tooltip-empty{font-size:.68rem;font-weight:650;color:#cbd4d1;line-height:1.45}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}@media(max-width:620px){.cms-draft-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.cms-draft-tooltip::before{display:none}}";
+  style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{position:relative;padding:7px 9px;border-radius:999px;background:#fff;cursor:help;outline:none}.cms-draft-count:focus-visible{box-shadow:0 0 0 3px rgba(155,131,32,.24)}.cms-draft-tooltip{position:absolute;z-index:130;top:calc(100% + 9px);right:0;display:grid;gap:8px;width:max-content;min-width:300px;max-width:min(480px,calc(100vw - 28px));padding:12px 13px;border:1px solid #d9deda;border-radius:12px;background:#172026;color:#fff;box-shadow:0 14px 36px rgba(20,32,38,.22);white-space:normal;text-align:left;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}.cms-draft-count:hover .cms-draft-tooltip,.cms-draft-count:focus .cms-draft-tooltip,.cms-draft-count:focus-within .cms-draft-tooltip{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}.cms-draft-tooltip::before{content:'';position:absolute;top:-6px;right:18px;width:10px;height:10px;background:#172026;border-left:1px solid #d9deda;border-top:1px solid #d9deda;transform:rotate(45deg)}.cms-draft-tooltip-title{position:relative;z-index:1;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#f0d64f}.cms-draft-tooltip-row{display:grid;gap:2px;width:100%;padding:8px 7px;border:0;border-top:1px solid rgba(255,255,255,.14);border-radius:7px;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}.cms-draft-tooltip-row:hover,.cms-draft-tooltip-row:focus-visible{background:rgba(255,255,255,.09);outline:none}.cms-draft-tooltip-row b{font-size:.74rem;color:#fff;line-height:1.35}.cms-draft-tooltip-row span,.cms-draft-tooltip-empty{font-size:.68rem;font-weight:650;color:#cbd4d1;line-height:1.45}.cms-draft-tooltip-row small{margin-top:2px;font-size:.61rem;font-weight:900;color:#f0d64f}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}@media(max-width:620px){.cms-draft-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.cms-draft-tooltip::before{display:none}}";
   document.head.appendChild(style);
   refreshDraftToolbar(toolbar);
 }
@@ -1370,6 +1563,8 @@ function renderProjectEditor(item){
   const up=node.querySelector(".project-up"),down=node.querySelector(".project-down"),visibleBadge=node.querySelector(".project-visible-badge"),archiveBadge=node.querySelector(".project-archive-badge"),orderLabel=node.querySelector(".project-order");
   const title=node.querySelector('[data-project-field="title"]'),imageTitle=node.querySelector('[data-project-field="imageTitle"]'),imageDescription=node.querySelector('[data-project-field="imageDescription"]'),description=node.querySelector('[data-project-field="description"]'),location=node.querySelector('[data-project-field="location"]'),year=node.querySelector('[data-project-field="year"]'),featured=node.querySelector('[data-project-meta="featured"]');
   const servicesWrap=node.querySelector(".project-services");
+  card.dataset.projectSlug=item.slug;
+  card.dataset.mediaKey=item.key;
   projectServiceOptions.forEach(([value,label])=>{
     const l=document.createElement("label");l.className="check-option";const input=document.createElement("input");input.type="checkbox";input.value=value;
     input.checked=projectValue(item,"services").includes(value);input.addEventListener("change",()=>setProjectDirty(card,true));l.append(input,document.createTextNode(label));servicesWrap.appendChild(l);
@@ -2867,7 +3062,7 @@ function renderTechniqueEditor(item){
   const displayCategory=techniqueValue(item,"category").trim()||item.category||"Technik";
   heading.textContent=displayName; categoryLabel.textContent=displayCategory;
   indexLabel.textContent=String(equipment.indexOf(item)+1).padStart(2,"0");
-  mediaKey.textContent=item.key; orderLabel.textContent=String(equipment.indexOf(item)+1); card.dataset.technikSlug=item.slug;
+  mediaKey.textContent=item.key; orderLabel.textContent=String(equipment.indexOf(item)+1); card.dataset.technikSlug=item.slug; card.dataset.mediaKey=item.key;
   visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";
   visibleBadge.classList.toggle("is-off",item.visible===false);
   archiveBadge.hidden=!item.archived;
@@ -3061,6 +3256,7 @@ function renderCollection(target, items){
     const upload=node.querySelector(".upload");
     const reset=node.querySelector(".reset");
     const status=node.querySelector(".card-status");
+    card.dataset.mediaKey=item.key;
 
     title.textContent=item.name;
     detail.textContent=item.detail;
@@ -3235,3 +3431,4 @@ adminNavLinks.forEach(link=>{
   const page=link.dataset.page||"";
   link.classList.toggle("active",page===activeAdminPage);
 });
+setTimeout(()=>consumePendingDraftJump(),450);
