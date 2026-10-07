@@ -32,6 +32,9 @@ contains("cloudflare/src/index.js","GUDELIUS_CMS_MEDIA_ENDPOINT = '/api/admin/me
 contains("assets/gudelius-site.js","img.src=cmsMediaUrl(key);","Frontend wendet den konfigurierten CMS-Medien-Endpunkt nicht auf Projektbilder an.");
 contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen","Entwurfsmodus-Hinweis für Bildlayouts fehlt.");
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
+contains("admin/admin.js","admin-global-dirty-tooltip","Hover-/Fokus-Details für ungespeicherte Änderungen fehlen.");
+contains("admin/admin.js","dirtyFieldLabel","Dirty-State merkt sich keine konkreten Feldnamen.");
+contains("admin/admin.css",".admin-global-dirty:hover .admin-global-dirty-tooltip","Dirty-Tooltip wird beim Hover nicht eingeblendet.");
 
 const media=read("admin/media-library.js");
 for(const token of ['mode==="unused"','mode==="large"','mode==="external"',"value_size","Abmessungen","Dateigröße"]){
