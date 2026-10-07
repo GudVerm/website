@@ -1953,3 +1953,18 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 .inquiry-workflow-fields{display:grid;grid-template-columns:1fr 1fr auto minmax(100px,1fr);gap:9px;align-items:end;margin:0 0 12px;padding:11px;border:1px solid #e0e4df;border-radius:11px;background:#f8f9f7}
 .inquiry-workflow-fields label{display:grid;gap:5px}.inquiry-workflow-fields select,.inquiry-workflow-fields input{min-height:38px;border:1px solid var(--line);border-radius:9px;padding:8px 9px;background:#fff;color:var(--ink);font:inherit;font-size:.75rem}
 @media(max-width:760px){.inquiry-workflow-fields{grid-template-columns:1fr 1fr}.inquiry-workflow-fields button,.inquiry-workflow-fields .status{grid-column:1/-1}}
+
+
+/* Audit: Veröffentlichungsänderungen per Hover/Fokus */
+.audit-publication-hover{position:relative;display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px dashed #b7a354;border-radius:999px;background:#fff9d9;color:#5d4f14;font-weight:850;cursor:help;outline:none}
+.audit-publication-hover:focus-visible{box-shadow:0 0 0 3px rgba(199,168,14,.2)}
+.audit-publication-tooltip{position:absolute;z-index:160;top:calc(100% + 8px);left:0;display:grid;gap:8px;width:max-content;min-width:300px;max-width:min(520px,calc(100vw - 32px));padding:13px;border:1px solid #344148;border-radius:13px;background:#172026;color:#fff;box-shadow:0 16px 40px rgba(20,32,38,.26);white-space:normal;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}
+.audit-publication-hover:hover .audit-publication-tooltip,.audit-publication-hover:focus .audit-publication-tooltip,.audit-publication-hover:focus-within .audit-publication-tooltip{opacity:1;visibility:visible;transform:translateY(0)}
+.audit-publication-tooltip strong{font-size:.72rem;color:#f0d64f}
+.audit-publication-tooltip code{overflow-wrap:anywhere;color:#dfe7e4;font-size:.66rem}
+.audit-publication-summary{font-size:.72rem;font-weight:800;line-height:1.45;color:#fff}
+.audit-publication-values{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.audit-publication-values>span{display:grid;gap:3px;min-width:0;padding:8px;border-radius:9px;background:rgba(255,255,255,.07)}
+.audit-publication-values b{font-size:.61rem;text-transform:uppercase;letter-spacing:.05em;color:#b9c6c2}
+.audit-publication-values em{overflow-wrap:anywhere;font-size:.68rem;font-style:normal;line-height:1.4;color:#fff}
+@media(max-width:620px){.audit-publication-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.audit-publication-values{grid-template-columns:1fr}}
