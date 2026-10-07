@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Impressum · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20261007-03">
+</head>
+<body data-admin-page="impressum">
+  <header class="admin-header">
+    <div><span class="kicker">GudeliusVermessung</span><h1>Website-Admin</h1></div>
+    <div class="admin-header-actions"><a class="ghost" href="./">Übersicht</a><a class="ghost" href="../impressum/" target="_blank" rel="noopener">Impressum öffnen ↗</a></div>
+  </header>
+  <nav class="admin-nav" aria-label="Admin-Bereiche"><div class="admin-nav-inner">
+    <a class="admin-nav-link" data-page="verbindung" href="./verbindung/">Verbindung</a>
+    <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+    <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+    <a class="admin-nav-link" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+    <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+    <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+    <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen</a>
+    <a class="admin-nav-link" data-page="statistik" href="./statistik/">Statistik</a>
+    <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    <a class="admin-nav-link active" data-page="impressum" href="./impressum/">Impressum</a>
+    <a class="admin-nav-link" data-page="audit" href="./audit/">Audit-Log</a>
+  </div></nav>
+  <main class="wrap admin-page-wrap">
+    <section class="admin-section" id="impressum">
+      <section class="section-head admin-section-head"><div><span class="kicker">Rechtliches</span><h2>Impressum bearbeiten</h2></div><p>Anbieterangaben, Berufsangaben, Versicherung und Rechtstexte. Rechtliche Änderungen sollten vor Veröffentlichung fachlich geprüft werden.</p></section>
+      <section class="cms-subpanel"><div class="cms-subpanel-head"><span class="cms-subpanel-icon">01</span><div><span class="kicker">Seiteneinstieg</span><h3>Einleitung</h3><p>Kurzer Text unter der Überschrift „Impressum“.</p></div></div><div class="text-editor-grid single-column"><label><span>Einleitung</span><textarea id="imprintHeroLead" rows="3" maxlength="600"></textarea></label></div></section>
+      <div class="cms-group-grid">
+        <section class="cms-subpanel"><div class="cms-subpanel-head"><span class="cms-subpanel-icon">02</span><div><span class="kicker">Anbieter</span><h3>Anbieter & Kontakt</h3><p>Angaben gemäß § 5 DDG.</p></div></div><div class="text-editor-grid">
+          <label><span>Name</span><input id="imprintProviderName" type="text" maxlength="160"></label><label><span>Bezeichnung</span><input id="imprintProviderRole" type="text" maxlength="160"></label>
+          <label><span>Straße / Hausnummer</span><input id="imprintStreet" type="text" maxlength="180"></label><label><span>PLZ / Ort</span><input id="imprintCity" type="text" maxlength="180"></label>
+          <label><span>Telefon</span><input id="imprintPhone" type="text" maxlength="120"></label><label><span>Telefax</span><input id="imprintFax" type="text" maxlength="120"></label>
+          <label class="text-editor-wide"><span>E-Mail</span><input id="imprintEmail" type="email" maxlength="240"></label></div></section>
+        <section class="cms-subpanel"><div class="cms-subpanel-head"><span class="cms-subpanel-icon">03</span><div><span class="kicker">Beruf</span><h3>Berufsangaben</h3><p>Berufsbezeichnung, Kammer und Regelungen.</p></div></div><div class="text-editor-grid">
+          <label><span>Berufsbezeichnung</span><input id="imprintProfession" type="text" maxlength="180"></label><label><span>Zuständige Kammer</span><input id="imprintChamber" type="text" maxlength="240"></label>
+          <label><span>Verliehen durch</span><input id="imprintCountry" type="text" maxlength="160"></label><label class="text-editor-wide"><span>Berufsrechtliche Regelungen</span><textarea id="imprintRegulations" rows="5" maxlength="1600"></textarea></label></div></section>
+      </div>
+      <section class="cms-subpanel"><div class="cms-subpanel-head"><span class="cms-subpanel-icon">04</span><div><span class="kicker">Versicherung</span><h3>Berufshaftpflichtversicherung</h3><p>Name, Anschrift und Geltungsraum.</p></div></div><div class="text-editor-grid">
+        <label><span>Versicherer</span><input id="imprintInsurerName" type="text" maxlength="240"></label><label><span>Straße / Hausnummer</span><input id="imprintInsurerStreet" type="text" maxlength="200"></label>
+        <label><span>PLZ / Ort</span><input id="imprintInsurerCity" type="text" maxlength="180"></label><label><span>Geltungsraum</span><input id="imprintInsuranceArea" type="text" maxlength="180"></label></div></section>
+      <section class="cms-subpanel"><div class="cms-subpanel-head"><span class="cms-subpanel-icon">05</span><div><span class="kicker">Rechtstexte</span><h3>Haftung, Streitbeilegung & Urheberrecht</h3><p>Längere Rechtstexte der Impressumsseite.</p></div></div><div class="text-editor-grid single-column">
+        <label><span>Verbraucherstreitbeilegung</span><textarea id="imprintDispute" rows="4" maxlength="2400"></textarea></label>
+        <label><span>Haftung für Inhalte · Absatz 1</span><textarea id="imprintLiabilityContent1" rows="5" maxlength="4000"></textarea></label><label><span>Haftung für Inhalte · Absatz 2</span><textarea id="imprintLiabilityContent2" rows="5" maxlength="4000"></textarea></label>
+        <label><span>Haftung für Links · Absatz 1</span><textarea id="imprintLiabilityLinks1" rows="6" maxlength="5000"></textarea></label><label><span>Haftung für Links · Absatz 2</span><textarea id="imprintLiabilityLinks2" rows="5" maxlength="4000"></textarea></label>
+        <label><span>Urheberrecht · Absatz 1</span><textarea id="imprintCopyright1" rows="6" maxlength="5000"></textarea></label><label><span>Urheberrecht · Absatz 2</span><textarea id="imprintCopyright2" rows="6" maxlength="5000"></textarea></label>
+      </div></section>
+      <div class="text-editor-actions"><button id="saveImprintTexts" type="button">Impressum speichern</button><button id="reloadImprintTexts" class="secondary" type="button">Neu laden</button><span id="imprintTextStatus" class="status">Impressum wird geladen …</span></div>
+    </section>
+  </main>
+  <script src="./config.js?v=20261007-03"></script><script src="./admin-data.js?v=20261003-01"></script><script src="./admin.js?v=20261007-06"></script>
+</body>
+</html>
