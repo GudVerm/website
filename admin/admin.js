@@ -480,7 +480,7 @@ function ensureDraftToolbar(){
 }
 
 const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
-function initialMediaSrc(item){return getApi()&&cmsMediaEnabled?mediaUrl(item.key):item.fallback}
+function initialMediaSrc(item){return getApi()&&(cmsMediaEnabled||cmsAccessMode)?mediaUrl(item.key):item.fallback}
 function showMediaModeNotice(){
   if(cmsMediaEnabled)return;
   const hasMediaUi=document.querySelector("#startPageGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
@@ -495,7 +495,10 @@ function showMediaModeNotice(){
   notice.style.cssText="margin:0 0 18px;padding:12px 14px;border:1px solid #e0cf7b;border-radius:12px;background:#fff8cf;color:#5f531d;font-size:.78rem;line-height:1.5;font-weight:750";
   head.insertAdjacentElement("afterend",notice);
 }
-function mediaUrl(key){return getApi()+"/media/"+key.split("/").map(encodeURIComponent).join("/")}
+function mediaUrl(key){
+  const prefix=cmsAccessMode?"/api/admin/media/":"/media/";
+  return getApi()+prefix+key.split("/").map(encodeURIComponent).join("/");
+}
 async function imageFileDimensions(file){
   if(!file||!String(file.type||"").startsWith("image/"))return {width:0,height:0};
   const objectUrl=URL.createObjectURL(file);
