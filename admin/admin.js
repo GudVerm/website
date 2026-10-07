@@ -250,6 +250,7 @@ function adminHeaders(extra={}){
 }
 
 const draftCapablePages=new Set(["startseite","leistungen","unternehmen","technik","projekte","kontakt","impressum"]);
+const draftToolbarPages=new Set([...draftCapablePages,"dashboard"]);
 const currentAdminPage=document.body?.dataset?.adminPage||"";
 
 /* Zentraler, abschnittsbezogener Dirty-State. */
@@ -597,7 +598,7 @@ document.addEventListener("click",event=>{
 });
 ensureAdminDirtyUi();
 
-let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
+let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftToolbarPages.has(currentAdminPage);
 ensureAdminSaveDock();
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
@@ -963,7 +964,7 @@ async function refreshDraftToolbar(toolbar){
   }
 }
 function ensureDraftToolbar(){
-  if(!draftCapablePages.has(currentAdminPage)||!cmsAccessMode)return;
+  if(!draftToolbarPages.has(currentAdminPage)||!cmsAccessMode)return;
   const header=document.querySelector(".admin-header");
   if(!header||header.querySelector(".cms-draft-toolbar"))return;
   const toolbar=document.createElement("section");
@@ -3581,11 +3582,25 @@ window.GUDELIUS_ADMIN_CORE=Object.freeze({
 const adminNavInner=document.querySelector(".admin-nav-inner");
 function adminAreaUrl(page){
   const api=getApi();
+  const root=window.GUDELIUS_ADMIN_APP_URL||new URL(currentAdminPage==="dashboard"?"./":"../",location.href).toString();
+  if(page==="dashboard")return api?api+"/admin/":root;
   if(api)return api+"/admin/"+page+"/";
-  const root=window.GUDELIUS_ADMIN_APP_URL||new URL("./",location.href).toString();
   return new URL(page+"/",root).toString();
 }
-if(adminNavInner){
+function ensureCompactAdminNavStyle(){
+  if(document.getElementById("admin-compact-nav-style"))return;
+  const style=document.createElement("style");
+  style.id="admin-compact-nav-style";
+  style.textContent=".admin-nav-inner{overflow:visible!important;align-items:center;flex-wrap:nowrap}.admin-nav-link{min-height:36px;padding:0 13px}.admin-nav-group{position:relative;flex:0 0 auto}.admin-nav-group-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:0 13px;border-radius:999px;color:#526067;font-size:.8rem;font-weight:900;white-space:nowrap;cursor:pointer;list-style:none;transition:.18s ease}.admin-nav-group-trigger::-webkit-details-marker{display:none}.admin-nav-group-trigger::after{content:'⌄';font-size:.9rem;line-height:1;transition:transform .16s ease}.admin-nav-group[open]>.admin-nav-group-trigger::after{transform:rotate(180deg)}.admin-nav-group-trigger:hover,.admin-nav-group[open]>.admin-nav-group-trigger{background:#eef0ec;color:#172026}.admin-nav-group.is-active>.admin-nav-group-trigger{background:#172026;color:#fff}.admin-nav-menu{position:absolute;z-index:80;top:calc(100% + 7px);left:0;display:grid;gap:3px;min-width:220px;padding:8px;border:1px solid #dfe4df;border-radius:14px;background:#fff;box-shadow:0 16px 42px rgba(20,32,38,.16)}.admin-nav-group-operations .admin-nav-menu{left:auto;right:0}.admin-nav-menu .admin-nav-link{width:100%;justify-content:flex-start;border-radius:9px;padding:0 11px}.admin-nav-menu .admin-nav-link.active{background:#172026;color:#fff}.admin-nav-inner>.admin-nav-link{flex:0 0 auto}@media(max-width:620px){.admin-nav-inner{gap:5px!important;padding:8px 0!important;flex-wrap:wrap}.admin-nav-link,.admin-nav-group-trigger{min-height:34px;padding:0 10px;font-size:.73rem}.admin-nav-menu{min-width:min(240px,calc(100vw - 22px))}}";
+  document.head.appendChild(style);
+}
+function buildCompactAdminNav(){
+  if(!adminNavInner)return;
+  const labels={
+    dashboard:"Übersicht",verbindung:"Verbindung",startseite:"Startseite",leistungen:"Leistungen",
+    unternehmen:"Unternehmen",technik:"Technik",projekte:"Projekte",anfragen:"Anfragen",
+    statistik:"Statistik",kontakt:"Kontakt",medien:"Medien",impressum:"Impressum",audit:"Audit-Log"
+  };
   const ensureNavLink=(page,label)=>{
     let link=adminNavInner.querySelector('[data-page="'+page+'"]');
     if(!link){
@@ -3593,22 +3608,58 @@ if(adminNavInner){
       link.className="admin-nav-link";
       link.dataset.page=page;
       link.textContent=label;
-      adminNavInner.appendChild(link);
     }
     link.href=adminAreaUrl(page);
+    if(page==="anfragen"&&!link.querySelector(".nav-count")){
+      const count=document.createElement("span");
+      count.className="nav-count";
+      count.id="inquiryNavCount";
+      count.hidden=true;
+      count.textContent="0";
+      link.append(" ",count);
+    }
     return link;
   };
-  ensureNavLink("medien","Medien");
-  ensureNavLink("impressum","Impressum");
-  ensureNavLink("audit","Audit-Log");
+  const createGroup=(key,label,pages)=>{
+    const group=document.createElement("details");
+    group.className="admin-nav-group admin-nav-group-"+key;
+    const summary=document.createElement("summary");
+    summary.className="admin-nav-group-trigger";
+    summary.textContent=label;
+    const menu=document.createElement("div");
+    menu.className="admin-nav-menu";
+    pages.forEach(page=>menu.appendChild(ensureNavLink(page,labels[page])));
+    group.append(summary,menu);
+    return group;
+  };
+
+  const dashboard=ensureNavLink("dashboard",labels.dashboard);
+  const contentGroup=createGroup("content","Inhalte",["startseite","leistungen","unternehmen","technik","projekte","kontakt","medien","impressum"]);
+  const operationsGroup=createGroup("operations","Betrieb",["anfragen","statistik","audit"]);
+  const connection=ensureNavLink("verbindung",labels.verbindung);
+  adminNavInner.replaceChildren(dashboard,contentGroup,operationsGroup,connection);
+
+  const activeAdminPage=document.body.dataset.adminPage||"";
+  const links=[...adminNavInner.querySelectorAll(".admin-nav-link")];
+  links.forEach(link=>link.classList.toggle("active",link.dataset.page===activeAdminPage));
+  adminNavInner.querySelectorAll(".admin-nav-group").forEach(group=>{
+    group.classList.toggle("is-active",Boolean(group.querySelector(".admin-nav-link.active")));
+    group.addEventListener("toggle",()=>{
+      if(!group.open)return;
+      adminNavInner.querySelectorAll(".admin-nav-group[open]").forEach(other=>{if(other!==group)other.open=false});
+    });
+  });
 }
+ensureCompactAdminNavStyle();
+buildCompactAdminNav();
 document.querySelectorAll('a[href="./audit/"],a[href="../audit/"],a[href="/audit/"],a[href="/admin/audit/"]').forEach(link=>{link.href=adminAreaUrl("audit")});
 document.querySelectorAll('a[href="./impressum/"],a[href="../impressum/"],a[href="/admin/impressum/"]').forEach(link=>{link.href=adminAreaUrl("impressum")});
-const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
-const activeAdminPage=document.body.dataset.adminPage||"";
-
-adminNavLinks.forEach(link=>{
-  const page=link.dataset.page||"";
-  link.classList.toggle("active",page===activeAdminPage);
+document.addEventListener("click",event=>{
+  if(event.target.closest(".admin-nav-group"))return;
+  document.querySelectorAll(".admin-nav-group[open]").forEach(group=>group.open=false);
+});
+document.addEventListener("keydown",event=>{
+  if(event.key!=="Escape")return;
+  document.querySelectorAll(".admin-nav-group[open]").forEach(group=>group.open=false);
 });
 setTimeout(()=>consumePendingDraftJump(),450);
