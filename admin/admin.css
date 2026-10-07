@@ -1876,11 +1876,20 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
 @media(max-width:620px){.media-crop-target-head{align-items:flex-start;flex-direction:column}.media-crop-target-head button{width:100%}}
 
 /* Zentraler Dirty-State */
-.admin-global-dirty{display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #e0b8b3;border-radius:999px;background:#fff1ef;color:#8c2f28;font-size:.68rem;font-weight:900;white-space:nowrap}
+.admin-global-dirty{position:relative;display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #e0b8b3;border-radius:999px;background:#fff1ef;color:#8c2f28;font-size:.68rem;font-weight:900;white-space:nowrap;cursor:help;outline:none}
 .admin-global-dirty[hidden]{display:none!important}
 .admin-global-dirty i{width:8px;height:8px;border-radius:50%;background:#c24639;box-shadow:0 0 0 3px rgba(194,70,57,.12)}
-.admin-global-dirty b{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#8c2f28;color:#fff;font-size:.62rem}
+.admin-global-dirty>b{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#8c2f28;color:#fff;font-size:.62rem}
+.admin-global-dirty:focus-visible{box-shadow:0 0 0 3px rgba(194,70,57,.2)}
+.admin-global-dirty-tooltip{position:absolute;z-index:120;top:calc(100% + 9px);left:0;display:grid;gap:8px;width:max-content;min-width:270px;max-width:min(420px,calc(100vw - 28px));padding:12px 13px;border:1px solid #d9deda;border-radius:12px;background:#172026;color:#fff;box-shadow:0 14px 36px rgba(20,32,38,.22);white-space:normal;text-align:left;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}
+.admin-global-dirty:hover .admin-global-dirty-tooltip,.admin-global-dirty:focus .admin-global-dirty-tooltip,.admin-global-dirty:focus-within .admin-global-dirty-tooltip{opacity:1;visibility:visible;transform:translateY(0)}
+.admin-global-dirty-tooltip::before{content:"";position:absolute;top:-6px;left:18px;width:10px;height:10px;background:#172026;border-left:1px solid #d9deda;border-top:1px solid #d9deda;transform:rotate(45deg)}
+.admin-global-dirty-tooltip-title{position:relative;z-index:1;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#f0d64f}
+.admin-global-dirty-tooltip-row{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.14)}
+.admin-global-dirty-tooltip-row b{font-size:.74rem;color:#fff;line-height:1.35}
+.admin-global-dirty-tooltip-row span{font-size:.68rem;font-weight:650;color:#cbd4d1;line-height:1.45}
 .has-unsaved-admin-changes .admin-header{box-shadow:inset 0 -2px 0 rgba(194,70,57,.55)}
+@media(max-width:620px){.admin-global-dirty-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.admin-global-dirty-tooltip::before{display:none}}
 
 /* Entwurfsmanager */
 .draft-manager-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 14px}
