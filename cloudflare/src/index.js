@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.3";
+const WORKER_RELEASE = "2026-10-07.4";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -1319,6 +1319,9 @@ async function resolveAuditPublicationChange(env,entry){
 async function handleAdminDraftList(env,cors){
   await ensureContentTable(env);
   await ensureContentDraftTable(env);
+  await env.DB.prepare(
+    "DELETE FROM content_drafts WHERE EXISTS (SELECT 1 FROM content c WHERE c.key = content_drafts.key AND c.value = content_drafts.value)"
+  ).run();
   const {results=[]}=await env.DB.prepare(
     "SELECT d.key,d.value AS draft_value,d.actor_email,d.updated_at,LENGTH(d.value) AS value_size,c.value AS live_value "+
     "FROM content_drafts d LEFT JOIN content c ON c.key=d.key ORDER BY d.updated_at DESC,d.key"
@@ -1339,11 +1342,19 @@ async function saveContentDraft(request,env,cors,key,principal){
   const raw=await request.text();
   if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES)return json({error:"Content payload too large"},413,cors);
   let value;try{value=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+  await ensureContentTable(env);
   await ensureContentDraftTable(env);
+  const serialized=JSON.stringify(value);
+  const live=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
+  if(live&&live.value===serialized){
+    await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(key).run();
+    const countRow=await env.DB.prepare("SELECT COUNT(*) AS count FROM content_drafts").first();
+    return json({ok:true,key,draft:true,unchanged:true,count:Number(countRow?.count||0)},200,cors);
+  }
   await env.DB.prepare(
     `INSERT INTO content_drafts (key,value,actor_email,updated_at) VALUES (?,?,?,CURRENT_TIMESTAMP)
      ON CONFLICT(key) DO UPDATE SET value=excluded.value,actor_email=excluded.actor_email,updated_at=CURRENT_TIMESTAMP`
-  ).bind(key,JSON.stringify(value),cleanSingleLine(principal?.email||principal?.mode||"",240)).run();
+  ).bind(key,serialized,cleanSingleLine(principal?.email||principal?.mode||"",240)).run();
   await writeAudit(env,principal,"entwurf_gespeichert",auditAreaFromTarget(key),key);
   const countRow=await env.DB.prepare("SELECT COUNT(*) AS count FROM content_drafts").first();
   return json({ok:true,key,draft:true,count:Number(countRow?.count||0)},200,cors);
