@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.4`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.5`.
 
 ## Secrets
 
@@ -447,3 +447,11 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Bereits vorhandene Entwürfe ohne inhaltliche Differenz werden beim Laden der Draft-Liste automatisch bereinigt.
 - Der Impressum-Editor vergleicht vor dem Speichern mit dem aktuellen CMS-/Entwurfsstand und schreibt nur geänderte Felder.
 - Explizit leere CMS-Textwerte überschreiben statische Fallback-Texte. Damit sind bewusst gelöschte Texte auch in der Vorschau und nach Veröffentlichung wirklich leer.
+
+
+## Release 2026-10-07.5 – Medien als eigener Admin-Bereich
+
+- `/admin/medien/` ist jetzt ein eigener Access-geschützter Admin-Bereich.
+- Der Menüpunkt Medien führt nicht mehr auf einen Anker der Dashboard-Seite, sondern direkt in die Medienbibliothek.
+- Dashboard-KPI und Dashboard-Kachel verlinken ebenfalls auf den neuen Medienbereich.
+- Die große Medienbibliothek wurde aus der Dashboard-Übersicht entfernt, damit die Startseite wieder ausschließlich als Übersicht dient.
