@@ -5,11 +5,11 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.4";
+const WORKER_RELEASE = "2026-10-07.5";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "impressum", "audit"]);
+const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "medien", "impressum", "audit"]);
 
 export default {
   async fetch(request, env, ctx) {
