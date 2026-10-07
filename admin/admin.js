@@ -3222,21 +3222,7 @@ if(adminNavInner){
     link.href=adminAreaUrl(page);
     return link;
   };
-  let mediaLink=adminNavInner.querySelector('[data-page="medien"],a[href="#medien"]');
-  if(!mediaLink){
-    mediaLink=document.createElement("a");
-    mediaLink.className="admin-nav-link";
-    mediaLink.textContent="Medien";
-  }
-  mediaLink.dataset.page="medien";
-  mediaLink.href=(getApi()?getApi()+"/admin/":adminAreaUrl("").replace(/\/\/$/,"/"))+"#medien";
-  const legalOrAudit=adminNavInner.querySelector('[data-page="impressum"],[data-page="audit"]');
-  if(mediaLink.parentElement!==adminNavInner){
-    if(legalOrAudit)adminNavInner.insertBefore(mediaLink,legalOrAudit);
-    else adminNavInner.appendChild(mediaLink);
-  }else if(legalOrAudit&&mediaLink.compareDocumentPosition(legalOrAudit)&Node.DOCUMENT_POSITION_PRECEDING){
-    adminNavInner.insertBefore(mediaLink,legalOrAudit);
-  }
+  ensureNavLink("medien","Medien");
   ensureNavLink("impressum","Impressum");
   ensureNavLink("audit","Audit-Log");
 }
