@@ -26,7 +26,7 @@
       <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
       <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen</a>
       <a class="admin-nav-link" data-page="statistik" href="./statistik/">Statistik</a>
-      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a><a class="admin-nav-link" data-page="impressum" href="./impressum/">Impressum</a><a class="admin-nav-link" data-page="audit" href="./audit/">Audit-Log</a><a class="admin-nav-link" href="#medien">Medien</a>
+      <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a><a class="admin-nav-link" data-page="medien" href="./medien/">Medien</a><a class="admin-nav-link" data-page="impressum" href="./impressum/">Impressum</a><a class="admin-nav-link" data-page="audit" href="./audit/">Audit-Log</a>
     </div>
   </nav>
 
@@ -50,7 +50,7 @@
       <div class="dashboard-kpis">
         <a class="dashboard-kpi" href="./anfragen/"><span>Neue Anfragen</span><strong id="dashboardNewInquiries">…</strong><small id="dashboardInquiryNote">wird geladen</small></a>
         <a class="dashboard-kpi" href="./audit/"><span>Entwürfe</span><strong id="dashboardDrafts">…</strong><small>noch nicht veröffentlicht</small></a>
-        <a class="dashboard-kpi" href="#medien"><span>R2-Medien</span><strong id="dashboardMedia">…</strong><small id="dashboardMediaNote">Inventar</small></a>
+        <a class="dashboard-kpi" href="./medien/"><span>R2-Medien</span><strong id="dashboardMedia">…</strong><small id="dashboardMediaNote">Inventar</small></a>
         <div class="dashboard-kpi"><span>Backend</span><strong id="dashboardHealth">…</strong><small id="dashboardRelease">Worker wird geprüft</small></div>
       </div>
       <div class="dashboard-recent">
@@ -71,26 +71,9 @@
       <a class="admin-dashboard-card" href="./statistik/"><span class="cms-subpanel-icon">08</span><div><small>KPI</small><h3>Statistik</h3><p>Seitenaufrufe, Klicks und Kontaktaktionen auswerten.</p></div><b>→</b></a>
       <a class="admin-dashboard-card" href="./kontakt/"><span class="cms-subpanel-icon">09</span><div><small>Website</small><h3>Kontakt</h3><p>Kontaktdaten, Formular und Kontakttexte verwalten.</p></div><b>→</b></a>
       <a class="admin-dashboard-card" href="./impressum/"><span class="cms-subpanel-icon">10</span><div><small>Rechtliches</small><h3>Impressum</h3><p>Anbieterangaben, Versicherung und Rechtstexte im CMS pflegen.</p></div><b>→</b></a>
-      <a class="admin-dashboard-card" href="./audit/"><span class="cms-subpanel-icon">11</span><div><small>Betrieb</small><h3>Audit-Log</h3><p>Nachvollziehen, wer wann welche CMS-Änderung vorgenommen hat.</p></div><b>→</b></a>
+      <a class="admin-dashboard-card" href="./medien/"><span class="cms-subpanel-icon">11</span><div><small>Bibliothek</small><h3>Medien</h3><p>Website-Bilder, R2-Medien, Dateigrößen, Verwendung und Bildausschnitte zentral prüfen.</p></div><b>→</b></a>
+      <a class="admin-dashboard-card" href="./audit/"><span class="cms-subpanel-icon">12</span><div><small>Betrieb</small><h3>Audit-Log</h3><p>Nachvollziehen, wer wann welche CMS-Änderung vorgenommen hat.</p></div><b>→</b></a>
     </section>
-    <section class="section-head admin-section-head media-library-head" id="medien">
-      <div>
-        <span class="kicker">Medienbibliothek</span>
-        <h2>Alle Website-Bilder auf einen Blick</h2>
-      </div>
-      <p>Vorschau, Medienkey, R2-Status, gespeicherter Bildausschnitt und direkte Verknüpfung zum zuständigen CMS-Bereich.</p>
-    </section>
-
-    <section class="media-library-panel">
-      <div class="media-library-toolbar">
-        <label><span>Suche</span><input id="mediaLibrarySearch" type="search" placeholder="Bild, Bereich oder Medienkey"></label>
-        <label><span>Filter</span><select id="mediaLibraryFilter"><option value="all">Alle</option><option value="r2">Nur R2-Bilder</option><option value="fallback">Mit lokalem Fallback</option><option value="crop">Mit gespeichertem Crop</option><option value="nocrop">Ohne gespeicherten Crop</option><option value="unused">Ungenutzte R2-Medien</option><option value="large">Große Medien (&gt; 1 MiB)</option><option value="external">Externe Fremdquellen</option></select></label>
-        <div id="mediaLibrarySummary" class="media-library-summary">Lade Medien …</div>
-      </div>
-      <div id="mediaLibraryGrid" class="media-library-grid" aria-live="polite"></div>
-      <div id="mediaLibraryStatus" class="status"></div>
-    </section>
-
     <style>
       .media-library-panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(20,32,38,.05)}
       .media-library-toolbar{display:grid;grid-template-columns:1.4fr .8fr auto;gap:14px;align-items:end;margin-bottom:18px}
@@ -121,8 +104,7 @@
 
   <script src="./config.js?v=20260924-44"></script>
   <script src="./admin-data.js?v=20261003-01"></script>
-  <script src="./admin.js?v=20261007-09"></script>
+  <script src="./admin.js?v=20261007-10"></script>
   <script src="./admin-dashboard.js?v=20261004-01"></script>
-  <script src="./media-library.js?v=20261003-01"></script>
 </body>
 </html>
