@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cmsApi = (window.GUDELIUS_CMS_API || "").replace(/\/$/, "");
   const cmsSiteEndpoint = String(window.GUDELIUS_CMS_SITE_ENDPOINT || "/api/site");
   const cmsMediaEnabled = window.GUDELIUS_CMS_MEDIA_ENABLED !== false;
+  const cmsMediaEndpoint = String(window.GUDELIUS_CMS_MEDIA_ENDPOINT || "/media").replace(/\/$/,"");
   let cmsSiteContentPromise=null;
 
   async function loadCmsSiteContent(){
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function cmsMediaUrl(key) {
-    return cmsApi + "/media/" + key.split("/").map(encodeURIComponent).join("/");
+    return cmsApi + cmsMediaEndpoint + "/" + key.split("/").map(encodeURIComponent).join("/");
   }
 
   function normalizeCmsMediaLayout(value){
