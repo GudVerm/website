@@ -9,10 +9,16 @@
   <link rel="stylesheet" href="../assets/gudelius-site.css?v=20261007-09">
   <style>
     .legal-hero{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
       background:#172026;
       color:#fff;
       padding:92px 0 68px;
     }
+    .legal-hero-media{position:absolute;inset:0;z-index:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+    .legal-hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(18,27,32,.92) 0%,rgba(18,27,32,.75) 50%,rgba(18,27,32,.4) 100%);pointer-events:none}
+    .legal-hero>.container{position:relative;z-index:2}
     .legal-hero .eyebrow{color:#e5c533}
     .legal-hero h1{
       max-width:900px;
@@ -187,7 +193,8 @@
   </header>
 
   <main id="main-content">
-    <section class="legal-hero">
+    <section class="legal-hero legal-hero-with-media">
+      <img class="legal-hero-media" src="../assets/media/home-hero.webp" data-cms-media="impressum/hero" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high">
       <div class="container">
         <div class="eyebrow">Rechtliche Angaben</div>
         <h1>Impressum</h1>
