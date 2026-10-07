@@ -53,6 +53,9 @@ contains("cloudflare/src/index.js","unchanged:true","Worker erkennt identische D
 contains("impressum/index.html",'data-cms-text="impressum/provider-name"',"Öffentliches Impressum ist nicht CMS-fähig.");
 contains("cloudflare/src/index.js","resolveAuditPublicationChange","Audit-Veröffentlichungen besitzen keinen Vorher-/Nachher-Abgleich.");
 contains("admin/audit/index.html","audit-publication-hover","Audit-Oberfläche zeigt Veröffentlichungsänderungen nicht per Hover/Fokus.");
+contains("admin/audit/index.html",'id="auditHistoryPanel"',"Audit-Historie ist nicht einklappbar.");
+contains("admin/audit/index.html",'id="contentHistoryPanel"',"CMS-Versionen sind nicht einklappbar.");
+contains("admin/audit/index.html","audit-collapsible-summary","Audit-Einklappbereiche besitzen keine klickbare Kopfzeile.");
 contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwurfsmodus nicht sichtbar für die Vorschau angelegt.");
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
 contains("cloudflare/src/index.js","const existingBase=body.match","Preview erkennt vorhandene Base-Tags nicht.");
