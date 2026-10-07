@@ -157,6 +157,23 @@ for(const path of adminCachePages){
   check(html.includes("admin.js?v=20261007-25"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
 }
 
+const publicSiteJs=read("assets/gudelius-site.js");
+const externalTechniqueImages=[...publicSiteJs.matchAll(/image:'(https?:\/\/[^']+)'/g)].map(match=>match[1]).filter(url=>!url.includes("gudeliusvermessung.de"));
+check(externalTechniqueImages.length===0,"Technik enthält fremde Laufzeit-Bilder: "+externalTechniqueImages.join(", "));
+contains("assets/gudelius-site.js","equipment-trimble-placeholder.svg","Trimble-Geräte verwenden nicht den neutralen Tachymeter-Platzhalter.");
+contains("assets/gudelius-site.js","equipment-neutral-placeholder.svg","Fremde Technikbilder wurden nicht durch neutrale Platzhalter ersetzt.");
+contains("assets/gudelius-site.js","mediaKey:base.mediaKey||('equipment/'+entry.slug)","Dynamische Technik überschreibt die neuen sicheren Medienkeys.");
+contains("assets/gudelius-site.css","font-size:clamp(1.55rem,2.8vw,2.45rem)","Technik-Modalüberschrift ist nicht verkleinert.");
+contains("assets/gudelius-site.css","font-size:clamp(1.45rem,2.4vw,2.2rem)","Projekt-Modalüberschrift ist nicht verkleinert.");
+for(const path of [
+  "leistungen/ingenieurvermessung/index.html",
+  "leistungen/gis-bauvermessung/index.html",
+  "leistungen/3d-laserscanning/index.html",
+  "leistungen/drohnenvermessung/index.html"
+]){
+  contains(path,'<a href="../../index.html#start">Startseite</a>',path+" enthält Startseite nicht im Hauptmenü.");
+}
+
 const quality=read(".github/workflows/website-quality.yml");
 for(const token of ["browser-check.mjs","cms-browser-integration.mjs","visual-regression.mjs","accessibility-check.mjs","environment-check.mjs"]){
   check(quality.includes(token),"Website-quality enthält Check nicht: "+token);

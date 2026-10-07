@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Foto folgt noch</title>
+  <desc id="desc">Neutraler Platzhalter mit schematischer Darstellung eines Tachymeters.</desc>
+  <rect width="1200" height="800" fill="#f3f2ec"/>
+  <path d="M0 650h1200" stroke="#d8d9d3" stroke-width="2"/>
+  <g fill="none" stroke="#172026" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" transform="translate(760 120)">
+    <path d="M95 180h170l52 68-42 92H98l-45-92z"/>
+    <circle cx="184" cy="250" r="52"/>
+    <path d="M183 128v52M135 128h96M135 128l20-48h56l20 48"/>
+    <path d="M110 340l-85 285M255 340l92 285M183 340v285"/>
+    <path d="M72 625h-62M366 625h-62M183 625h-35"/>
+    <path d="M265 216h96M361 216l44-26"/>
+  </g>
+  <g transform="translate(90 120)">
+    <rect width="180" height="42" rx="21" fill="#e5c533"/>
+    <text x="90" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#172026">PLATZHALTER</text>
+    <text x="0" y="150" font-family="Arial,sans-serif" font-size="74" font-weight="800" fill="#172026">Foto folgt noch</text>
+    <text x="0" y="205" font-family="Arial,sans-serif" font-size="28" fill="#526067">Schematische Darstellung eines Tachymeters</text>
+    <path d="M0 250h470" stroke="#e5c533" stroke-width="8"/>
+    <text x="0" y="310" font-family="Arial,sans-serif" font-size="22" fill="#748087">Wird durch ein eigenes Foto von GudeliusVermessung ersetzt.</text>
+  </g>
+</svg>

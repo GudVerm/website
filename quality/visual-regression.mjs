@@ -60,6 +60,8 @@ for(const [viewportName,viewport] of viewports){
       *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
       html{scroll-behavior:auto!important}
       [data-image-review-badge],.image-review-badge{display:none!important}
+      /* Technik-Gerätebilder werden über den globalen Bild-Stub neutralisiert;
+         Navigations- und Typografieänderungen bleiben als Regression sichtbar. */
       /* Hero-Fotos werden im visuellen Regressionstest bewusst neutralisiert.
          Layout, Text, Buttons, Höhe und Überlagerungen bleiben prüfbar; wechselnde
          oder neu angebundene CMS-/Fallback-Fotos erzeugen aber keine falschen Diffs. */

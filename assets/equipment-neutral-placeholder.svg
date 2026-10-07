@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Foto folgt noch</title>
+  <desc id="desc">Neutraler Platzhalter bis ein eigenes Foto von GudeliusVermessung vorliegt.</desc>
+  <rect width="1200" height="800" fill="#f3f2ec"/>
+  <g transform="translate(90 120)">
+    <rect width="180" height="42" rx="21" fill="#e5c533"/>
+    <text x="90" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="800" fill="#172026">PLATZHALTER</text>
+    <text x="0" y="150" font-family="Arial,sans-serif" font-size="74" font-weight="800" fill="#172026">Foto folgt noch</text>
+    <text x="0" y="205" font-family="Arial,sans-serif" font-size="28" fill="#526067">Noch kein eigenes GudeliusVermessung-Bild hinterlegt.</text>
+    <path d="M0 250h470" stroke="#e5c533" stroke-width="8"/>
+  </g>
+  <g transform="translate(755 180)" fill="none" stroke="#172026" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="0" y="0" width="300" height="230" rx="26"/>
+    <circle cx="85" cy="72" r="26"/>
+    <path d="M28 190l78-72 52 45 45-38 69 65"/>
+    <path d="M78 315h145M150 245v140"/>
+  </g>
+</svg>
