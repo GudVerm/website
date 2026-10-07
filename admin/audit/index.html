@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Audit-Log · Gudelius Admin</title>
-  <link rel="stylesheet" href="../admin.css?v=20261004-11">
+  <link rel="stylesheet" href="../admin.css?v=20261007-03">
 </head>
 <body data-admin-page="audit">
   <header class="admin-header">
@@ -23,7 +23,8 @@
       <a class="admin-nav-link" data-page="anfragen" href="../anfragen/">Anfragen</a>
       <a class="admin-nav-link" data-page="statistik" href="../statistik/">Statistik</a>
       <a class="admin-nav-link" data-page="kontakt" href="../kontakt/">Kontakt</a>
-      <a class="admin-nav-link" data-page="audit" href="./">Audit-Log</a>
+      <a class="admin-nav-link" data-page="impressum" href="../impressum/">Impressum</a>
+      <a class="admin-nav-link" data-page="audit" href="/admin/audit/">Audit-Log</a>
     </div>
   </nav>
   <main class="wrap admin-page-wrap">
@@ -39,7 +40,7 @@
       </div>
       <div class="text-editor-grid">
         <label><span>Benutzer</span><select id="auditActor"><option value="">Alle Benutzer</option></select></label>
-        <label><span>Bereich</span><select id="auditArea"><option value="">Alle Bereiche</option><option>startseite</option><option>leistungen</option><option>projekte</option><option>technik</option><option>unternehmen</option><option>kontakt</option><option>anfragen</option><option>cms</option></select></label>
+        <label><span>Bereich</span><select id="auditArea"><option value="">Alle Bereiche</option><option>startseite</option><option>leistungen</option><option>projekte</option><option>technik</option><option>unternehmen</option><option>kontakt</option><option>impressum</option><option>anfragen</option><option>cms</option></select></label>
         <label><span>Von</span><input id="auditFrom" type="date"></label>
         <label><span>Bis</span><input id="auditTo" type="date"></label>
       </div>
@@ -100,7 +101,7 @@
   </main>
   <script src="../config.js?v=20260924-44"></script>
   <script src="../admin-data.js?v=20261003-01"></script>
-  <script src="../admin.js?v=20261007-01"></script>
+  <script src="../admin.js?v=20261007-06"></script>
   <script>
 (() => {
   "use strict";
@@ -147,11 +148,59 @@
     return params.toString();
   }
 
+  function auditValuePreview(value){
+    if(value===undefined)return "—";
+    if(value===null)return "leer";
+    if(typeof value==="boolean")return value?"Ja":"Nein";
+    if(typeof value==="number")return String(value);
+    if(typeof value==="string"){
+      const clean=value.replace(/\s+/g," ").trim();
+      if(!clean)return "leer";
+      return clean.length>120?clean.slice(0,117)+"…":clean;
+    }
+    if(Array.isArray(value))return value.length+" Einträge";
+    return "Struktur";
+  }
+  function auditPrettyPart(value){
+    const dictionary={x:"Position X",y:"Position Y",zoom:"Zoom",rotation:"Drehung",title:"Titel",description:"Beschreibung",location:"Ort",year:"Jahr",services:"Leistungen",index:"Liste & Reihenfolge"};
+    const raw=String(value||"");
+    return dictionary[raw]||raw.replace(/[-_]+/g," ").replace(/\b\w/g,char=>char.toUpperCase());
+  }
+  function publicationSummary(change){
+    if(!change)return "Änderungsdetails nicht verfügbar.";
+    const before=change.before,after=change.after;
+    if(!change.has_before)return "Neu veröffentlicht: "+auditValuePreview(after);
+    if(before&&after&&typeof before==="object"&&typeof after==="object"&&!Array.isArray(before)&&!Array.isArray(after)){
+      const keys=[...new Set([...Object.keys(before),...Object.keys(after)])];
+      const changed=keys.filter(key=>JSON.stringify(before[key])!==JSON.stringify(after[key]));
+      if(!changed.length)return "Keine inhaltliche Differenz.";
+      return changed.slice(0,5).map(key=>auditPrettyPart(key)+": "+auditValuePreview(before[key])+" → "+auditValuePreview(after[key])).join(" · ")+(changed.length>5?" · …":"");
+    }
+    if(Array.isArray(before)&&Array.isArray(after)){
+      if(JSON.stringify(before)===JSON.stringify(after))return "Keine inhaltliche Differenz.";
+      if(before.length!==after.length)return "Liste: "+before.length+" → "+after.length+" Einträge";
+      return "Liste / Reihenfolge / Eigenschaften geändert.";
+    }
+    if(JSON.stringify(before)===JSON.stringify(after))return "Keine inhaltliche Differenz.";
+    return auditValuePreview(before)+" → "+auditValuePreview(after);
+  }
+  function publicationAction(entry){
+    const label=esc(actionLabel(entry.action));
+    if(entry.action!=="entwurf_veroeffentlicht"||!entry.change)return label;
+    const summaryText=publicationSummary(entry.change);
+    const before=entry.change.has_before?auditValuePreview(entry.change.before):"Noch kein Live-Wert";
+    const after=auditValuePreview(entry.change.after);
+    return '<span class="audit-publication-hover" tabindex="0">'+label+
+      '<span class="audit-publication-tooltip" role="tooltip"><strong>Veröffentlichte Änderung</strong><code>'+esc(entry.target||"")+'</code>'+
+      '<span class="audit-publication-summary">'+esc(summaryText)+'</span>'+
+      '<span class="audit-publication-values"><span><b>Vorher</b><em>'+esc(before)+'</em></span><span><b>Nachher</b><em>'+esc(after)+'</em></span></span>'+
+      '</span></span>';
+  }
   function render(entries){
     rows.innerHTML=entries.map(entry=>'<tr>'+
       '<td>'+esc(entry.created_at||"")+'</td>'+
       '<td>'+esc(entry.actor_email||"–")+'</td>'+
-      '<td>'+esc(actionLabel(entry.action))+'</td>'+
+      '<td>'+publicationAction(entry)+'</td>'+
       '<td>'+esc(entry.area||"–")+'</td>'+
       '<td><code>'+esc(entry.target||"–")+'</code></td>'+
       '<td>'+esc(entry.details||"")+'</td>'+
