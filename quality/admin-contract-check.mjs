@@ -55,6 +55,9 @@ contains("cloudflare/src/index.js","resolveAuditPublicationChange","Audit-Veröf
 contains("admin/audit/index.html","audit-publication-hover","Audit-Oberfläche zeigt Veröffentlichungsänderungen nicht per Hover/Fokus.");
 contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwurfsmodus nicht sichtbar für die Vorschau angelegt.");
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
+contains("cloudflare/src/index.js","const existingBase=body.match","Preview erkennt vorhandene Base-Tags nicht.");
+contains("cloudflare/src/index.js","new URL(existingBase[1],sourceUrl)","Preview löst vorhandene Base-Pfade nicht gegen die echte öffentliche Seiten-URL auf.");
+contains("cloudflare/src/index.js","const previewHead=(existingBase?","Preview injiziert weiterhin immer einen konkurrierenden Base-Tag.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_PREVIEW_CONTENT","Preview-Draft-Snapshot fehlt.");
 contains("admin/admin.js","loadProtectedMediaIntoImage(img,item.key,item.fallback)","Projekt-Admin bestätigt Projektbild-Uploads nicht über den geschützten R2-GET.");
 contains("admin/admin.js","setAdminImageSource","Geschützte Admin-Medien werden nicht auf tatsächliche Bild-Dekodierbarkeit geprüft.");
