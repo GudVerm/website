@@ -499,6 +499,27 @@ function mediaUrl(key){
   const prefix=cmsAccessMode?"/api/admin/media/":"/media/";
   return getApi()+prefix+key.split("/").map(encodeURIComponent).join("/");
 }
+const adminMediaObjectUrls=new WeakMap();
+async function loadProtectedMediaIntoImage(img,key,fallback=""){
+  if(!img||!key)return false;
+  const response=await fetch(getApi()+"/api/admin/media/"+key.split("/").map(encodeURIComponent).join("/"),{
+    method:"GET",
+    headers:adminHeaders(),
+    credentials:"include",
+    cache:"no-store"
+  });
+  if(!response.ok){
+    if(fallback)img.src=fallback;
+    return false;
+  }
+  const blob=await response.blob();
+  const oldUrl=adminMediaObjectUrls.get(img);
+  if(oldUrl)URL.revokeObjectURL(oldUrl);
+  const objectUrl=URL.createObjectURL(blob);
+  adminMediaObjectUrls.set(img,objectUrl);
+  img.src=objectUrl;
+  return true;
+}
 async function imageFileDimensions(file){
   if(!file||!String(file.type||"").startsWith("image/"))return {width:0,height:0};
   const objectUrl=URL.createObjectURL(file);
@@ -1126,7 +1147,13 @@ function renderProjectEditor(item){
   const displayTitle=title.value||item.title||item.slug;heading.textContent=displayTitle;indexLabel.textContent=String(projects.indexOf(item)+1).padStart(2,"0");mediaKey.textContent=item.key;orderLabel.textContent=String(projects.indexOf(item)+1);
   visibleBadge.textContent=item.visible===false?"Ausgeblendet":"Sichtbar";visibleBadge.classList.toggle("is-off",item.visible===false);archiveBadge.hidden=!item.archived;
   visibility.textContent=item.visible===false?"Einblenden":"Ausblenden";archive.textContent=item.archived?"Aus Archiv holen":"Archivieren";remove.hidden=!item.archived;up.disabled=projects.indexOf(item)===0;down.disabled=projects.indexOf(item)===projects.length-1;
-  img.src=initialMediaSrc(item);img.alt=displayTitle;img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  img.alt=displayTitle;
+  img.onerror=()=>{img.onerror=null;img.src=item.fallback};
+  if(cmsAccessMode&&getApi()){
+    loadProtectedMediaIntoImage(img,item.key,item.fallback).catch(()=>{img.src=item.fallback});
+  }else{
+    img.src=initialMediaSrc(item);
+  }
   attachMediaCropEditor(card,img,item,mediaStatus);
   card.addEventListener("cms-crop-dirty-change",event=>{
     setProjectDirty(card,Boolean(event.detail?.dirty),"crop");
@@ -1135,9 +1162,22 @@ function renderProjectEditor(item){
   upload.addEventListener("click",async()=>{
     const selected=file.files?.[0];if(!selected)return setStatus(mediaStatus,"Bitte zuerst ein Bild auswählen.",false);if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     upload.disabled=true;setStatus(mediaStatus,"Upload läuft …");
-    try{const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"PUT",headers:await mediaUploadHeaders(selected),body:selected});
-      const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));img.src=mediaUrl(item.key)+"?v="+Date.now();setStatus(mediaStatus,"Projektbild gespeichert.",true)}
-    catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
+    try{
+      const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
+        method:"PUT",
+        headers:await mediaUploadHeaders(selected),
+        credentials:"include",
+        body:selected
+      });
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
+      const readable=await loadProtectedMediaIntoImage(img,item.key,item.fallback);
+      if(!readable)throw new Error("Bild wurde gespeichert, konnte aber nicht wieder aus R2 geladen werden.");
+      file.value="";
+      setStatus(mediaStatus,"Projektbild gespeichert und aus R2 bestätigt.",true);
+    }catch(error){
+      setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false);
+    }finally{upload.disabled=false}
   });
   reset.addEventListener("click",async()=>{
     if(!getApi()||!hasAdminAuth())return setStatus(mediaStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);if(!confirm("Cloudflare-Bild für „"+displayTitle+"“ löschen?"))return;
