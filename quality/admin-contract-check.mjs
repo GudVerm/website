@@ -68,6 +68,7 @@ contains("admin/admin.js",'setStatus(status,"Bild gespeichert und aus R2 bestät
 contains("admin/admin.js",'credentials:"include"',"Admin-Medienupload sendet keine Access-Credentials.");
 contains("assets/cms-config.js","GUDELIUS_CMS_MEDIA_ENABLED = true","Öffentliche CMS-Medien sind im Site-Config weiterhin deaktiviert.");
 contains("cloudflare/wrangler.jsonc",'"PUBLIC_MEDIA_ENABLED": "true"',"Öffentliche R2-Medienausgabe ist im Worker weiterhin deaktiviert.");
+contains("cloudflare/src/index.js",'public, max-age=0, must-revalidate',"Öffentliche Medien dürfen nicht eine Stunde veraltet bleiben.");
 contains("index.html",'data-cms-bg="leistungen/ingenieurvermessung"',"Leistungsbilder sind auf der Live-Startseite nicht an CMS-Medienkeys gebunden.");
 contains("leistungen/ingenieurvermessung/index.html",'class="service-hero-media"',"Ingenieurvermessungs-Hero verwendet kein echtes Bild-Element.");
 contains("leistungen/gis-bauvermessung/index.html",'data-cms-media="leistungsseiten/gis-bauvermessung/hero"',"GIS-Hero ist nicht direkt an den CMS-Medienkey gebunden.");
