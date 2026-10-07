@@ -61,6 +61,9 @@ contains("admin/admin.js","adminDirtyElements","Ungespeichert-Hinweise merken si
 contains("admin/admin.js","jumpToDraftKey","Entwurfs-Hinweise sind nicht als Sprungnavigation umgesetzt.");
 contains("admin/admin.js","gudelius-admin-pending-draft-jump","Entwurfs-Sprung über Admin-Bereiche hinweg fehlt.");
 contains("admin/admin.css",".admin-change-highlight","Geänderte Felder werden nach dem Sprung nicht rot hervorgehoben.");
+contains("admin/admin.css",".admin-global-dirty::after","Hover-Brücke für Ungespeichert fehlt.");
+contains("admin/admin.js",".cms-draft-count::after","Hover-Brücke für Entwürfe fehlt.");
+contains("admin/admin.js",".cms-draft-tooltip:hover","Entwurfs-Popup bleibt beim direkten Hover nicht offen.");
 contains("admin/admin.js","dirtyFieldLabel","Dirty-State merkt sich keine konkreten Feldnamen.");
 contains("admin/admin.css",".admin-global-dirty:hover .admin-global-dirty-tooltip","Dirty-Tooltip wird beim Hover nicht eingeblendet.");
 
