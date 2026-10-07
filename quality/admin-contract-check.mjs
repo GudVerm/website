@@ -35,6 +35,10 @@ contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet n
 contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
 contains("admin/admin.js","clearAdminDirtyForElements","Gespeicherte Formularfelder können ihren Dirty-State nicht gezielt zurücksetzen.");
 contains("admin/admin.js",'clearAdminDirtyForElements(Object.values(imprintTextFields),"fields")',"Impressum bleibt nach erfolgreichem Speichern fälschlich als ungespeichert markiert.");
+contains("admin/admin.js","const changed=Object.entries(imprintTextFields).filter","Impressum schreibt weiterhin unveränderte Felder als Entwürfe.");
+contains("assets/gudelius-site.js",'if (typeof value === "string")',"Explizit leere CMS-Texte werden in der Vorschau nicht angewendet.");
+contains("cloudflare/src/index.js","DELETE FROM content_drafts WHERE EXISTS","Drafts ohne Live-Differenz werden nicht bereinigt.");
+contains("cloudflare/src/index.js","unchanged:true","Worker erkennt identische Draft-/Live-Werte nicht.");
 contains("impressum/index.html",'data-cms-text="impressum/provider-name"',"Öffentliches Impressum ist nicht CMS-fähig.");
 contains("cloudflare/src/index.js","resolveAuditPublicationChange","Audit-Veröffentlichungen besitzen keinen Vorher-/Nachher-Abgleich.");
 contains("admin/audit/index.html","audit-publication-hover","Audit-Oberfläche zeigt Veröffentlichungsänderungen nicht per Hover/Fokus.");
