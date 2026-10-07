@@ -9,6 +9,7 @@
     ...withArea(data.projectHeroImages,"Projekte","./projekte/"),
     ...withArea(data.techniqueHeroImages,"Technik","./technik/"),
     ...withArea(data.contactHeroImages,"Kontakt","./kontakt/"),
+    ...withArea(data.imprintHeroImages,"Impressum","./impressum/"),
     ...withArea(data.defaultProjects,"Projekte","./projekte/"),
     ...withArea(data.techniqueGroupImages,"Technik","./technik/"),
     ...withArea(data.defaultEquipment,"Technik","./technik/"),
