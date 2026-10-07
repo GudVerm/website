@@ -25,6 +25,11 @@ contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert off
 contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwurfsmodus nicht sichtbar für die Vorschau angelegt.");
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_PREVIEW_CONTENT","Preview-Draft-Snapshot fehlt.");
+contains("admin/admin.js","loadProtectedMediaIntoImage(img,item.key,item.fallback)","Projekt-Admin bestätigt Projektbild-Uploads nicht über den geschützten R2-GET.");
+contains("cloudflare/src/index.js",'url: new URL("/api/admin/media/" + encodePath(key), url).toString()', "Admin-Medienupload liefert weiterhin einen ungeschützten/öffentlichen Medienpfad zurück.");
+contains("cloudflare/src/index.js",'url.pathname.startsWith("/api/admin/media/") && request.method === "GET"',"Geschützter GET-Endpunkt für Admin-Medien fehlt.");
+contains("cloudflare/src/index.js","GUDELIUS_CMS_MEDIA_ENDPOINT = '/api/admin/media';","Preview verwendet nicht den geschützten Medien-Endpunkt.");
+contains("assets/gudelius-site.js","img.src=cmsMediaUrl(key);","Frontend wendet den konfigurierten CMS-Medien-Endpunkt nicht auf Projektbilder an.");
 contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen","Entwurfsmodus-Hinweis für Bildlayouts fehlt.");
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
 
