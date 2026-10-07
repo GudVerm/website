@@ -13,12 +13,12 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 - **Admin-Zugang:** Cloudflare Access mit One-time PIN; der technische Token-Fallback ist deaktiviert
 - **Admin-Allowlist:** zusätzlich serverseitig im Worker auf `gudeliusvermessung@web.de` und `jost@gudeliusvermessung.de` begrenzt (`ADMIN_ALLOWED_EMAILS`)
 - **Erlaubter Browser-Origin:** `ALLOWED_ORIGIN=https://gudverm.github.io`
-- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=false` bis zur bewussten Medienprüfung
+- **Öffentliche R2-Ausgabe:** `PUBLIC_MEDIA_ENABLED=true` – veröffentlichte CMS-Bilder werden live aus R2 ausgeliefert
 - **Token-Fallback:** `ADMIN_TOKEN_FALLBACK_ENABLED=false`
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.5`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.6`.
 
 ## Secrets
 
@@ -55,7 +55,7 @@ ALLOWED_ORIGIN=https://gudverm.github.io
 BREVO_FROM_EMAIL=gudeliusvermessung@web.de
 BREVO_FROM_NAME=GudeliusVermessung
 CONTACT_EMAIL_TO=gudeliusvermessung@web.de
-PUBLIC_MEDIA_ENABLED=false
+PUBLIC_MEDIA_ENABLED=true
 ADMIN_ALLOWED_EMAILS=gudeliusvermessung@web.de,jost@gudeliusvermessung.de
 ```
 
@@ -455,3 +455,11 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Der Menüpunkt Medien führt nicht mehr auf einen Anker der Dashboard-Seite, sondern direkt in die Medienbibliothek.
 - Dashboard-KPI und Dashboard-Kachel verlinken ebenfalls auf den neuen Medienbereich.
 - Die große Medienbibliothek wurde aus der Dashboard-Übersicht entfernt, damit die Startseite wieder ausschließlich als Übersicht dient.
+
+
+## Release 2026-10-07.6 – Öffentliche CMS-Medien aktiviert
+
+- `PUBLIC_MEDIA_ENABLED=true`: veröffentlichte CMS-Bilder werden auf der öffentlichen GitHub-Pages-Website über `/media/<key>` aus R2 ausgeliefert.
+- Die öffentliche `assets/cms-config.js` setzt `GUDELIUS_CMS_MEDIA_ENABLED=true`.
+- Damit ersetzen hochgeladene Bilder – unter anderem die Leistungskarten auf der Startseite – ihre statischen Fallback-Bilder auch live.
+- Admin- und Preview-Medienpfade bleiben unverändert Access-geschützt.
