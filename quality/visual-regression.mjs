@@ -60,11 +60,11 @@ for(const [viewportName,viewport] of viewports){
       *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}
       html{scroll-behavior:auto!important}
       [data-image-review-badge],.image-review-badge{display:none!important}
-      /* Das Startseiten-Hero-Medium wird im visuellen Regressionstest bewusst
-         neutralisiert. Layout, Text, Buttons, Höhe und Überlagerungen bleiben
-         prüfbar; ein asynchron dekodiertes Foto erzeugt aber keine falschen Diffs. */
-      .home-page .hero{background:#172026!important}
-      .home-page .hero-background{visibility:hidden!important}
+      /* Hero-Fotos werden im visuellen Regressionstest bewusst neutralisiert.
+         Layout, Text, Buttons, Höhe und Überlagerungen bleiben prüfbar; wechselnde
+         oder neu angebundene CMS-/Fallback-Fotos erzeugen aber keine falschen Diffs. */
+      .home-page .hero,.directory-hero{background:#172026!important}
+      .home-page .hero-background,.directory-hero-media{visibility:hidden!important}
     `});
     await page.evaluate(async()=>{
       const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
