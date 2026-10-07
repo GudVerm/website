@@ -678,6 +678,10 @@ function consumePendingDraftJump(attempt=0){
   if(!key)return;
   const targetPage=draftAdminPageForKey(key);
   if(targetPage&&targetPage!==currentAdminPage)return;
+  if(key.startsWith("media-layout/")&&!knownDraftRecords.has(key)&&attempt<24){
+    setTimeout(()=>consumePendingDraftJump(attempt+1),250);
+    return;
+  }
   const draft=knownDraftRecords.get(key);
   const targets=draftTargetElements(key,draft);
   if(targets.length){
