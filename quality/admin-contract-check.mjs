@@ -57,6 +57,9 @@ contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwur
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_PREVIEW_CONTENT","Preview-Draft-Snapshot fehlt.");
 contains("admin/admin.js","loadProtectedMediaIntoImage(img,item.key,item.fallback)","Projekt-Admin bestätigt Projektbild-Uploads nicht über den geschützten R2-GET.");
+contains("admin/admin.js","setAdminImageSource","Geschützte Admin-Medien werden nicht auf tatsächliche Bild-Dekodierbarkeit geprüft.");
+contains("admin/admin.js",'blob.type||""',"Geschützte Medien prüfen den R2-Content-Type nicht.");
+contains("admin/admin.js","await showFallback()","Fehlerhafte R2-Bilder fallen nicht zuverlässig auf das lokale Hero-Bild zurück.");
 contains("admin/admin.js","if(cmsAccessMode&&getApi())","Generische Admin-Medien werden bei Access nicht geschützt aus R2 geladen.");
 contains("admin/admin.js",'setStatus(status,"Bild gespeichert und aus R2 bestätigt.",true)',"Startseiten-Kachelbilder werden nach Upload nicht aus R2 bestätigt.");
 contains("admin/admin.js",'credentials:"include"',"Admin-Medienupload sendet keine Access-Credentials.");
