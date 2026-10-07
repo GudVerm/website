@@ -3634,10 +3634,10 @@ function buildCompactAdminNav(){
   };
 
   const dashboard=ensureNavLink("dashboard",labels.dashboard);
-  const contentGroup=createGroup("content","Inhalte",["startseite","leistungen","unternehmen","technik","projekte","kontakt","medien","impressum"]);
-  const operationsGroup=createGroup("operations","Betrieb",["anfragen","statistik","audit"]);
-  const connection=ensureNavLink("verbindung",labels.verbindung);
-  adminNavInner.replaceChildren(dashboard,contentGroup,operationsGroup,connection);
+  const contentPages=["startseite","leistungen","unternehmen","technik","projekte","kontakt","medien","impressum"];
+  const contentLinks=contentPages.map(page=>ensureNavLink(page,labels[page]));
+  const operationsGroup=createGroup("operations","Betrieb",["verbindung","anfragen","statistik","audit"]);
+  adminNavInner.replaceChildren(dashboard,...contentLinks,operationsGroup);
 
   const activeAdminPage=document.body.dataset.adminPage||"";
   const links=[...adminNavInner.querySelectorAll(".admin-nav-link")];

@@ -38,8 +38,9 @@ contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert off
 contains("admin/admin.js","cms-draft-tooltip","Entwurfszähler zeigt keine Hover-/Fokus-Details.");
 contains("admin/admin.js","cms-draft-toolbar-header","Entwurf & Vorschau ist nicht als Header-Werkzeugleiste markiert.");
 contains("admin/admin.js",'const draftToolbarPages=new Set([...draftCapablePages,"dashboard"])',"Dashboard ist nicht für die globale Entwurf-/Vorschau-Leiste freigeschaltet.");
-contains("admin/admin.js",'createGroup("content","Inhalte"',"Kompakte Inhalte-Navigation fehlt.");
-contains("admin/admin.js",'createGroup("operations","Betrieb"',"Kompakte Betrieb-Navigation fehlt.");
+contains("admin/admin.js",'const contentLinks=contentPages.map',"Inhaltsseiten sind nicht dauerhaft direkt im Menü sichtbar.");
+check(!read("admin/admin.js").includes('createGroup("content","Inhalte"'),"Inhalte sind fälschlich weiterhin eingeklappt.");
+contains("admin/admin.js",'createGroup("operations","Betrieb",["verbindung","anfragen","statistik","audit"])',"Betriebsmenü enthält Verbindung/Anfragen/Statistik/Audit nicht vollständig.");
 contains("admin/admin.js",'ensureNavLink("dashboard",labels.dashboard)',"Übersicht fehlt in der kompakten Admin-Navigation.");
 contains("admin/admin.js",'headerTitle.insertAdjacentElement("afterend",toolbar)',"Entwurf & Vorschau wird nicht direkt neben Website-Admin im Header platziert.");
 check(!read("admin/admin.js").includes("main.prepend(toolbar)"),"Entwurf & Vorschau wird weiterhin im Seiteninhalt statt im Header eingefügt.");
@@ -147,7 +148,7 @@ for(const path of adminCachePages){
   const html=read(path);
   check(html.includes("admin.css?v=20261007-09"),path+" verwendet nicht die aktuelle admin.css-Cache-Version.");
   check(html.includes("admin-data.js?v=20261007-04"),path+" verwendet nicht die aktuelle admin-data.js-Cache-Version.");
-  check(html.includes("admin.js?v=20261007-24"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
+  check(html.includes("admin.js?v=20261007-25"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
 }
 
 const quality=read(".github/workflows/website-quality.yml");
