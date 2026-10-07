@@ -5,11 +5,11 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.2";
+const WORKER_RELEASE = "2026-10-07.3";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "audit"]);
+const ADMIN_PAGE_SLUGS = new Set(["verbindung", "startseite", "leistungen", "unternehmen", "technik", "projekte", "anfragen", "statistik", "kontakt", "impressum", "audit"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -1122,6 +1122,7 @@ function auditAreaFromTarget(target) {
   if(raw.startsWith("equipment/")||raw.startsWith("technik/")) return "technik";
   if(raw.startsWith("unternehmen/")) return "unternehmen";
   if(raw.startsWith("kontakt/")) return "kontakt";
+  if(raw.startsWith("impressum/")) return "impressum";
   return "cms";
 }
 
@@ -1247,7 +1248,13 @@ async function handleAdminAudit(env, cors, url) {
   const {results=[]}=await env.DB.prepare(
     "SELECT id, actor_email, action, area, target, details, created_at FROM audit_log"+where+" ORDER BY id DESC LIMIT ?"
   ).bind(...bindings,limit).all();
-  return json({entries:results,limit},200,cors);
+  const entries=[];
+  for(const entry of results){
+    const item={...entry};
+    if(entry.action==="entwurf_veroeffentlicht"&&entry.target)item.change=await resolveAuditPublicationChange(env,entry);
+    entries.push(item);
+  }
+  return json({entries,limit},200,cors);
 }
 
 async function ensureContentTable(env) {
@@ -1293,6 +1300,20 @@ async function handlePreviewSite(env,cors){
 function parseStoredContentValue(raw){
   if(raw===null||raw===undefined)return null;
   try{return JSON.parse(raw)}catch{return raw}
+}
+
+async function resolveAuditPublicationChange(env,entry){
+  await ensureContentTable(env);
+  await ensureContentHistoryTable(env);
+  let history=null;
+  const match=String(entry.details||"").match(/history_id=(\d+)/);
+  if(match)history=await env.DB.prepare("SELECT id,key,value,operation,actor_email,created_at FROM content_history WHERE id = ? AND key = ?").bind(Number(match[1]),entry.target).first();
+  if(!history)history=await env.DB.prepare("SELECT id,key,value,operation,actor_email,created_at FROM content_history WHERE key = ? AND operation = 'draft_publish' AND actor_email = ? AND created_at <= ? ORDER BY id DESC LIMIT 1").bind(entry.target,entry.actor_email||"",entry.created_at||"9999-12-31 23:59:59").first();
+  let afterRow=null;
+  if(history?.id)afterRow=await env.DB.prepare("SELECT value FROM content_history WHERE key = ? AND id > ? ORDER BY id ASC LIMIT 1").bind(entry.target,history.id).first();
+  else afterRow=await env.DB.prepare("SELECT value FROM content_history WHERE key = ? AND created_at >= ? ORDER BY id ASC LIMIT 1").bind(entry.target,entry.created_at||"").first();
+  if(!afterRow)afterRow=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(entry.target).first();
+  return {has_before:Boolean(history),before:history?parseStoredContentValue(history.value):null,after:afterRow?parseStoredContentValue(afterRow.value):null,history_id:Number(history?.id||0)};
 }
 
 async function handleAdminDraftList(env,cors){
@@ -1364,15 +1385,16 @@ async function publishContentDrafts(request,env,cors,principal){
   const published=[];
   for(const draft of drafts){
     const previous=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(draft.key).first();
-    let previousParsed=null,nextParsed=null;
-    if(previous&&previous.value!==draft.value){await recordContentHistory(env,principal,draft.key,previous.value,"draft_publish");try{previousParsed=JSON.parse(previous.value)}catch{}}
+    let previousParsed=null,nextParsed=null,historyId=0;
+    if(previous&&previous.value!==draft.value){historyId=await recordContentHistory(env,principal,draft.key,previous.value,"draft_publish");try{previousParsed=JSON.parse(previous.value)}catch{}}
     try{nextParsed=JSON.parse(draft.value)}catch{}
     await env.DB.prepare(
       `INSERT INTO content (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP)
        ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP`
     ).bind(draft.key,draft.value).run();
     await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(draft.key).run();
-    await writeAudit(env,principal,"entwurf_veroeffentlicht",auditAreaFromTarget(draft.key),draft.key);
+    const auditDetail=historyId?"history_id="+historyId:(previous?"keine_aenderung":"neu");
+    await writeAudit(env,principal,"entwurf_veroeffentlicht",auditAreaFromTarget(draft.key),draft.key,auditDetail);
     if(isCollectionManifestKey(draft.key))await writeCollectionManifestAudit(env,principal,draft.key,previousParsed,nextParsed);
     published.push(draft.key);
   }
@@ -1416,9 +1438,9 @@ async function ensureContentHistoryTable(env) {
 }
 
 async function recordContentHistory(env, principal, key, serializedValue, operation) {
-  if(typeof serializedValue!=="string")return;
+  if(typeof serializedValue!=="string")return 0;
   await ensureContentHistoryTable(env);
-  await env.DB.prepare(
+  const inserted=await env.DB.prepare(
     "INSERT INTO content_history (key,value,operation,actor_email,created_at) VALUES (?,?,?,?,CURRENT_TIMESTAMP)"
   ).bind(
     cleanSingleLine(key,240),
@@ -1429,6 +1451,7 @@ async function recordContentHistory(env, principal, key, serializedValue, operat
   await env.DB.prepare(
     "DELETE FROM content_history WHERE id NOT IN (SELECT id FROM content_history ORDER BY id DESC LIMIT ?)"
   ).bind(CONTENT_HISTORY_LIMIT).run();
+  return Number(inserted?.meta?.last_row_id||0);
 }
 
 async function handleAdminContentHistory(env,cors,url){
