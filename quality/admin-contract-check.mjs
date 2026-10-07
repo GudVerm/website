@@ -22,6 +22,8 @@ contains("admin/admin.css",'grid-template-columns:minmax(0,1fr) 62px',"Cropper-W
 contains("admin/admin.css","border-radius:999px","Cropper-Wertpillen sind nicht als stabile Pills gestaltet.");
 contains("admin/admin.css","@container (max-width:230px)","Cropper besitzt keine containerbasierte Absicherung für schmale Karten.");
 contains("admin/admin.css","grid-template-columns:repeat(2,minmax(0,1fr))","Cropper-Aktionsbuttons können in schmalen Karten überlaufen.");
+contains("admin/admin.css","grid-template-columns:minmax(0,1fr);","Leistungs-Medienbereich nutzt weiterhin das alte Zwei-Spalten-Layout.");
+contains("admin/admin.css",".service-page-media-grid .equipment-card","Leistungs-Unterseitenbilder nutzen nicht die volle Breite.");
 contains("assets/admin-cropper.js","cms-crop-dirty-change","Crop-Dirty-Event fehlt.");
 contains("admin/admin.js","beforeunload","Schutz vor Verlassen mit offenen Änderungen fehlt.");
 contains("admin/admin.js","cmsDraftMode?draftContentUrl(key):contentUrl(key)","Text-/Layout-Speicherung ist nicht draft-aware.");
