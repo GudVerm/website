@@ -1986,3 +1986,48 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   0%{box-shadow:0 0 0 2px rgba(200,61,52,.34)}
   100%{box-shadow:0 0 0 9px rgba(200,61,52,.05)}
 }
+
+
+/* Immer sichtbare Speicherleiste */
+.has-admin-save-dock{padding-bottom:92px}
+.admin-save-dock{
+  position:fixed;
+  z-index:190;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  width:min(680px,calc(100vw - 32px));
+  min-height:58px;
+  padding:9px 10px 9px 15px;
+  border:1px solid #d9dfda;
+  border-radius:16px;
+  background:rgba(255,255,252,.96);
+  box-shadow:0 16px 46px rgba(20,32,38,.2);
+  backdrop-filter:blur(12px);
+}
+.admin-save-dock-state{display:flex;align-items:center;gap:9px;min-width:0;color:#526067;font-size:.75rem;font-weight:850}
+.admin-save-dock-state i{flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:#7f9188;box-shadow:0 0 0 4px rgba(127,145,136,.12)}
+.admin-save-dock.has-changes .admin-save-dock-state{color:#8c2f28}
+.admin-save-dock.has-changes .admin-save-dock-state i{background:#c24639;box-shadow:0 0 0 4px rgba(194,70,57,.13)}
+.admin-save-dock.is-error{border-color:#d69b95;box-shadow:0 16px 46px rgba(140,47,40,.18)}
+.admin-save-dock button{flex:0 0 auto;min-height:40px;padding:0 16px;border-radius:11px}
+.admin-save-dock button:disabled{opacity:.48;cursor:default}
+@media(max-width:620px){
+  .has-admin-save-dock{padding-bottom:112px}
+  .admin-save-dock{
+    left:12px;
+    right:12px;
+    bottom:12px;
+    width:auto;
+    min-height:64px;
+    transform:none;
+    gap:10px;
+    padding:10px 10px 10px 12px;
+  }
+  .admin-save-dock-state{font-size:.7rem}
+  .admin-save-dock button{max-width:52%;padding-inline:12px;font-size:.7rem;white-space:normal;line-height:1.15}
+}
