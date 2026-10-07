@@ -32,6 +32,7 @@ contains("admin/admin.css","grid-template-columns:minmax(0,1fr);","Leistungs-Med
 contains("admin/admin.css",".service-page-media-grid .equipment-card","Leistungs-Unterseitenbilder nutzen nicht die volle Breite.");
 contains("assets/admin-cropper.js","cms-crop-dirty-change","Crop-Dirty-Event fehlt.");
 contains("admin/admin.js","beforeunload","Schutz vor Verlassen mit offenen Änderungen fehlt.");
+contains("admin/admin.js",'target.matches("#projectSelect,#technikSelect")',"Datensatz-Auswahl darf nicht selbst als ungespeicherte Inhaltsänderung markiert werden.");
 contains("admin/admin.js","cmsDraftMode?draftContentUrl(key):contentUrl(key)","Text-/Layout-Speicherung ist nicht draft-aware.");
 contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert offene Textänderungen nicht als Entwurf.");
 contains("admin/admin.js","cms-draft-tooltip","Entwurfszähler zeigt keine Hover-/Fokus-Details.");
@@ -139,7 +140,7 @@ for(const path of adminCachePages){
   const html=read(path);
   check(html.includes("admin.css?v=20261007-09"),path+" verwendet nicht die aktuelle admin.css-Cache-Version.");
   check(html.includes("admin-data.js?v=20261007-04"),path+" verwendet nicht die aktuelle admin-data.js-Cache-Version.");
-  check(html.includes("admin.js?v=20261007-21"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
+  check(html.includes("admin.js?v=20261007-22"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
 }
 
 const quality=read(".github/workflows/website-quality.yml");
