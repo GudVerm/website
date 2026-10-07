@@ -57,6 +57,18 @@ const servicePageImages = [
   { key:"leistungsseiten/drohnenvermessung/ergebnis-2", name:"Drohnenvermessung · Ergebnis 2", detail:"Zweites Bild im Ergebnisbereich", fallback:"../assets/media/2026-10-02-drohne-ergebnis-2.webp" }
 ];
 
+const projectHeroImages = [
+  { key:"projekte/hero", name:"Projekte · Hero", detail:"Großes Kopfbild der Projektseite", fallback:"../assets/media/2026-10-02-projekt-ingenieur.webp" }
+];
+
+const techniqueHeroImages = [
+  { key:"technik/hero", name:"Technik · Hero", detail:"Großes Kopfbild der Technikseite", fallback:"../assets/media/2026-10-02-technik-aussendienst.webp" }
+];
+
+const contactHeroImages = [
+  { key:"kontakt/hero", name:"Kontakt · Hero", detail:"Großes Kopfbild der Kontaktseite", fallback:"../assets/media/home-hero.webp" }
+];
+
 const companyImages = [
   { key:"unternehmen/hero", name:"Unternehmen · Hero", detail:"Großes Kopfbild der Unternehmensseite", fallback:"../assets/media/jost-gudelius.jpg" },
   { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
@@ -69,5 +81,5 @@ const techniqueGroupImages = [
   { key:"technik/gruppen/programme-arbeitsplatz", name:"Technik · Programme & Arbeitsplatz", detail:"Großes Gruppenbild oberhalb der Software- und Arbeitsplatz-Einträge", fallback:"../assets/media/2026-10-02-technik-software.webp" }
 ];
 
-  window.GUDELIUS_ADMIN_DATA = Object.freeze({ defaultEquipment, defaultProjects, startPageImages, serviceImages, servicePageImages, companyImages, techniqueGroupImages });
+  window.GUDELIUS_ADMIN_DATA = Object.freeze({ defaultEquipment, defaultProjects, startPageImages, serviceImages, servicePageImages, projectHeroImages, techniqueHeroImages, contactHeroImages, companyImages, techniqueGroupImages });
 })();
