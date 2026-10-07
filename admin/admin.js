@@ -31,6 +31,7 @@ const grid=document.getElementById("equipmentGrid");
 const projectGrid=document.getElementById("projectGrid");
 const startPageGrid=document.getElementById("startPageGrid");
 const startPageTileGrid=document.getElementById("startPageTileGrid");
+const companyHeroGrid=document.getElementById("companyHeroGrid");
 const companyGrid=document.getElementById("companyGrid");
 const techniqueGroupGrid=document.getElementById("technikGroupGrid");
 const service1Grid=document.getElementById("service1Grid");
@@ -1025,7 +1026,7 @@ const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
 function initialMediaSrc(item){return getApi()&&(cmsMediaEnabled||cmsAccessMode)?mediaUrl(item.key):item.fallback}
 function showMediaModeNotice(){
   if(cmsMediaEnabled)return;
-  const hasMediaUi=document.querySelector("#startPageGrid,#startPageTileGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
+  const hasMediaUi=document.querySelector("#startPageGrid,#startPageTileGrid,#companyHeroGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
   if(!hasMediaUi)return;
   const section=hasMediaUi.closest(".admin-section")||document.querySelector(".admin-section");
   const head=section?.querySelector(".admin-section-head");
@@ -3533,7 +3534,8 @@ function render(){
   renderCollection(servicePage3Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/3d-laserscanning/")));
   renderCollection(servicePage4Grid, servicePageImages.filter(item=>item.key.startsWith("leistungsseiten/drohnenvermessung/")));
 
-  renderCollection(companyGrid, companyImages);
+  renderCollection(companyHeroGrid, companyImages.filter(item=>item.key==="unternehmen/hero"));
+  renderCollection(companyGrid, companyImages.filter(item=>item.key!=="unternehmen/hero"));
   renderCollection(techniqueGroupGrid, techniqueGroupImages);
   renderCollection(grid, equipment);
   renderCollection(projectGrid, projects);
