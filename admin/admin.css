@@ -1770,6 +1770,18 @@ button.danger-soft{background:#f2e7e4;color:#8a3d35}button.danger{background:#8f
   line-height:1;
   text-align:center;
   white-space:nowrap;
+  cursor:pointer;
+  transition:border-color .14s ease,background .14s ease,box-shadow .14s ease;
+}
+.media-crop-value:hover{
+  border-color:#c7a80e;
+  background:#fff9d9;
+}
+.media-crop-value:focus-visible{
+  outline:none;
+  border-color:#c7a80e;
+  background:#fff9d9;
+  box-shadow:0 0 0 3px rgba(199,168,14,.2);
 }
 .media-crop-sliders input[type="range"]{
   grid-area:range;
