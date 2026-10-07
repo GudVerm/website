@@ -31,6 +31,8 @@ contains("admin/admin.js","draftChangeSummary","Entwurfs-Hover vergleicht Live- 
 contains("admin/admin.js","knownDraftRecords","Entwurfs-Hover speichert keine Draft-Detaildaten.");
 contains("cloudflare/src/index.js",'"impressum", "audit"',"Impressum ist nicht als geschützte Admin-Seite freigeschaltet.");
 contains("admin/admin.js",'ensureNavLink("impressum","Impressum")',"Impressum fehlt in der Admin-Navigation.");
+contains("admin/admin.js",'data-page="medien"',"Medien fehlt als globaler Admin-Menüpunkt.");
+contains("admin/admin.js",'+"#medien"',"Medien-Menüpunkt führt nicht zur zentralen Medienbibliothek.");
 contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet nicht den eindeutigen Worker-Adminpfad.");
 contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
 contains("admin/admin.js","clearAdminDirtyForElements","Gespeicherte Formularfelder können ihren Dirty-State nicht gezielt zurücksetzen.");
