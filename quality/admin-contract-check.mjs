@@ -33,6 +33,8 @@ contains("cloudflare/src/index.js",'"impressum", "audit"',"Impressum ist nicht a
 contains("admin/admin.js",'ensureNavLink("impressum","Impressum")',"Impressum fehlt in der Admin-Navigation.");
 contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet nicht den eindeutigen Worker-Adminpfad.");
 contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
+contains("admin/admin.js","clearAdminDirtyForElements","Gespeicherte Formularfelder können ihren Dirty-State nicht gezielt zurücksetzen.");
+contains("admin/admin.js",'clearAdminDirtyForElements(Object.values(imprintTextFields),"fields")',"Impressum bleibt nach erfolgreichem Speichern fälschlich als ungespeichert markiert.");
 contains("impressum/index.html",'data-cms-text="impressum/provider-name"',"Öffentliches Impressum ist nicht CMS-fähig.");
 contains("cloudflare/src/index.js","resolveAuditPublicationChange","Audit-Veröffentlichungen besitzen keinen Vorher-/Nachher-Abgleich.");
 contains("admin/audit/index.html","audit-publication-hover","Audit-Oberfläche zeigt Veröffentlichungsänderungen nicht per Hover/Fokus.");
