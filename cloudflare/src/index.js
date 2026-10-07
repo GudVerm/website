@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.8";
+const WORKER_RELEASE = "2026-10-07.9";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -1399,6 +1399,33 @@ async function publishContentDrafts(request,env,cors,principal){
   }else{
     const result=await env.DB.prepare("SELECT key,value FROM content_drafts ORDER BY key").all();drafts=result.results||[];
   }
+  const suppressedDraftKeys=new Set();
+  for(const manifestDraft of drafts.filter(item=>isCollectionManifestKey(item.key))){
+    const config=manifestDraft.key==="projekte/index"
+      ? {contentPrefix:"projekte/",mediaPrefix:"media-layout/projects/"}
+      : manifestDraft.key==="technik/index"
+        ? {contentPrefix:"technik/",mediaPrefix:"media-layout/equipment/"}
+        : null;
+    if(!config)continue;
+    const previousManifest=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(manifestDraft.key).first();
+    let previousValue=null,nextValue=null;
+    try{previousValue=previousManifest?JSON.parse(previousManifest.value):null}catch{}
+    try{nextValue=JSON.parse(manifestDraft.value)}catch{}
+    const previousSlugs=manifestSlugSet(previousValue);
+    const nextSlugs=manifestSlugSet(nextValue);
+    if(!previousSlugs||!nextSlugs)continue;
+    for(const slug of [...previousSlugs].filter(slug=>!nextSlugs.has(slug))){
+      const childPrefix=config.contentPrefix+slug+"/";
+      const mediaLayoutKey=config.mediaPrefix+slug;
+      for(const candidate of drafts){
+        if(candidate.key.startsWith(childPrefix)||candidate.key===mediaLayoutKey)suppressedDraftKeys.add(candidate.key);
+      }
+      await env.DB.prepare("DELETE FROM content_drafts WHERE key LIKE ? OR key = ?")
+        .bind(childPrefix+"%",mediaLayoutKey).run();
+    }
+  }
+  if(suppressedDraftKeys.size)drafts=drafts.filter(draft=>!suppressedDraftKeys.has(draft.key));
+
   const published=[];
   for(const draft of drafts){
     const previous=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(draft.key).first();
