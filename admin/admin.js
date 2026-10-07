@@ -388,6 +388,7 @@ function updateAdminDirtyUi(){
     indicator.querySelector("b").textContent=String(adminDirtyKeys.size);
     renderAdminDirtyTooltip(indicator);
   }
+  updateAdminSaveDock();
 }
 function markAdminDirty(element,type="fields"){
   if(!draftCapablePages.has(currentAdminPage))return;
@@ -422,6 +423,115 @@ function clearAdminDirtyForElements(elements,type="fields"){
 }
 function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();adminDirtyDetails.clear();adminDirtyElements.clear();updateAdminDirtyUi()}
 function hasAdminDirty(){return adminDirtyKeys.size>0}
+let adminSaveDockBusy=false;
+function adminElementInMap(element,map){
+  return Object.values(map||{}).some(field=>field===element);
+}
+function adminSaveButtonForElement(element){
+  if(!element)return null;
+  const projectCard=element.closest?.(".project-editor-card");
+  if(projectCard)return projectCard.querySelector(".project-save");
+  const technikCard=element.closest?.(".technik-editor-card");
+  if(technikCard)return technikCard.querySelector(".technik-save");
+  if(companyTimelineEditor&&(element===companyTimelineEditor||companyTimelineEditor.contains(element)))return saveCompanyTimeline;
+  if([heroEyebrow,heroTitle,heroLead].includes(element))return saveHeroTexts;
+  if(adminElementInMap(element,companyTextFields))return saveCompanyTexts;
+  if(adminElementInMap(element,contactTextFields))return saveContactTexts;
+  if(adminElementInMap(element,serviceContactTextFields))return saveServiceContactTexts;
+  if(adminElementInMap(element,imprintTextFields))return saveImprintTexts;
+  for(const control of serviceTextControls||[]){
+    if(control.keys.some(key=>serviceTextFields[key]===element))return control.save;
+  }
+  const id=element.id||"";
+  if(/^eng/.test(id))return saveEngineerPageTexts;
+  if(/^gis/.test(id))return saveGisPageTexts;
+  if(/^scan/.test(id))return saveScanPageTexts;
+  if(/^drone/.test(id))return saveDronePageTexts;
+  const scope=dirtyScopeFor(element);
+  const local=[...(scope?.querySelectorAll?.(draftFieldSaveSelector)||[])].filter(button=>!button.hidden);
+  if(local.length===1)return local[0];
+  const section=scope?.closest?.(".admin-section");
+  const sectionButtons=[...(section?.querySelectorAll?.(draftFieldSaveSelector)||[])].filter(button=>!button.hidden);
+  return sectionButtons.length===1?sectionButtons[0]:null;
+}
+async function waitForAdminSaveButton(button,timeout=15000){
+  if(!button)return;
+  const started=Date.now();
+  let sawDisabled=button.disabled;
+  await new Promise(resolve=>setTimeout(resolve,0));
+  while(Date.now()-started<timeout){
+    if(button.disabled)sawDisabled=true;
+    if(sawDisabled&&!button.disabled)return;
+    if(!sawDisabled&&Date.now()-started>500)return;
+    await new Promise(resolve=>setTimeout(resolve,60));
+  }
+  throw new Error("Speichern hat zu lange gedauert.");
+}
+function updateAdminSaveDock(){
+  const dock=document.querySelector(".admin-save-dock");
+  if(!dock)return;
+  const button=dock.querySelector("[data-admin-save-all]");
+  const status=dock.querySelector("[data-admin-save-status]");
+  const count=adminDirtyKeys.size;
+  dock.classList.toggle("has-changes",count>0);
+  if(button){
+    button.disabled=adminSaveDockBusy||count===0;
+    button.textContent=adminSaveDockBusy?"Speichert …":(cmsDraftMode?"Als Entwurf speichern":"Änderungen speichern");
+  }
+  if(status&&!adminSaveDockBusy){
+    status.textContent=count?count+" offener "+(count===1?"Bereich":"Bereiche"):"Alles gespeichert";
+  }
+}
+async function saveAllAdminDirtyChanges(){
+  if(adminSaveDockBusy||!hasAdminDirty())return;
+  const dock=document.querySelector(".admin-save-dock");
+  const status=dock?.querySelector("[data-admin-save-status]");
+  adminSaveDockBusy=true;
+  updateAdminSaveDock();
+  if(status)status.textContent="Änderungen werden gespeichert …";
+  try{
+    const buttonEntries=new Map();
+    for(const key of [...adminDirtyKeys].filter(key=>key.endsWith(":fields"))){
+      const elements=[...(adminDirtyElements.get(key)||[])].filter(element=>element?.isConnected);
+      let button=null;
+      for(const element of elements){
+        button=adminSaveButtonForElement(element);
+        if(button)break;
+      }
+      if(!button)button=visibleEnabledSaveButton(adminDirtyScopes.get(key));
+      if(!button)continue;
+      if(!buttonEntries.has(button))buttonEntries.set(button,new Set());
+      buttonEntries.get(button).add(key);
+    }
+    for(const button of buttonEntries.keys()){
+      if(button.disabled)await waitForAdminSaveButton(button);
+      button.click();
+      await waitForAdminSaveButton(button);
+    }
+    await saveAllPendingMediaCrops();
+    if(cmsDraftMode)await refreshDraftToolbar(document.querySelector(".cms-draft-toolbar"));
+    await new Promise(resolve=>setTimeout(resolve,120));
+    if(status)status.textContent=hasAdminDirty()?adminDirtyKeys.size+" Änderung(en) noch offen":"Alles gespeichert";
+  }catch(error){
+    if(status)status.textContent="Speichern fehlgeschlagen: "+error.message;
+    dock?.classList.add("is-error");
+    setTimeout(()=>dock?.classList.remove("is-error"),3500);
+  }finally{
+    adminSaveDockBusy=false;
+    updateAdminSaveDock();
+  }
+}
+function ensureAdminSaveDock(){
+  if(!draftCapablePages.has(currentAdminPage)||document.querySelector(".admin-save-dock"))return;
+  const dock=document.createElement("aside");
+  dock.className="admin-save-dock";
+  dock.setAttribute("aria-label","Speicherstatus");
+  dock.innerHTML='<div class="admin-save-dock-state"><i aria-hidden="true"></i><span data-admin-save-status>Alles gespeichert</span></div><button type="button" data-admin-save-all disabled>Änderungen speichern</button>';
+  dock.querySelector("[data-admin-save-all]").addEventListener("click",saveAllAdminDirtyChanges);
+  document.body.appendChild(dock);
+  document.body.classList.add("has-admin-save-dock");
+  updateAdminSaveDock();
+}
 function ensureAdminDirtyUi(){
   if(!draftCapablePages.has(currentAdminPage))return;
   const actions=document.querySelector(".admin-header-actions")||document.querySelector(".admin-header");
@@ -438,7 +548,7 @@ function ensureAdminDirtyUi(){
 function shouldTrackAdminField(target){
   if(!draftCapablePages.has(currentAdminPage)||!target?.matches?.("input,textarea,select"))return false;
   if(target.closest(".cms-draft-toolbar"))return false;
-  if(target.matches('input[type="search"],input[type="hidden"]'))return false;
+  if(target.matches('input[type="search"],input[type="hidden"],input[type="file"]'))return false;
   if(target.closest(".media-crop-editor"))return false;
   return Boolean(target.closest("main"));
 }
@@ -479,6 +589,7 @@ document.addEventListener("click",event=>{
 ensureAdminDirtyUi();
 
 let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftCapablePages.has(currentAdminPage);
+ensureAdminSaveDock();
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
 const knownDraftKeys=new Set();
