@@ -80,6 +80,8 @@ contains("leistungen/drohnenvermessung/index.html",'data-cms-media="leistungssei
 contains("assets/service-pages.css",".service-hero-media{","Leistungs-Hero besitzt kein sichtbares Bild-Layer.");
 contains("admin/startseite/index.html","Vier Leistungs-Kacheln der Startseite","Die vier Leistungs-Kacheln fehlen im Startseiten-Admin.");
 contains("admin/startseite/index.html",'id="service1Grid"',"Ingenieurvermessungs-Kachel fehlt im Startseiten-Admin.");
+contains("admin/startseite/index.html","startpage-hero-admin-grid","Startseiten-Hero nutzt nicht das vergrößerte Admin-Layout.");
+contains("admin/startseite/index.html","#startPageGrid .equipment-card","Startseiten-Hero-Bildkarte nutzt nicht die volle Editorbreite.");
 check(!read("admin/leistungen/index.html").includes("<strong>Startseiten-Kachel</strong>"),"Startseiten-Leistungskacheln sind weiterhin im Leistungen-Admin eingebettet.");
 contains("admin/admin.js",'if(raw.startsWith("leistungen/"))return "startseite";',"Entwurfs-Sprünge für Startseiten-Leistungskacheln führen nicht zur Startseite.");
 contains("admin/media-library.js",'withArea(data.serviceImages,"Startseite","./startseite/")',"Medienbibliothek verlinkt Startseiten-Leistungskacheln weiterhin zum Leistungen-Admin.");
