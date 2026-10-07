@@ -1042,8 +1042,36 @@ function mediaUrl(key){
   return getApi()+prefix+key.split("/").map(encodeURIComponent).join("/");
 }
 const adminMediaObjectUrls=new WeakMap();
+function setAdminImageSource(img,src){
+  return new Promise(resolve=>{
+    if(!img||!src)return resolve(false);
+    let settled=false;
+    const finish=ok=>{
+      if(settled)return;
+      settled=true;
+      img.removeEventListener("load",onLoad);
+      img.removeEventListener("error",onError);
+      resolve(Boolean(ok&&img.naturalWidth>0&&img.naturalHeight>0));
+    };
+    const onLoad=()=>finish(true);
+    const onError=()=>finish(false);
+    img.addEventListener("load",onLoad);
+    img.addEventListener("error",onError);
+    img.src=src;
+    if(img.complete)queueMicrotask(()=>finish(img.naturalWidth>0&&img.naturalHeight>0));
+  });
+}
 async function loadProtectedMediaIntoImage(img,key,fallback=""){
   if(!img||!key)return false;
+  const fallbackUrl=fallback?new URL(fallback,document.baseURI).href:"";
+  const showFallback=async()=>{
+    const oldUrl=adminMediaObjectUrls.get(img);
+    if(oldUrl){
+      URL.revokeObjectURL(oldUrl);
+      adminMediaObjectUrls.delete(img);
+    }
+    return fallbackUrl?setAdminImageSource(img,fallbackUrl):false;
+  };
   const response=await fetch(getApi()+"/api/admin/media/"+key.split("/").map(encodeURIComponent).join("/"),{
     method:"GET",
     headers:adminHeaders(),
@@ -1051,16 +1079,22 @@ async function loadProtectedMediaIntoImage(img,key,fallback=""){
     cache:"no-store"
   });
   if(!response.ok){
-    if(fallback)img.src=fallback;
+    await showFallback();
     return false;
   }
   const blob=await response.blob();
+  if(!String(blob.type||"").startsWith("image/")||blob.size<32){
+    await showFallback();
+    return false;
+  }
   const oldUrl=adminMediaObjectUrls.get(img);
   if(oldUrl)URL.revokeObjectURL(oldUrl);
   const objectUrl=URL.createObjectURL(blob);
   adminMediaObjectUrls.set(img,objectUrl);
-  img.src=objectUrl;
-  return true;
+  const readable=await setAdminImageSource(img,objectUrl);
+  if(readable)return true;
+  await showFallback();
+  return false;
 }
 async function imageFileDimensions(file){
   if(!file||!String(file.type||"").startsWith("image/"))return {width:0,height:0};
