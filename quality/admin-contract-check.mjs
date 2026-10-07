@@ -31,8 +31,9 @@ contains("admin/admin.js","draftChangeSummary","Entwurfs-Hover vergleicht Live- 
 contains("admin/admin.js","knownDraftRecords","Entwurfs-Hover speichert keine Draft-Detaildaten.");
 contains("cloudflare/src/index.js",'"impressum", "audit"',"Impressum ist nicht als geschützte Admin-Seite freigeschaltet.");
 contains("admin/admin.js",'ensureNavLink("impressum","Impressum")',"Impressum fehlt in der Admin-Navigation.");
-contains("admin/admin.js",'data-page="medien"',"Medien fehlt als globaler Admin-Menüpunkt.");
-contains("admin/admin.js",'+"#medien"',"Medien-Menüpunkt führt nicht zur zentralen Medienbibliothek.");
+contains("admin/admin.js",'ensureNavLink("medien","Medien")',"Medien fehlt als globaler Admin-Menüpunkt.");
+contains("cloudflare/src/index.js",'"medien", "impressum", "audit"',"Medien ist nicht als geschützte Admin-Seite freigeschaltet.");
+contains("admin/index.html",'href="./medien/"',"Dashboard verlinkt nicht auf den eigenständigen Medienbereich.");
 contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet nicht den eindeutigen Worker-Adminpfad.");
 contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
 contains("admin/admin.js","clearAdminDirtyForElements","Gespeicherte Formularfelder können ihren Dirty-State nicht gezielt zurücksetzen.");
@@ -96,3 +97,6 @@ if(errors.length){
   process.exit(1);
 }
 console.log("CMS-Vertragscheck erfolgreich: Sicherheits-, CMS-, Medien-, Entwurfs- und Anfragenfunktionen vorhanden.");
+
+contains("admin/medien/index.html",'data-admin-page="medien"',"Eigenständige Medien-Adminseite fehlt.");
+contains("admin/medien/index.html","mediaLibraryGrid","Medien-Adminseite enthält keine Medienbibliothek.");
