@@ -58,7 +58,7 @@ async function testPublicEndpoints() {
   ok("CORS erlaubt Test-Origin");
 
   await call("/media/__smoke__/not-public",{method:"GET"},[404]);
-  ok("Öffentliche R2-Ausgabe bleibt deaktiviert");
+  ok("Unbekannter öffentlicher Medien-Key liefert korrekt 404");
 
   await call("/api/analytics/event", {
     method:"POST",
