@@ -370,6 +370,17 @@ function clearAdminDirty(element,type="fields"){
   adminDirtyDetails.delete(key);
   updateAdminDirtyUi();
 }
+function clearAdminDirtyForElements(elements,type="fields"){
+  let changed=false;
+  for(const element of elements||[]){
+    if(!element)continue;
+    const key=dirtyKey(element,type);
+    if(adminDirtyKeys.delete(key))changed=true;
+    adminDirtyScopes.delete(key);
+    adminDirtyDetails.delete(key);
+  }
+  if(changed)updateAdminDirtyUi();
+}
 function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();adminDirtyDetails.clear();updateAdminDirtyUi()}
 function hasAdminDirty(){return adminDirtyKeys.size>0}
 function ensureAdminDirtyUi(){
@@ -1635,6 +1646,7 @@ if(saveImprintTexts){
     setStatus(imprintTextStatus,"Speichere Impressum …");
     try{
       await Promise.all(Object.entries(imprintTextFields).map(([key,field])=>saveHeroText(key,field?.value.trim()||"")));
+      clearAdminDirtyForElements(Object.values(imprintTextFields),"fields");
       setStatus(imprintTextStatus,cmsDraftMode?"Impressum als Entwurf gespeichert.":"Impressum erfolgreich gespeichert.",true);
     }catch(error){
       setStatus(imprintTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
