@@ -403,13 +403,104 @@ let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftC
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
 const knownDraftKeys=new Set();
+const knownDraftRecords=new Map();
+function draftPrettyPart(value){
+  const dictionary={
+    index:"Liste & Reihenfolge",title:"Titel",description:"Beschreibung",location:"Ort",year:"Jahr",services:"Leistungen",
+    "image-title":"Bildtitel","image-description":"Bildbeschreibung",name:"Name",category:"Kategorie",manufacturer:"Hersteller",
+    model:"Modell",details:"Details",group:"Gruppe",visible:"Sichtbarkeit",featured:"Hervorgehoben",
+    x:"Position X",y:"Position Y",zoom:"Zoom",rotation:"Drehung"
+  };
+  const raw=String(value||"").trim();
+  if(dictionary[raw])return dictionary[raw];
+  return raw.replace(/[-_]+/g," ").replace(/\b\w/g,char=>char.toUpperCase())||"Inhalt";
+}
+function draftKeyLabel(key){
+  const parts=String(key||"").split("/").filter(Boolean);
+  const isLayout=parts[0]==="media-layout";
+  const contentParts=isLayout?parts.slice(1):parts;
+  const area=contentParts[0]||"cms";
+  const areaLabels={startseite:"Startseite",leistungen:"Leistungen",unternehmen:"Unternehmen",technik:"Technik",projekte:"Projekte",kontakt:"Kontakt"};
+  const areaLabel=areaLabels[area]||draftPrettyPart(area);
+  if(isLayout){
+    if(area==="projects"||area==="projekte")return "Projektbild: "+draftPrettyPart(contentParts[1]||"");
+    if(area==="equipment"||area==="technik")return "Technikbild: "+draftPrettyPart(contentParts[1]||"");
+    return areaLabel+" · Bildausschnitt";
+  }
+  if(area==="projekte"&&contentParts.length>=3)return "Projekt: "+draftPrettyPart(contentParts[1])+" · "+draftPrettyPart(contentParts.slice(2).join("-"));
+  if(area==="technik"&&contentParts.length>=3)return "Technik: "+draftPrettyPart(contentParts[1])+" · "+draftPrettyPart(contentParts.slice(2).join("-"));
+  if(contentParts.length===2)return areaLabel+" · "+draftPrettyPart(contentParts[1]);
+  if(contentParts.length>2)return areaLabel+" · "+draftPrettyPart(contentParts.slice(1).join("-"));
+  return areaLabel;
+}
+function draftValuePreview(value){
+  if(value===undefined)return "—";
+  if(value===null)return "leer";
+  if(typeof value==="boolean")return value?"Ja":"Nein";
+  if(typeof value==="number")return String(value);
+  if(typeof value==="string"){
+    const clean=value.replace(/\s+/g," ").trim();
+    if(!clean)return "leer";
+    return clean.length>52?clean.slice(0,49)+"…":clean;
+  }
+  if(Array.isArray(value))return value.length+" Einträge";
+  return "Struktur";
+}
+function draftChangeSummary(draft){
+  if(!draft)return "Gespeicherter Entwurf";
+  const live=draft.live_value,next=draft.draft_value;
+  if(!draft.has_live_value)return "Neu: "+draftValuePreview(next);
+  if(live&&next&&typeof live==="object"&&typeof next==="object"&&!Array.isArray(live)&&!Array.isArray(next)){
+    const keys=[...new Set([...Object.keys(live),...Object.keys(next)])];
+    const changed=keys.filter(key=>JSON.stringify(live[key])!==JSON.stringify(next[key]));
+    if(!changed.length)return "Keine inhaltliche Differenz";
+    return changed.slice(0,4).map(key=>draftPrettyPart(key)+": "+draftValuePreview(live[key])+" → "+draftValuePreview(next[key])).join(" · ")+(changed.length>4?" · …":"");
+  }
+  if(Array.isArray(live)&&Array.isArray(next)){
+    if(JSON.stringify(live)===JSON.stringify(next))return "Keine inhaltliche Differenz";
+    if(live.length!==next.length)return "Liste: "+live.length+" → "+next.length+" Einträge";
+    return "Liste / Reihenfolge / Eigenschaften geändert";
+  }
+  if(JSON.stringify(live)===JSON.stringify(next))return "Keine inhaltliche Differenz";
+  return draftValuePreview(live)+" → "+draftValuePreview(next);
+}
+function renderDraftToolbarDetails(toolbar=document.querySelector(".cms-draft-toolbar")){
+  const badge=toolbar?.querySelector(".cms-draft-count");
+  const tooltip=badge?.querySelector(".cms-draft-tooltip");
+  if(!badge||!tooltip)return;
+  tooltip.innerHTML="";
+  const title=document.createElement("strong");
+  title.className="cms-draft-tooltip-title";
+  title.textContent="Änderungen in Entwürfen";
+  tooltip.appendChild(title);
+  if(!knownDraftKeys.size){
+    const empty=document.createElement("span");
+    empty.className="cms-draft-tooltip-empty";
+    empty.textContent="Keine offenen Entwürfe.";
+    tooltip.appendChild(empty);
+    return;
+  }
+  for(const key of knownDraftKeys){
+    const draft=knownDraftRecords.get(key);
+    const row=document.createElement("div");
+    row.className="cms-draft-tooltip-row";
+    const label=document.createElement("b");
+    label.textContent=draftKeyLabel(key);
+    const summary=document.createElement("span");
+    summary.textContent=draftChangeSummary(draft);
+    row.append(label,summary);
+    tooltip.appendChild(row);
+  }
+}
 function renderDraftToolbarCount(toolbar=document.querySelector(".cms-draft-toolbar"),serverCount=null){
   if(!toolbar)return;
   const count=toolbar.querySelector("[data-draft-count]");
   if(!count)return;
   const numeric=Number.isFinite(Number(serverCount))?Number(serverCount):knownDraftKeys.size;
   count.textContent=String(Math.max(0,numeric));
-  count.closest(".cms-draft-count")?.setAttribute("aria-label",numeric+" gespeicherte Entwürfe");
+  const badge=count.closest(".cms-draft-count");
+  badge?.setAttribute("aria-label",numeric+" gespeicherte Entwürfe. Hover oder Fokus zeigt die Änderungen.");
+  renderDraftToolbarDetails(toolbar);
 }
 function registerDraftKey(key,authoritativeCount=null){
   if(!cmsDraftMode||!key)return;
@@ -418,7 +509,10 @@ function registerDraftKey(key,authoritativeCount=null){
   else renderDraftToolbarCount();
 }
 function unregisterDraftKeys(keys){
-  for(const key of keys||[])knownDraftKeys.delete(key);
+  for(const key of keys||[]){
+    knownDraftKeys.delete(key);
+    knownDraftRecords.delete(key);
+  }
   renderDraftToolbarCount();
 }
 function scheduleDraftToolbarRefresh(){
@@ -492,9 +586,15 @@ async function refreshDraftToolbar(toolbar){
     const drafts=Array.isArray(data.drafts)?data.drafts:[];
     if(drafts.length){
       knownDraftKeys.clear();
-      for(const draft of drafts)if(draft?.key)knownDraftKeys.add(draft.key);
+      knownDraftRecords.clear();
+      for(const draft of drafts){
+        if(!draft?.key)continue;
+        knownDraftKeys.add(draft.key);
+        knownDraftRecords.set(draft.key,draft);
+      }
     }else if(Number(data.count)===0){
       knownDraftKeys.clear();
+      knownDraftRecords.clear();
     }
     const serverCount=Array.isArray(data.drafts)?drafts.length:Number(data.count||0);
     renderDraftToolbarCount(toolbar,Math.max(serverCount,knownDraftKeys.size));
@@ -511,7 +611,7 @@ function ensureDraftToolbar(){
   toolbar.className="cms-draft-toolbar";
   toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Texte, Strukturen sowie Bildausschnitt, Zoom und Drehung werden im Entwurfsmodus erst als Entwurf gespeichert. Bilddatei-Uploads bleiben direkte Medienänderungen.</span></div>'+
     '<label class="cms-draft-switch"><input type="checkbox" data-draft-toggle> Entwurfsmodus</label>'+
-    '<span class="cms-draft-count" role="status" aria-live="polite"><b data-draft-count>…</b> Entwürfe</span>'+
+    '<span class="cms-draft-count" role="status" aria-live="polite" tabindex="0"><b data-draft-count>…</b> Entwürfe<span class="cms-draft-tooltip" role="tooltip"></span></span>'+
     '<button type="button" class="secondary" data-draft-preview>Vorschau öffnen ↗</button>'+
     '<button type="button" data-draft-publish>Alle veröffentlichen</button>'+
     '<button type="button" class="secondary" data-draft-discard>Alle verwerfen</button>';
@@ -565,7 +665,7 @@ function ensureDraftToolbar(){
     }catch(error){alert("Verwerfen fehlgeschlagen: "+error.message)}finally{button.disabled=false}
   });
   const style=document.createElement("style");
-  style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{padding:7px 9px;border-radius:999px;background:#fff}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}";
+  style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{position:relative;padding:7px 9px;border-radius:999px;background:#fff;cursor:help;outline:none}.cms-draft-count:focus-visible{box-shadow:0 0 0 3px rgba(155,131,32,.24)}.cms-draft-tooltip{position:absolute;z-index:130;top:calc(100% + 9px);right:0;display:grid;gap:8px;width:max-content;min-width:300px;max-width:min(480px,calc(100vw - 28px));padding:12px 13px;border:1px solid #d9deda;border-radius:12px;background:#172026;color:#fff;box-shadow:0 14px 36px rgba(20,32,38,.22);white-space:normal;text-align:left;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}.cms-draft-count:hover .cms-draft-tooltip,.cms-draft-count:focus .cms-draft-tooltip,.cms-draft-count:focus-within .cms-draft-tooltip{opacity:1;visibility:visible;transform:translateY(0)}.cms-draft-tooltip::before{content:'';position:absolute;top:-6px;right:18px;width:10px;height:10px;background:#172026;border-left:1px solid #d9deda;border-top:1px solid #d9deda;transform:rotate(45deg)}.cms-draft-tooltip-title{position:relative;z-index:1;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#f0d64f}.cms-draft-tooltip-row{display:grid;gap:2px;padding-top:7px;border-top:1px solid rgba(255,255,255,.14)}.cms-draft-tooltip-row b{font-size:.74rem;color:#fff;line-height:1.35}.cms-draft-tooltip-row span,.cms-draft-tooltip-empty{font-size:.68rem;font-weight:650;color:#cbd4d1;line-height:1.45}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}@media(max-width:620px){.cms-draft-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.cms-draft-tooltip::before{display:none}}";
   document.head.appendChild(style);
   refreshDraftToolbar(toolbar);
 }
