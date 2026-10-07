@@ -18,6 +18,12 @@ contains("admin/audit/index.html","Live ↔ Entwurf vergleichen","Entwurfs-Diffe
 contains("assets/admin-cropper.js","media-crop-target-frame","Cropper-Zielvorschau fehlt.");
 contains("assets/admin-cropper.js","Empfohlenen Ausschnitt verwenden","Cropper-Empfehlungs-Preset fehlt.");
 contains("assets/admin-cropper.js","media-crop-x-value","Cropper-Zahlenwerte fehlen.");
+contains("assets/admin-cropper.js","resetSingleCropValue","Cropper-Zahlenwerte lassen sich nicht einzeln auf Standard zurücksetzen.");
+contains("assets/admin-cropper.js",'key:"x",value:50',"Horizontal-Standardwert ist nicht 50 %.");
+contains("assets/admin-cropper.js",'key:"y",value:50',"Vertikal-Standardwert ist nicht 50 %.");
+contains("assets/admin-cropper.js",'key:"zoom",value:100',"Zoom-Standardwert ist nicht 100 %.");
+contains("assets/admin-cropper.js",'key:"rotation",value:0',"Drehungs-Standardwert ist nicht 0°.");
+contains("admin/admin.css",".media-crop-value:hover","Klickbare Cropper-Zahlen haben keine visuelle Hover-Rückmeldung.");
 contains("admin/admin.css",'grid-template-columns:minmax(0,1fr) 62px',"Cropper-Wertpillen besitzen keine feste, kollisionsfreie Wertspalte.");
 contains("admin/admin.css","border-radius:999px","Cropper-Wertpillen sind nicht als stabile Pills gestaltet.");
 contains("admin/admin.css","@container (max-width:230px)","Cropper besitzt keine containerbasierte Absicherung für schmale Karten.");
