@@ -49,6 +49,9 @@ contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwur
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_PREVIEW_CONTENT","Preview-Draft-Snapshot fehlt.");
 contains("admin/admin.js","loadProtectedMediaIntoImage(img,item.key,item.fallback)","Projekt-Admin bestätigt Projektbild-Uploads nicht über den geschützten R2-GET.");
+contains("admin/admin.js","if(cmsAccessMode&&getApi())","Generische Admin-Medien werden bei Access nicht geschützt aus R2 geladen.");
+contains("admin/admin.js",'setStatus(status,"Bild gespeichert und aus R2 bestätigt.",true)',"Startseiten-Kachelbilder werden nach Upload nicht aus R2 bestätigt.");
+contains("admin/admin.js",'credentials:"include"',"Admin-Medienupload sendet keine Access-Credentials.");
 contains("cloudflare/src/index.js",'url: new URL("/api/admin/media/" + encodePath(key), url).toString()', "Admin-Medienupload liefert weiterhin einen ungeschützten/öffentlichen Medienpfad zurück.");
 contains("cloudflare/src/index.js",'url.pathname.startsWith("/api/admin/media/") && request.method === "GET"',"Geschützter GET-Endpunkt für Admin-Medien fehlt.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_MEDIA_ENDPOINT = '/api/admin/media';","Preview verwendet nicht den geschützten Medien-Endpunkt.");
