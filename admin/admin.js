@@ -964,17 +964,19 @@ async function refreshDraftToolbar(toolbar){
 }
 function ensureDraftToolbar(){
   if(!draftCapablePages.has(currentAdminPage)||!cmsAccessMode)return;
-  const main=document.querySelector("main");
-  if(!main||main.querySelector(".cms-draft-toolbar"))return;
+  const header=document.querySelector(".admin-header");
+  if(!header||header.querySelector(".cms-draft-toolbar"))return;
   const toolbar=document.createElement("section");
-  toolbar.className="cms-draft-toolbar";
+  toolbar.className="cms-draft-toolbar cms-draft-toolbar-header";
   toolbar.innerHTML='<div><strong>Entwurf & Vorschau</strong><span>Texte, Strukturen sowie Bildausschnitt, Zoom und Drehung werden im Entwurfsmodus erst als Entwurf gespeichert. Bilddatei-Uploads bleiben direkte Medienänderungen.</span></div>'+
     '<label class="cms-draft-switch"><input type="checkbox" data-draft-toggle> Entwurfsmodus</label>'+
     '<span class="cms-draft-count" role="status" aria-live="polite" tabindex="0"><b data-draft-count>…</b> Entwürfe<span class="cms-draft-tooltip" role="tooltip"></span></span>'+
     '<button type="button" class="secondary" data-draft-preview>Vorschau öffnen ↗</button>'+
     '<button type="button" data-draft-publish>Alle veröffentlichen</button>'+
     '<button type="button" class="secondary" data-draft-discard>Alle verwerfen</button>';
-  main.prepend(toolbar);
+  const headerTitle=header.firstElementChild;
+  if(headerTitle)headerTitle.insertAdjacentElement("afterend",toolbar);
+  else header.prepend(toolbar);
   const toggle=toolbar.querySelector("[data-draft-toggle]");
   toggle.checked=cmsDraftMode;
   toggle.addEventListener("change",()=>{sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");location.reload()});
@@ -1025,6 +1027,7 @@ function ensureDraftToolbar(){
   });
   const style=document.createElement("style");
   style.textContent=".cms-draft-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 22px;padding:14px 16px;border:1px solid #ded8c9;border-radius:16px;background:#fff8cf}.cms-draft-toolbar>div{display:grid;gap:2px;flex:1 1 280px}.cms-draft-toolbar>div span{font-size:.72rem;color:#665b30}.cms-draft-switch,.cms-draft-count{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:850}.cms-draft-count{position:relative;padding:7px 9px;border-radius:999px;background:#fff;cursor:help;outline:none}.cms-draft-count::after{content:'';position:absolute;z-index:129;top:100%;left:-6px;right:-6px;height:14px}.cms-draft-count:focus-visible{box-shadow:0 0 0 3px rgba(155,131,32,.24)}.cms-draft-tooltip{position:absolute;z-index:130;top:calc(100% + 9px);right:0;display:grid;gap:8px;width:max-content;min-width:300px;max-width:min(480px,calc(100vw - 28px));padding:12px 13px;border:1px solid #d9deda;border-radius:12px;background:#172026;color:#fff;box-shadow:0 14px 36px rgba(20,32,38,.22);white-space:normal;text-align:left;opacity:0;visibility:hidden;transform:translateY(-4px);pointer-events:none;transition:opacity .14s ease,transform .14s ease,visibility .14s ease}.cms-draft-count:hover .cms-draft-tooltip,.cms-draft-count:focus .cms-draft-tooltip,.cms-draft-count:focus-within .cms-draft-tooltip,.cms-draft-tooltip:hover{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}.cms-draft-tooltip::before{content:'';position:absolute;top:-6px;right:18px;width:10px;height:10px;background:#172026;border-left:1px solid #d9deda;border-top:1px solid #d9deda;transform:rotate(45deg)}.cms-draft-tooltip-title{position:relative;z-index:1;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#f0d64f}.cms-draft-tooltip-row{display:grid;gap:2px;width:100%;padding:8px 7px;border:0;border-top:1px solid rgba(255,255,255,.14);border-radius:7px;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}.cms-draft-tooltip-row:hover,.cms-draft-tooltip-row:focus-visible{background:rgba(255,255,255,.09);outline:none}.cms-draft-tooltip-row b{font-size:.74rem;color:#fff;line-height:1.35}.cms-draft-tooltip-row span,.cms-draft-tooltip-empty{font-size:.68rem;font-weight:650;color:#cbd4d1;line-height:1.45}.cms-draft-tooltip-row small{margin-top:2px;font-size:.61rem;font-weight:900;color:#f0d64f}.cms-draft-toolbar button{min-height:36px}.cms-draft-toolbar button.secondary{background:#fff}.cms-draft-switch input{width:16px;height:16px}@media(max-width:620px){.cms-draft-tooltip{position:fixed;top:auto;left:14px;right:14px;bottom:14px;width:auto;max-width:none}.cms-draft-tooltip::before{display:none}}";
+  style.textContent+=".admin-header{flex-wrap:wrap}.admin-header .cms-draft-toolbar{flex:1 1 620px;max-width:920px;margin:0;padding:8px 10px;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#fff;justify-content:flex-end}.admin-header .cms-draft-toolbar>div{flex:0 0 auto}.admin-header .cms-draft-toolbar>div span{display:none}.admin-header .cms-draft-toolbar>div strong{font-size:.8rem;white-space:nowrap}.admin-header .cms-draft-switch{color:#fff;white-space:nowrap}.admin-header .cms-draft-count{color:#172026}.admin-header .cms-draft-toolbar button{min-height:34px;padding:8px 10px;white-space:nowrap}.admin-header .cms-draft-toolbar button:not(.secondary){background:var(--accent);color:#172026}.admin-header .cms-draft-toolbar button.secondary{background:#fff;color:#172026}.admin-header .admin-header-actions{margin-left:auto}@media(max-width:1180px){.admin-header .cms-draft-toolbar{order:3;flex-basis:100%;max-width:none;justify-content:flex-start}.admin-header .cms-draft-toolbar>div{margin-right:auto}}@media(max-width:760px){.admin-header .cms-draft-toolbar{gap:8px}.admin-header .cms-draft-toolbar>div{flex-basis:100%;margin-right:0}.admin-header .cms-draft-toolbar>div strong{font-size:.76rem}.admin-header .cms-draft-switch,.admin-header .cms-draft-count{font-size:.7rem}.admin-header .cms-draft-toolbar button{flex:1 1 auto}}";
   document.head.appendChild(style);
   refreshDraftToolbar(toolbar);
 }
