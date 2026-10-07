@@ -29,6 +29,13 @@ contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert off
 contains("admin/admin.js","cms-draft-tooltip","Entwurfszähler zeigt keine Hover-/Fokus-Details.");
 contains("admin/admin.js","draftChangeSummary","Entwurfs-Hover vergleicht Live- und Entwurfswert nicht.");
 contains("admin/admin.js","knownDraftRecords","Entwurfs-Hover speichert keine Draft-Detaildaten.");
+contains("cloudflare/src/index.js",'"impressum", "audit"',"Impressum ist nicht als geschützte Admin-Seite freigeschaltet.");
+contains("admin/admin.js",'ensureNavLink("impressum","Impressum")',"Impressum fehlt in der Admin-Navigation.");
+contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet nicht den eindeutigen Worker-Adminpfad.");
+contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
+contains("impressum/index.html",'data-cms-text="impressum/provider-name"',"Öffentliches Impressum ist nicht CMS-fähig.");
+contains("cloudflare/src/index.js","resolveAuditPublicationChange","Audit-Veröffentlichungen besitzen keinen Vorher-/Nachher-Abgleich.");
+contains("admin/audit/index.html","audit-publication-hover","Audit-Oberfläche zeigt Veröffentlichungsänderungen nicht per Hover/Fokus.");
 contains("admin/admin.js","visible:draftVisible","Neue Projekte werden im Entwurfsmodus nicht sichtbar für die Vorschau angelegt.");
 contains("cloudflare/src/index.js","previewConfig=renderPreviewConfig","Preview-Konfiguration wird nicht inline eingebettet.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_PREVIEW_CONTENT","Preview-Draft-Snapshot fehlt.");
