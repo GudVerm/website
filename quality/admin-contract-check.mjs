@@ -177,11 +177,12 @@ const env=JSON.parse(read("site.environments.json"));
 check(env.active_environment==="staging","Vor Domain-Cutover muss staging aktiv sein.");
 check(env.environments?.staging?.indexable===false,"Staging darf nicht indexierbar sein.");
 
+contains("admin/medien/index.html",'data-admin-page="medien"',"Eigenständige Medien-Adminseite fehlt.");
+contains("admin/medien/index.html","mediaLibraryGrid","Medien-Adminseite enthält keine Medienbibliothek.");
+
 if(errors.length){
   console.error("CMS-Vertragscheck fehlgeschlagen:\n- "+errors.join("\n- "));
   process.exit(1);
 }
 console.log("CMS-Vertragscheck erfolgreich: Sicherheits-, CMS-, Medien-, Entwurfs- und Anfragenfunktionen vorhanden.");
 
-contains("admin/medien/index.html",'data-admin-page="medien"',"Eigenständige Medien-Adminseite fehlt.");
-contains("admin/medien/index.html","mediaLibraryGrid","Medien-Adminseite enthält keine Medienbibliothek.");
