@@ -7,6 +7,34 @@
   <base href="../">
   <title>Startseite · Gudelius Admin</title>
   <link rel="stylesheet" href="./admin.css?v=20261007-09">
+  <style>
+    .startpage-hero-admin-grid{
+      grid-template-columns:minmax(0,1.7fr) minmax(320px,.8fr);
+      gap:22px;
+    }
+    #startPageGrid{
+      grid-template-columns:1fr!important;
+    }
+    #startPageGrid .equipment-card{
+      width:100%;
+      max-width:none;
+    }
+    #startPageGrid .image-wrap{
+      aspect-ratio:16/9;
+      min-height:320px;
+    }
+    #startPageGrid .card-body{
+      padding:20px;
+    }
+    @media(max-width:1000px){
+      .startpage-hero-admin-grid{
+        grid-template-columns:1fr;
+      }
+      #startPageGrid .image-wrap{
+        min-height:0;
+      }
+    }
+  </style>
 </head>
 <body data-admin-page="startseite">
   <header class="admin-header">
@@ -44,7 +72,7 @@
         <p>Bild und zentrale Einstiegstexte der Startseite sind getrennt voneinander pflegbar.</p>
       </section>
 
-      <div class="cms-group-grid">
+      <div class="cms-group-grid startpage-hero-admin-grid">
         <section class="cms-subpanel">
           <div class="cms-subpanel-head">
             <span class="cms-subpanel-icon">01</span>
@@ -54,7 +82,7 @@
               <p>Das große Hintergrundbild im Kopfbereich der Startseite.</p>
             </div>
           </div>
-          <section id="startPageGrid" class="equipment-grid compact-grid" aria-live="polite"></section>
+          <section id="startPageGrid" class="equipment-grid compact-grid startpage-hero-media-grid" aria-live="polite"></section>
         </section>
 
         <section class="cms-subpanel">
