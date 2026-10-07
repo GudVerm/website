@@ -1222,10 +1222,11 @@ function openProjectCreate(){projectCreatePanel.hidden=false;projectCreateTitle.
 function closeProjectCreate(){projectCreatePanel.hidden=true;setStatus(projectCreateStatus,"")}
 async function createProject(){
   const title=projectCreateTitle?.value.trim()||"";if(!title)return setStatus(projectCreateStatus,"Bitte einen Projekttitel eingeben.",false);if(!getApi()||!hasAdminAuth())return setStatus(projectCreateStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
-  const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:false,archived:false,featured:false,order:projects.length+1};
+  const draftVisible=cmsDraftMode===true;
+  const slug=uniqueProjectSlug(title),item={slug,key:"projects/"+slug,title,name:title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[],detail:"Projektbild",fallback:projectFallbackImage(),visible:draftVisible,archived:false,featured:false,order:projects.length+1};
   projectCreateSave.disabled=true;setStatus(projectCreateStatus,"Lege Projekt an …");
   try{projects.push(item);const values={title,imageTitle:title,imageDescription:"",description:"",location:"",year:"",services:[]};for(const field of projectFields){await saveHeroText(projectContentKey(item,field),values[field]);projectContentCache[projectContentKey(item,field)]=values[field]}
-    await saveProjectManifest();refreshProjectSelect();activeProjectSlug=slug;projectSelect.value=slug;closeProjectCreate();renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),"Neues Projekt angelegt und zunächst ausgeblendet.",true);history.replaceState(null,"","#"+encodeURIComponent(slug))}
+    await saveProjectManifest();refreshProjectSelect();activeProjectSlug=slug;projectSelect.value=slug;closeProjectCreate();renderProjectEditor(item);setStatus(projectEditor.querySelector(".project-status"),cmsDraftMode?"Neues Projekt als sichtbarer Entwurf angelegt. Es erscheint jetzt in der Vorschau.":"Neues Projekt angelegt und zunächst ausgeblendet.",true);history.replaceState(null,"","#"+encodeURIComponent(slug))}
   catch(error){projects=projects.filter(p=>p.slug!==slug);setStatus(projectCreateStatus,"Anlegen fehlgeschlagen: "+error.message,false)}finally{projectCreateSave.disabled=false}
 }
 function setupProjectEditor(){
