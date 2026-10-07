@@ -659,7 +659,8 @@ function draftAdminPageForKey(key){
   const raw=String(key||"").replace(/^media-layout\//,"");
   if(raw.startsWith("projects/")||raw.startsWith("projekte/"))return "projekte";
   if(raw.startsWith("equipment/")||raw.startsWith("technik/"))return "technik";
-  if(raw.startsWith("leistungsseiten/")||raw.startsWith("leistungen/"))return "leistungen";
+  if(raw.startsWith("leistungsseiten/"))return "leistungen";
+  if(raw.startsWith("leistungen/"))return "startseite";
   if(raw.startsWith("unternehmen/"))return "unternehmen";
   if(raw.startsWith("kontakt/"))return "kontakt";
   if(raw.startsWith("impressum/"))return "impressum";
