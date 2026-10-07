@@ -3387,7 +3387,9 @@ function renderCollection(target, items){
       img.src=fallbackUrl;
     }
 
-    if(getApi()&&cmsMediaEnabled){
+    if(cmsAccessMode&&getApi()){
+      loadProtectedMediaIntoImage(img,item.key,item.fallback).catch(showFallback);
+    }else if(getApi()&&cmsMediaEnabled){
       img.onerror=showFallback;
       img.src=mediaUrl(item.key);
     }else{
@@ -3420,16 +3422,27 @@ function renderCollection(target, items){
         const r=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
           method:"PUT",
           headers:await mediaUploadHeaders(selected),
+          credentials:"include",
           body:selected
         });
         const data=await r.json().catch(()=>({}));
         if(!r.ok) throw new Error(data.error||("HTTP "+r.status));
-        if(cmsMediaEnabled){
+        if(cmsAccessMode){
+          const readable=await loadProtectedMediaIntoImage(img,item.key,item.fallback);
+          if(!readable)throw new Error("Bild wurde gespeichert, konnte aber nicht wieder aus R2 geladen werden.");
+          if(previewObjectUrl){
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl="";
+          }
+          file.value="";
+          setStatus(status,"Bild gespeichert und aus R2 bestätigt.",true);
+        }else if(cmsMediaEnabled){
           img.onerror=showFallback;
           img.src=mediaUrl(item.key)+"?v="+Date.now();
+          file.value="";
           setStatus(status,"Bild erfolgreich in Cloudflare gespeichert.",true);
         }else{
-          setStatus(status,"Bild erfolgreich in R2 gespeichert. Öffentliche Medienausgabe ist deaktiviert; die lokale Vorschau bleibt sichtbar.",true);
+          setStatus(status,"Bild erfolgreich in R2 gespeichert.",true);
         }
       }catch(e){
         setStatus(status,"Upload fehlgeschlagen: "+e.message,false);
