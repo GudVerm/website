@@ -1643,11 +1643,27 @@ if(saveImprintTexts){
   saveImprintTexts.addEventListener("click",async()=>{
     if(!getApi()||!hasAdminAuth())return setStatus(imprintTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     saveImprintTexts.disabled=true;
-    setStatus(imprintTextStatus,"Speichere Impressum …");
+    setStatus(imprintTextStatus,"Prüfe Änderungen …");
     try{
-      await Promise.all(Object.entries(imprintTextFields).map(([key,field])=>saveHeroText(key,field?.value.trim()||"")));
+      const snapshotResponse=await fetchSiteSnapshot();
+      if(!snapshotResponse.ok)throw new Error("Aktueller CMS-Stand konnte nicht geladen werden (HTTP "+snapshotResponse.status+").");
+      const snapshotData=await snapshotResponse.json();
+      const currentContent=snapshotData.content||{};
+      const changed=Object.entries(imprintTextFields).filter(([key,field])=>{
+        const next=field?.value.trim()||"";
+        const current=typeof currentContent[key]==="string"?currentContent[key]:imprintTextDefaults[key];
+        return next!==current;
+      });
+      if(changed.length){
+        setStatus(imprintTextStatus,"Speichere "+changed.length+" Änderung"+(changed.length===1?"":"en")+" …");
+        await Promise.all(changed.map(([key,field])=>saveHeroText(key,field?.value.trim()||"")));
+      }
       clearAdminDirtyForElements(Object.values(imprintTextFields),"fields");
-      setStatus(imprintTextStatus,cmsDraftMode?"Impressum als Entwurf gespeichert.":"Impressum erfolgreich gespeichert.",true);
+      if(cmsDraftMode)await refreshDraftToolbar(document.querySelector(".cms-draft-toolbar"));
+      const message=changed.length
+        ? (cmsDraftMode?changed.length+" Änderung"+(changed.length===1?"":"en")+" als Entwurf gespeichert.":changed.length+" Änderung"+(changed.length===1?"":"en")+" veröffentlicht.")
+        : "Keine inhaltlichen Änderungen.";
+      setStatus(imprintTextStatus,message,true);
     }catch(error){
       setStatus(imprintTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
     }finally{
