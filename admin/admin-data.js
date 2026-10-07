@@ -69,6 +69,10 @@ const contactHeroImages = [
   { key:"kontakt/hero", name:"Kontakt · Hero", detail:"Großes Kopfbild der Kontaktseite", fallback:"../assets/media/home-hero.webp" }
 ];
 
+const imprintHeroImages = [
+  { key:"impressum/hero", name:"Impressum · Hero", detail:"Großes Kopfbild der Impressumsseite", fallback:"../assets/media/home-hero.webp" }
+];
+
 const companyImages = [
   { key:"unternehmen/hero", name:"Unternehmen · Hero", detail:"Großes Kopfbild der Unternehmensseite", fallback:"../assets/media/jost-gudelius.jpg" },
   { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
@@ -81,5 +85,5 @@ const techniqueGroupImages = [
   { key:"technik/gruppen/programme-arbeitsplatz", name:"Technik · Programme & Arbeitsplatz", detail:"Großes Gruppenbild oberhalb der Software- und Arbeitsplatz-Einträge", fallback:"../assets/media/2026-10-02-technik-software.webp" }
 ];
 
-  window.GUDELIUS_ADMIN_DATA = Object.freeze({ defaultEquipment, defaultProjects, startPageImages, serviceImages, servicePageImages, projectHeroImages, techniqueHeroImages, contactHeroImages, companyImages, techniqueGroupImages });
+  window.GUDELIUS_ADMIN_DATA = Object.freeze({ defaultEquipment, defaultProjects, startPageImages, serviceImages, servicePageImages, projectHeroImages, techniqueHeroImages, contactHeroImages, imprintHeroImages, companyImages, techniqueGroupImages });
 })();
