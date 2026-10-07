@@ -136,6 +136,19 @@ contains("admin/unternehmen/index.html",'id="companyHeroGrid"',"Unternehmens-Her
 contains("unternehmen/index.html",'data-cms-media="unternehmen/hero"',"Öffentliche Unternehmensseite ist nicht an das Hero-CMS-Bild gebunden.");
 contains("assets/gudelius-site.css",".company-directory-hero::before","Unternehmens-Hero besitzt kein lesbares Overlay.");
 
+contains("admin/admin-data.js",'key:"projekte/hero"',"Projekt-Hero fehlt im Medienkatalog.");
+contains("admin/admin-data.js",'key:"technik/hero"',"Technik-Hero fehlt im Medienkatalog.");
+contains("admin/admin-data.js",'key:"kontakt/hero"',"Kontakt-Hero fehlt im Medienkatalog.");
+contains("admin/projekte/index.html",'id="projectHeroGrid"',"Projekt-Hero kann im Admin nicht bearbeitet werden.");
+contains("admin/technik/index.html",'id="techniqueHeroGrid"',"Technik-Hero kann im Admin nicht bearbeitet werden.");
+contains("admin/kontakt/index.html",'id="contactHeroGrid"',"Kontakt-Hero kann im Admin nicht bearbeitet werden.");
+contains("admin/kontakt/index.html","admin-cropper.js","Kontakt-Admin lädt den Bildausschnitt-Editor nicht.");
+contains("projekte/index.html",'data-cms-media="projekte/hero"',"Projektseite ist nicht an das Hero-CMS-Bild gebunden.");
+contains("technik/index.html",'data-cms-media="technik/hero"',"Technikseite ist nicht an das Hero-CMS-Bild gebunden.");
+contains("kontakt/index.html",'data-cms-media="kontakt/hero"',"Kontaktseite ist nicht an das Hero-CMS-Bild gebunden.");
+contains("admin/media-library.js","data.projectHeroImages","Projekt-Hero fehlt in der Medienbibliothek.");
+contains("assets/gudelius-site.css",".directory-hero-with-media::before","Directory-Heros besitzen kein lesbares Overlay.");
+
 const env=JSON.parse(read("site.environments.json"));
 check(env.active_environment==="staging","Vor Domain-Cutover muss staging aktiv sein.");
 check(env.environments?.staging?.indexable===false,"Staging darf nicht indexierbar sein.");
