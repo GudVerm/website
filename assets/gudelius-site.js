@@ -297,34 +297,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const key=element.dataset.cmsText;
         let value = content[key];
         if(typeof value==="string"&&legacyCompanyText[key]?.[value]) value=legacyCompanyText[key][value];
-        if (typeof value === "string" && value.trim()) {
+        if (typeof value === "string") {
           element.textContent = value;
         }
       });
 
       root.querySelectorAll("[data-cms-link]").forEach((element) => {
         const value = content[element.dataset.cmsLink];
-        if (typeof value !== "string" || !value.trim()) return;
+        if (typeof value !== "string") return;
 
+        const trimmed=value.trim();
         const type = element.dataset.cmsLinkType;
         if (type === "mailto") {
-          element.href = "mailto:" + value.trim();
+          if(trimmed)element.href = "mailto:" + trimmed;
+          else element.removeAttribute("href");
         } else if (type === "tel") {
-          const normalized = value.trim().replace(/[^+\d]/g, "");
-          element.href = "tel:" + normalized;
+          const normalized = trimmed.replace(/[^+\d]/g, "");
+          if(normalized)element.href = "tel:" + normalized;
+          else element.removeAttribute("href");
         }
       });
 
       root.querySelectorAll("[data-cms-placeholder]").forEach((element) => {
         const value = content[element.dataset.cmsPlaceholder];
-        if (typeof value === "string" && value.trim()) {
+        if (typeof value === "string") {
           element.setAttribute("placeholder", value);
         }
       });
 
       root.querySelectorAll("[data-cms-value]").forEach((element) => {
         const value = content[element.dataset.cmsValue];
-        if (typeof value === "string" && value.trim()) {
+        if (typeof value === "string") {
           element.value = value;
         }
       });
