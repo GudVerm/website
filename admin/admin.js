@@ -30,6 +30,7 @@ const connectionStatus=document.getElementById("connectionStatus");
 const grid=document.getElementById("equipmentGrid");
 const projectGrid=document.getElementById("projectGrid");
 const startPageGrid=document.getElementById("startPageGrid");
+const startPageTileGrid=document.getElementById("startPageTileGrid");
 const companyGrid=document.getElementById("companyGrid");
 const techniqueGroupGrid=document.getElementById("technikGroupGrid");
 const service1Grid=document.getElementById("service1Grid");
@@ -1023,7 +1024,7 @@ const cmsMediaEnabled=window.GUDELIUS_CMS_MEDIA_ENABLED!==false;
 function initialMediaSrc(item){return getApi()&&(cmsMediaEnabled||cmsAccessMode)?mediaUrl(item.key):item.fallback}
 function showMediaModeNotice(){
   if(cmsMediaEnabled)return;
-  const hasMediaUi=document.querySelector("#startPageGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
+  const hasMediaUi=document.querySelector("#startPageGrid,#startPageTileGrid,#companyGrid,#service1Grid,#service2Grid,#service3Grid,#service4Grid,#servicePage1Grid,#servicePage2Grid,#servicePage3Grid,#servicePage4Grid,#technikEditor,#projectEditor");
   if(!hasMediaUi)return;
   const section=hasMediaUi.closest(".admin-section")||document.querySelector(".admin-section");
   const head=section?.querySelector(".admin-section-head");
@@ -3484,7 +3485,8 @@ function renderCollection(target, items){
 
 
 function render(){
-  renderCollection(startPageGrid, startPageImages);
+  renderCollection(startPageGrid, startPageImages.filter(item=>item.key==="startseite/hero"));
+  renderCollection(startPageTileGrid, startPageImages.filter(item=>item.key!=="startseite/hero"));
 
   renderCollection(service1Grid, serviceImages.filter(item=>item.key==="leistungen/ingenieurvermessung"));
   renderCollection(service2Grid, serviceImages.filter(item=>item.key==="leistungen/gis-bauvermessung"));
