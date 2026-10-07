@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.1`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.2`.
 
 ## Secrets
 
@@ -423,3 +423,11 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Admin und Access-Vorschau laden R2-Bilder über `/api/admin/media/<key>`.
 - `PUBLIC_MEDIA_ENABLED=false` bleibt unverändert; die öffentliche Medienausgabe wird nicht geöffnet.
 - Die öffentliche Website verwendet weiterhin `/media/<key>` und bleibt dadurch geschützt.
+
+
+## Release 2026-10-07.2 – Konsistenter Projektbild-Upload
+
+- Admin-Uploads auf `/api/admin/media/<key>` liefern als Rückgabe-URL ebenfalls den Access-geschützten Medienpfad statt des bei `PUBLIC_MEDIA_ENABLED=false` gesperrten öffentlichen `/media/<key>`-Pfads.
+- Der Projekt-Admin bestätigt den Upload weiterhin durch direktes Rücklesen aus R2 über `GET /api/admin/media/<key>`.
+- Die Access-Vorschau verwendet weiterhin `GUDELIUS_CMS_MEDIA_ENDPOINT='/api/admin/media'`; die öffentliche Medienausgabe bleibt unverändert deaktiviert.
+- Der CMS-Vertragscheck sichert diesen Projektbild-Pfad gegen Regressionen ab.
