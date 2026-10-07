@@ -14,6 +14,7 @@ const {
   projectHeroImages=[],
   techniqueHeroImages=[],
   contactHeroImages=[],
+  imprintHeroImages=[],
   companyImages,
   techniqueGroupImages
 }=window.GUDELIUS_ADMIN_DATA||{};
@@ -35,6 +36,7 @@ const projectGrid=document.getElementById("projectGrid");
 const projectHeroGrid=document.getElementById("projectHeroGrid");
 const techniqueHeroGrid=document.getElementById("techniqueHeroGrid");
 const contactHeroGrid=document.getElementById("contactHeroGrid");
+const imprintHeroGrid=document.getElementById("imprintHeroGrid");
 const startPageGrid=document.getElementById("startPageGrid");
 const startPageTileGrid=document.getElementById("startPageTileGrid");
 const companyHeroGrid=document.getElementById("companyHeroGrid");
@@ -3548,6 +3550,7 @@ function render(){
   renderCollection(projectHeroGrid, projectHeroImages);
   renderCollection(techniqueHeroGrid, techniqueHeroImages);
   renderCollection(contactHeroGrid, contactHeroImages);
+  renderCollection(imprintHeroGrid, imprintHeroImages);
   renderCollection(companyHeroGrid, companyImages.filter(item=>item.key==="unternehmen/hero"));
   renderCollection(companyGrid, companyImages.filter(item=>item.key!=="unternehmen/hero"));
   renderCollection(techniqueGroupGrid, techniqueGroupImages);
