@@ -56,6 +56,11 @@ contains("assets/gudelius-site.js","img.src=cmsMediaUrl(key);","Frontend wendet 
 contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen","Entwurfsmodus-Hinweis für Bildlayouts fehlt.");
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
 contains("admin/admin.js","admin-global-dirty-tooltip","Hover-/Fokus-Details für ungespeicherte Änderungen fehlen.");
+contains("admin/admin.js","focusAdminChangeTargets","Ungespeichert-/Entwurfs-Hinweise können nicht zur Änderung springen.");
+contains("admin/admin.js","adminDirtyElements","Ungespeichert-Hinweise merken sich nicht die tatsächlich geänderten Felder.");
+contains("admin/admin.js","jumpToDraftKey","Entwurfs-Hinweise sind nicht als Sprungnavigation umgesetzt.");
+contains("admin/admin.js","gudelius-admin-pending-draft-jump","Entwurfs-Sprung über Admin-Bereiche hinweg fehlt.");
+contains("admin/admin.css",".admin-change-highlight","Geänderte Felder werden nach dem Sprung nicht rot hervorgehoben.");
 contains("admin/admin.js","dirtyFieldLabel","Dirty-State merkt sich keine konkreten Feldnamen.");
 contains("admin/admin.css",".admin-global-dirty:hover .admin-global-dirty-tooltip","Dirty-Tooltip wird beim Hover nicht eingeblendet.");
 
