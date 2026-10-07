@@ -57,6 +57,10 @@ contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen",
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
 contains("admin/admin.js","admin-global-dirty-tooltip","Hover-/Fokus-Details für ungespeicherte Änderungen fehlen.");
 contains("admin/admin.js","focusAdminChangeTargets","Ungespeichert-/Entwurfs-Hinweise können nicht zur Änderung springen.");
+contains("admin/admin.js","admin-save-dock","Feste Speicherleiste fehlt auf bearbeitbaren CMS-Seiten.");
+contains("admin/admin.js","saveAllAdminDirtyChanges","Feste Speicherleiste kann offene Änderungen nicht speichern.");
+contains("admin/admin.js","saveAllPendingMediaCrops","Feste Speicherleiste berücksichtigt offene Bildausschnitte nicht.");
+contains("admin/admin.css",".admin-save-dock{","Feste Speicherleiste besitzt kein sichtbares Layout.");
 contains("admin/admin.js","adminDirtyElements","Ungespeichert-Hinweise merken sich nicht die tatsächlich geänderten Felder.");
 contains("admin/admin.js","jumpToDraftKey","Entwurfs-Hinweise sind nicht als Sprungnavigation umgesetzt.");
 contains("admin/admin.js","gudelius-admin-pending-draft-jump","Entwurfs-Sprung über Admin-Bereiche hinweg fehlt.");
