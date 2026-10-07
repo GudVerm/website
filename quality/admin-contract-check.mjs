@@ -130,6 +130,12 @@ for(const path of publicHtml){
   check(externalImages.length===0,path+" enthält externe Laufzeit-Bildquelle(n): "+externalImages.join(", "));
 }
 
+contains("admin/admin.js","companyHeroGrid","Unternehmens-Hero besitzt keinen eigenen Admin-Medieneditor.");
+contains("admin/admin-data.js",'key:"unternehmen/hero"',"Unternehmens-Hero fehlt im Medienkatalog.");
+contains("admin/unternehmen/index.html",'id="companyHeroGrid"',"Unternehmens-Hero kann im Admin nicht bearbeitet werden.");
+contains("unternehmen/index.html",'data-cms-media="unternehmen/hero"',"Öffentliche Unternehmensseite ist nicht an das Hero-CMS-Bild gebunden.");
+contains("assets/gudelius-site.css",".company-directory-hero::before","Unternehmens-Hero besitzt kein lesbares Overlay.");
+
 const env=JSON.parse(read("site.environments.json"));
 check(env.active_environment==="staging","Vor Domain-Cutover muss staging aktiv sein.");
 check(env.environments?.staging?.indexable===false,"Staging darf nicht indexierbar sein.");
