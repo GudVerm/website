@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-06.3`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.1`.
 
 ## Secrets
 
@@ -416,3 +416,10 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Die Access-Vorschau bettet CMS-API, Preview-Flag und den zusammengeführten Live+Draft-Snapshot direkt in die HTML-Seite ein.
 - Der frühere relative Request auf `/admin/preview/config.js` entfällt.
 - Damit kann das in der Vorschau gesetzte `<base href>` die Preview-Konfiguration nicht mehr versehentlich auf GitHub Pages umleiten.
+
+
+## Release 2026-10-07.1 – Geschützte Projektbilder in Admin und Vorschau
+
+- Admin und Access-Vorschau laden R2-Bilder über `/api/admin/media/<key>`.
+- `PUBLIC_MEDIA_ENABLED=false` bleibt unverändert; die öffentliche Medienausgabe wird nicht geöffnet.
+- Die öffentliche Website verwendet weiterhin `/media/<key>` und bleibt dadurch geschützt.
