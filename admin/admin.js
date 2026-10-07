@@ -556,6 +556,7 @@ function ensureAdminDirtyUi(){
 function shouldTrackAdminField(target){
   if(!draftCapablePages.has(currentAdminPage)||!target?.matches?.("input,textarea,select"))return false;
   if(target.closest(".cms-draft-toolbar"))return false;
+  if(target.matches("#projectSelect,#technikSelect"))return false;
   if(target.matches('input[type="search"],input[type="hidden"],input[type="file"]'))return false;
   if(target.closest(".media-crop-editor"))return false;
   return Boolean(target.closest("main"));
