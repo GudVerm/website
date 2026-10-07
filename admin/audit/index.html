@@ -106,7 +106,7 @@
       <div class="audit-collapsible-body">
         <div class="analytics-table-wrap">
           <table class="analytics-table">
-            <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Aktion</th><th>Bereich</th><th>Ziel</th><th>Details</th></tr></thead>
+            <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Aktion</th><th>Bereich</th><th>Element</th><th>Was wurde geändert?</th></tr></thead>
             <tbody id="auditRows"></tbody>
           </table>
         </div>
@@ -240,29 +240,60 @@
     if(JSON.stringify(before)===JSON.stringify(after))return "Keine inhaltliche Differenz.";
     return auditValuePreview(before)+" → "+auditValuePreview(after);
   }
-  function publicationAction(entry){
-    const label=esc(actionLabel(entry.action));
-    if(entry.action!=="entwurf_veroeffentlicht"||!entry.change)return label;
-    const summaryText=publicationSummary(entry.change);
-    const before=entry.change.has_before?auditValuePreview(entry.change.before):"Noch kein Live-Wert";
-    const after=auditValuePreview(entry.change.after);
-    return '<span class="audit-publication-hover" tabindex="0">'+label+
-      '<span class="audit-publication-tooltip" role="tooltip"><strong>Veröffentlichte Änderung</strong><code>'+esc(entry.target||"")+'</code>'+
-      '<span class="audit-publication-summary">'+esc(summaryText)+'</span>'+
-      '<span class="audit-publication-values"><span><b>Vorher</b><em>'+esc(before)+'</em></span><span><b>Nachher</b><em>'+esc(after)+'</em></span></span>'+
-      '</span></span>';
+  function auditAreaLabel(value){return ({projekte:"Projekte",technik:"Technik",leistungen:"Leistungen",startseite:"Startseite",unternehmen:"Unternehmen",kontakt:"Kontakt",impressum:"Impressum",medien:"Medien",anfragen:"Anfragen"}[value]||auditPrettyPart(value||""))}
+  function auditFieldLabel(value){const map={title:"Titel",description:"Beschreibung",location:"Ort",year:"Jahr",services:"Leistungen","image-title":"Bildtitel","image-description":"Bildbeschreibung",visible:"Sichtbarkeit",featured:"Hervorgehoben",index:"Liste & Reihenfolge","hero-lead":"Einleitung","provider-name":"Anbietername",phone:"Telefon",email:"E-Mail"};const raw=String(value||"").trim();return map[raw]||auditPrettyPart(raw)}
+  function auditEntity(entry){
+    const target=String(entry.target||"");let m=target.match(/^projekte\/([^/]+)(?:\/(.+))?$/);
+    if(m)return {id:"projekt:"+m[1],kind:"projekt",area:"Projekte",target:'Projekt „'+auditPrettyPart(m[1])+'“',field:m[2]?auditFieldLabel(m[2]):"Projekt"};
+    m=target.match(/^media-layout\/projects\/([^/]+)$/);if(m)return {id:"projekt:"+m[1],kind:"projekt",area:"Projekte",target:'Projekt „'+auditPrettyPart(m[1])+'“',field:"Bildausschnitt"};
+    m=target.match(/^technik\/([^/]+)(?:\/(.+))?$/);if(m&&m[1]!=="index")return {id:"technik:"+m[1],kind:"technik",area:"Technik",target:'Technik „'+auditPrettyPart(m[1])+'“',field:m[2]?auditFieldLabel(m[2]):"Eintrag"};
+    m=target.match(/^media-layout\/equipment\/([^/]+)$/);if(m)return {id:"technik:"+m[1],kind:"technik",area:"Technik",target:'Technik „'+auditPrettyPart(m[1])+'“',field:"Bildausschnitt"};
+    const area=String(entry.area||target.split("/")[0]||"").toLowerCase(),parts=target.split("/").filter(Boolean);
+    const field=parts[0]==="media-layout"?(parts.at(-1)==="hero"?"Hero-Bildausschnitt":"Bildausschnitt"):auditFieldLabel(parts.slice(1).join(" · ")||parts[0]||"Inhalt");
+    return {id:"bereich:"+area,kind:"bereich",area:auditAreaLabel(area),target:auditAreaLabel(area),field};
   }
+  function auditTime(entry){const value=Date.parse(String(entry.created_at||"").replace(" ","T")+"Z");return Number.isFinite(value)?value:0}
+  function auditNear(a,b){return a.actor_email===b.actor_email&&Math.abs(auditTime(a)-auditTime(b))<=5000}
+  function readableAuditEntries(entries){
+    const lifecycleActions=new Set(["projekt_angelegt","projekt_geloescht","projekt_geaendert","technik_angelegt","technik_geloescht","technik_geaendert"]);
+    const lifecycle=entries.filter(e=>lifecycleActions.has(e.action)).map(entry=>({entry,entity:auditEntity(entry)}));
+    const output=[],groups=[];
+    for(const entry of entries){
+      const entity=auditEntity(entry);
+      if(entry.action==="entwurf_veroeffentlicht"){
+        const related=lifecycle.find(item=>auditNear(entry,item.entry)&&((entity.kind==="projekt"&&item.entity.id===entity.id)||(entity.kind==="technik"&&item.entity.id===entity.id)||(entry.target==="projekte/index"&&item.entry.area==="projekte")||(entry.target==="technik/index"&&item.entry.area==="technik")));
+        if(related)continue;
+        let group=groups.find(item=>item.entity.id===entity.id&&auditNear(entry,item.entry));
+        if(!group){
+          group={entry:{...entry},entity,fields:new Set()};
+          group.entry._displayAction=entity.kind==="projekt"?"Projekt geändert":entity.kind==="technik"?"Technik geändert":"Änderungen veröffentlicht";
+          group.entry._displayArea=entity.area;
+          group.entry._displayTarget=entity.target;
+          groups.push(group);
+          output.push(group.entry);
+        }
+        if(entity.field)group.fields.add(entity.field);
+        group.entry._displayDetails=[...group.fields].join(", ")+" veröffentlicht.";
+        continue;
+      }
+      const display={...entry,_displayArea:entity.area,_displayTarget:entity.target};
+      if(entry.action==="projekt_geloescht")display._displayDetails="Projekt aus der veröffentlichten Projektliste entfernt.";
+      else if(entry.action==="projekt_angelegt")display._displayDetails="Projekt zur veröffentlichten Projektliste hinzugefügt.";
+      else if(entry.action==="technik_geloescht")display._displayDetails="Technik-Eintrag aus der veröffentlichten Liste entfernt.";
+      else if(entry.action==="technik_angelegt")display._displayDetails="Technik-Eintrag zur veröffentlichten Liste hinzugefügt.";
+      else if(entry.details==="manifest")display._displayDetails="Liste bzw. Reihenfolge geändert.";
+      else if(/^history_id=/.test(entry.details||""))display._displayDetails="Vorheriger Stand wurde versioniert.";
+      else if(entry.details==="neu")display._displayDetails="Neuer Inhalt.";
+      output.push(display);
+    }
+    return output;
+  }
+  function publicationAction(entry){return esc(entry._displayAction||actionLabel(entry.action))}
   function render(entries){
-    rows.innerHTML=entries.map(entry=>'<tr>'+
-      '<td>'+esc(entry.created_at||"")+'</td>'+
-      '<td>'+esc(entry.actor_email||"–")+'</td>'+
-      '<td>'+publicationAction(entry)+'</td>'+
-      '<td>'+esc(entry.area||"–")+'</td>'+
-      '<td><code>'+esc(entry.target||"–")+'</code></td>'+
-      '<td>'+esc(entry.details||"")+'</td>'+
-      '</tr>').join("");
-    summary.textContent=entries.length+" Einträge angezeigt.";
-    if(!entries.length)rows.innerHTML='<tr><td colspan="6">Keine passenden Änderungen gefunden.</td></tr>';
+    const displayEntries=readableAuditEntries(entries);
+    rows.innerHTML=displayEntries.map(entry=>'<tr><td>'+esc(entry.created_at||"")+'</td><td>'+esc(entry.actor_email||"–")+'</td><td>'+publicationAction(entry)+'</td><td>'+esc(entry._displayArea||auditAreaLabel(entry.area)||"–")+'</td><td>'+esc(entry._displayTarget||entry.target||"–")+'</td><td>'+esc(entry._displayDetails||entry.details||"")+'</td></tr>').join("");
+    summary.textContent=displayEntries.length+" verständliche Änderungen aus "+entries.length+" Protokolleinträgen.";
+    if(!displayEntries.length)rows.innerHTML='<tr><td colspan="6">Keine passenden Änderungen gefunden.</td></tr>';
   }
 
   async function load(){
