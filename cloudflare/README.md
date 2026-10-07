@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.2`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.3`.
 
 ## Secrets
 
@@ -431,3 +431,11 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Der Projekt-Admin bestätigt den Upload weiterhin durch direktes Rücklesen aus R2 über `GET /api/admin/media/<key>`.
 - Die Access-Vorschau verwendet weiterhin `GUDELIUS_CMS_MEDIA_ENDPOINT='/api/admin/media'`; die öffentliche Medienausgabe bleibt unverändert deaktiviert.
 - Der CMS-Vertragscheck sichert diesen Projektbild-Pfad gegen Regressionen ab.
+
+
+## Release 2026-10-07.3 – Impressum und Audit-Veröffentlichungsdetails
+
+- `/admin/impressum/` ist als Access-geschützter Admin-Bereich freigeschaltet und unterstützt Entwürfe sowie Vorschau.
+- Das öffentliche Impressum liest die editierbaren rechtlichen Angaben über `impressum/*`-CMS-Keys.
+- Admin-Navigation normalisiert Audit- und Impressum-Links auf die geschützten Worker-Pfade `/admin/audit/` und `/admin/impressum/`.
+- Veröffentlichungen im Audit-Log werden mit der Inhalts-Historie verknüpft. Beim Hover/Fokus kann der Admin den rekonstruierten Vorher-/Nachher-Stand der jeweiligen Veröffentlichung sehen.
