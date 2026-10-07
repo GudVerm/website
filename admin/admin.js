@@ -160,6 +160,35 @@ const saveContactTexts=document.getElementById("saveContactTexts");
 const reloadContactTexts=document.getElementById("reloadContactTexts");
 const contactTextStatus=document.getElementById("contactTextStatus");
 
+const imprintTextFields={
+  "impressum/hero-lead":document.getElementById("imprintHeroLead"),
+  "impressum/provider-name":document.getElementById("imprintProviderName"),
+  "impressum/provider-role":document.getElementById("imprintProviderRole"),
+  "impressum/street":document.getElementById("imprintStreet"),
+  "impressum/city":document.getElementById("imprintCity"),
+  "impressum/phone":document.getElementById("imprintPhone"),
+  "impressum/fax":document.getElementById("imprintFax"),
+  "impressum/email":document.getElementById("imprintEmail"),
+  "impressum/profession":document.getElementById("imprintProfession"),
+  "impressum/chamber":document.getElementById("imprintChamber"),
+  "impressum/country":document.getElementById("imprintCountry"),
+  "impressum/regulations":document.getElementById("imprintRegulations"),
+  "impressum/insurer-name":document.getElementById("imprintInsurerName"),
+  "impressum/insurer-street":document.getElementById("imprintInsurerStreet"),
+  "impressum/insurer-city":document.getElementById("imprintInsurerCity"),
+  "impressum/insurance-area":document.getElementById("imprintInsuranceArea"),
+  "impressum/dispute":document.getElementById("imprintDispute"),
+  "impressum/liability-content-1":document.getElementById("imprintLiabilityContent1"),
+  "impressum/liability-content-2":document.getElementById("imprintLiabilityContent2"),
+  "impressum/liability-links-1":document.getElementById("imprintLiabilityLinks1"),
+  "impressum/liability-links-2":document.getElementById("imprintLiabilityLinks2"),
+  "impressum/copyright-1":document.getElementById("imprintCopyright1"),
+  "impressum/copyright-2":document.getElementById("imprintCopyright2")
+};
+const saveImprintTexts=document.getElementById("saveImprintTexts");
+const reloadImprintTexts=document.getElementById("reloadImprintTexts");
+const imprintTextStatus=document.getElementById("imprintTextStatus");
+
 const serviceContactTextFields={
   "kontakt/service-eyebrow":document.getElementById("contactServiceEyebrow"),
   "kontakt/ingenieurvermessung/title":document.getElementById("contactEngineerTitle"),
@@ -212,7 +241,7 @@ function adminHeaders(extra={}){
   return token ? {...extra,"authorization":"Bearer "+token} : {...extra};
 }
 
-const draftCapablePages=new Set(["startseite","leistungen","unternehmen","technik","projekte","kontakt"]);
+const draftCapablePages=new Set(["startseite","leistungen","unternehmen","technik","projekte","kontakt","impressum"]);
 const currentAdminPage=document.body?.dataset?.adminPage||"";
 
 /* Zentraler, abschnittsbezogener Dirty-State. */
@@ -237,7 +266,7 @@ function cleanDirtyLabel(value,fallback=""){
 function dirtyScopeLabel(scope){
   const pageFallback={
     startseite:"Startseite",leistungen:"Leistungen",unternehmen:"Unternehmen",
-    technik:"Technik",projekte:"Projekte",kontakt:"Kontakt"
+    technik:"Technik",projekte:"Projekte",kontakt:"Kontakt",impressum:"Impressum"
   }[currentAdminPage]||"Aktueller Bereich";
   if(!scope)return pageFallback;
   const text=selector=>cleanDirtyLabel(scope.querySelector(selector)?.textContent);
@@ -420,7 +449,7 @@ function draftKeyLabel(key){
   const isLayout=parts[0]==="media-layout";
   const contentParts=isLayout?parts.slice(1):parts;
   const area=contentParts[0]||"cms";
-  const areaLabels={startseite:"Startseite",leistungen:"Leistungen",unternehmen:"Unternehmen",technik:"Technik",projekte:"Projekte",kontakt:"Kontakt"};
+  const areaLabels={startseite:"Startseite",leistungen:"Leistungen",unternehmen:"Unternehmen",technik:"Technik",projekte:"Projekte",kontakt:"Kontakt",impressum:"Impressum"};
   const areaLabel=areaLabels[area]||draftPrettyPart(area);
   if(isLayout){
     if(area==="projects"||area==="projekte")return "Projektbild: "+draftPrettyPart(contentParts[1]||"");
@@ -526,7 +555,7 @@ function scheduleDraftToolbarRefresh(){
 const draftFieldSaveSelector=[
   "#saveHeroTexts","#saveService1Texts","#saveService2Texts","#saveService3Texts","#saveService4Texts",
   "#saveEngineerPageTexts","#saveGisPageTexts","#saveScanPageTexts","#saveDronePageTexts",
-  "#saveCompanyTexts","#saveCompanyTimeline","#saveContactTexts","#saveServiceContactTexts",
+  "#saveCompanyTexts","#saveCompanyTimeline","#saveContactTexts","#saveServiceContactTexts","#saveImprintTexts",
   ".project-save",".technik-save"
 ].join(",");
 function visibleEnabledSaveButton(scope){
@@ -573,7 +602,8 @@ function previewPathForAdminPage(){
     unternehmen:"unternehmen/",
     technik:"technik/",
     projekte:"projekte/",
-    kontakt:"kontakt/"
+    kontakt:"kontakt/",
+    impressum:"impressum/"
   }[currentAdminPage]||"index.html";
 }
 async function refreshDraftToolbar(toolbar){
@@ -1552,6 +1582,68 @@ if(saveContactTexts){
 }
 
 if(reloadContactTexts) reloadContactTexts.addEventListener("click",loadContactTexts);
+
+const imprintTextDefaults={
+  "impressum/hero-lead":"Angaben gemäß § 5 DDG und weitere rechtliche Hinweise von GudeliusVermessung.",
+  "impressum/provider-name":"Jost Gudelius",
+  "impressum/provider-role":"Vermessungsbüro",
+  "impressum/street":"Bäcker 25",
+  "impressum/city":"83676 Jachenau",
+  "impressum/phone":"+49 (0) 8043 9187958",
+  "impressum/fax":"+49 (0) 8043 9189672",
+  "impressum/email":"gudeliusvermessung@web.de",
+  "impressum/profession":"Vermessungsingenieur",
+  "impressum/chamber":"–",
+  "impressum/country":"Deutschland",
+  "impressum/regulations":"Es gelten folgende berufsrechtliche Regelungen:\nRegelungen einsehbar unter:\nhttp://",
+  "impressum/insurer-name":"Allianz Versicherungs-Aktiengesellschaft",
+  "impressum/insurer-street":"Albert-Schäffenacker-Straße 5",
+  "impressum/insurer-city":"83646 Bad Tölz",
+  "impressum/insurance-area":"Deutschland",
+  "impressum/dispute":"Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+  "impressum/liability-content-1":"Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Für die Verantwortlichkeit für fremde Informationen gelten die jeweils anwendbaren gesetzlichen Vorschriften.",
+  "impressum/liability-content-2":"Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.",
+  "impressum/liability-links-1":"Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar.",
+  "impressum/liability-links-2":"Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.",
+  "impressum/copyright-1":"Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.",
+  "impressum/copyright-2":"Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen."
+};
+
+async function loadImprintTexts(){
+  if(!imprintTextStatus)return;
+  if(!getApi())return setStatus(imprintTextStatus,"Worker-URL fehlt.",false);
+  setStatus(imprintTextStatus,"Lade Impressum …");
+  try{
+    const response=await fetchSiteSnapshot();
+    if(!response.ok)throw new Error("HTTP "+response.status);
+    const data=await response.json();
+    const content=data.content||{};
+    Object.entries(imprintTextFields).forEach(([key,field])=>{
+      if(field)field.value=typeof content[key]==="string"?content[key]:imprintTextDefaults[key];
+    });
+    setStatus(imprintTextStatus,"Impressum geladen.",true);
+  }catch(error){
+    Object.entries(imprintTextFields).forEach(([key,field])=>{if(field)field.value=imprintTextDefaults[key]});
+    setStatus(imprintTextStatus,"Impressum konnte nicht geladen werden: "+error.message,false);
+  }
+}
+
+if(saveImprintTexts){
+  saveImprintTexts.addEventListener("click",async()=>{
+    if(!getApi()||!hasAdminAuth())return setStatus(imprintTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    saveImprintTexts.disabled=true;
+    setStatus(imprintTextStatus,"Speichere Impressum …");
+    try{
+      await Promise.all(Object.entries(imprintTextFields).map(([key,field])=>saveHeroText(key,field?.value.trim()||"")));
+      setStatus(imprintTextStatus,cmsDraftMode?"Impressum als Entwurf gespeichert.":"Impressum erfolgreich gespeichert.",true);
+    }catch(error){
+      setStatus(imprintTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
+    }finally{
+      saveImprintTexts.disabled=false;
+    }
+  });
+}
+if(reloadImprintTexts)reloadImprintTexts.addEventListener("click",loadImprintTexts);
 
 async function loadServiceContactTexts(){
   if(!serviceContactTextStatus) return;
@@ -3069,6 +3161,7 @@ loadServiceTexts();
 loadCompanyTexts();
 loadCompanyTimeline();
 loadContactTexts();
+loadImprintTexts();
 loadServiceContactTexts();
 loadEngineerPageTexts();
 loadGisPageTexts();
@@ -3082,14 +3175,30 @@ window.GUDELIUS_ADMIN_CORE=Object.freeze({
 });
 
 const adminNavInner=document.querySelector(".admin-nav-inner");
-if(adminNavInner&&!adminNavInner.querySelector('[data-page="audit"]')){
-  const auditLink=document.createElement("a");
-  auditLink.className="admin-nav-link";
-  auditLink.dataset.page="audit";
-  auditLink.href=(document.body.dataset.adminPage==="dashboard"?"./audit/":"../audit/");
-  auditLink.textContent="Audit-Log";
-  adminNavInner.appendChild(auditLink);
+function adminAreaUrl(page){
+  const api=getApi();
+  if(api)return api+"/admin/"+page+"/";
+  const root=window.GUDELIUS_ADMIN_APP_URL||new URL("./",location.href).toString();
+  return new URL(page+"/",root).toString();
 }
+if(adminNavInner){
+  const ensureNavLink=(page,label)=>{
+    let link=adminNavInner.querySelector('[data-page="'+page+'"]');
+    if(!link){
+      link=document.createElement("a");
+      link.className="admin-nav-link";
+      link.dataset.page=page;
+      link.textContent=label;
+      adminNavInner.appendChild(link);
+    }
+    link.href=adminAreaUrl(page);
+    return link;
+  };
+  ensureNavLink("impressum","Impressum");
+  ensureNavLink("audit","Audit-Log");
+}
+document.querySelectorAll('a[href="./audit/"],a[href="../audit/"],a[href="/audit/"],a[href="/admin/audit/"]').forEach(link=>{link.href=adminAreaUrl("audit")});
+document.querySelectorAll('a[href="./impressum/"],a[href="../impressum/"],a[href="/admin/impressum/"]').forEach(link=>{link.href=adminAreaUrl("impressum")});
 const adminNavLinks=[...document.querySelectorAll(".admin-nav-link")];
 const activeAdminPage=document.body.dataset.adminPage||"";
 
