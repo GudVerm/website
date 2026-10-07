@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <base href="../">
+  <title>Medien · Gudelius Admin</title>
+  <link rel="stylesheet" href="./admin.css?v=20261007-03">
+</head>
+<body data-admin-page="medien">
+  <header class="admin-header">
+    <div><span class="kicker">GudeliusVermessung</span><h1>Medien</h1></div>
+    <div class="admin-header-actions"><a class="ghost" href="./">Übersicht</a><a class="ghost" href="../" target="_blank" rel="noopener">Website öffnen ↗</a></div>
+  </header>
+  <nav class="admin-nav" aria-label="Admin-Bereiche"><div class="admin-nav-inner">
+    <a class="admin-nav-link" data-page="verbindung" href="./verbindung/">Verbindung</a>
+    <a class="admin-nav-link" data-page="startseite" href="./startseite/">Startseite</a>
+    <a class="admin-nav-link" data-page="leistungen" href="./leistungen/">Leistungen</a>
+    <a class="admin-nav-link" data-page="unternehmen" href="./unternehmen/">Unternehmen</a>
+    <a class="admin-nav-link" data-page="technik" href="./technik/">Technik</a>
+    <a class="admin-nav-link" data-page="projekte" href="./projekte/">Projekte</a>
+    <a class="admin-nav-link" data-page="anfragen" href="./anfragen/">Anfragen</a>
+    <a class="admin-nav-link" data-page="statistik" href="./statistik/">Statistik</a>
+    <a class="admin-nav-link" data-page="kontakt" href="./kontakt/">Kontakt</a>
+    <a class="admin-nav-link active" data-page="medien" href="./medien/">Medien</a>
+    <a class="admin-nav-link" data-page="impressum" href="./impressum/">Impressum</a>
+    <a class="admin-nav-link" data-page="audit" href="./audit/">Audit-Log</a>
+  </div></nav>
+  <main class="wrap admin-page-wrap">
+    <section class="section-head admin-section-head media-library-head">
+      <div><span class="kicker">Medienbibliothek</span><h2>Website-Bilder zentral verwalten</h2></div>
+      <p>Alle bekannten Website-Bilder, R2-Dateien, Verwendungen und gespeicherten Bildausschnitte an einem Ort. Bearbeitet wird das Bild anschließend im jeweils zuständigen Inhaltsbereich.</p>
+    </section>
+    <section class="media-library-panel">
+      <div class="media-library-toolbar">
+        <label><span>Suche</span><input id="mediaLibrarySearch" type="search" placeholder="Bild, Bereich oder Medienkey"></label>
+        <label><span>Filter</span><select id="mediaLibraryFilter"><option value="all">Alle Medien</option><option value="r2">Nur hochgeladene R2-Bilder</option><option value="fallback">Mit lokalem Fallback</option><option value="crop">Mit gespeichertem Bildausschnitt</option><option value="nocrop">Ohne gespeicherten Bildausschnitt</option><option value="unused">Nicht zugeordnete R2-Medien</option><option value="large">Große Medien (&gt; 1 MiB)</option><option value="external">Externe Quellen</option></select></label>
+        <div id="mediaLibrarySummary" class="media-library-summary">Lade Medien …</div>
+      </div>
+      <div id="mediaLibraryGrid" class="media-library-grid" aria-live="polite"></div>
+      <div id="mediaLibraryStatus" class="status"></div>
+    </section>
+  </main>
+  <style>
+    .media-library-panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(20,32,38,.05)}
+    .media-library-toolbar{display:grid;grid-template-columns:1.4fr .9fr auto;gap:14px;align-items:end;margin-bottom:18px}
+    .media-library-toolbar label{display:grid;gap:6px}.media-library-toolbar label>span{font-size:.7rem;font-weight:900;color:#526067}
+    .media-library-toolbar input,.media-library-toolbar select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#fbfbf8;color:var(--ink);font:inherit}
+    .media-library-summary{padding:11px 12px;border-radius:11px;background:#eef0ed;color:#526067;font-size:.75rem;font-weight:850;white-space:nowrap}
+    .media-library-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .media-library-card{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fbfbf8}
+    .media-library-preview{aspect-ratio:16/10;background:#172026;overflow:hidden}.media-library-preview img{width:100%;height:100%;object-fit:cover}
+    .media-library-no-preview{display:grid;place-items:center;height:100%;color:#cbd4d1;font-size:.75rem}
+    .media-library-body{display:grid;gap:10px;padding:15px}.media-library-body h3{margin:0;font-size:1rem}.media-library-body code{display:block;overflow-wrap:anywhere;color:#59666c;font-size:.68rem}
+    .media-library-meta{display:flex;flex-wrap:wrap;gap:6px}.media-library-pill{padding:5px 7px;border-radius:999px;background:#ecefe9;color:#526067;font-size:.62rem;font-weight:900}.media-library-pill.is-r2{background:#e1f0e5;color:#25643c}.media-library-pill.is-crop{background:#fff2b3;color:#725b00}.media-library-pill.is-warning{background:#fde8df;color:#8c3d26}
+    .media-library-context{display:grid;gap:7px;margin:0;padding:10px;border:1px solid #e3e6e1;border-radius:10px;background:#fff}.media-library-context div{display:grid;grid-template-columns:82px minmax(0,1fr);gap:8px}.media-library-context dt{color:#67757b;font-size:.64rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.media-library-context dd{min-width:0;margin:0;color:#45535a;font-size:.7rem;line-height:1.45}.media-library-context code{font-size:.66rem}
+    .media-library-crop{color:#67757b;font-size:.7rem;line-height:1.45}.media-library-actions{display:flex;gap:7px;flex-wrap:wrap}.media-library-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 10px;border-radius:9px;background:#172026;color:#fff;text-decoration:none;font-size:.7rem;font-weight:850}.media-library-actions a.secondary{background:#edf0ed;color:#172026}
+    @media(max-width:900px){.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.media-library-toolbar{grid-template-columns:1fr 1fr}.media-library-summary{grid-column:1/-1}}
+    @media(max-width:620px){.media-library-grid,.media-library-toolbar{grid-template-columns:1fr}.media-library-context div{grid-template-columns:1fr}}
+  </style>
+  <script src="./config.js?v=20261007-03"></script>
+  <script src="./admin-data.js?v=20261003-01"></script>
+  <script src="./admin.js?v=20261007-10"></script>
+  <script src="./media-library.js?v=20261003-01"></script>
+</body>
+</html>
