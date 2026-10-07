@@ -36,6 +36,9 @@ contains("admin/admin.js",'target.matches("#projectSelect,#technikSelect")',"Dat
 contains("admin/admin.js","cmsDraftMode?draftContentUrl(key):contentUrl(key)","Text-/Layout-Speicherung ist nicht draft-aware.");
 contains("admin/admin.js","savePendingDraftFieldChanges","Vorschau speichert offene Textänderungen nicht als Entwurf.");
 contains("admin/admin.js","cms-draft-tooltip","Entwurfszähler zeigt keine Hover-/Fokus-Details.");
+contains("admin/admin.js","cms-draft-toolbar-header","Entwurf & Vorschau ist nicht als Header-Werkzeugleiste markiert.");
+contains("admin/admin.js",'headerTitle.insertAdjacentElement("afterend",toolbar)',"Entwurf & Vorschau wird nicht direkt neben Website-Admin im Header platziert.");
+check(!read("admin/admin.js").includes("main.prepend(toolbar)"),"Entwurf & Vorschau wird weiterhin im Seiteninhalt statt im Header eingefügt.");
 contains("admin/admin.js","draftChangeSummary","Entwurfs-Hover vergleicht Live- und Entwurfswert nicht.");
 contains("admin/admin.js","knownDraftRecords","Entwurfs-Hover speichert keine Draft-Detaildaten.");
 contains("cloudflare/src/index.js",'"impressum", "audit"',"Impressum ist nicht als geschützte Admin-Seite freigeschaltet.");
@@ -140,7 +143,7 @@ for(const path of adminCachePages){
   const html=read(path);
   check(html.includes("admin.css?v=20261007-09"),path+" verwendet nicht die aktuelle admin.css-Cache-Version.");
   check(html.includes("admin-data.js?v=20261007-04"),path+" verwendet nicht die aktuelle admin-data.js-Cache-Version.");
-  check(html.includes("admin.js?v=20261007-22"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
+  check(html.includes("admin.js?v=20261007-23"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
 }
 
 const quality=read(".github/workflows/website-quality.yml");
