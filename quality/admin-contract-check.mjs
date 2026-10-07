@@ -18,6 +18,10 @@ contains("admin/audit/index.html","Live ↔ Entwurf vergleichen","Entwurfs-Diffe
 contains("assets/admin-cropper.js","media-crop-target-frame","Cropper-Zielvorschau fehlt.");
 contains("assets/admin-cropper.js","Empfohlenen Ausschnitt verwenden","Cropper-Empfehlungs-Preset fehlt.");
 contains("assets/admin-cropper.js","media-crop-x-value","Cropper-Zahlenwerte fehlen.");
+contains("admin/admin.css",'grid-template-columns:minmax(0,1fr) 62px',"Cropper-Wertpillen besitzen keine feste, kollisionsfreie Wertspalte.");
+contains("admin/admin.css","border-radius:999px","Cropper-Wertpillen sind nicht als stabile Pills gestaltet.");
+contains("admin/admin.css","@container (max-width:230px)","Cropper besitzt keine containerbasierte Absicherung für schmale Karten.");
+contains("admin/admin.css","grid-template-columns:repeat(2,minmax(0,1fr))","Cropper-Aktionsbuttons können in schmalen Karten überlaufen.");
 contains("assets/admin-cropper.js","cms-crop-dirty-change","Crop-Dirty-Event fehlt.");
 contains("admin/admin.js","beforeunload","Schutz vor Verlassen mit offenen Änderungen fehlt.");
 contains("admin/admin.js","cmsDraftMode?draftContentUrl(key):contentUrl(key)","Text-/Layout-Speicherung ist nicht draft-aware.");
