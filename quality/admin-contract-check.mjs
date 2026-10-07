@@ -66,6 +66,11 @@ contains("admin/admin.js",'credentials:"include"',"Admin-Medienupload sendet kei
 contains("assets/cms-config.js","GUDELIUS_CMS_MEDIA_ENABLED = true","Öffentliche CMS-Medien sind im Site-Config weiterhin deaktiviert.");
 contains("cloudflare/wrangler.jsonc",'"PUBLIC_MEDIA_ENABLED": "true"',"Öffentliche R2-Medienausgabe ist im Worker weiterhin deaktiviert.");
 contains("index.html",'data-cms-bg="leistungen/ingenieurvermessung"',"Leistungsbilder sind auf der Live-Startseite nicht an CMS-Medienkeys gebunden.");
+contains("leistungen/ingenieurvermessung/index.html",'class="service-hero-media"',"Ingenieurvermessungs-Hero verwendet kein echtes Bild-Element.");
+contains("leistungen/gis-bauvermessung/index.html",'data-cms-media="leistungsseiten/gis-bauvermessung/hero"',"GIS-Hero ist nicht direkt an den CMS-Medienkey gebunden.");
+contains("leistungen/3d-laserscanning/index.html",'data-cms-media="leistungsseiten/3d-laserscanning/hero"',"3D-Hero ist nicht direkt an den CMS-Medienkey gebunden.");
+contains("leistungen/drohnenvermessung/index.html",'data-cms-media="leistungsseiten/drohnenvermessung/hero"',"Drohnen-Hero ist nicht direkt an den CMS-Medienkey gebunden.");
+contains("assets/service-pages.css",".service-hero-media{","Leistungs-Hero besitzt kein sichtbares Bild-Layer.");
 contains("admin/startseite/index.html","Vier Leistungs-Kacheln der Startseite","Die vier Leistungs-Kacheln fehlen im Startseiten-Admin.");
 contains("admin/startseite/index.html",'id="service1Grid"',"Ingenieurvermessungs-Kachel fehlt im Startseiten-Admin.");
 check(!read("admin/leistungen/index.html").includes("<strong>Startseiten-Kachel</strong>"),"Startseiten-Leistungskacheln sind weiterhin im Leistungen-Admin eingebettet.");
