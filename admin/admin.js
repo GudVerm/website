@@ -218,10 +218,11 @@ const currentAdminPage=document.body?.dataset?.adminPage||"";
 /* Zentraler, abschnittsbezogener Dirty-State. */
 const adminDirtyKeys=new Set();
 const adminDirtyScopes=new Map();
+const adminDirtyDetails=new Map();
 const adminDirtyScopeIds=new WeakMap();
 let adminDirtyScopeSeq=0;
 function dirtyScopeFor(element){
-  return element?.closest?.(".project-editor-card,.equipment-card,.service-department,.admin-section,.cms-subpanel,.panel,main")||document.querySelector("main")||document.body;
+  return element?.closest?.(".project-editor-card,.technik-editor-card,.equipment-card,.service-department,.admin-section,.cms-subpanel,.panel,main")||document.querySelector("main")||document.body;
 }
 function dirtyScopeId(scope){
   if(!scope)return "page";
@@ -229,6 +230,91 @@ function dirtyScopeId(scope){
   return adminDirtyScopeIds.get(scope);
 }
 function dirtyKey(element,type="fields"){return dirtyScopeId(dirtyScopeFor(element))+":"+type}
+function cleanDirtyLabel(value,fallback=""){
+  const text=String(value||"").replace(/\s+/g," ").trim();
+  return (text||fallback).slice(0,100);
+}
+function dirtyScopeLabel(scope){
+  const pageFallback={
+    startseite:"Startseite",leistungen:"Leistungen",unternehmen:"Unternehmen",
+    technik:"Technik",projekte:"Projekte",kontakt:"Kontakt"
+  }[currentAdminPage]||"Aktueller Bereich";
+  if(!scope)return pageFallback;
+  const text=selector=>cleanDirtyLabel(scope.querySelector(selector)?.textContent);
+  if(scope.matches?.(".project-editor-card"))return "Projekt: "+(text(".project-editor-name")||pageFallback);
+  if(scope.matches?.(".technik-editor-card"))return "Technik: "+(text(".technik-editor-name")||pageFallback);
+  if(scope.matches?.(".service-department"))return "Leistung: "+(text(":scope > .cms-subpanel-head h3")||text("h3")||pageFallback);
+  return text(":scope > .cms-subpanel-head h3")
+    ||text(":scope > .admin-section-head h2")
+    ||text(":scope > .section-head h2")
+    ||text(":scope > h3")
+    ||text(":scope > h2")
+    ||pageFallback;
+}
+function dirtyFieldLabel(element){
+  if(!element)return "Inhalte";
+  const explicit=cleanDirtyLabel(element.getAttribute?.("aria-label")||element.getAttribute?.("data-dirty-label"));
+  if(explicit)return explicit;
+  const id=element.id;
+  if(id){
+    const linked=document.querySelector('label[for="'+CSS.escape(id)+'"]');
+    const linkedText=cleanDirtyLabel(linked?.textContent);
+    if(linkedText)return linkedText;
+  }
+  const label=element.closest?.("label");
+  if(label){
+    const directSpan=cleanDirtyLabel(label.querySelector(":scope > span")?.textContent);
+    if(directSpan)return directSpan;
+    const clone=label.cloneNode(true);
+    clone.querySelectorAll("input,textarea,select,button").forEach(node=>node.remove());
+    const text=cleanDirtyLabel(clone.textContent);
+    if(text)return text;
+  }
+  return cleanDirtyLabel(
+    element.dataset?.projectField
+    ||element.dataset?.techniqueField
+    ||element.name
+    ||element.id,
+    "Inhalte"
+  );
+}
+function dirtyDetailLabel(element,type){
+  return type==="crop"?"Bildausschnitt":dirtyFieldLabel(element);
+}
+function renderAdminDirtyTooltip(indicator){
+  const tooltip=indicator?.querySelector(".admin-global-dirty-tooltip");
+  if(!tooltip)return;
+  tooltip.innerHTML="";
+  const title=document.createElement("strong");
+  title.className="admin-global-dirty-tooltip-title";
+  title.textContent="Offene Änderungen";
+  tooltip.appendChild(title);
+
+  const grouped=new Map();
+  for(const key of adminDirtyKeys){
+    const scope=adminDirtyScopes.get(key);
+    const scopeId=dirtyScopeId(scope);
+    if(!grouped.has(scopeId))grouped.set(scopeId,{label:dirtyScopeLabel(scope),details:new Set()});
+    const group=grouped.get(scopeId);
+    const details=adminDirtyDetails.get(key);
+    if(details?.size)for(const detail of details)group.details.add(detail);
+    else group.details.add(key.endsWith(":crop")?"Bildausschnitt":"Inhalte");
+  }
+
+  for(const group of grouped.values()){
+    const row=document.createElement("div");
+    row.className="admin-global-dirty-tooltip-row";
+    const section=document.createElement("b");
+    section.textContent=group.label;
+    const details=document.createElement("span");
+    details.textContent=[...group.details].join(", ");
+    row.append(section,details);
+    tooltip.appendChild(row);
+  }
+
+  const summary=[...grouped.values()].map(group=>group.label+": "+[...group.details].join(", ")).join("; ");
+  indicator.setAttribute("aria-label","Ungespeichert. "+summary);
+}
 function updateAdminDirtyUi(){
   const indicator=document.querySelector(".admin-global-dirty");
   const dirty=adminDirtyKeys.size>0;
@@ -236,6 +322,7 @@ function updateAdminDirtyUi(){
   if(indicator){
     indicator.hidden=!dirty;
     indicator.querySelector("b").textContent=String(adminDirtyKeys.size);
+    renderAdminDirtyTooltip(indicator);
   }
 }
 function markAdminDirty(element,type="fields"){
@@ -243,15 +330,18 @@ function markAdminDirty(element,type="fields"){
   const key=dirtyKey(element,type);
   adminDirtyKeys.add(key);
   adminDirtyScopes.set(key,dirtyScopeFor(element));
+  if(!adminDirtyDetails.has(key))adminDirtyDetails.set(key,new Set());
+  adminDirtyDetails.get(key).add(dirtyDetailLabel(element,type));
   updateAdminDirtyUi();
 }
 function clearAdminDirty(element,type="fields"){
   const key=dirtyKey(element,type);
   adminDirtyKeys.delete(key);
   adminDirtyScopes.delete(key);
+  adminDirtyDetails.delete(key);
   updateAdminDirtyUi();
 }
-function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();updateAdminDirtyUi()}
+function clearAllAdminDirty(){adminDirtyKeys.clear();adminDirtyScopes.clear();adminDirtyDetails.clear();updateAdminDirtyUi()}
 function hasAdminDirty(){return adminDirtyKeys.size>0}
 function ensureAdminDirtyUi(){
   if(!draftCapablePages.has(currentAdminPage))return;
@@ -260,7 +350,8 @@ function ensureAdminDirtyUi(){
   const indicator=document.createElement("span");
   indicator.className="admin-global-dirty";
   indicator.hidden=true;
-  indicator.innerHTML='<i aria-hidden="true"></i><span>Ungespeichert</span><b>0</b>';
+  indicator.tabIndex=0;
+  indicator.innerHTML='<i aria-hidden="true"></i><span>Ungespeichert</span><b>0</b><span class="admin-global-dirty-tooltip" role="tooltip"></span>';
   indicator.setAttribute("role","status");
   indicator.setAttribute("aria-live","polite");
   actions.prepend(indicator);
