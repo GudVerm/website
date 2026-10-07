@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.7";
+const WORKER_RELEASE = "2026-10-07.8";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -533,7 +533,7 @@ export default {
           await env.MEDIA.put(key, bytes, {
             httpMetadata: {
               contentType,
-              cacheControl: "public, max-age=3600"
+              cacheControl: "public, max-age=0, must-revalidate"
             },
             customMetadata: {
               originalName,
@@ -580,7 +580,7 @@ export default {
         const headers = new Headers(cors);
         object.writeHttpMetadata(headers);
         headers.set("etag", object.httpEtag);
-        headers.set("cache-control", "public, max-age=3600");
+        headers.set("cache-control", "public, max-age=0, must-revalidate");
         headers.set("x-content-type-options", "nosniff");
         headers.set("cross-origin-resource-policy", "cross-origin");
 
