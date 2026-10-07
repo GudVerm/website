@@ -58,6 +58,7 @@ const servicePageImages = [
 ];
 
 const companyImages = [
+  { key:"unternehmen/hero", name:"Unternehmen · Hero", detail:"Großes Kopfbild der Unternehmensseite", fallback:"../assets/media/jost-gudelius.jpg" },
   { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
   { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"../assets/media/pruefsachverstaendiger.jpg" }
 ];
