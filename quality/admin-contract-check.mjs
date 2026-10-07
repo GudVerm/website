@@ -115,6 +115,28 @@ for(const token of ["inquiryPriorityLabel","Wiedervorlage","unbeantwortet","expo
 const schema=read("cloudflare/schema.sql");
 for(const token of ["priority TEXT","follow_up_at TEXT","idx_contact_requests_follow_up_at"])check(schema.includes(token),"D1-Schema fehlt: "+token);
 
+const adminCachePages=[
+  "admin/index.html",
+  "admin/verbindung/index.html",
+  "admin/startseite/index.html",
+  "admin/leistungen/index.html",
+  "admin/unternehmen/index.html",
+  "admin/technik/index.html",
+  "admin/projekte/index.html",
+  "admin/anfragen/index.html",
+  "admin/statistik/index.html",
+  "admin/kontakt/index.html",
+  "admin/medien/index.html",
+  "admin/impressum/index.html",
+  "admin/audit/index.html"
+];
+for(const path of adminCachePages){
+  const html=read(path);
+  check(html.includes("admin.css?v=20261007-09"),path+" verwendet nicht die aktuelle admin.css-Cache-Version.");
+  check(html.includes("admin-data.js?v=20261007-04"),path+" verwendet nicht die aktuelle admin-data.js-Cache-Version.");
+  check(html.includes("admin.js?v=20261007-21"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
+}
+
 const quality=read(".github/workflows/website-quality.yml");
 for(const token of ["browser-check.mjs","cms-browser-integration.mjs","visual-regression.mjs","accessibility-check.mjs","environment-check.mjs"]){
   check(quality.includes(token),"Website-quality enthält Check nicht: "+token);
