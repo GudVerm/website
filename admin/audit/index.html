@@ -6,6 +6,48 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Audit-Log · Gudelius Admin</title>
   <link rel="stylesheet" href="../admin.css?v=20261007-09">
+  <style>
+    .audit-collapsible{padding:0;overflow:hidden}
+    .audit-collapsible-summary{
+      list-style:none;
+      cursor:pointer;
+      margin:0;
+      padding:22px;
+      border-bottom:0;
+      align-items:center;
+      user-select:none;
+    }
+    .audit-collapsible-summary::-webkit-details-marker{display:none}
+    .audit-collapsible-copy{display:grid;gap:3px;min-width:0;flex:1}
+    .audit-collapsible-title{font-size:1.12rem;font-weight:900;color:var(--ink)}
+    .audit-collapsible-copy #auditSummary,
+    .audit-collapsible-copy .audit-collapsible-description{margin:0;color:var(--muted);line-height:1.5;font-size:.82rem}
+    .audit-collapsible-toggle{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:36px;
+      padding:0 12px;
+      border-radius:999px;
+      background:#eef0ed;
+      color:var(--ink);
+      font-size:.72rem;
+      font-weight:900;
+    }
+    .audit-collapsible-toggle::after{content:"⌄";font-size:1rem;line-height:1;transition:transform .18s ease}
+    .audit-collapsible-close{display:none}
+    .audit-collapsible[open] .audit-collapsible-summary{border-bottom:1px solid #e8ebe7}
+    .audit-collapsible[open] .audit-collapsible-open{display:none}
+    .audit-collapsible[open] .audit-collapsible-close{display:inline}
+    .audit-collapsible[open] .audit-collapsible-toggle::after{transform:rotate(180deg)}
+    .audit-collapsible-body{padding:0 22px 22px}
+    @media(max-width:620px){
+      .audit-collapsible-summary{align-items:flex-start}
+      .audit-collapsible-toggle{padding:0 10px}
+      .audit-collapsible-open,.audit-collapsible-close{display:none!important}
+    }
+  </style>
 </head>
 <body data-admin-page="audit">
   <header class="admin-header">
@@ -51,18 +93,25 @@
       </div>
     </section>
 
-    <section class="cms-subpanel">
-      <div class="cms-subpanel-head compact">
+    <details class="cms-subpanel audit-collapsible" id="auditHistoryPanel">
+      <summary class="cms-subpanel-head compact audit-collapsible-summary">
         <span class="cms-subpanel-icon">100</span>
-        <div><span class="kicker">Historie</span><h3>Letzte Änderungen</h3><p id="auditSummary">Noch keine Daten geladen.</p></div>
+        <span class="audit-collapsible-copy">
+          <span class="kicker">Historie</span>
+          <span class="audit-collapsible-title">Letzte Änderungen</span>
+          <span id="auditSummary">Noch keine Daten geladen.</span>
+        </span>
+        <span class="audit-collapsible-toggle" aria-hidden="true"><span class="audit-collapsible-open">Öffnen</span><span class="audit-collapsible-close">Schließen</span></span>
+      </summary>
+      <div class="audit-collapsible-body">
+        <div class="analytics-table-wrap">
+          <table class="analytics-table">
+            <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Aktion</th><th>Bereich</th><th>Ziel</th><th>Details</th></tr></thead>
+            <tbody id="auditRows"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="analytics-table-wrap">
-        <table class="analytics-table">
-          <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Aktion</th><th>Bereich</th><th>Ziel</th><th>Details</th></tr></thead>
-          <tbody id="auditRows"></tbody>
-        </table>
-      </div>
-    </section>
+    </details>
 
     <section class="cms-subpanel" id="draftManager">
       <div class="cms-subpanel-head compact">
@@ -79,25 +128,32 @@
       <div id="draftCards" class="draft-manager-list" aria-live="polite"></div>
     </section>
 
-    <section class="cms-subpanel">
-      <div class="cms-subpanel-head compact">
+    <details class="cms-subpanel audit-collapsible" id="contentHistoryPanel">
+      <summary class="cms-subpanel-head compact audit-collapsible-summary">
         <span class="cms-subpanel-icon">↶</span>
-        <div><span class="kicker">Versionen</span><h3>Frühere CMS-Stände wiederherstellen</h3><p>Vor jeder Änderung oder Löschung wird der vorherige Wert automatisch gesichert.</p></div>
+        <span class="audit-collapsible-copy">
+          <span class="kicker">Versionen</span>
+          <span class="audit-collapsible-title">Frühere CMS-Stände wiederherstellen</span>
+          <span class="audit-collapsible-description">Vor jeder Änderung oder Löschung wird der vorherige Wert automatisch gesichert.</span>
+        </span>
+        <span class="audit-collapsible-toggle" aria-hidden="true"><span class="audit-collapsible-open">Öffnen</span><span class="audit-collapsible-close">Schließen</span></span>
+      </summary>
+      <div class="audit-collapsible-body">
+        <div class="text-editor-grid">
+          <label><span>Key suchen</span><input id="historyQuery" type="search" placeholder="z. B. startseite/hero-title"></label>
+        </div>
+        <div class="text-editor-actions">
+          <button id="historyRefresh" type="button">Versionen laden</button>
+          <span id="historyStatus" class="status">Noch keine Versionen geladen.</span>
+        </div>
+        <div class="analytics-table-wrap">
+          <table class="analytics-table">
+            <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Key</th><th>Typ</th><th>Größe</th><th>Aktion</th></tr></thead>
+            <tbody id="historyRows"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="text-editor-grid">
-        <label><span>Key suchen</span><input id="historyQuery" type="search" placeholder="z. B. startseite/hero-title"></label>
-      </div>
-      <div class="text-editor-actions">
-        <button id="historyRefresh" type="button">Versionen laden</button>
-        <span id="historyStatus" class="status">Noch keine Versionen geladen.</span>
-      </div>
-      <div class="analytics-table-wrap">
-        <table class="analytics-table">
-          <thead><tr><th>Zeitpunkt</th><th>Benutzer</th><th>Key</th><th>Typ</th><th>Größe</th><th>Aktion</th></tr></thead>
-          <tbody id="historyRows"></tbody>
-        </table>
-      </div>
-    </section>
+    </details>
   </main>
   <script src="../config.js?v=20260924-44"></script>
   <script src="../admin-data.js?v=20261007-04"></script>
