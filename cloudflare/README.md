@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.6`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.7`.
 
 ## Secrets
 
@@ -463,3 +463,10 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Die öffentliche `assets/cms-config.js` setzt `GUDELIUS_CMS_MEDIA_ENABLED=true`.
 - Damit ersetzen hochgeladene Bilder – unter anderem die Leistungskarten auf der Startseite – ihre statischen Fallback-Bilder auch live.
 - Admin- und Preview-Medienpfade bleiben unverändert Access-geschützt.
+
+
+## Release 2026-10-07.7 – Vorschau-Basispfade korrigiert
+
+- Die Admin-Vorschau respektiert vorhandene `<base href>`-Angaben der öffentlichen Seite und löst sie absolut gegen deren echte URL auf.
+- Dadurch laden Unterseiten wie `unternehmen/` ihre CSS-, JS- und Bild-Assets wieder von der korrekten Website-Basis statt fälschlich unter `/admin/preview/.../assets/`.
+- Seiten ohne eigenes `<base>` erhalten weiterhin automatisch eine passende absolute Basis.
