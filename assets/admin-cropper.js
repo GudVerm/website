@@ -529,6 +529,32 @@
     [xInput,yInput,zoomInput,rotationInput].forEach(input=>{
       input.addEventListener("input",updateFromSliders);
     });
+
+    const valueResets=[
+      {output:xValue,key:"x",value:50,label:"Horizontal",unit:"50 %"},
+      {output:yValue,key:"y",value:50,label:"Vertikal",unit:"50 %"},
+      {output:zoomValue,key:"zoom",value:100,label:"Zoom",unit:"100 %"},
+      {output:rotationValue,key:"rotation",value:0,label:"Drehung",unit:"0°"}
+    ];
+    function resetSingleCropValue(entry){
+      if(!entry)return;
+      layout={...layout,[entry.key]:entry.value};
+      markChanged(entry.label+" auf Standardwert "+entry.unit+" zurückgesetzt.");
+    }
+    valueResets.forEach(entry=>{
+      const output=entry.output;
+      if(!output)return;
+      output.tabIndex=0;
+      output.setAttribute("role","button");
+      output.setAttribute("aria-label",entry.label+" auf Standardwert "+entry.unit+" zurücksetzen");
+      output.title=entry.label+" auf Standardwert "+entry.unit+" zurücksetzen";
+      output.addEventListener("click",()=>resetSingleCropValue(entry));
+      output.addEventListener("keydown",event=>{
+        if(event.key!=="Enter"&&event.key!==" ")return;
+        event.preventDefault();
+        resetSingleCropValue(entry);
+      });
+    });
   
     imageWrap.addEventListener("keydown",event=>{
       const move=event.shiftKey?8:2;
