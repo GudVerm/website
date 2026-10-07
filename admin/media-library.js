@@ -4,7 +4,7 @@
   const withArea=(items,area,href)=>(items||[]).map(item=>({...item,area,href,assigned:true}));
   const baseCatalog=[
     ...withArea(data.startPageImages,"Startseite","./startseite/"),
-    ...withArea(data.serviceImages,"Leistungen","./leistungen/"),
+    ...withArea(data.serviceImages,"Startseite","./startseite/"),
     ...withArea(data.servicePageImages,"Leistungen","./leistungen/"),
     ...withArea(data.defaultProjects,"Projekte","./projekte/"),
     ...withArea(data.techniqueGroupImages,"Technik","./technik/"),
