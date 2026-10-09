@@ -183,6 +183,10 @@ for(const key of publicMediaKeys)check(adminMediaKeys.has(key),"Öffentlicher CM
 
 const publicSiteJs=read("assets/gudelius-site.js");
 contains("assets/gudelius-site.js","cmsMediaRequestVersion","Öffentliche CMS-Bilder besitzen keinen Cache-Buster nach R2-Overwrite.");
+contains("assets/gudelius-site.js","isFullBleedCmsImage","Vollflächen-Heros besitzen keine eigene Zoom-Untergrenze.");
+contains("assets/gudelius-site.js","Math.max(100,value.zoom)","Öffentliche Hero-Bilder können unter 100 % verkleinert werden.");
+contains("assets/admin-cropper.js",'zoomInput.min=isFullBleedHero?"100":"25"',"Hero-Cropper erlaubt weiterhin Zoom unter 100 %.");
+contains("assets/gudelius-site.css","min-width:100%;min-height:100%;max-width:none","Directory-Hero-Bilder sind nicht gegen freie Ränder abgesichert.");
 contains("assets/gudelius-site.js",'"v=" + cmsMediaRequestVersion',"CMS-Medien-URL enthält keinen Versionsparameter.");
 
 const externalTechniqueImages=[...publicSiteJs.matchAll(/image:'(https?:\/\/[^']+)'/g)].map(match=>match[1]).filter(url=>!url.includes("gudeliusvermessung.de"));
