@@ -39,6 +39,17 @@ for(const fallback of fallbacks){
   if(!existsSync(target))fail("Fallback-Datei fehlt: "+fallback);
 }
 
+const publicAssetVersions={css:new Set(),js:new Set()};
+for(const page of publicPages){
+  const html=read(page);
+  const css=(html.match(/gudelius-site\.css\?v=([0-9A-Za-z._-]+)/)||[])[1];
+  const js=(html.match(/gudelius-site\.js\?v=([0-9A-Za-z._-]+)/)||[])[1];
+  if(css)publicAssetVersions.css.add(css);
+  if(js)publicAssetVersions.js.add(js);
+}
+if(publicAssetVersions.css.size>1)fail("Öffentliche Seiten verwenden unterschiedliche gudelius-site.css-Versionen: "+[...publicAssetVersions.css].join(", "));
+if(publicAssetVersions.js.size>1)fail("Öffentliche Seiten verwenden unterschiedliche gudelius-site.js-Versionen: "+[...publicAssetVersions.js].join(", "));
+
 const publicKeys=new Set();
 for(const page of publicPages){
   const html=read(page);
