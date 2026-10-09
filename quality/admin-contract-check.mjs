@@ -53,6 +53,9 @@ contains("cloudflare/src/index.js",'"medien", "impressum", "audit"',"Medien ist 
 contains("admin/index.html",'href="./medien/"',"Dashboard verlinkt nicht auf den eigenständigen Medienbereich.");
 contains("admin/admin.js",'api+"/admin/"+page+"/"',"Admin-Navigation verwendet nicht den eindeutigen Worker-Adminpfad.");
 contains("admin/admin.js","loadImprintTexts","Impressum-Editor ist nicht an das CMS angebunden.");
+contains("admin/admin.js","primeImprintDefaults","Impressum-Felder werden vor dem CMS-Laden nicht mit Initialwerten befüllt.");
+contains("admin/admin.js","hasSavedImprint","Leere Impressums-Datensätze werden nicht auf Initialwerte zurückgeführt.");
+contains("admin/admin.js",'imprintHeroImages=[{key:"impressum/hero"',"Impressum-Hero besitzt keinen lokalen Admin-Fallback.");
 contains("admin/admin-data.js",'key:"impressum/hero"',"Impressum-Hero fehlt im Medienkatalog.");
 contains("admin/impressum/index.html",'id="imprintHeroGrid"',"Impressum-Hero kann im Admin nicht bearbeitet werden.");
 contains("admin/admin.js","imprintHeroGrid","Impressum-Hero wird im Admin nicht gerendert.");
