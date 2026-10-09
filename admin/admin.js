@@ -14,7 +14,7 @@ const {
   projectHeroImages=[],
   techniqueHeroImages=[],
   contactHeroImages=[],
-  imprintHeroImages=[],
+  imprintHeroImages=[{key:"impressum/hero",name:"Impressum · Hero",detail:"Großes Kopfbild der Impressumsseite",fallback:"../assets/media/home-hero.webp"}],
   companyImages,
   techniqueGroupImages
 }=window.GUDELIUS_ADMIN_DATA||{};
@@ -1980,6 +1980,13 @@ const imprintTextDefaults={
   "impressum/copyright-2":"Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen."
 };
 
+function primeImprintDefaults(){
+  Object.entries(imprintTextFields).forEach(([key,field])=>{
+    if(field&&!String(field.value||"").trim())field.value=imprintTextDefaults[key]||"";
+  });
+}
+primeImprintDefaults();
+
 async function loadImprintTexts(){
   if(!imprintTextStatus)return;
   if(!getApi())return setStatus(imprintTextStatus,"Worker-URL fehlt.",false);
@@ -1989,10 +1996,12 @@ async function loadImprintTexts(){
     if(!response.ok)throw new Error("HTTP "+response.status);
     const data=await response.json();
     const content=data.content||{};
+    const hasSavedImprint=Object.keys(imprintTextFields).some(key=>typeof content[key]==="string"&&content[key].trim());
     Object.entries(imprintTextFields).forEach(([key,field])=>{
-      if(field)field.value=typeof content[key]==="string"?content[key]:imprintTextDefaults[key];
+      if(!field)return;
+      field.value=hasSavedImprint&&typeof content[key]==="string"?content[key]:(imprintTextDefaults[key]||"");
     });
-    setStatus(imprintTextStatus,"Impressum geladen.",true);
+    setStatus(imprintTextStatus,hasSavedImprint?"Impressum geladen.":"Noch keine Impressumsdaten gespeichert · Initialwerte werden angezeigt.",true);
   }catch(error){
     Object.entries(imprintTextFields).forEach(([key,field])=>{if(field)field.value=imprintTextDefaults[key]});
     setStatus(imprintTextStatus,"Impressum konnte nicht geladen werden: "+error.message,false);
