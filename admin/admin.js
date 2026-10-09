@@ -1937,13 +1937,41 @@ async function loadContactTexts(){
 if(saveContactTexts){
   saveContactTexts.addEventListener("click",async()=>{
     if(!getApi()||!hasAdminAuth()) return setStatus(contactTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    const emailField=contactTextFields["kontakt/email"];
+    if(emailField&&!emailField.checkValidity()){
+      emailField.reportValidity();
+      return setStatus(contactTextStatus,"Bitte eine gültige Kontakt-E-Mail-Adresse eingeben.",false);
+    }
     saveContactTexts.disabled=true;
     setStatus(contactTextStatus,"Speichere Kontaktdaten …");
     try{
-      await Promise.all(Object.entries(contactTextFields).map(([key,field])=>
-        saveHeroText(key,field.value.trim())
-      ));
-      setStatus(contactTextStatus,"Kontaktdaten erfolgreich gespeichert.",true);
+      // Nur geaenderte Inhalte speichern; unveraenderte CMS-Werte bleiben unberuehrt.
+      const response=await fetchSiteSnapshot();
+      if(!response.ok)throw new Error("Kontaktdaten konnten nicht abgeglichen werden (HTTP "+response.status+").");
+      const current=(await response.json()).content||{};
+      const changed=Object.entries(contactTextFields).filter(([key,field])=>{
+        if(!field)return false;
+        const previous=typeof current[key]==="string"?current[key]:contactTextDefaults[key];
+        return field.value.trim()!==previous;
+      }).map(([key,field])=>({key,value:field.value.trim()}));
+      if(changed.length){
+        await Promise.all(changed.map(({key,value})=>saveHeroText(key,value)));
+        // Keine irrefuehrende Erfolgsmeldung, falls ein Worker gespeicherte
+        // E-Mail-Werte bei der Ausgabe ueberschreibt oder ein Request scheitert.
+        const verified=await fetchSiteSnapshot();
+        if(!verified.ok)throw new Error("Gespeicherte Kontaktdaten konnten nicht erneut geladen werden.");
+        const saved=(await verified.json()).content||{};
+        if(changed.some(({key,value})=>saved[key]!==value)){
+          throw new Error("Gespeicherte Kontaktdaten stimmen nicht mit der Eingabe überein. Bitte die Änderung prüfen.");
+        }
+      }
+      // Das Statusfeld liegt im Formular-Subpanel; die geaenderten Felder
+      // gehoeren aber zu mehreren anderen Subpanels (z.B. Kontaktdaten).
+      clearAdminDirtyForElements(Object.values(contactTextFields),"fields");
+      const message=changed.length
+        ?changed.length+" Änderung"+(changed.length===1?"":"en")+(cmsDraftMode?" als Entwurf gespeichert. Bitte noch veröffentlichen.":" veröffentlicht.")
+        :"Keine inhaltlichen Änderungen.";
+      setStatus(contactTextStatus,message,true);
     }catch(error){
       setStatus(contactTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
     }finally{

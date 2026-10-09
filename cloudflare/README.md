@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-09.1`.
+Die geplante Worker-Releasekennung nach dem Kontakt-CMS-Fix ist `2026-10-09.2`. **Das GitHub-Commit allein deployt den Worker nicht**; die tatsächlich laufende Version ist über `GET /api/health` zu prüfen.
 
 ## Secrets
 
@@ -58,6 +58,16 @@ CONTACT_EMAIL_TO=gudeliusvermessung@web.de
 PUBLIC_MEDIA_ENABLED=true
 ADMIN_ALLOWED_EMAILS=gudeliusvermessung@web.de,jost@gudeliusvermessung.de
 ```
+
+## Kontakt-E-Mail über das CMS bearbeiten
+
+Im Admin unter `/admin/kontakt/` kann der sichtbare Wert `kontakt/email` einschließlich des `mailto:`-Links bearbeitet werden. Beim Speichern werden nur tatsächlich geänderte Felder geschrieben und anschließend aus dem jeweiligen Live-/Entwurfs-Endpunkt zurückgelesen. Der lokale Status **„offener Bereich“** wird erst nach erfolgreicher Prüfung für alle Kontakt-Textfelder gelöscht; bei Abweichungen bleibt er bestehen und eine Fehlermeldung wird angezeigt. Im Entwurfsmodus muss danach weiterhin bewusst veröffentlicht werden.
+
+`GET /api/site` ist ausschließlich lesend und darf gespeicherte CMS-E-Mail-Adressen nicht eigenmächtig ersetzen. Eine historische Umleitung von `jost@gudeliusvermessung.de` auf `gudeliusvermessung@web.de` wurde daher aus dem Worker entfernt; es werden keine bestehenden D1-Daten umgeschrieben.
+
+**Getrennte Einstellungen:** Die im CMS sichtbare Adresse steuert **nicht** den tatsächlichen Empfänger der Formular-Benachrichtigungen. Dieser bleibt in der Worker-Umgebung `CONTACT_EMAIL_TO` hinterlegt, der technische Absender in `BREVO_FROM_EMAIL`. Änderungen an diesen Versandkonfigurationen erfordern eine eigenständige, kontrollierte Konfigurationsänderung.
+
+**Prüfungen vor Livegang:** Kontakt-E-Mail bearbeiten → „Kontaktbereich speichern“ → Anzeige der offenen Änderungen verschwindet → „Neu laden“ zeigt den gespeicherten Wert; im Entwurfsmodus zusätzlich „Alle veröffentlichen“ ausführen. Öffentliche `/kontakt/` und `mailto:`-Verknüpfung prüfen, sowie `GET /api/health` auf den Worker-Release `2026-10-09.2`. Live-Worker und D1 dürfen erst nach gesonderter Freigabe angepasst werden.
 
 ## Kontaktformular und E-Mail
 
