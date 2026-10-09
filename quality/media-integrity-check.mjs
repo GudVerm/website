@@ -50,6 +50,21 @@ for(const page of publicPages){
 if(publicAssetVersions.css.size>1)fail("Öffentliche Seiten verwenden unterschiedliche gudelius-site.css-Versionen: "+[...publicAssetVersions.css].join(", "));
 if(publicAssetVersions.js.size>1)fail("Öffentliche Seiten verwenden unterschiedliche gudelius-site.js-Versionen: "+[...publicAssetVersions.js].join(", "));
 
+const imageAdminPages=[
+  "admin/startseite/index.html",
+  "admin/leistungen/index.html",
+  "admin/unternehmen/index.html",
+  "admin/technik/index.html",
+  "admin/projekte/index.html",
+  "admin/kontakt/index.html",
+  "admin/impressum/index.html"
+];
+for(const page of imageAdminPages){
+  const html=read(page);
+  if(!html.includes('id="equipmentTemplate"'))fail(page+": gemeinsames Bildkarten-Template fehlt.");
+  if(!html.includes("admin-cropper.js"))fail(page+": admin-cropper.js fehlt.");
+}
+
 const publicKeys=new Set();
 for(const page of publicPages){
   const html=read(page);
