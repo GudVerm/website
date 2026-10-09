@@ -25,6 +25,8 @@ jobs:
         run: node quality/environment-check.mjs
       - name: CMS-/Admin-Verträge prüfen
         run: node quality/admin-contract-check.mjs
+      - name: Medien-Integrität prüfen
+        run: node quality/media-integrity-check.mjs
 
   browser-quality:
     needs: static-quality
