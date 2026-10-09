@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-09.1";
+const WORKER_RELEASE = "2026-10-09.2";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -153,12 +153,8 @@ export default {
           }
         }
 
-        if (content["kontakt/email"] === "jost@gudeliusvermessung.de") {
-          content["kontakt/email"] = "gudeliusvermessung@web.de";
-          await env.DB.prepare(
-            "UPDATE content SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?"
-          ).bind(JSON.stringify("gudeliusvermessung@web.de"), "kontakt/email").run();
-        }
+        // GET /api/site is strictly read-only. Never rewrite CMS-configured
+        // contact addresses while serving public content.
 
         return json({ content }, 200, cors);
       }
