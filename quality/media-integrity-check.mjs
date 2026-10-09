@@ -95,11 +95,13 @@ if((adminJs.match(/loadProtectedMediaIntoImage\(img,item\.key/g)||[]).length<3){
 }
 
 for(const token of [
-  'url.pathname.startsWith("/api/admin/media/") && request.method === "PUT"',
+  'pathname.startsWith("/api/admin/media/") && (method === "PUT" || method === "DELETE")',
   'url.pathname.startsWith("/api/admin/media/") && request.method === "GET"',
+  'url.pathname.startsWith("/api/media/")',
+  'if (request.method === "PUT")',
   'url.pathname.startsWith("/media/") && request.method === "GET"'
 ]){
-  if(!worker.includes(token))fail("Worker-Medienroute fehlt: "+token);
+  if(!worker.includes(token))fail("Worker-Medienroute/-Rewrite fehlt: "+token);
 }
 
 for(const token of [
