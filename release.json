@@ -1,5 +1,5 @@
 {
-  "worker_release": "2026-10-07.9",
+  "worker_release": "2026-10-09.1",
   "quality_schema": 2,
   "public_site": "https://gudverm.github.io/website/",
   "worker_health": "https://gudelius-cms.gudeliusvermessung.workers.dev/api/health",
