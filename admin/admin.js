@@ -1913,6 +1913,51 @@ const serviceContactTextDefaults={
   "kontakt/drohnenvermessung/subject":"Anfrage Drohnenvermessung"
 };
 
+// Kontakt und Leistungs-Kontakttexte: erst nach verifiziertem CMS-Readback als gespeichert markieren.
+async function saveVerifiedContactTextGroup(fields,defaults,button,status,label){
+  if(!getApi()||!hasAdminAuth())return setStatus(status,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+  const expected=new Map(Object.entries(fields).filter(([,field])=>Boolean(field)).map(([key,field])=>[key,field.value.trim()]));
+  if(fields["kontakt/email"]){
+    const email=fields["kontakt/email"];
+    if(!expected.get("kontakt/email")||!email.checkValidity()){
+      setStatus(status,"Bitte eine gültige E-Mail-Adresse eintragen.",false);
+      email.focus();
+      return;
+    }
+  }
+  button.disabled=true;
+  setStatus(status,"Prüfe Änderungen …");
+  try{
+    const response=await fetchSiteSnapshot();
+    if(!response.ok)throw new Error("Aktueller CMS-Stand konnte nicht geladen werden (HTTP "+response.status+").");
+    const data=await response.json();
+    const content=data.content||{};
+    const changed=[...expected].filter(([key,value])=>
+      value!==(typeof content[key]==="string"?content[key]:(defaults[key]||""))
+    );
+    if(changed.length){
+      setStatus(status,"Speichere "+changed.length+" Änderung"+(changed.length===1?"":"en")+" …");
+      await Promise.all(changed.map(([key,value])=>saveHeroText(key,value)));
+      const verification=await fetchSiteSnapshot();
+      if(!verification.ok)throw new Error("Gespeicherte Werte konnten nicht überprüft werden (HTTP "+verification.status+").");
+      const readback=(await verification.json()).content||{};
+      const mismatch=changed.find(([key,value])=>readback[key]!==value);
+      if(mismatch)throw new Error("CMS hat die Änderung "+mismatch[0]+" nicht bestätigt. Bitte erneut versuchen.");
+    }
+    const stillCurrent=[...expected].every(([key,value])=>fields[key]?.value.trim()===value);
+    if(stillCurrent)clearAdminDirtyForElements(Object.values(fields),"fields");
+    if(cmsDraftMode)await refreshDraftToolbar(document.querySelector(".cms-draft-toolbar"));
+    const outcome=changed.length
+      ?changed.length+" Änderung"+(changed.length===1?"":"en")+(cmsDraftMode?" als Entwurf gespeichert. Bitte „Alle veröffentlichen“ verwenden.":" veröffentlicht.")
+      :"Keine inhaltlichen Änderungen.";
+    setStatus(status,stillCurrent?label+": "+outcome:label+": "+outcome+" Weitere Änderungen sind noch offen.",true);
+  }catch(error){
+    setStatus(status,"Speichern fehlgeschlagen: "+error.message,false);
+  }finally{
+    button.disabled=false;
+  }
+}
+
 async function loadContactTexts(){
   if(!contactTextStatus) return;
   if(!getApi()) return setStatus(contactTextStatus,"Worker-URL fehlt.",false);
@@ -1925,6 +1970,7 @@ async function loadContactTexts(){
     Object.entries(contactTextFields).forEach(([key,field])=>{
       if(field) field.value=typeof content[key]==="string" ? content[key] : contactTextDefaults[key];
     });
+    clearAdminDirtyForElements(Object.values(contactTextFields),"fields");
     setStatus(contactTextStatus,"Kontaktdaten geladen.",true);
   }catch(error){
     Object.entries(contactTextFields).forEach(([key,field])=>{
@@ -1935,21 +1981,9 @@ async function loadContactTexts(){
 }
 
 if(saveContactTexts){
-  saveContactTexts.addEventListener("click",async()=>{
-    if(!getApi()||!hasAdminAuth()) return setStatus(contactTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
-    saveContactTexts.disabled=true;
-    setStatus(contactTextStatus,"Speichere Kontaktdaten …");
-    try{
-      await Promise.all(Object.entries(contactTextFields).map(([key,field])=>
-        saveHeroText(key,field.value.trim())
-      ));
-      setStatus(contactTextStatus,"Kontaktdaten erfolgreich gespeichert.",true);
-    }catch(error){
-      setStatus(contactTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
-    }finally{
-      saveContactTexts.disabled=false;
-    }
-  });
+  saveContactTexts.addEventListener("click",()=>saveVerifiedContactTextGroup(
+    contactTextFields,contactTextDefaults,saveContactTexts,contactTextStatus,"Kontaktbereich"
+  ));
 }
 
 if(reloadContactTexts) reloadContactTexts.addEventListener("click",loadContactTexts);
@@ -2064,21 +2098,9 @@ async function loadServiceContactTexts(){
 }
 
 if(saveServiceContactTexts){
-  saveServiceContactTexts.addEventListener("click",async()=>{
-    if(!getApi()||!hasAdminAuth()) return setStatus(serviceContactTextStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
-    saveServiceContactTexts.disabled=true;
-    setStatus(serviceContactTextStatus,"Speichere Leistungs-Kontakttexte …");
-    try{
-      await Promise.all(Object.entries(serviceContactTextFields).map(([key,field])=>
-        saveHeroText(key,field.value.trim())
-      ));
-      setStatus(serviceContactTextStatus,"Leistungs-Kontakttexte erfolgreich gespeichert.",true);
-    }catch(error){
-      setStatus(serviceContactTextStatus,"Speichern fehlgeschlagen: "+error.message,false);
-    }finally{
-      saveServiceContactTexts.disabled=false;
-    }
-  });
+  saveServiceContactTexts.addEventListener("click",()=>saveVerifiedContactTextGroup(
+    serviceContactTextFields,serviceContactTextDefaults,saveServiceContactTexts,serviceContactTextStatus,"Leistungs-Kontakttexte"
+  ));
 }
 
 if(reloadServiceContactTexts) reloadServiceContactTexts.addEventListener("click",loadServiceContactTexts);
