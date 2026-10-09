@@ -18,7 +18,7 @@ Dieses Verzeichnis enthält das bestehende Cloudflare-Backend für GudeliusVerme
 
 Die kostenpflichtige Cloudflare-Email-Sending-Bindung wird nicht mehr verwendet. Damit entstehen für das Kontaktformular derzeit keine Cloudflare-Email-Sending-Kosten. Wix, Domain-DNS und bestehende E-Mail-DNS-Einträge werden dadurch nicht verändert.
 
-Die aktuelle Worker-Releasekennung im Repository ist `2026-10-07.9`.
+Die aktuelle Worker-Releasekennung im Repository ist `2026-10-09.1`.
 
 ## Secrets
 
@@ -472,7 +472,7 @@ Zusätzlich entstehen Indizes für `priority` und `follow_up_at`.
 - Seiten ohne eigenes `<base>` erhalten weiterhin automatisch eine passende absolute Basis.
 
 
-## Release 2026-10-07.9 – Medien-Cache revalidieren
+## Release 2026-10-09.1 – Medien-Cache revalidieren
 
 - Öffentliche R2-Medien werden nicht mehr eine Stunde blind unter demselben Medien-Key gecacht.
 - `/media/<key>` liefert jetzt `Cache-Control: public, max-age=0, must-revalidate` zusammen mit dem R2-ETag.
