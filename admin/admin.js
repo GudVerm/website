@@ -3116,7 +3116,7 @@ function applyTechniqueManifest(raw){
     const fallback=defaultEquipment.find(item=>item.slug===entry.slug);
     return {
       ...(fallback||{slug:entry.slug,name:entry.slug,category:"",detail:"",manufacturer:"",model:"",description:"",details:"",fallback:techniqueFallbackForGroup(entry.group)}),
-      slug:entry.slug,key:"equipment/"+entry.slug,group:entry.group,order:index+1,visible:entry.visible,archived:entry.archived
+      slug:entry.slug,key:fallback?.key||("equipment/"+entry.slug),group:entry.group,order:index+1,visible:entry.visible,archived:entry.archived
     };
   });
 }
@@ -3247,8 +3247,13 @@ function renderTechniqueEditor(item){
   moveDown.disabled=equipment.indexOf(item)===equipment.length-1;
 
   const techniqueFallback=techniqueFallbackSrc(item);
-  img.src=cmsMediaEnabled?initialMediaSrc(item):techniqueFallback; img.alt=displayName;
+  img.alt=displayName;
   img.onerror=()=>{img.onerror=null;img.src=techniqueFallback};
+  if(cmsAccessMode&&getApi()){
+    loadProtectedMediaIntoImage(img,item.key,techniqueFallback).catch(()=>{img.src=techniqueFallback});
+  }else{
+    img.src=cmsMediaEnabled?initialMediaSrc(item):techniqueFallback;
+  }
   attachMediaCropEditor(card,img,item,mediaStatus);
   card.addEventListener("cms-crop-dirty-change",event=>{
     setTechniqueDirty(card,Boolean(event.detail?.dirty),"crop");
@@ -3265,10 +3270,13 @@ function renderTechniqueEditor(item){
     upload.disabled=true; setStatus(mediaStatus,"Upload läuft …");
     try{
       const response=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{
-        method:"PUT",headers:await mediaUploadHeaders(selected),body:selected
+        method:"PUT",headers:await mediaUploadHeaders(selected),credentials:"include",body:selected
       });
       const data=await response.json().catch(()=>({})); if(!response.ok) throw new Error(data.error||("HTTP "+response.status));
-      img.src=mediaUrl(item.key)+"?v="+Date.now(); setStatus(mediaStatus,"Bild erfolgreich in Cloudflare gespeichert.",true);
+      const readable=await loadProtectedMediaIntoImage(img,item.key,techniqueFallback);
+      if(!readable)throw new Error("Bild wurde gespeichert, konnte aber nicht wieder aus R2 geladen werden.");
+      file.value="";
+      setStatus(mediaStatus,"Technikbild gespeichert und aus R2 bestätigt.",true);
     }catch(error){setStatus(mediaStatus,"Upload fehlgeschlagen: "+error.message,false)}finally{upload.disabled=false}
   });
   reset.addEventListener("click",async()=>{
