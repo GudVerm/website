@@ -14,7 +14,9 @@ for(const draftMode of [false,true]){
   const drafts={};
   const writes=[];
   const errors=[];
+  let stage="initial";
   page.on("pageerror",error=>errors.push(error.message));
+  page.on("requestfailed",request=>errors.push("Request: "+request.url()+" "+request.failure()?.errorText));
 
   if(draftMode){
     await page.addInitScript(()=>sessionStorage.setItem("gudelius-cms-draft-mode","1"));
@@ -61,11 +63,15 @@ for(const draftMode of [false,true]){
   try{
     const response=await page.goto(new URL("admin/kontakt/",base).href,{waitUntil:"load",timeout:25000});
     if(!response?.ok())throw new Error("Admin-Seite HTTP "+response?.status());
-    await page.waitForFunction(()=>document.querySelector("#contactEmail")?.value==="gudeliusvermessung@web.de",{timeout:12000});
+    stage="CMS-Initialwerte";
+    await page.waitForFunction(()=>document.querySelector("#contactEmail")?.value==="gudeliusvermessung@web.de",null,{timeout:11000});
     await page.locator("#contactEmail").fill(email);
-    await page.waitForFunction(()=>document.querySelector("[data-admin-save-status]")?.textContent?.includes("offener"));
+    stage="Dirty-Markierung";
+    await page.waitForFunction(()=>document.querySelector("[data-admin-save-status]")?.textContent?.includes("offener"),null,{timeout:11000});
     await page.locator("[data-admin-save-all]").click();
-    await page.waitForFunction(()=>document.querySelector("[data-admin-save-status]")?.textContent==="Alles gespeichert",{timeout:14000});
+    stage="Dirty-Reset";
+    await page.waitForFunction(()=>document.querySelector("[data-admin-save-status]")?.textContent==="Alles gespeichert",null,{timeout:11000});
+    stage="Speichermeldung";
     const text=await page.locator("#contactTextStatus").innerText();
     if(!text.includes(draftMode?"als Entwurf gespeichert":"veröffentlicht")){
       throw new Error("Falsche Speichermeldung: "+text);
@@ -85,7 +91,16 @@ for(const draftMode of [false,true]){
       },email,{timeout:12000});
     }
   }catch(error){
-    failures.push((draftMode?"Entwurf":"Live")+": "+error.message);
+    const debug=await page.evaluate(()=>({
+      url:location.href,
+      email:document.querySelector("#contactEmail")?.value,
+      status:document.querySelector("#contactTextStatus")?.textContent,
+      saveStatus:document.querySelector("[data-admin-save-status]")?.textContent,
+      hasCore:Boolean(window.GUDELIUS_ADMIN_CORE),
+      access:window.GUDELIUS_CMS_USE_ACCESS,
+      legacy:window.GUDELIUS_LEGACY_ADMIN_DISABLED
+    })).catch(()=>({}));
+    failures.push((draftMode?"Entwurf":"Live")+" ["+stage+"]: "+error.message+" DEBUG "+JSON.stringify({debug,writes,errors}));
   }
   if(errors.length)failures.push((draftMode?"Entwurf":"Live")+" Browser-JS: "+errors.slice(0,5).join(" | "));
   await context.close();
