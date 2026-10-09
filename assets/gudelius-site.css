@@ -1238,3 +1238,10 @@ img[data-cms-media].cms-media-ready,
   .hero[data-cms-bg].cms-media-ready .hero-background,
   .pic[data-cms-bg].cms-media-ready{animation:none!important}
 }
+
+/* Viewport-gesteuerte CMS-Bilder: kein Fallback-Aufblitzen beim Scrollen. */
+img[data-cms-media].cms-media-lazy-pending:not(.cms-media-ready),
+.pic[data-cms-bg].cms-media-lazy-pending:not(.cms-media-ready){
+  opacity:0;
+  animation:none!important;
+}

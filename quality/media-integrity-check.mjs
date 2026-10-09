@@ -145,6 +145,10 @@ const siteCss=read("assets/gudelius-site.css");
 if(!siteCss.includes("cmsMediaFallbackRelease"))fail("CMS-Bilder besitzen keinen Schutz gegen sichtbaren Fallback-Flash.");
 if(!siteCss.includes("img[data-cms-media].cms-media-ready"))fail("CMS-Bilder werden nach erfolgreichem Laden nicht sichtbar geschaltet.");
 
+
+if(!siteJs.includes("cmsLazyBackgroundObserver.observe(element)"))fail("CMS-Leistungskacheln laden Medien nicht erst im Viewport.");
+if(!siteJs.includes('img[data-cms-media][loading="lazy"]'))fail("Lazy-CMS-Bilder werden nicht vor dem Fallback-Flash geschützt.");
+if(!read("assets/gudelius-site.css").includes(".cms-media-lazy-pending:not(.cms-media-ready)"))fail("Lazy-CMS-Bilder bleiben vor der R2-Antwort nicht verborgen.");
 const unusedCatalog=[...catalogSet].filter(key=>!publicKeys.has(key)&&!siteJs.includes(key));
 if(unusedCatalog.length)warn("Medien-Keys ohne direkten öffentlichen Treffer: "+unusedCatalog.join(", "));
 

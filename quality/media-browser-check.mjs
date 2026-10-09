@@ -71,7 +71,15 @@ for(const [slug,path] of pages){
   });
   if(pending.length)failures.push(slug+": Fallback-Bilder vor CMS-Antwort sichtbar: "+pending.join(", "));
 
-  await page.waitForTimeout(520);
+  const cards=page.locator(".pic[data-cms-bg]");
+  for(let i=0;i<await cards.count();i++)await cards.nth(i).scrollIntoViewIfNeeded();
+  await page.evaluate(()=>{
+    for(const img of document.querySelectorAll('img[data-cms-media][loading="lazy"]')){
+      // Test-only: ensure offscreen images can still be validated, including hidden galleries.
+      img.loading="eager";
+    }
+  });
+  await page.waitForTimeout(650);
 
   const result=await page.evaluate(()=>{
     const normalizeKey=key=>String(key||"").split("/").map(encodeURIComponent).join("/");

@@ -194,8 +194,25 @@ document.addEventListener('DOMContentLoaded', () => {
     element?.classList?.add("cms-media-ready");
   }
 
+
+  const cmsLazyBackgroundLoaders=new WeakMap();
+  const cmsLazyBackgroundObserver=typeof IntersectionObserver==="function"
+    ?new IntersectionObserver((entries,observer)=>{
+      for(const entry of entries){
+        if(!entry.isIntersecting)continue;
+        observer.unobserve(entry.target);
+        const loader=cmsLazyBackgroundLoaders.get(entry.target);
+        cmsLazyBackgroundLoaders.delete(entry.target);
+        loader?.();
+      }
+    },{rootMargin:"350px 0px"}):null;
+
   async function applyCmsMedia(root = document) {
     if (!cmsApi) return;
+    if(cmsMediaEnabled){
+      root.querySelectorAll('img[data-cms-media][loading="lazy"],.pic[data-cms-bg]')
+        .forEach(element=>element.classList.add("cms-media-lazy-pending"));
+    }
     let content={};
     try{content=await loadCmsSiteContent()||{}}catch{}
 
@@ -279,7 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      const image=new Image();
+      const loadCmsBackground=()=>{
+        const image=new Image();
       image.onload=()=>{
         if(element.classList.contains("service-hero")){
           element.style.setProperty("--service-image",`url("${url}")`);
@@ -295,7 +313,22 @@ document.addEventListener('DOMContentLoaded', () => {
         markCmsMediaReady(element);
       };
       image.onerror=()=>markCmsMediaReady(element);
-      image.src=url;
+        image.onerror=()=>{
+          if(element.dataset.bg){
+            element.style.backgroundImage='url("'+element.dataset.bg+'")';
+            element.removeAttribute("data-bg");
+            element.classList.remove("lazy-bg");
+          }
+          markCmsMediaReady(element);
+        };
+        image.src=url;
+      };
+      if(element.classList.contains("pic")&&cmsLazyBackgroundObserver){
+        cmsLazyBackgroundLoaders.set(element,loadCmsBackground);
+        cmsLazyBackgroundObserver.observe(element);
+      }else{
+        loadCmsBackground();
+      }
     });
   }
 
@@ -424,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const loadBackground = (element) => {
     if (!element?.dataset?.bg) return;
+    if(element.hasAttribute("data-cms-bg")&&cmsApi&&cmsMediaEnabled)return;
     element.style.backgroundImage = `url("${element.dataset.bg}")`;
     element.removeAttribute('data-bg');
     element.classList.remove('lazy-bg');
