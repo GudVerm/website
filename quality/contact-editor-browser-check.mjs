@@ -48,7 +48,7 @@ for(const draftMode of [false,true]){
     }
     if(method==="GET"&&path==="/api/admin/session")return json({ok:true,auth_mode:"access",token_fallback_enabled:false});
     if(method==="GET"&&path==="/api/admin/media")return json({objects:[]});
-    const draftPrefix="/api/admin/drafts/",livePrefix="/api/content/";
+    const draftPrefix="/api/admin/drafts/",livePrefix="/api/admin/content/";
     if(method==="PUT"&&(path.startsWith(draftPrefix)||path.startsWith(livePrefix))){
       const isDraft=path.startsWith(draftPrefix);
       const key=path.slice((isDraft?draftPrefix:livePrefix).length).split("/").map(decodeURIComponent).join("/");
