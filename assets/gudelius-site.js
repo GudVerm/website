@@ -163,13 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return {x:clamp(source.x,0,100,50),y:clamp(source.y,0,100,50),zoom:clamp(source.zoom,25,300,100),rotation:clamp(source.rotation,-180,180,0)};
   }
   function cmsMediaLayout(content,key){return normalizeCmsMediaLayout(content?.["media-layout/"+key])}
+  function isFullBleedCmsImage(img){
+    return Boolean(img?.matches?.(".hero-background,.directory-hero-media,.legal-hero-media,.service-hero-media"));
+  }
   function applyCmsImageLayout(img,layout){
     if(!img)return;
     const value=normalizeCmsMediaLayout(layout);
+    const zoom=isFullBleedCmsImage(img)?Math.max(100,value.zoom):value.zoom;
     img.style.objectFit="cover";
     img.style.objectPosition=value.x+"% "+value.y+"%";
     img.style.transformOrigin=value.x+"% "+value.y+"%";
-    img.style.transform="scale("+(value.zoom/100)+") rotate("+value.rotation+"deg)";
+    img.style.transform="scale("+(zoom/100)+") rotate("+value.rotation+"deg)";
   }
   function applyCmsBackgroundLayout(element,layout){
     const value=normalizeCmsMediaLayout(layout);
