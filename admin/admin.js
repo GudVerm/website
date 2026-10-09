@@ -2088,6 +2088,7 @@ async function loadServiceContactTexts(){
     Object.entries(serviceContactTextFields).forEach(([key,field])=>{
       if(field) field.value=typeof content[key]==="string" ? content[key] : serviceContactTextDefaults[key];
     });
+    clearAdminDirtyForElements(Object.values(serviceContactTextFields),"fields");
     setStatus(serviceContactTextStatus,"Leistungs-Kontakttexte geladen.",true);
   }catch(error){
     Object.entries(serviceContactTextFields).forEach(([key,field])=>{
