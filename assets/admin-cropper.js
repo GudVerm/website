@@ -23,7 +23,8 @@
     imageWrap.tabIndex=0;
     imageWrap.setAttribute("role","application");
     imageWrap.setAttribute("aria-label","Bild direkt verschieben, zoomen und drehen");
-    if(item.key==="startseite/hero"||/\/hero$/.test(item.key))imageWrap.classList.add("media-crop-stage-hero");
+    const isFullBleedHero=item.key==="startseite/hero"||/\/hero$/.test(item.key);
+    if(isFullBleedHero)imageWrap.classList.add("media-crop-stage-hero");
   
     const hud=document.createElement("div");
     hud.className="media-crop-hud";
@@ -120,6 +121,7 @@
     const yInput=editor.querySelector(".media-crop-y");
     const zoomInput=editor.querySelector(".media-crop-zoom");
     const rotationInput=editor.querySelector(".media-crop-rotation");
+    if(zoomInput)zoomInput.min=isFullBleedHero?"100":"25";
     const xValue=editor.querySelector(".media-crop-x-value");
     const yValue=editor.querySelector(".media-crop-y-value");
     const zoomValue=editor.querySelector(".media-crop-zoom-value");
@@ -154,7 +156,7 @@
       return {
         x:Number(normalized.x),
         y:Number(normalized.y),
-        zoom:Number(normalized.zoom),
+        zoom:isFullBleedHero?Math.max(100,Number(normalized.zoom)):Number(normalized.zoom),
         rotation:Number(normalized.rotation)
       };
     }
@@ -189,7 +191,7 @@
       const naturalW=Math.max(1,img.naturalWidth||stageW);
       const naturalH=Math.max(1,img.naturalHeight||stageH);
       const cover=Math.max(stageW/naturalW,stageH/naturalH);
-      const zoom=Math.max(.25,currentLayout.zoom/100);
+      const zoom=Math.max(isFullBleedHero?1:.25,currentLayout.zoom/100);
       const width=naturalW*cover*zoom;
       const height=naturalH*cover*zoom;
       const radians=(normalizeAngle(currentLayout.rotation)||0)*Math.PI/180;
@@ -239,7 +241,8 @@
       targetImage.style.objectFit="cover";
       targetImage.style.objectPosition=layout.x+"% "+layout.y+"%";
       targetImage.style.transformOrigin=layout.x+"% "+layout.y+"%";
-      targetImage.style.transform="scale("+(layout.zoom/100)+") rotate("+layout.rotation+"deg)";
+      const previewZoom=isFullBleedHero?Math.max(100,layout.zoom):layout.zoom;
+      targetImage.style.transform="scale("+(previewZoom/100)+") rotate("+layout.rotation+"deg)";
       targetReadout.textContent=activeTarget.label+" · "+Math.round(layout.zoom)+" % · "+Math.round(layout.rotation)+"° · X "+Math.round(layout.x)+" % · Y "+Math.round(layout.y)+" %";
     }
     function recommendedLayout(profile=activeTarget){
@@ -258,7 +261,7 @@
       return canonicalLayout({...layout,x:50,y:50,zoom:Math.min(300,Math.max(100,Math.ceil(scale*105)))});
     }
     function render(){
-      layout=normalizeMediaLayout({...layout,rotation:normalizeAngle(layout.rotation)});
+      layout=canonicalLayout({...layout,rotation:normalizeAngle(layout.rotation)});
       const metrics=measure(layout);
       const placement=visualPlacement(layout,metrics);
   
@@ -344,7 +347,7 @@
       let next={...handleState.startLayout};
       if(type==="zoom"){
         const ratio=pointDistance(handleState.center,p)/handleState.startDistance;
-        next.zoom=clampMediaNumber(handleState.startLayout.zoom*ratio,25,300,100);
+        next.zoom=clampMediaNumber(handleState.startLayout.zoom*ratio,isFullBleedHero?100:25,300,100);
       }else{
         const delta=pointAngle(handleState.center,p)-handleState.startAngle;
         next.rotation=normalizeAngle(handleState.startLayout.rotation+delta);
@@ -505,7 +508,7 @@
       };
       const next={
         ...startLayout,
-        zoom:clampMediaNumber(zoomInput.value,25,300,100),
+        zoom:clampMediaNumber(zoomInput.value,isFullBleedHero?100:25,300,100),
         rotation:normalizeAngle(clampMediaNumber(rotationInput.value,-180,180,0))
       };
       const nextMetrics=measure(next);
