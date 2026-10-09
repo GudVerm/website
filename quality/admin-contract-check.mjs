@@ -106,7 +106,7 @@ contains("admin/media-library.js",'withArea(data.serviceImages,"Startseite","./s
 contains("cloudflare/src/index.js",'url: new URL("/api/admin/media/" + encodePath(key), url).toString()', "Admin-Medienupload liefert weiterhin einen ungeschützten/öffentlichen Medienpfad zurück.");
 contains("cloudflare/src/index.js",'url.pathname.startsWith("/api/admin/media/") && request.method === "GET"',"Geschützter GET-Endpunkt für Admin-Medien fehlt.");
 contains("cloudflare/src/index.js","GUDELIUS_CMS_MEDIA_ENDPOINT = '/api/admin/media';","Preview verwendet nicht den geschützten Medien-Endpunkt.");
-contains("assets/gudelius-site.js","img.src=cmsMediaUrl(key);","Frontend wendet den konfigurierten CMS-Medien-Endpunkt nicht auf Projektbilder an.");
+contains("assets/gudelius-site.js","const url=cmsMediaUrl(key);","Frontend verwendet den konfigurierten CMS-Medien-Endpunkt nicht für CMS-Bilder.");
 contains("admin/admin.js","Bilddatei-Uploads bleiben direkte Medienänderungen","Entwurfsmodus-Hinweis für Bildlayouts fehlt.");
 contains("admin/admin.js","admin-global-dirty","Globaler Dirty-Indikator fehlt.");
 contains("admin/admin.js","admin-global-dirty-tooltip","Hover-/Fokus-Details für ungespeicherte Änderungen fehlen.");
