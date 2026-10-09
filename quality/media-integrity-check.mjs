@@ -29,6 +29,22 @@ const publicPages=[
   "404.html"
 ];
 
+
+const startPortrait=read("index.html").match(/<img\b[^>]*data-cms-media="([^"]+)"[^>]*alt="Jost Gudelius"/);
+const companyPortrait=read("unternehmen/index.html").match(/<img\b[^>]*class="portrait"[^>]*data-cms-media="([^"]+)"/);
+if(!startPortrait||!companyPortrait||startPortrait[1]!==companyPortrait[1]){
+  fail("Startseite und Unternehmens-Portrait müssen denselben CMS-Bild-Key verwenden.");
+}
+if(startPortrait?.[1]!=="startseite/unternehmen"){
+  fail("Das gemeinsame Ansprechpartnerfoto muss weiterhin das aktuelle Startseiten-Bild verwenden.");
+}
+if(!adminData.includes('sharedKey:"startseite/unternehmen"')){
+  fail("Unternehmen-Admin muss das gemeinsame Ansprechpartnerfoto unter dem Startseiten-Key bearbeiten.");
+}
+if(!read("admin/admin.js").includes("item.sharedKey?{...item,key:item.sharedKey}:item")){
+  fail("Unternehmens-Editor löst den gemeinsamen Medien-Key nicht auf.");
+}
+
 const catalogKeys=[...adminData.matchAll(/\bkey:"([^"]+)"/g)].map(match=>match[1]);
 const catalogSet=new Set(catalogKeys);
 if(catalogSet.size!==catalogKeys.length)fail("Doppelte CMS-Medien-Keys im Admin-Katalog.");

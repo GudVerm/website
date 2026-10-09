@@ -29,7 +29,7 @@ const startPageImages = [
   { key:"startseite/hero", name:"Hero / Startseitenbild", detail:"Großes Hintergrundbild im Kopfbereich", fallback:"../assets/media/home-hero.webp" },
   { key:"startseite/projekte", name:"Startseite · Projekte", detail:"Bild der großen Projekte-Karte", fallback:"../assets/media/home-projekte.webp" },
   { key:"startseite/technik", name:"Startseite · Technik", detail:"Bild der großen Technik-Karte", fallback:"../assets/media/home-technik.webp" },
-  { key:"startseite/unternehmen", name:"Startseite · Unternehmen", detail:"Bild der großen Unternehmens-Karte", fallback:"../assets/media/jost-gudelius.jpg" }
+  { key:"startseite/unternehmen", name:"Unternehmen · Ansprechpartnerfoto", detail:"Gemeinsames Foto auf der Startseite und im Unternehmen-Portrait", fallback:"../assets/media/jost-gudelius.jpg" }
 ];
 
 const serviceImages = [
@@ -75,7 +75,7 @@ const imprintHeroImages = [
 
 const companyImages = [
   { key:"unternehmen/hero", name:"Unternehmen · Hero", detail:"Großes Kopfbild der Unternehmensseite", fallback:"../assets/media/jost-gudelius.jpg" },
-  { key:"unternehmen/jost-gudelius", name:"Jost Gudelius", detail:"Portrait im Bereich Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
+  { sharedKey:"startseite/unternehmen", name:"Jost Gudelius", detail:"Gemeinsames Ansprechpartnerfoto · Startseite und Unternehmen", fallback:"../assets/media/jost-gudelius.jpg" },
   { key:"unternehmen/pruefsachverstaendiger", name:"Prüfsachverständiger BayIkaBau", detail:"Zweites Bild im Unternehmensbereich", fallback:"../assets/media/pruefsachverstaendiger.jpg" }
 ];
 

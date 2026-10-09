@@ -3569,7 +3569,7 @@ function render(){
   renderCollection(contactHeroGrid, contactHeroImages);
   renderCollection(imprintHeroGrid, imprintHeroImages);
   renderCollection(companyHeroGrid, companyImages.filter(item=>item.key==="unternehmen/hero"));
-  renderCollection(companyGrid, companyImages.filter(item=>item.key!=="unternehmen/hero"));
+  renderCollection(companyGrid, companyImages.filter(item=>item.key!=="unternehmen/hero").map(item=>item.sharedKey?{...item,key:item.sharedKey}:item));
   renderCollection(techniqueGroupGrid, techniqueGroupImages);
   renderCollection(grid, equipment);
   renderCollection(projectGrid, projects);

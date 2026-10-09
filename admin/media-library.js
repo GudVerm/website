@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const data=window.GUDELIUS_ADMIN_DATA||{};
-  const withArea=(items,area,href)=>(items||[]).map(item=>({...item,area,href,assigned:true}));
+  const withArea=(items,area,href)=>(items||[]).filter(item=>typeof item.key==="string"&&item.key.trim()).map(item=>({...item,area,href,assigned:true}));
   const baseCatalog=[
     ...withArea(data.startPageImages,"Startseite","./startseite/"),
     ...withArea(data.serviceImages,"Startseite","./startseite/"),
