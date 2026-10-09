@@ -155,10 +155,31 @@ const adminCachePages=[
 ];
 for(const path of adminCachePages){
   const html=read(path);
-  check(html.includes("admin.css?v=20261007-09"),path+" verwendet nicht die aktuelle admin.css-Cache-Version.");
-  check(html.includes("admin-data.js?v=20261007-04"),path+" verwendet nicht die aktuelle admin-data.js-Cache-Version.");
-  check(html.includes("admin.js?v=20261007-25"),path+" verwendet nicht die aktuelle admin.js-Cache-Version.");
+  check(/admin\.css\?v=[0-9A-Za-z._-]+/.test(html),path+" lädt admin.css nicht versioniert.");
+  check(/admin-data\.js\?v=[0-9A-Za-z._-]+/.test(html),path+" lädt admin-data.js nicht versioniert.");
+  check(/admin\.js\?v=[0-9A-Za-z._-]+/.test(html),path+" lädt admin.js nicht versioniert.");
 }
+contains("cloudflare/src/index.js",'sourceUrl.searchParams.set("_fresh", Date.now().toString(36))',"Admin-/Asset-Proxy lädt GitHub-Quellen nicht cache-bustend frisch.");
+contains("cloudflare/src/index.js",'.replace(/admin-data\\.js\\?v=',"Admin-Proxy versioniert admin-data.js nicht mit der Worker-Release.");
+contains("cloudflare/src/index.js",'.replace(/admin-cropper\\.js\\?v=',"Admin-Proxy versioniert den Cropper nicht mit der Worker-Release.");
+
+const mediaCatalogSource=read("admin/admin-data.js");
+const adminMediaKeys=new Set([...mediaCatalogSource.matchAll(/\bkey:"([^"]+)"/g)].map(match=>match[1]));
+check(adminMediaKeys.size===([...mediaCatalogSource.matchAll(/\bkey:"([^"]+)"/g)].map(match=>match[1])).length,"admin-data.js enthält doppelte Medien-Keys.");
+const publicMediaPages=[
+  "index.html",
+  "leistungen/ingenieurvermessung/index.html",
+  "leistungen/gis-bauvermessung/index.html",
+  "leistungen/3d-laserscanning/index.html",
+  "leistungen/drohnenvermessung/index.html",
+  "projekte/index.html","technik/index.html","unternehmen/index.html","kontakt/index.html","impressum/index.html"
+];
+const publicMediaKeys=new Set();
+for(const path of publicMediaPages){
+  const html=read(path);
+  for(const match of html.matchAll(/data-cms-(?:media|bg)="([^"]+)"/g))publicMediaKeys.add(match[1]);
+}
+for(const key of publicMediaKeys)check(adminMediaKeys.has(key),"Öffentlicher CMS-Bild-Key fehlt im Admin-Medienkatalog: "+key);
 
 const publicSiteJs=read("assets/gudelius-site.js");
 contains("assets/gudelius-site.js","cmsMediaRequestVersion","Öffentliche CMS-Bilder besitzen keinen Cache-Buster nach R2-Overwrite.");
