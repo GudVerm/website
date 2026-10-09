@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-07.9";
+const WORKER_RELEASE = "2026-10-09.1";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -666,6 +666,7 @@ async function handleAdminPreviewUi(request,env,url){
   if(rawPath.includes("..")||!/^[-A-Za-z0-9_/.]*$/.test(rawPath))return new Response("Not found",{status:404,headers:adminUiHeaders("text/plain; charset=utf-8")});
   const sourcePath=rawPath||"index.html";
   const sourceUrl=new URL(sourcePath,publicSiteUrl(env));
+  sourceUrl.searchParams.set("_fresh", Date.now().toString(36));
   const upstream=await fetch(sourceUrl,{headers:{"user-agent":"GudeliusVermessung-PreviewProxy/1.0"},redirect:"follow"});
   if(!upstream.ok)return new Response("Vorschau konnte nicht geladen werden.",{status:upstream.status===404?404:502,headers:adminUiHeaders("text/plain; charset=utf-8")});
   let body=await upstream.text();
@@ -703,6 +704,7 @@ async function handleAdminUi(request, env, url) {
   if (!sourcePath) return new Response("Not found", { status: 404, headers: adminUiHeaders("text/plain; charset=utf-8") });
 
   const sourceUrl = new URL(sourcePath, publicSiteUrl(env));
+  sourceUrl.searchParams.set("_fresh", Date.now().toString(36));
   const requestedVersion=url.searchParams.get("v");
   if(requestedVersion)sourceUrl.searchParams.set("v",requestedVersion);
   sourceUrl.searchParams.set("worker_release", WORKER_RELEASE);
@@ -733,6 +735,10 @@ async function handleAdminUi(request, env, url) {
       .replaceAll('href="../">Website öffnen ↗', 'href="' + publicSiteUrl(env) + '">Website öffnen ↗')
       .replace(/config\.js\?v=[0-9A-Za-z._-]+/g, "config.js?v="+WORKER_RELEASE)
       .replace(/admin\.js\?v=[0-9A-Za-z._-]+/g, "admin.js?v="+WORKER_RELEASE)
+      .replace(/admin-data\.js\?v=[0-9A-Za-z._-]+/g, "admin-data.js?v="+WORKER_RELEASE)
+      .replace(/media-library\.js\?v=[0-9A-Za-z._-]+/g, "media-library.js?v="+WORKER_RELEASE)
+      .replace(/admin-dashboard\.js\?v=[0-9A-Za-z._-]+/g, "admin-dashboard.js?v="+WORKER_RELEASE)
+      .replace(/admin-cropper\.js\?v=[0-9A-Za-z._-]+/g, "admin-cropper.js?v="+WORKER_RELEASE)
       .replace("Cloudflare Worker und Admin-Token verwalten.", "Cloudflare-Verbindung und Admin-Anmeldung verwalten.")
       .replace("<h3>Worker & Admin-Token</h3>", "<h3>CMS-Zugang</h3>")
       .replace("Die Worker-URL ist fest hinterlegt. Das Admin-Token wird nur in dieser Browser-Sitzung gespeichert.", "Auf dieser Cloudflare-Adminadresse erfolgt die Anmeldung über Cloudflare Access. Ein Browser-Token ist hier nicht erforderlich.");
@@ -754,6 +760,7 @@ async function handlePublicAssetProxy(request, env, url) {
     return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
   }
   const sourceUrl = new URL(url.pathname.slice(1), publicSiteUrl(env));
+  sourceUrl.searchParams.set("_fresh", Date.now().toString(36));
   const requestedVersion=url.searchParams.get("v");
   if(requestedVersion)sourceUrl.searchParams.set("v",requestedVersion);
   sourceUrl.searchParams.set("worker_release", WORKER_RELEASE);
