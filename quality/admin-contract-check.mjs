@@ -158,6 +158,9 @@ for(const path of adminCachePages){
 }
 
 const publicSiteJs=read("assets/gudelius-site.js");
+contains("assets/gudelius-site.js","cmsMediaRequestVersion","Öffentliche CMS-Bilder besitzen keinen Cache-Buster nach R2-Overwrite.");
+contains("assets/gudelius-site.js",'+"v="+cmsMediaRequestVersion',"CMS-Medien-URL enthält keinen Versionsparameter.");
+
 const externalTechniqueImages=[...publicSiteJs.matchAll(/image:'(https?:\/\/[^']+)'/g)].map(match=>match[1]).filter(url=>!url.includes("gudeliusvermessung.de"));
 check(externalTechniqueImages.length===0,"Technik enthält fremde Laufzeit-Bilder: "+externalTechniqueImages.join(", "));
 contains("assets/gudelius-site.js","equipment-trimble-placeholder.svg","Trimble-Geräte verwenden nicht den neutralen Tachymeter-Platzhalter.");
