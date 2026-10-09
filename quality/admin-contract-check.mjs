@@ -194,6 +194,8 @@ check(externalTechniqueImages.length===0,"Technik enthält fremde Laufzeit-Bilde
 contains("assets/gudelius-site.js","equipment-trimble-placeholder.svg","Trimble-Geräte verwenden nicht den neutralen Tachymeter-Platzhalter.");
 contains("assets/gudelius-site.js","equipment-neutral-placeholder.svg","Fremde Technikbilder wurden nicht durch neutrale Platzhalter ersetzt.");
 contains("assets/gudelius-site.js","mediaKey:base.mediaKey||('equipment/'+entry.slug)","Dynamische Technik überschreibt die neuen sicheren Medienkeys.");
+contains("admin/admin.js",'key:fallback?.key||("equipment/"+entry.slug)',"Technik-Manifest überschreibt individuelle Medien-Keys.");
+contains("admin/admin.js","Technikbild gespeichert und aus R2 bestätigt.","Technik-Upload bestätigt das gespeicherte R2-Bild nicht.");
 contains("assets/gudelius-site.css","font-size:clamp(1.55rem,2.8vw,2.45rem)","Technik-Modalüberschrift ist nicht verkleinert.");
 contains("assets/gudelius-site.css","font-size:clamp(1.45rem,2.4vw,2.2rem)","Projekt-Modalüberschrift ist nicht verkleinert.");
 for(const path of [
