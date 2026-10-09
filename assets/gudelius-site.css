@@ -1209,3 +1209,32 @@ body.modal-open{overflow:hidden}
 .directory-hero .eyebrow,
 .contact-copy .eyebrow,
 .home-contact-cta .eyebrow{color:#e5c533}
+
+
+/* CMS-Medien: Fallback nicht kurz vor dem aktuellen R2-Bild anzeigen. */
+@keyframes cmsMediaFallbackRelease{to{opacity:1}}
+img[data-cms-media],
+.hero[data-cms-bg] .hero-background,
+.pic[data-cms-bg]{
+  opacity:0;
+  animation:cmsMediaFallbackRelease 0s 1.5s forwards;
+  transition:opacity .12s ease;
+}
+img[data-cms-media].cms-media-ready,
+.hero[data-cms-bg].cms-media-ready .hero-background,
+.pic[data-cms-bg].cms-media-ready{
+  opacity:1;
+  animation:none;
+}
+@media (prefers-reduced-motion: reduce){
+  img[data-cms-media],
+  .hero[data-cms-bg] .hero-background,
+  .pic[data-cms-bg]{
+    transition:none!important;
+    animation-duration:0s!important;
+    animation-delay:1.5s!important;
+  }
+  img[data-cms-media].cms-media-ready,
+  .hero[data-cms-bg].cms-media-ready .hero-background,
+  .pic[data-cms-bg].cms-media-ready{animation:none!important}
+}

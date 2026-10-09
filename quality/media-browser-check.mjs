@@ -36,6 +36,7 @@ for(const [slug,path] of pages){
       });
     }
     if(url.pathname.startsWith("/media/")){
+      await new Promise(resolve=>setTimeout(resolve,260));
       return route.fulfill({
         status:200,
         contentType:"image/png",
@@ -54,8 +55,23 @@ for(const [slug,path] of pages){
     return route.fulfill({status:404,contentType:"application/json",body:'{"error":"media-browser-stub"}'});
   });
 
-  await page.goto(new URL(path,base).href,{waitUntil:"load",timeout:20000});
-  await page.waitForTimeout(500);
+  await page.goto(new URL(path,base).href,{waitUntil:"domcontentloaded",timeout:20000});
+  await page.waitForTimeout(60);
+
+  const pending=await page.evaluate(()=>{
+    const visible=[];
+    for(const img of document.querySelectorAll("img[data-cms-media]")){
+      if(Number.parseFloat(getComputedStyle(img).opacity)>0.05)visible.push(img.dataset.cmsMedia||"");
+    }
+    for(const element of document.querySelectorAll("[data-cms-bg]")){
+      const target=element.classList.contains("hero")?element.querySelector(".hero-background"):element;
+      if(target&&Number.parseFloat(getComputedStyle(target).opacity)>0.05)visible.push(element.dataset.cmsBg||"");
+    }
+    return visible;
+  });
+  if(pending.length)failures.push(slug+": Fallback-Bilder vor CMS-Antwort sichtbar: "+pending.join(", "));
+
+  await page.waitForTimeout(520);
 
   const result=await page.evaluate(()=>{
     const normalizeKey=key=>String(key||"").split("/").map(encodeURIComponent).join("/");
@@ -68,7 +84,7 @@ for(const [slug,path] of pages){
       const key=img.dataset.cmsMedia||"";
       const expected="/media/"+normalizeKey(key);
       const src=img.currentSrc||img.src||"";
-      if(!src.includes(expected)||!img.complete||img.naturalWidth<=0){
+      if(!src.includes(expected)||!img.complete||img.naturalWidth<=0||!img.classList.contains("cms-media-ready")){
         imageProblems.push({key,src,complete:img.complete,naturalWidth:img.naturalWidth});
       }
     }
@@ -86,7 +102,7 @@ for(const [slug,path] of pages){
       }else{
         rendered=element.style.backgroundImage||"";
       }
-      if(!rendered.includes(expected))backgroundProblems.push({key,rendered});
+      if(!rendered.includes(expected)||!element.classList.contains("cms-media-ready"))backgroundProblems.push({key,rendered,ready:element.classList.contains("cms-media-ready")});
     }
 
     return {bindings,imageProblems,backgroundProblems};

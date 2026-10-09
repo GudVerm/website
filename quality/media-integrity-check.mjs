@@ -131,6 +131,8 @@ for(const token of [
 }
 
 for(const token of [
+  "markCmsMediaReady",
+  "cms-media-ready",
   'querySelectorAll("img[data-cms-media]")',
   'querySelectorAll("[data-cms-bg]")',
   "cmsMediaRequestVersion",
@@ -138,6 +140,10 @@ for(const token of [
 ]){
   if(!siteJs.includes(token))fail("Öffentliche CMS-Bildlogik fehlt: "+token);
 }
+
+const siteCss=read("assets/gudelius-site.css");
+if(!siteCss.includes("cmsMediaFallbackRelease"))fail("CMS-Bilder besitzen keinen Schutz gegen sichtbaren Fallback-Flash.");
+if(!siteCss.includes("img[data-cms-media].cms-media-ready"))fail("CMS-Bilder werden nach erfolgreichem Laden nicht sichtbar geschaltet.");
 
 const unusedCatalog=[...catalogSet].filter(key=>!publicKeys.has(key)&&!siteJs.includes(key));
 if(unusedCatalog.length)warn("Medien-Keys ohne direkten öffentlichen Treffer: "+unusedCatalog.join(", "));

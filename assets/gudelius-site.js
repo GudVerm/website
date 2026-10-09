@@ -190,6 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function markCmsMediaReady(element){
+    element?.classList?.add("cms-media-ready");
+  }
+
   async function applyCmsMedia(root = document) {
     if (!cmsApi) return;
     let content={};
@@ -199,20 +203,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const key=img.dataset.cmsMedia||"";
       if(!key)return;
       applyCmsImageLayout(img,cmsMediaLayout(content,key));
-      if(!cmsMediaEnabled||img.dataset.cmsApplied==="1")return;
+      if(!cmsMediaEnabled){
+        markCmsMediaReady(img);
+        return;
+      }
+      if(img.dataset.cmsApplied==="1")return;
       const fallback=img.currentSrc||img.src;
       const fallbackSrcset=img.getAttribute("srcset");
       const fallbackSizes=img.getAttribute("sizes");
+      const url=cmsMediaUrl(key);
       img.dataset.cmsApplied="1";
-      img.addEventListener("error",function restoreFallback(){
+
+      const revealCmsImage=()=>{
+        img.removeEventListener("error",restoreFallback);
+        markCmsMediaReady(img);
+      };
+      const restoreFallback=()=>{
+        img.removeEventListener("load",revealCmsImage);
         img.removeEventListener("error",restoreFallback);
         img.src=fallback;
         if(fallbackSrcset)img.setAttribute("srcset",fallbackSrcset);else img.removeAttribute("srcset");
         if(fallbackSizes)img.setAttribute("sizes",fallbackSizes);else img.removeAttribute("sizes");
-      });
+        markCmsMediaReady(img);
+      };
+
+      img.addEventListener("load",revealCmsImage,{once:true});
+      img.addEventListener("error",restoreFallback,{once:true});
       img.removeAttribute("srcset");
       img.removeAttribute("sizes");
-      img.src=cmsMediaUrl(key);
+      img.src=url;
     });
 
     root.querySelectorAll("[data-cms-bg]").forEach((element) => {
@@ -227,35 +246,55 @@ document.addEventListener('DOMContentLoaded', () => {
         applyCmsBackgroundLayout(element,layout);
       }
 
-      if(!cmsMediaEnabled||element.dataset.cmsApplied==="1")return;
+      if(!cmsMediaEnabled){
+        markCmsMediaReady(element);
+        return;
+      }
+      if(element.dataset.cmsApplied==="1")return;
       element.dataset.cmsApplied="1";
       const url=cmsMediaUrl(key);
+
+      if(element.classList.contains("hero")){
+        const heroImage=element.querySelector(".hero-background");
+        if(heroImage){
+          const fallback=heroImage.currentSrc||heroImage.src;
+          const fallbackSrcset=heroImage.getAttribute("srcset");
+          const fallbackSizes=heroImage.getAttribute("sizes");
+          const revealHero=()=>{heroImage.removeEventListener("error",restoreHero);markCmsMediaReady(element)};
+          const restoreHero=()=>{
+            heroImage.removeEventListener("load",revealHero);
+            heroImage.removeEventListener("error",restoreHero);
+            heroImage.src=fallback;
+            if(fallbackSrcset)heroImage.setAttribute("srcset",fallbackSrcset);else heroImage.removeAttribute("srcset");
+            if(fallbackSizes)heroImage.setAttribute("sizes",fallbackSizes);else heroImage.removeAttribute("sizes");
+            markCmsMediaReady(element);
+          };
+          heroImage.addEventListener("load",revealHero,{once:true});
+          heroImage.addEventListener("error",restoreHero,{once:true});
+          heroImage.removeAttribute("srcset");
+          heroImage.removeAttribute("sizes");
+          heroImage.src=url;
+          applyCmsImageLayout(heroImage,layout);
+          return;
+        }
+      }
+
       const image=new Image();
       image.onload=()=>{
-        if(element.classList.contains("hero")){
-          const heroImage=element.querySelector(".hero-background");
-          if(heroImage){
-            const fallback=heroImage.currentSrc||heroImage.src;
-            const fallbackSrcset=heroImage.getAttribute("srcset");
-            const fallbackSizes=heroImage.getAttribute("sizes");
-            heroImage.onerror=()=>{heroImage.onerror=null;heroImage.src=fallback;if(fallbackSrcset)heroImage.setAttribute("srcset",fallbackSrcset);else heroImage.removeAttribute("srcset");if(fallbackSizes)heroImage.setAttribute("sizes",fallbackSizes);else heroImage.removeAttribute("sizes")};
-            heroImage.removeAttribute("srcset");
-            heroImage.removeAttribute("sizes");
-            heroImage.src=url;
-            applyCmsImageLayout(heroImage,layout);
-          }else{
-            element.style.setProperty("--hero-image",`url("${url}")`);
-          }
-        }else if(element.classList.contains("service-hero")){
+        if(element.classList.contains("service-hero")){
           element.style.setProperty("--service-image",`url("${url}")`);
           applyCmsBackgroundLayout(element,layout);
+        }else if(element.classList.contains("hero")){
+          element.style.setProperty("--hero-image",`url("${url}")`);
         }else{
           element.style.backgroundImage=`url("${url}")`;
           element.removeAttribute("data-bg");
           element.classList.remove("lazy-bg");
           applyCmsBackgroundLayout(element,layout);
         }
+        markCmsMediaReady(element);
       };
+      image.onerror=()=>markCmsMediaReady(element);
       image.src=url;
     });
   }
