@@ -62,6 +62,11 @@ contains("admin/admin.js","imprintHeroGrid","Impressum-Hero wird im Admin nicht 
 contains("impressum/index.html",'data-cms-media="impressum/hero"',"Öffentliches Impressum ist nicht an das Hero-CMS-Bild gebunden.");
 contains("admin/media-library.js","data.imprintHeroImages","Impressum-Hero fehlt in der Medienbibliothek.");
 contains("admin/admin.js","clearAdminDirtyForElements","Gespeicherte Formularfelder können ihren Dirty-State nicht gezielt zurücksetzen.");
+contains("admin/admin.js","saveVerifiedContactTextGroup","Kontakttexte nutzen keine verifizierte Speicherlogik.");
+contains("admin/admin.js","CMS hat die Änderung","Kontakt-Speicherung besitzt keine Rücklesebestätigung.");
+contains("admin/admin.js",'saveVerifiedContactTextGroup(\n    contactTextFields',"Kontakt-Editor ist nicht an den bestätigten Speicherweg angeschlossen.");
+contains("admin/admin.js",'saveVerifiedContactTextGroup(\n    serviceContactTextFields',"Leistungs-Kontakteditor ist nicht an den bestätigten Speicherweg angeschlossen.");
+
 contains("admin/admin.js",'clearAdminDirtyForElements(Object.values(imprintTextFields),"fields")',"Impressum bleibt nach erfolgreichem Speichern fälschlich als ungespeichert markiert.");
 contains("admin/admin.js","const changed=Object.entries(imprintTextFields).filter","Impressum schreibt weiterhin unveränderte Felder als Entwürfe.");
 contains("assets/gudelius-site.js",'if (typeof value === "string")',"Explizit leere CMS-Texte werden in der Vorschau nicht angewendet.");
