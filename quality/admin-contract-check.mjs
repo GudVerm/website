@@ -7,6 +7,13 @@ const errors=[];
 const check=(condition,message)=>{if(!condition)errors.push(message)};
 const contains=(path,needle,message)=>check(read(path).includes(needle),message||path+" enthält nicht: "+needle);
 
+const workerSource=read("cloudflare/src/index.js");
+const publicSiteReadHandler=workerSource.split('if (url.pathname === "/api/site" && request.method === "GET") {')[1]?.split('if (url.pathname === "/api/contact")')[0]||"";
+check(Boolean(publicSiteReadHandler),"Öffentlicher CMS-Lese-Endpunkt /api/site fehlt.");
+check(!publicSiteReadHandler.includes("UPDATE content"),"Öffentlicher CMS-Lese-Endpunkt darf keine Kontaktwerte in D1 verändern.");
+check(!publicSiteReadHandler.includes('content["kontakt/email"] ='),"Öffentlicher CMS-Lese-Endpunkt überschreibt die gespeicherte Kontakt-E-Mail.");
+
+
 contains("cloudflare/wrangler.jsonc",'"ADMIN_TOKEN_FALLBACK_ENABLED": "false"',"Token-Fallback muss deaktiviert bleiben.");
 contains("cloudflare/wrangler.jsonc",'"ADMIN_ALLOWED_EMAILS": "gudeliusvermessung@web.de,jost@gudeliusvermessung.de"',"Admin-Allowlist wurde verändert.");
 contains("cloudflare/src/index.js",'"/api/admin/drafts/discard"',"Mehrfach-Verwerfen von Entwürfen fehlt.");
