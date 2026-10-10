@@ -61,6 +61,10 @@ jobs:
         env:
           SITE_URL: http://127.0.0.1:4173/
         run: node quality/contact-editor-browser-check.mjs
+      - name: Turnstile-Kontaktformular im Browser prüfen
+        env:
+          SITE_URL: http://127.0.0.1:4173/
+        run: node quality/turnstile-browser-check.mjs
       - name: Öffentliche CMS-/CORS-Integration prüfen
         run: node quality/cms-browser-integration.mjs
       - name: Visuelle Regression prüfen
