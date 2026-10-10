@@ -321,6 +321,10 @@ Die zentrale Medienbibliothek im Admin liest den Medienkatalog aus `admin/admin-
 
 Die Browser-Konfiguration enthält einen optionalen `GUDELIUS_TURNSTILE_SITE_KEY`. Solange dieser leer ist, wird kein Turnstile-Widget geladen. Honeypot, Origin-Prüfung, Größenlimits und Rate Limiting bleiben unabhängig davon aktiv.
 
+Der Kontakt-Client verwendet die Widget-Aktion `contact` und den Anzeigemodus `interaction-only`. Solange der öffentliche Site-Key fehlt, bleibt das Formular ohne Turnstile benutzbar. Sobald der Site-Key gesetzt ist, blockiert der Browser einen Versand ohne Token und zeigt eine verständliche Meldung an. Turnstile-Tokens sind einmalig verwendbar; deshalb wird die Sicherheitsprüfung bei einem fehlgeschlagenen Versand erneuert. Der Browser-Vertrag ist in `quality/turnstile-browser-check.mjs` abgesichert.
+
+**Erst nach Einrichtung beider echten Schlüssel ist der Spam-Schutz vollständig aktiv.** Test-Site-Keys und Test-Secrets gehören nicht auf die öffentliche Website.
+
 Der Worker unterstützt die serverseitige Verifikation über Cloudflare Siteverify. Sie wird automatisch aktiv, sobald das Secret `TURNSTILE_SECRET_KEY` gesetzt ist. Ab diesem Zeitpunkt wird jede normale Kontaktanfrage ohne gültigen Turnstile-Token abgewiesen; Honeypot-Treffer werden weiterhin neutral beantwortet.
 
 Aktivierungsreihenfolge, damit es keinen Formularausfall gibt:
