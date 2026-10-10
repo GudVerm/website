@@ -1,5 +1,5 @@
 name: Visual baseline initialize
-# refresh: service-contact-aa-20261004
+# refresh: smartwerk-footer-20261010
 
 on:
   push:
