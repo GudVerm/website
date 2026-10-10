@@ -431,13 +431,28 @@ document.addEventListener('DOMContentLoaded', () => {
       widget.className="cf-turnstile";
       widget.dataset.sitekey=siteKey;
       widget.dataset.theme="auto";
+      widget.dataset.action="contact";
+      widget.dataset.appearance="interaction-only";
+      widget.setAttribute("aria-label","Cloudflare-Sicherheitsprüfung");
+      const hint=document.createElement("p");
+      hint.className="turnstile-notice";
+      hint.textContent="Spam-Schutz durch Cloudflare Turnstile. Bitte warten Sie auf die Sicherheitsprüfung.";
       const submit=form.querySelector('button[type="submit"]');
       submit?.before(widget);
+      widget.after(hint);
     });
     if(!document.querySelector('script[data-gudelius-turnstile]')){
       const script=document.createElement("script");
       script.src="https://challenges.cloudflare.com/turnstile/v0/api.js";
       script.async=true;script.defer=true;script.dataset.gudeliusTurnstile="1";
+      script.onerror=()=>{
+        for(const form of forms){
+          const status=form.querySelector(".form-note");
+          if(!status)continue;
+          status.textContent="Die Sicherheitsprüfung konnte nicht geladen werden. Bitte versuchen Sie es später erneut oder kontaktieren Sie uns per E-Mail.";
+          status.classList.add("error");
+        }
+      };
       document.head.appendChild(script);
     }
   }
@@ -1108,6 +1123,15 @@ async function sendMail(e) {
     source: window.location.pathname
   };
 
+  if (String(window.GUDELIUS_TURNSTILE_SITE_KEY||"").trim() && !payload.turnstileToken.trim()) {
+    if (status) {
+      status.textContent="Bitte warten Sie, bis die Cloudflare-Sicherheitsprüfung abgeschlossen ist, und versuchen Sie es erneut.";
+      status.classList.remove("success");
+      status.classList.add("error");
+    }
+    return;
+  }
+
   if (submit) {
     submit.disabled = true;
     submit.dataset.originalText = submit.textContent;
@@ -1136,6 +1160,10 @@ async function sendMail(e) {
       status.classList.add("success");
     }
   } catch (error) {
+    // Turnstile tokens are single use: refresh before trying again.
+    if (String(window.GUDELIUS_TURNSTILE_SITE_KEY||"").trim()) {
+      try{window.turnstile?.reset?.()}catch{}
+    }
     if (status) {
       const detail=String(error?.message||"");
       status.textContent = detail && !/^HTTP\s+\d+/i.test(detail)
