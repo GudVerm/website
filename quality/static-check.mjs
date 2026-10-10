@@ -69,6 +69,7 @@ for(const page of publicPages){
   if(page!=="404.html"){
     if(!html.includes('class="footer-credit"')||!html.includes("Entwickelt und gehostet von"))fail(page+": Footer-SmartWerk-Hinweis fehlt.");
     if(!html.includes("https://www.smartwerk.art/wp-content/uploads/2026/09/SmartWerk-3D-Druck-Logo-transparent-300x64.png"))fail(page+": Footer-SmartWerk-Logo fehlt.");
+    if(!html.includes('alt="SmartWerk" width="150" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer"'))fail(page+": Footer-SmartWerk-Logo benötigt Alternativtext und Referrer-Schutz.");
   }
 
   const ids=[...html.matchAll(/\bid=["']([^"']+)["']/gi)].map(m=>m[1]);
