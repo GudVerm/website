@@ -1245,3 +1245,7 @@ img[data-cms-media].cms-media-lazy-pending:not(.cms-media-ready),
   opacity:0;
   animation:none!important;
 }
+
+/* Turnstile is displayed only after a genuine public site key is configured. */
+.contact-form .cf-turnstile{margin:16px 0 6px;min-height:0}
+.contact-form .turnstile-notice{margin:0 0 18px;font-size:.76rem;line-height:1.5;color:var(--muted,#59666c)}
