@@ -240,6 +240,16 @@
             Statistikfunktion.
           </p>
 
+          <h3>Spam-Schutz des Kontaktformulars (Cloudflare Turnstile)</h3>
+          <p>
+            Zum Schutz des Kontaktformulars vor automatisierten Anfragen kann Cloudflare Turnstile
+            eingesetzt werden. Bei aktiviertem Turnstile lädt der Browser die Sicherheitsprüfung
+            von Cloudflare. Dabei können technisch erforderliche Verbindungs- und Browserinformationen
+            (beispielsweise die IP-Adresse) an Cloudflare übermittelt werden. Das kurzlebige Token
+            wird bei einem Kontaktversand von unserem Cloudflare Worker an Cloudflare zur Prüfung
+            übermittelt, bevor die Anfrage gespeichert wird.
+          </p>
+
           <h3>Datensparsame Website-Statistik</h3>
           <p>
             Für die Statistik werden ausschließlich der Ereignistyp, ein normalisierter Seitenpfad, ein kurzes
