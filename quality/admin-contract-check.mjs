@@ -255,6 +255,13 @@ contains("kontakt/index.html",'data-cms-media="kontakt/hero"',"Kontaktseite ist 
 contains("admin/media-library.js","data.projectHeroImages","Projekt-Hero fehlt in der Medienbibliothek.");
 contains("assets/gudelius-site.css",".directory-hero-with-media::before","Directory-Heros besitzen kein lesbares Overlay.");
 
+contains("assets/gudelius-site.js",'widget.dataset.action="contact"',"Turnstile-Aktion contact fehlt.");
+contains("assets/gudelius-site.js",'widget.dataset.appearance="interaction-only"',"Turnstile-Anzeigemodus fehlt.");
+contains("assets/gudelius-site.js","!payload.turnstileToken.trim()","Kontaktversand ist nicht gegen fehlende Turnstile-Tokens abgesichert.");
+contains("assets/gudelius-site.js","window.turnstile?.reset?.()","Turnstile-Token wird bei Fehlern nicht erneuert.");
+contains("cloudflare/src/index.js","verifyTurnstileToken(request, env, payload.turnstileToken)","Cloudflare Siteverify wird beim Kontaktversand nicht serverseitig aufgerufen.");
+contains("datenschutz/index.html","Spam-Schutz des Kontaktformulars (Cloudflare Turnstile)","Turnstile-Datenschutzhinweis fehlt.");
+
 const env=JSON.parse(read("site.environments.json"));
 check(env.active_environment==="staging","Vor Domain-Cutover muss staging aktiv sein.");
 check(env.environments?.staging?.indexable===false,"Staging darf nicht indexierbar sein.");
