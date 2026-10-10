@@ -66,6 +66,11 @@ for(const page of publicPages){
   if(!/class=["'][^"']*\bskip-link\b/i.test(html)||!/id=["']main-content["']/i.test(html))fail(page+": Skip-Link/main-content fehlt");
   if(/static\.wixstatic\.com/i.test(html))fail(page+": produktive Wix-Bildreferenz gefunden");
 
+  if(page!=="404.html"){
+    if(!html.includes('class="footer-credit"')||!html.includes("Entwickelt und gehostet von"))fail(page+": Footer-SmartWerk-Hinweis fehlt.");
+    if(!html.includes("https://www.smartwerk.art/wp-content/uploads/2026/09/SmartWerk-3D-Druck-Logo-transparent-300x64.png"))fail(page+": Footer-SmartWerk-Logo fehlt.");
+  }
+
   const ids=[...html.matchAll(/\bid=["']([^"']+)["']/gi)].map(m=>m[1]);
   const duplicates=[...new Set(ids.filter((id,index)=>ids.indexOf(id)!==index))];
   if(duplicates.length)fail(page+": doppelte IDs: "+duplicates.join(", "));

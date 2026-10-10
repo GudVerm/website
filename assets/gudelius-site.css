@@ -1249,3 +1249,12 @@ img[data-cms-media].cms-media-lazy-pending:not(.cms-media-ready),
 /* Turnstile is displayed only after a genuine public site key is configured. */
 .contact-form .cf-turnstile{margin:16px 0 6px;min-height:0}
 .contact-form .turnstile-notice{margin:0 0 18px;font-size:.76rem;line-height:1.5;color:var(--muted,#59666c)}
+
+
+/* Footer: SmartWerk-Credit */
+footer .container{flex-wrap:wrap}
+footer .footer-credit{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap;line-height:1.4}
+footer .footer-credit a{display:inline-flex;align-items:center;justify-content:center;padding:7px 9px;border-radius:7px;background:#fff;text-decoration:none}
+footer .footer-credit a:hover{background:#f0f2f3}
+footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;object-fit:contain}
+@media(max-width:800px){footer .container{align-items:flex-start}footer .footer-credit{width:100%}}
