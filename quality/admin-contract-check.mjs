@@ -228,11 +228,14 @@ const baselines=existsSync(resolve(root,"quality/visual-baselines"))
   : [];
 check(baselines.length>=18,"Visuelle Baselines fehlen oder sind unvollständig (gefunden "+baselines.length+").");
 
+const approvedSmartWerkLogo="https://www.smartwerk.art/wp-content/uploads/2026/09/SmartWerk-3D-Druck-Logo-transparent-300x64.png";
 const publicHtml=["index.html","technik/index.html","projekte/index.html","unternehmen/index.html","kontakt/index.html"];
 for(const path of publicHtml){
   const html=read(path);
   const externalImages=[...html.matchAll(/<img\b[^>]*\bsrc=["'](https?:\/\/[^"']+)["']/gi)].map(match=>match[1]);
-  check(externalImages.length===0,path+" enthält externe Laufzeit-Bildquelle(n): "+externalImages.join(", "));
+  const unexpectedImages=externalImages.filter(url=>url!==approvedSmartWerkLogo);
+  check(unexpectedImages.length===0,path+" enthält nicht genehmigte externe Laufzeit-Bildquelle(n): "+unexpectedImages.join(", "));
+  check(html.includes('class="footer-credit-logo" src="'+approvedSmartWerkLogo+'"'),path+" nutzt kein freigegebenes SmartWerk-Logo im Footer.");
 }
 
 contains("admin/admin.js","companyHeroGrid","Unternehmens-Hero besitzt keinen eigenen Admin-Medieneditor.");
