@@ -427,6 +427,8 @@ export default {
             return json({ error: "Body must be valid JSON" }, 400, cors);
           }
 
+          const validationError=cmsPublicationValueError(key,value);
+          if(validationError)return json({error:validationError,key},422,cors);
           const serializedValue=JSON.stringify(value);
           const previous = await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
           let previousManifestValue = null;
@@ -1344,10 +1346,51 @@ async function handleAdminDraftList(env,cors){
   return json({drafts,count:drafts.length},200,cors);
 }
 
+function cmsPublicationValueError(key,value){
+  if(isCollectionManifestKey(key)){
+    if(!Array.isArray(value)||value.some(item=>
+      !item||typeof item!=="object"||typeof item.slug!=="string"||
+      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)
+    )||new Set(value.map(item=>item.slug)).size!==value.length){
+      return "Projekt-/Technikliste enthält ungültige oder doppelte Kennungen.";
+    }
+  }
+  if(key==="kontakt/email"&&
+     (typeof value!=="string"||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))){
+    return "Kontakt-E-Mail ist ungültig.";
+  }
+  if(key.startsWith("media-layout/")){
+    if(!value||typeof value!=="object"||Array.isArray(value)){
+      return "Bildausschnitt enthält ungültige Daten.";
+    }
+    for(const [part,min,max] of [["x",0,100],["y",0,100],["zoom",25,300],["rotation",-180,180]]){
+      if(value[part]!==undefined&&
+        (typeof value[part]!=="number"||!Number.isFinite(value[part])||value[part]<min||value[part]>max)){
+        return "Bildausschnitt enthält einen ungültigen "+part+"-Wert.";
+      }
+    }
+  }
+  if(/^projekte\/[^/]+\/services$/.test(key)&&
+     (!Array.isArray(value)||value.some(service=>typeof service!=="string"))){
+    return "Projektleistungen enthalten ungültige Daten.";
+  }
+  if(key==="unternehmen/timeline"&&
+     (!Array.isArray(value)||value.some(item=>
+       !item||typeof item!=="object"||
+       ["id","period","text","description"].some(part=>item[part]!==undefined&&typeof item[part]!=="string")||
+       (item.visible!==undefined&&typeof item.visible!=="boolean")
+     ))){
+    return "Unternehmens-Zeitleiste enthält ungültige Daten.";
+  }
+  return "";
+}
+
 async function saveContentDraft(request,env,cors,key,principal){
   const raw=await request.text();
   if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES)return json({error:"Content payload too large"},413,cors);
   let value;try{value=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+  const validationError=cmsPublicationValueError(key,value);
+  if(validationError)return json({error:validationError,key},422,cors);
   await ensureContentTable(env);
   await ensureContentDraftTable(env);
   const serialized=JSON.stringify(value);
@@ -1428,26 +1471,8 @@ async function publishContentDrafts(request,env,cors,principal){
     try{value=JSON.parse(draft.value)}catch{
       return json({error:"Entwurf enthält ungültiges JSON.",key:draft.key},422,cors);
     }
-    if(isCollectionManifestKey(draft.key)){
-      if(!Array.isArray(value)||value.some(item=>
-        !item||typeof item!=="object"||typeof item.slug!=="string"||
-        !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)
-      )||new Set(value.map(item=>item.slug)).size!==value.length){
-        return json({error:"Projekt-/Technikliste enthält ungültige oder doppelte Kennungen.",key:draft.key},422,cors);
-      }
-    }
-    if(draft.key==="kontakt/email"&&
-       (typeof value!=="string"||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))){
-      return json({error:"Kontakt-E-Mail ist ungültig.",key:draft.key},422,cors);
-    }
-    if(draft.key.startsWith("media-layout/")&&
-       (!value||typeof value!=="object"||Array.isArray(value))){
-      return json({error:"Bildausschnitt enthält ungültige Daten.",key:draft.key},422,cors);
-    }
-    if(/^projekte\/[^/]+\/services$/.test(draft.key)&&
-       (!Array.isArray(value)||value.some(service=>typeof service!=="string"))){
-      return json({error:"Projektleistungen enthalten ungültige Daten.",key:draft.key},422,cors);
-    }
+    const validationError=cmsPublicationValueError(draft.key,value);
+    if(validationError)return json({error:validationError,key:draft.key},422,cors);
     nextValues.set(draft.key,value);
   }
 
