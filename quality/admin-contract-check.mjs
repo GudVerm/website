@@ -25,6 +25,12 @@ check(publishHandler.includes("suppressedDraftKeys")&&publishHandler.includes("r
 contains("admin/admin.js","if(hasAdminDirty()||hasPendingMediaCrops())","Ungespeicherte Felder/Bildausschnitte dürfen nicht veröffentlicht werden.");
 check((workerSource.match(/cmsPublicationValueError\(key,value\)/g)||[]).length>=3,"Validierung fehlt für direkte Speicherung und Entwürfe.");
 check(publishHandler.includes("cmsPublicationValueError(draft.key,value)"),"Validierung fehlt für die Entwurfs-Veröffentlichung.");
+check(publishHandler.includes("media_cleanup_failed:mediaCleanupFailed"),"Medien-Aufräumfehler dürfen nach erfolgreichem D1-Publish nicht verschwiegen werden.");
+check(publishHandler.includes("'draft_publish_delete'")&&publishHandler.includes("DELETE FROM content WHERE "), "Publizierte Kind-Datensätze müssen beim Lösch-Publish aus Live und Entwürfen entfernt werden.");
+const adminSource=read("admin/admin.js");
+check((adminSource.match(/if\(!cmsDraftMode\)\{\s*try\{\s*const (?:mr|mediaResponse)=await fetch\(getApi\(\)\+"\/api\/admin\/media\//g)||[]).length===2,
+  "Projekt- und Technik-Löschungen müssen R2-/Live-Löschen während des Entwurfsmodus verhindern.");
+contains("admin/admin.js","const failedMedia=Array.isArray(data.media_cleanup_failed)","Fehlgeschlagenes R2-Aufräumen muss beim Publish sichtbar sein.");
 
 contains("cloudflare/src/index.js","live_value","Entwurfs-API liefert keinen Live-Wert.");
 contains("cloudflare/src/index.js","draft_value","Entwurfs-API liefert keinen Entwurfswert.");
