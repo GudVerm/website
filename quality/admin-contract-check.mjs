@@ -23,6 +23,8 @@ check(publishHandler.includes("await env.DB.batch(statements)"),"Veröffentlichu
 check(publishHandler.includes("requestedKeys.length")&&publishHandler.includes("422,cors"),"Auswahl und Feldwerte werden vor Veröffentlichung nicht geprüft.");
 check(publishHandler.includes("suppressedDraftKeys")&&publishHandler.includes("removedChildren"),"Gelöschte Projekte müssen innerhalb der Publish-Transaktion abgesichert werden.");
 contains("admin/admin.js","if(hasAdminDirty()||hasPendingMediaCrops())","Ungespeicherte Felder/Bildausschnitte dürfen nicht veröffentlicht werden.");
+check((workerSource.match(/cmsPublicationValueError\(key,value\)/g)||[]).length>=3,"Validierung fehlt für direkte Speicherung und Entwürfe.");
+check(publishHandler.includes("cmsPublicationValueError(draft.key,value)"),"Validierung fehlt für die Entwurfs-Veröffentlichung.");
 
 contains("cloudflare/src/index.js","live_value","Entwurfs-API liefert keinen Live-Wert.");
 contains("cloudflare/src/index.js","draft_value","Entwurfs-API liefert keinen Entwurfswert.");
