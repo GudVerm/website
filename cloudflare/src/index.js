@@ -1560,9 +1560,16 @@ async function publishContentDrafts(request,env,cors,principal){
     published.push(draft.key);
   }
   for(const child of removedChildren){
+    const where="substr(key,1,length(?)) = ? OR key = ?";
+    // Persist removed child values for a later version restore.
     statements.push(env.DB.prepare(
-      "DELETE FROM content_drafts WHERE substr(key,1,length(?)) = ? OR key = ?"
-    ).bind(child.childPrefix,child.childPrefix,child.mediaKey));
+      "INSERT INTO content_history (key,value,operation,actor_email,created_at) "+
+      "SELECT key,value,'draft_publish_delete',?,CURRENT_TIMESTAMP FROM content WHERE "+where
+    ).bind(actor,child.childPrefix,child.childPrefix,child.mediaKey));
+    statements.push(env.DB.prepare("DELETE FROM content WHERE "+where)
+      .bind(child.childPrefix,child.childPrefix,child.mediaKey));
+    statements.push(env.DB.prepare("DELETE FROM content_drafts WHERE "+where)
+      .bind(child.childPrefix,child.childPrefix,child.mediaKey));
   }
   if(published.length){
     statements.push(env.DB.prepare(
@@ -1571,7 +1578,17 @@ async function publishContentDrafts(request,env,cors,principal){
   }
   // Cloudflare D1 batch() rolls the whole transaction back on any failure.
   if(statements.length)await env.DB.batch(statements);
-  return json({ok:true,published,count:published.length},200,cors);
+  // R2 is not part of D1 transactions; delete files only AFTER commit.
+  // Report failures without misreporting the already committed publish as failed.
+  const mediaCleanupFailed=[];
+  for(const child of removedChildren){
+    const key=child.mediaKey.replace(/^media-layout\//,"");
+    try{await env.MEDIA.delete(key)}catch(error){
+      console.error("Veröffentlicht, aber R2-Aufräumen fehlgeschlagen:",key,error);
+      mediaCleanupFailed.push(key);
+    }
+  }
+  return json({ok:true,published,count:published.length,media_cleanup_failed:mediaCleanupFailed},200,cors);
 }
 
 async function handleAdminBackup(env){
