@@ -1382,6 +1382,17 @@ function cmsPublicationValueError(key,value){
      ))){
     return "Unternehmens-Zeitleiste enthält ungültige Daten.";
   }
+  if(/^leistungsseiten\/[^/]+\/lists\/(tasks|scope)$/.test(key)&&
+     (!Array.isArray(value)||value.some(entry=>typeof entry!=="string"||entry.length>2000))){
+    return "Leistungslisten dürfen nur Texte enthalten.";
+  }
+  const textKey=
+    /^(startseite|leistungen|kontakt|impressum)\/[^/]+$/.test(key)||
+    /^unternehmen\/(?!timeline$)[^/]+$/.test(key)||
+    /^leistungsseiten\/[^/]+\/text\/[^/]+$/.test(key)||
+    /^projekte\/[^/]+\/(?!services$)[^/]+$/.test(key)||
+    /^technik\/[^/]+\/[^/]+$/.test(key)&&key!=="technik/index";
+  if(textKey&&typeof value!=="string")return "Dieses Inhaltsfeld muss ein Text sein.";
   return "";
 }
 
