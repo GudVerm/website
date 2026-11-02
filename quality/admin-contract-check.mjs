@@ -17,6 +17,13 @@ check(!publicSiteReadHandler.includes('content["kontakt/email"] ='),"Öffentlich
 contains("cloudflare/wrangler.jsonc",'"ADMIN_TOKEN_FALLBACK_ENABLED": "false"',"Token-Fallback muss deaktiviert bleiben.");
 contains("cloudflare/wrangler.jsonc",'"ADMIN_ALLOWED_EMAILS": "gudeliusvermessung@web.de,jost@gudeliusvermessung.de"',"Admin-Allowlist wurde verändert.");
 contains("cloudflare/src/index.js",'"/api/admin/drafts/discard"',"Mehrfach-Verwerfen von Entwürfen fehlt.");
+const publishHandler=workerSource.split("async function publishContentDrafts(request,env,cors,principal){")[1]?.split("\nasync function handleAdminBackup(env){")[0]||"";
+check(Boolean(publishHandler),"Entwurfs-Publish-Handler fehlt.");
+check(publishHandler.includes("await env.DB.batch(statements)"),"Veröffentlichung darf keine unabhängigen Einzel-Commits verwenden.");
+check(publishHandler.includes("requestedKeys.length")&&publishHandler.includes("422,cors"),"Auswahl und Feldwerte werden vor Veröffentlichung nicht geprüft.");
+check(publishHandler.includes("suppressedDraftKeys")&&publishHandler.includes("removedChildren"),"Gelöschte Projekte müssen innerhalb der Publish-Transaktion abgesichert werden.");
+contains("admin/admin.js","if(hasAdminDirty()||hasPendingMediaCrops())","Ungespeicherte Felder/Bildausschnitte dürfen nicht veröffentlicht werden.");
+
 contains("cloudflare/src/index.js","live_value","Entwurfs-API liefert keinen Live-Wert.");
 contains("cloudflare/src/index.js","draft_value","Entwurfs-API liefert keinen Entwurfswert.");
 contains("admin/audit/index.html","draftPublishSelected","Entwurfs-Auswahl/Publish fehlt.");
