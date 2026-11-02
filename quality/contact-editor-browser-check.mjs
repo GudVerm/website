@@ -14,6 +14,9 @@ for(const draftMode of [false,true]){
   const drafts={};
   const writes=[];
   const errors=[];
+  const dialogs=[];
+  let publishCalls=0;
+  page.on("dialog",async dialog=>{dialogs.push(dialog.message());await dialog.accept()});
   let stage="initial";
   page.on("pageerror",error=>errors.push(error.message));
   page.on("requestfailed",request=>errors.push("Request: "+request.url()+" "+request.failure()?.errorText));
@@ -47,6 +50,10 @@ for(const draftMode of [false,true]){
       return json({count:Object.keys(drafts).length,drafts:Object.keys(drafts).map(key=>({key}))});
     }
     if(method==="GET"&&path==="/api/admin/session")return json({ok:true,auth_mode:"access",token_fallback_enabled:false});
+    if(method==="POST"&&path==="/api/admin/drafts/publish"){
+      publishCalls++;
+      return json({ok:true,published:[],count:0});
+    }
     if(method==="GET"&&path==="/api/admin/media")return json({objects:[]});
     const draftPrefix="/api/admin/drafts/",livePrefix="/api/admin/content/";
     if(method==="PUT"&&(path.startsWith(draftPrefix)||path.startsWith(livePrefix))){
@@ -82,6 +89,12 @@ for(const draftMode of [false,true]){
     if(draftMode){
       if(live["kontakt/email"]!==initialEmail||drafts["kontakt/email"]!==email){
         throw new Error("Entwurf wurde fälschlich live oder nicht als Entwurf gespeichert.");
+      }
+      stage="Ungespeicherte Änderung blockiert Veröffentlichung";
+      await page.locator("#contactEmail").fill("offen@example.org");
+      await page.locator("[data-draft-publish]").click();
+      if(publishCalls!==0||!dialogs.some(message=>message.includes("ungespeicherte Änderungen"))){
+        throw new Error("Veröffentlichen war trotz ungespeicherter Felder möglich.");
       }
     }else{
       await page.goto(new URL("kontakt/",base).href,{waitUntil:"load",timeout:25000});
