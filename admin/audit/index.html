@@ -405,7 +405,8 @@
       const response=await fetch(api+"/api/admin/drafts/publish",{method:"POST",credentials:"include",headers:{"content-type":"application/json"},body:JSON.stringify({keys})});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
-      draftStatus.textContent=(data.count||0)+" Entwürfe veröffentlicht.";draftStatus.className="status ok";
+      const failedMedia=Array.isArray(data.media_cleanup_failed)?data.media_cleanup_failed:[];
+      draftStatus.textContent=(data.count||0)+" Entwürfe veröffentlicht."+(failedMedia.length?" Achtung: "+failedMedia.length+" Medien konnten nicht bereinigt werden.":"");draftStatus.className=failedMedia.length?"status bad":"status ok";
       await Promise.all([load(),loadDrafts(),loadHistory()]);
     }catch(error){draftStatus.textContent="Veröffentlichen fehlgeschlagen: "+error.message;draftStatus.className="status bad"}
   }
