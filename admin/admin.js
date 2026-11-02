@@ -1009,6 +1009,10 @@ function ensureDraftToolbar(){
     }
   });
   toolbar.querySelector("[data-draft-publish]").addEventListener("click",async event=>{
+    if(hasAdminDirty()||hasPendingMediaCrops()){
+      alert("Es gibt noch ungespeicherte Änderungen. Bitte zuerst alle Änderungen speichern und die Vorschau prüfen, bevor du veröffentlichst.");
+      return;
+    }
     if(!confirm("Alle gespeicherten Entwürfe jetzt veröffentlichen?"))return;
     const button=event.currentTarget;button.disabled=true;
     try{
