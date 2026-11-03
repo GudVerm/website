@@ -3183,7 +3183,7 @@ function populateTechniqueSelect(){
     const items=equipment.filter(item=>item.group===group);
     if(!items.length) return;
     const optgroup=document.createElement("optgroup");
-    optgroup.label=group;
+    optgroup.label=group==="3D & Drohne"?"Drohnenvermessung":group;
     items.forEach(item=>{
       const option=document.createElement("option");
       option.value=item.slug;

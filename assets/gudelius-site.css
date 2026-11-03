@@ -1258,3 +1258,27 @@ footer .footer-credit a{display:inline-flex;align-items:center;justify-content:c
 footer .footer-credit a:hover{background:#f0f2f3}
 footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;object-fit:contain}
 @media(max-width:800px){footer .container{align-items:flex-start}footer .footer-credit{width:100%}}
+
+/* Einheitliche Hero-Hoehen und Leistungs-Kacheln (2026-11-03) */
+:root{--shared-hero-height:560px;--shared-hero-mobile-min-height:500px}
+/* Projekte bleiben erreichbar, sind aber im Hauptmenue vorerst ausgeblendet. */
+.navlinks > a[href$="projekte/"]{display:none}
+.home-page .hero,.directory-hero,.service-hero,.legal-hero{
+  height:var(--shared-hero-height);
+  min-height:var(--shared-hero-height);
+  box-sizing:border-box;
+}
+.home-page .hero-inner{height:100%;min-height:0}
+.directory-hero,.legal-hero{display:flex;align-items:center}
+.home-page .services .service-card{grid-template-rows:220px minmax(0,1fr)}
+.home-page .services .service-card .pic{height:220px;min-height:0}
+@media(max-width:650px){
+  /* Auf sehr schmalen Displays darf Inhalt die Mindesthoehe erweitern. */
+  .home-page .hero,.directory-hero,.service-hero,.legal-hero{
+    height:auto;
+    min-height:var(--shared-hero-mobile-min-height);
+  }
+  .home-page .hero-inner{height:auto;min-height:var(--shared-hero-mobile-min-height)}
+  .home-page .services .service-card{grid-template-rows:205px minmax(0,1fr)}
+  .home-page .services .service-card .pic{height:205px}
+}

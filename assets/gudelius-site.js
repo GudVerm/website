@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ]
     },
     digital: {
-      kicker: '3D & Drohne',
+      kicker: 'Drohnenvermessung',
       title: 'Digitale Erfassung aus Boden und Luft.',
       lead: 'Laserscanning, RTK-Drohne, Wärmebild und photogrammetrische Auswertung bilden den digitalen Technikblock.',
       summary: '3D-Laserscanning, RTK-Drohne und photogrammetrische Auswertung ergänzen die klassische Vermessung um flächenhafte und digitale Datenerfassung.',
@@ -836,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const equipmentFallbackBySlug = new Map(Object.values(equipmentData).flatMap(group=>group.devices).map(device=>[device.slug,{...device}]));
-  const equipmentGroupKeys = {'Außendienst':'aussendienst','3D & Drohne':'digital','Programme & Arbeitsplatz':'software'};
+  const equipmentGroupKeys = {'Außendienst':'aussendienst','3D & Drohne':'digital','Drohnenvermessung':'digital','Programme & Arbeitsplatz':'software'};
   const equipmentGroupMedia = {
     aussendienst:{image:'assets/media/2026-10-02-technik-aussendienst.webp',mediaKey:'technik/gruppen/aussendienst',alt:'Vermessungstechnik im Außeneinsatz'},
     digital:{image:'assets/media/2026-10-02-technik-digital.webp',mediaKey:'technik/gruppen/3d-drohne',alt:'RTK-Drohne und Vermessungstechnik im Außeneinsatz'},
