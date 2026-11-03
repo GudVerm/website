@@ -1292,3 +1292,22 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
 }
 /* Visuelle Referenzpruefung nach Designanpassungen vom 03.11.2026. */
 /* Navigation Startseite: Abschlusspruefung 2026-11-03. */
+/* Einheitlicher sichtbarer Bildausschnitt der vier Leistungskacheln */
+/* Der Rahmen begrenzt CMS-Zoom und -Drehung auf die Bildflaeche. */
+.home-page .services .service-card .pic-frame{
+  height:220px;
+  min-height:0;
+  overflow:hidden;
+  position:relative;
+}
+.home-page .services .service-card .pic-frame > .pic{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  background-size:cover;
+  background-repeat:no-repeat;
+}
+@media(max-width:650px){
+  .home-page .services .service-card .pic-frame{height:205px}
+}

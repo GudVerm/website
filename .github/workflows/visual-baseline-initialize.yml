@@ -1,5 +1,5 @@
 name: Visual baseline initialize
-# refresh: startseite-menuepunkt-20261103
+# refresh: leistungskacheln-bildausschnitt-20261103
 
 on:
   push:
