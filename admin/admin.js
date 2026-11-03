@@ -600,7 +600,8 @@ document.addEventListener("click",event=>{
 });
 ensureAdminDirtyUi();
 
-let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftToolbarPages.has(currentAdminPage);
+// Neue Admin-Sitzungen starten sicher im Entwurfsmodus; Live-Bearbeitung bleibt eine bewusste Ausnahme.
+let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")!=="0"&&draftToolbarPages.has(currentAdminPage);
 ensureAdminSaveDock();
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
@@ -984,7 +985,14 @@ function ensureDraftToolbar(){
   else header.prepend(toolbar);
   const toggle=toolbar.querySelector("[data-draft-toggle]");
   toggle.checked=cmsDraftMode;
-  toggle.addEventListener("change",()=>{sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");location.reload()});
+  toggle.addEventListener("change",()=>{
+    if(!toggle.checked&&!confirm("Direkte Änderungen wirken sofort auf der öffentlichen Website und umgehen Entwurf und Vorschau. Wirklich in den Direktmodus wechseln?")){
+      toggle.checked=true;
+      return;
+    }
+    sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");
+    location.reload();
+  });
   toolbar.querySelector("[data-draft-preview]").addEventListener("click",async event=>{
     const button=event.currentTarget;
     button.disabled=true;
