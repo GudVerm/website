@@ -566,6 +566,16 @@ function shouldTrackAdminField(target){
 }
 document.addEventListener("input",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
 document.addEventListener("change",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
+// R2-Dateien lassen sich noch nicht gemeinsam mit D1-Entwürfen veröffentlichen.
+document.addEventListener("click",event=>{
+  if(!cmsDraftMode)return;
+  const button=event.target.closest?.("button.upload,button.reset");
+  if(!button||!button.closest(".equipment-card,.project-editor-card,.technik-editor-card"))return;
+  const verb=button.classList.contains("upload")?"Hochladen":"Löschen";
+  if(confirm("Achtung: "+verb+" einer Bilddatei verändert die öffentliche Website SOFORT – auch bei aktivem Entwurfsmodus. Diese Medienänderung lässt sich nicht über „Entwürfe verwerfen“ rückgängig machen. Trotzdem fortfahren?"))return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+},true);
 document.addEventListener("cms-crop-dirty-change",event=>{
   if(event.detail?.dirty)markAdminDirty(event.target,"crop");
   else clearAdminDirty(event.target,"crop");
