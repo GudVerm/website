@@ -1324,6 +1324,14 @@ async function resolveAuditPublicationChange(env,entry){
   return {has_before:Boolean(history),before:history?parseStoredContentValue(history.value):null,after:afterRow?parseStoredContentValue(afterRow.value):null,history_id:Number(history?.id||0)};
 }
 
+
+async function draftRevisionFromRows(rows){
+  const entries=rows.map(row=>[row.key,row.value]).sort((a,b)=>a[0].localeCompare(b[0],"en"));
+  const bytes=new TextEncoder().encode(JSON.stringify(entries));
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
+}
+
 async function handleAdminDraftList(env,cors){
   await ensureContentTable(env);
   await ensureContentDraftTable(env);
@@ -1343,7 +1351,8 @@ async function handleAdminDraftList(env,cors){
     draft_value:parseStoredContentValue(row.draft_value),
     has_live_value:row.live_value!==null&&row.live_value!==undefined
   }));
-  return json({drafts,count:drafts.length},200,cors);
+  const revision=await draftRevisionFromRows(results.map(row=>({key:row.key,value:row.draft_value})));
+  return json({drafts,count:drafts.length,revision},200,cors);
 }
 
 function cmsPublicationValueError(key,value){
@@ -1442,6 +1451,7 @@ async function publishContentDrafts(request,env,cors,principal){
   await ensureAuditTable(env);
 
   let requestedKeys=null;
+  let expectedRevision="";
   const raw=await request.text();
   if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES){
     return json({error:"Veröffentlichungsanfrage zu groß."},413,cors);
@@ -1449,6 +1459,7 @@ async function publishContentDrafts(request,env,cors,principal){
   if(raw){
     let payload;
     try{payload=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+    expectedRevision=typeof payload?.expected_revision==="string"?payload.expected_revision:"";
     if(payload?.keys!==undefined){
       if(!Array.isArray(payload.keys)||!payload.keys.length){
         return json({error:"Keine Entwürfe zur Veröffentlichung ausgewählt."},400,cors);
@@ -1460,6 +1471,16 @@ async function publishContentDrafts(request,env,cors,principal){
     }
   }
 
+  if(!/^[a-f0-9]{64}$/.test(expectedRevision)){
+    return json({error:"Vor Veröffentlichung bitte die aktuelle Entwurfsliste laden."},428,cors);
+  }
+  const revisionRows=(await env.DB.prepare(
+    "SELECT key,value FROM content_drafts ORDER BY key"
+  ).all()).results||[];
+  const currentRevision=await draftRevisionFromRows(revisionRows);
+  if(currentRevision!==expectedRevision){
+    return json({error:"Die Entwürfe wurden zwischenzeitlich geändert. Bitte aktualisieren und erneut prüfen."},409,cors);
+  }
   let drafts=[];
   if(requestedKeys){
     const placeholders=requestedKeys.map(()=>"?").join(",");
