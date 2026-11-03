@@ -1,5 +1,5 @@
 name: Visual baseline initialize
-# refresh: hero-und-leistungsdesign-20261103
+# refresh: startseite-menuepunkt-20261103
 
 on:
   push:
