@@ -335,6 +335,7 @@
   const draftDiscardSelected=document.getElementById("draftDiscardSelected");
   const draftRefresh=document.getElementById("draftRefresh");
   let currentDrafts=[];
+  let currentDraftRevision="";
 
   function valueText(value){
     if(value===undefined)return "—";
@@ -391,18 +392,20 @@
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
       currentDrafts=Array.isArray(data.drafts)?data.drafts:[];
+      currentDraftRevision=typeof data.revision==="string"?data.revision:"";
       renderDrafts();
       draftStatus.textContent=currentDrafts.length+" offene Entwürfe.";draftStatus.className="status ok";
     }catch(error){
-      currentDrafts=[];renderDrafts();draftStatus.textContent="Entwürfe konnten nicht geladen werden: "+error.message;draftStatus.className="status bad";
+      currentDrafts=[];currentDraftRevision="";renderDrafts();draftStatus.textContent="Entwürfe konnten nicht geladen werden: "+error.message;draftStatus.className="status bad";
     }finally{draftRefresh.disabled=false}
   }
   async function publishDrafts(keys){
     if(!keys.length)return;
+    if(!currentDraftRevision){draftStatus.textContent="Entwurfsstand nicht geprüft. Bitte Liste neu laden.";draftStatus.className="status bad";return}
     if(!confirm(keys.length+" Entwurf"+(keys.length===1?"":"e")+" veröffentlichen? Vorherige Live-Werte werden versioniert."))return;
     draftStatus.textContent="Veröffentliche …";draftStatus.className="status";
     try{
-      const response=await fetch(api+"/api/admin/drafts/publish",{method:"POST",credentials:"include",headers:{"content-type":"application/json"},body:JSON.stringify({keys})});
+      const response=await fetch(api+"/api/admin/drafts/publish",{method:"POST",credentials:"include",headers:{"content-type":"application/json"},body:JSON.stringify({keys,expected_revision:currentDraftRevision})});
       const data=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(data.error||("HTTP "+response.status));
       const failedMedia=Array.isArray(data.media_cleanup_failed)?data.media_cleanup_failed:[];
