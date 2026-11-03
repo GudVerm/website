@@ -1329,6 +1329,9 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
   }
   .company-directory-hero > .company-directory-hero-mobile-media{
     display:block;
+    /* Das vorhandene Portraet sofort zeigen, auch vor Abschluss des CMS-Ladevorgangs. */
+    opacity:1!important;
+    animation:none!important;
     object-fit:cover;
     object-position:center 20% !important;
     transform:none !important;
