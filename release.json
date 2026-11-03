@@ -1,7 +1,7 @@
 {
   "worker_release": "2026-10-09.2",
   "quality_schema": 2,
-  "public_site": "https://gudverm.github.io/website/",
+  "public_site": "https://gudeliusvermessung.de/",
   "worker_health": "https://gudelius-cms.gudeliusvermessung.workers.dev/api/health",
   "worker_admin": "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/"
 }
