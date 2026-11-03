@@ -203,8 +203,14 @@ contains("assets/gudelius-site.js",'"v=" + cmsMediaRequestVersion',"CMS-Medien-U
 
 const externalTechniqueImages=[...publicSiteJs.matchAll(/image:'(https?:\/\/[^']+)'/g)].map(match=>match[1]).filter(url=>!url.includes("gudeliusvermessung.de"));
 check(externalTechniqueImages.length===0,"Technik enthält fremde Laufzeit-Bilder: "+externalTechniqueImages.join(", "));
-contains("assets/gudelius-site.js","equipment-trimble-placeholder.svg","Trimble-Geräte verwenden nicht den neutralen Tachymeter-Platzhalter.");
-contains("assets/gudelius-site.js","equipment-neutral-placeholder.svg","Fremde Technikbilder wurden nicht durch neutrale Platzhalter ersetzt.");
+// Die redaktionell festgelegten Geräte-Dummybilder verwenden das Gudelius-Logo.
+const equipmentDefaults=publicSiteJs.split("const equipmentFallbackBySlug")[0].split("const equipmentData")[1]||"";
+const deviceImages=[...equipmentDefaults.matchAll(/image:\\s*'([^']+)'/g)].map(match=>match[1]);
+check(deviceImages.length===13,"Technik muss weiterhin 13 Geräte-/Software-Fallbackbilder besitzen.");
+check(deviceImages.every(image=>image==="assets/media/gudelius-logo.png"),
+  "Geräte-Fallbackbilder müssen das abgestimmte Gudelius-Logo verwenden.");
+check(existsSync(resolve(root,"assets/media/gudelius-logo.png")),
+  "Logo-Dummybild fehlt im Repository.");
 contains("assets/gudelius-site.js","mediaKey:base.mediaKey||('equipment/'+entry.slug)","Dynamische Technik überschreibt die neuen sicheren Medienkeys.");
 contains("admin/admin.js",'key:fallback?.key||("equipment/"+entry.slug)',"Technik-Manifest überschreibt individuelle Medien-Keys.");
 contains("admin/admin.js","Technikbild gespeichert und aus R2 bestätigt.","Technik-Upload bestätigt das gespeicherte R2-Bild nicht.");
