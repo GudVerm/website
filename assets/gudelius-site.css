@@ -1338,10 +1338,13 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
     transform-origin:center !important;
   }
   .company-directory-hero::before{
-    background:linear-gradient(180deg,
-      rgba(13,20,24,.04) 0%,
-      rgba(13,20,24,.10) 27%,
-      rgba(13,20,24,.72) 48%,
-      rgba(13,20,24,.96) 100%);
+    /* Wie bei den Leistungs-Heros: das Bild bleibt unter dem Text sichtbar. */
+    background:linear-gradient(90deg,
+      rgba(9,20,27,.88) 0%,
+      rgba(9,20,27,.66) 48%,
+      rgba(9,20,27,.18) 100%);
+  }
+  .company-directory-hero .directory-hero-copy{
+    text-shadow:0 2px 14px rgba(0,0,0,.30);
   }
 }
