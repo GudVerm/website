@@ -31,6 +31,8 @@ const adminSource=read("admin/admin.js");
 check((adminSource.match(/if\(!cmsDraftMode\)\{\s*try\{\s*const (?:mr|mediaResponse)=await fetch\(getApi\(\)\+"\/api\/admin\/media\//g)||[]).length===2,
   "Projekt- und Technik-Löschungen müssen R2-/Live-Löschen während des Entwurfsmodus verhindern.");
 contains("admin/admin.js","const failedMedia=Array.isArray(data.media_cleanup_failed)","Fehlgeschlagenes R2-Aufräumen muss beim Publish sichtbar sein.");
+contains("admin/admin.js","verändert die öffentliche Website SOFORT","R2-Dateiänderungen brauchen im Entwurfsmodus eine ausdrückliche Warnung.");
+contains("admin/admin.js",'sessionStorage.getItem("gudelius-cms-draft-mode")!=="0"',"Neue Admin-Sitzungen sollen im Entwurfsmodus starten.");
 
 contains("cloudflare/src/index.js","live_value","Entwurfs-API liefert keinen Live-Wert.");
 contains("cloudflare/src/index.js","draft_value","Entwurfs-API liefert keinen Entwurfswert.");
