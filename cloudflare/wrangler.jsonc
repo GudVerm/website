@@ -7,7 +7,7 @@
     "enabled": true
   },
   "vars": {
-    "ALLOWED_ORIGIN": "https://gudeliusvermessung.de",
+    "ALLOWED_ORIGIN": "https://gudverm.github.io,https://gudeliusvermessung.de",
     "BREVO_FROM_EMAIL": "gudeliusvermessung@web.de",
     "BREVO_FROM_NAME": "GudeliusVermessung",
     "CONTACT_EMAIL_TO": "gudeliusvermessung@web.de",

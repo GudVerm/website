@@ -27,6 +27,9 @@ jobs:
         run: node quality/admin-contract-check.mjs
       - name: Medien-Integrität prüfen
         run: node quality/media-integrity-check.mjs
+      - name: Cloudflare-Pages-Produktionsartefakt bauen
+        if: github.event_name == 'pull_request'
+        run: node scripts/build-cloudflare-pages.mjs
 
   browser-quality:
     needs: static-quality

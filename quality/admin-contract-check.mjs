@@ -272,7 +272,11 @@ contains("cloudflare/src/index.js","verifyTurnstileToken(request, env, payload.t
 contains("datenschutz/index.html","Spam-Schutz des Kontaktformulars (Cloudflare Turnstile)","Turnstile-Datenschutzhinweis fehlt.");
 
 const env=JSON.parse(read("site.environments.json"));
-check(env.active_environment==="staging","Vor Domain-Cutover muss staging aktiv sein.");
+check(["staging","production"].includes(env.active_environment),"Umgebung muss staging oder production sein.");
+if(env.active_environment==="production"){
+  check(env.environments?.production?.indexable===true,"Produktionsumgebung muss indexierbar sein.");
+  check(existsSync(resolve(root,"scripts/build-cloudflare-pages.mjs")),"Cloudflare-Pages-Build fehlt.");
+}
 check(env.environments?.staging?.indexable===false,"Staging darf nicht indexierbar sein.");
 
 contains("admin/medien/index.html",'data-admin-page="medien"',"Eigenständige Medien-Adminseite fehlt.");

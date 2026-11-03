@@ -23,7 +23,7 @@ const wrangler=read("cloudflare/wrangler.jsonc");
 const workerBase=(wrangler.match(/"PUBLIC_SITE_URL"\s*:\s*"([^"]+)"/)||[])[1]||"";
 const workerOrigin=(wrangler.match(/"ALLOWED_ORIGIN"\s*:\s*"([^"]+)"/)||[])[1]||"";
 assert(workerBase===active?.public_base,"Worker PUBLIC_SITE_URL stimmt nicht zur Umgebung.");
-assert(workerOrigin===active?.allowed_origin,"Worker ALLOWED_ORIGIN stimmt nicht zur Umgebung.");
+assert(workerOrigin.split(",").map(origin=>origin.trim()).includes(active?.allowed_origin),"Worker ALLOWED_ORIGIN erlaubt die aktive Umgebung nicht.");
 const pages=[
   "index.html","projekte/index.html","technik/index.html","unternehmen/index.html","kontakt/index.html",
   "impressum/index.html","datenschutz/index.html",
@@ -47,7 +47,7 @@ if(mode==="production"){
   assert(/Allow:\s*\//i.test(robots)&&!/Disallow:\s*\/\s*(?:\n|$)/i.test(robots),
     "robots.txt muss PROD-Crawling erlauben.");
   assert(robots.includes("https://gudeliusvermessung.de/sitemap.xml"),"Sitemap fehlt in robots.txt.");
-  assert(read("CNAME").trim()==="gudeliusvermessung.de","CNAME fehlt oder zeigt auf falsche Domain.");
+  assert(read("scripts/build-cloudflare-pages.mjs").includes("dist"),"Cloudflare-Pages-Buildskript fehlt.");
 }else{
   assert(active?.indexable===false,"Staging darf nicht indexierbar sein.");
   assert(/Disallow:\s*\//i.test(robots),"robots.txt muss Staging sperren.");
