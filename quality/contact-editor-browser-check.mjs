@@ -22,9 +22,7 @@ for(const draftMode of [false,true]){
   page.on("pageerror",error=>errors.push(error.message));
   page.on("requestfailed",request=>errors.push("Request: "+request.url()+" "+request.failure()?.errorText));
 
-  if(draftMode){
-    await page.addInitScript(()=>sessionStorage.setItem("gudelius-cms-draft-mode","1"));
-  }
+  await page.addInitScript(mode=>sessionStorage.setItem("gudelius-cms-draft-mode",mode?"1":"0"),draftMode);
   // On production the Worker serves /admin/kontakt/ with scripts resolved
   // from /admin/. Reproduce that mapping in the local test server.
   await page.route("**/admin/kontakt/",async route=>{
