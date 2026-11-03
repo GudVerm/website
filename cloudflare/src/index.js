@@ -115,17 +115,17 @@ export default {
       }
 
       if (url.pathname === "/api/admin/drafts/publish" && request.method === "POST") {
-        return publishContentDrafts(request,env,cors,adminPrincipal);
+        return await publishContentDrafts(request,env,cors,adminPrincipal);
       }
 
       if (url.pathname === "/api/admin/drafts/discard" && request.method === "POST") {
-        return discardContentDrafts(request,env,cors,adminPrincipal);
+        return await discardContentDrafts(request,env,cors,adminPrincipal);
       }
 
       if (url.pathname.startsWith("/api/admin/drafts/")) {
         const key=decodeKey(url.pathname,"/api/admin/drafts/");
         if(!key)return json({error:"Missing draft key"},400,cors);
-        if(request.method==="PUT")return saveContentDraft(request,env,cors,key,adminPrincipal);
+        if(request.method==="PUT")return await saveContentDraft(request,env,cors,key,adminPrincipal);
         if(request.method==="DELETE"){
           await ensureContentDraftTable(env);
           await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(key).run();
@@ -358,7 +358,7 @@ export default {
         const rawId=url.pathname.slice("/api/admin/history/".length,-"/restore".length);
         const id=Number(rawId);
         if(!Number.isInteger(id)||id<=0)return json({error:"Ungültige Versions-ID."},400,cors);
-        return restoreContentHistory(env,cors,id,principal);
+        return await restoreContentHistory(env,cors,id,principal);
       }
 
       if (url.pathname === "/api/admin/media" && request.method === "GET") {
