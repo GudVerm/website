@@ -5,7 +5,7 @@ const MAX_CONTACT_UPDATE_BYTES = 8 * 1024;
 const MAX_ANALYTICS_BYTES = 4096;
 const ANALYTICS_RETENTION_DAYS = 370;
 const CONTENT_HISTORY_LIMIT = 2000;
-const WORKER_RELEASE = "2026-10-09.2";
+const WORKER_RELEASE = "2026-11-03.1";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const ALLOWED_MEDIA_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -115,17 +115,17 @@ export default {
       }
 
       if (url.pathname === "/api/admin/drafts/publish" && request.method === "POST") {
-        return publishContentDrafts(request,env,cors,adminPrincipal);
+        return await publishContentDrafts(request,env,cors,adminPrincipal);
       }
 
       if (url.pathname === "/api/admin/drafts/discard" && request.method === "POST") {
-        return discardContentDrafts(request,env,cors,adminPrincipal);
+        return await discardContentDrafts(request,env,cors,adminPrincipal);
       }
 
       if (url.pathname.startsWith("/api/admin/drafts/")) {
         const key=decodeKey(url.pathname,"/api/admin/drafts/");
         if(!key)return json({error:"Missing draft key"},400,cors);
-        if(request.method==="PUT")return saveContentDraft(request,env,cors,key,adminPrincipal);
+        if(request.method==="PUT")return await saveContentDraft(request,env,cors,key,adminPrincipal);
         if(request.method==="DELETE"){
           await ensureContentDraftTable(env);
           await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(key).run();
@@ -358,7 +358,7 @@ export default {
         const rawId=url.pathname.slice("/api/admin/history/".length,-"/restore".length);
         const id=Number(rawId);
         if(!Number.isInteger(id)||id<=0)return json({error:"Ungültige Versions-ID."},400,cors);
-        return restoreContentHistory(env,cors,id,principal);
+        return await restoreContentHistory(env,cors,id,principal);
       }
 
       if (url.pathname === "/api/admin/media" && request.method === "GET") {
@@ -427,6 +427,8 @@ export default {
             return json({ error: "Body must be valid JSON" }, 400, cors);
           }
 
+          const validationError=cmsPublicationValueError(key,value);
+          if(validationError)return json({error:validationError,key},422,cors);
           const serializedValue=JSON.stringify(value);
           const previous = await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(key).first();
           let previousManifestValue = null;
@@ -1322,6 +1324,14 @@ async function resolveAuditPublicationChange(env,entry){
   return {has_before:Boolean(history),before:history?parseStoredContentValue(history.value):null,after:afterRow?parseStoredContentValue(afterRow.value):null,history_id:Number(history?.id||0)};
 }
 
+
+async function draftRevisionFromRows(rows){
+  const entries=rows.map(row=>[row.key,row.value]).sort((a,b)=>a[0].localeCompare(b[0],"en"));
+  const bytes=new TextEncoder().encode(JSON.stringify(entries));
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
+}
+
 async function handleAdminDraftList(env,cors){
   await ensureContentTable(env);
   await ensureContentDraftTable(env);
@@ -1341,13 +1351,66 @@ async function handleAdminDraftList(env,cors){
     draft_value:parseStoredContentValue(row.draft_value),
     has_live_value:row.live_value!==null&&row.live_value!==undefined
   }));
-  return json({drafts,count:drafts.length},200,cors);
+  const revision=await draftRevisionFromRows(results.map(row=>({key:row.key,value:row.draft_value})));
+  return json({drafts,count:drafts.length,revision},200,cors);
+}
+
+function cmsPublicationValueError(key,value){
+  if(isCollectionManifestKey(key)){
+    if(!Array.isArray(value)||value.some(item=>
+      !item||typeof item!=="object"||typeof item.slug!=="string"||
+      !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)
+    )||new Set(value.map(item=>item.slug)).size!==value.length){
+      return "Projekt-/Technikliste enthält ungültige oder doppelte Kennungen.";
+    }
+  }
+  if(key==="kontakt/email"&&
+     (typeof value!=="string"||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))){
+    return "Kontakt-E-Mail ist ungültig.";
+  }
+  if(key.startsWith("media-layout/")){
+    if(!value||typeof value!=="object"||Array.isArray(value)){
+      return "Bildausschnitt enthält ungültige Daten.";
+    }
+    for(const [part,min,max] of [["x",0,100],["y",0,100],["zoom",25,300],["rotation",-180,180]]){
+      if(value[part]!==undefined&&
+        (typeof value[part]!=="number"||!Number.isFinite(value[part])||value[part]<min||value[part]>max)){
+        return "Bildausschnitt enthält einen ungültigen "+part+"-Wert.";
+      }
+    }
+  }
+  if(/^projekte\/[^/]+\/services$/.test(key)&&
+     (!Array.isArray(value)||value.some(service=>typeof service!=="string"))){
+    return "Projektleistungen enthalten ungültige Daten.";
+  }
+  if(key==="unternehmen/timeline"&&
+     (!Array.isArray(value)||value.some(item=>
+       !item||typeof item!=="object"||
+       ["id","period","text","description"].some(part=>item[part]!==undefined&&typeof item[part]!=="string")||
+       (item.visible!==undefined&&typeof item.visible!=="boolean")
+     ))){
+    return "Unternehmens-Zeitleiste enthält ungültige Daten.";
+  }
+  if(/^leistungsseiten\/[^/]+\/lists\/(tasks|scope)$/.test(key)&&
+     (!Array.isArray(value)||value.some(entry=>typeof entry!=="string"||entry.length>2000))){
+    return "Leistungslisten dürfen nur Texte enthalten.";
+  }
+  const textKey=
+    /^(startseite|leistungen|kontakt|impressum)\/[^/]+$/.test(key)||
+    /^unternehmen\/(?!timeline$)[^/]+$/.test(key)||
+    /^leistungsseiten\/[^/]+\/text\/[^/]+$/.test(key)||
+    /^projekte\/[^/]+\/(?!services$)[^/]+$/.test(key)||
+    /^technik\/[^/]+\/[^/]+$/.test(key)&&key!=="technik/index";
+  if(textKey&&typeof value!=="string")return "Dieses Inhaltsfeld muss ein Text sein.";
+  return "";
 }
 
 async function saveContentDraft(request,env,cors,key,principal){
   const raw=await request.text();
   if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES)return json({error:"Content payload too large"},413,cors);
   let value;try{value=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+  const validationError=cmsPublicationValueError(key,value);
+  if(validationError)return json({error:validationError,key},422,cors);
   await ensureContentTable(env);
   await ensureContentDraftTable(env);
   const serialized=JSON.stringify(value);
@@ -1382,67 +1445,182 @@ async function discardContentDrafts(request,env,cors,principal){
 }
 
 async function publishContentDrafts(request,env,cors,principal){
-  await ensureContentTable(env);await ensureContentDraftTable(env);
+  await ensureContentTable(env);
+  await ensureContentDraftTable(env);
+  await ensureContentHistoryTable(env);
+  await ensureAuditTable(env);
+
   let requestedKeys=null;
+  let expectedRevision="";
   const raw=await request.text();
+  if(new TextEncoder().encode(raw).byteLength>MAX_CONTENT_BYTES){
+    return json({error:"Veröffentlichungsanfrage zu groß."},413,cors);
+  }
   if(raw){
-    try{
-      const payload=JSON.parse(raw);
-      if(Array.isArray(payload?.keys))requestedKeys=[...new Set(payload.keys.map(v=>cleanSingleLine(v,240)).filter(Boolean))];
-    }catch{return json({error:"Body must be valid JSON"},400,cors)}
-  }
-  let drafts=[];
-  if(requestedKeys?.length){
-    const placeholders=requestedKeys.map(()=>"?").join(",");
-    const result=await env.DB.prepare("SELECT key,value FROM content_drafts WHERE key IN ("+placeholders+") ORDER BY key").bind(...requestedKeys).all();
-    drafts=result.results||[];
-  }else{
-    const result=await env.DB.prepare("SELECT key,value FROM content_drafts ORDER BY key").all();drafts=result.results||[];
-  }
-  const suppressedDraftKeys=new Set();
-  for(const manifestDraft of drafts.filter(item=>isCollectionManifestKey(item.key))){
-    const config=manifestDraft.key==="projekte/index"
-      ? {contentPrefix:"projekte/",mediaPrefix:"media-layout/projects/"}
-      : manifestDraft.key==="technik/index"
-        ? {contentPrefix:"technik/",mediaPrefix:"media-layout/equipment/"}
-        : null;
-    if(!config)continue;
-    const previousManifest=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(manifestDraft.key).first();
-    let previousValue=null,nextValue=null;
-    try{previousValue=previousManifest?JSON.parse(previousManifest.value):null}catch{}
-    try{nextValue=JSON.parse(manifestDraft.value)}catch{}
-    const previousSlugs=manifestSlugSet(previousValue);
-    const nextSlugs=manifestSlugSet(nextValue);
-    if(!previousSlugs||!nextSlugs)continue;
-    for(const slug of [...previousSlugs].filter(slug=>!nextSlugs.has(slug))){
-      const childPrefix=config.contentPrefix+slug+"/";
-      const mediaLayoutKey=config.mediaPrefix+slug;
-      for(const candidate of drafts){
-        if(candidate.key.startsWith(childPrefix)||candidate.key===mediaLayoutKey)suppressedDraftKeys.add(candidate.key);
+    let payload;
+    try{payload=JSON.parse(raw)}catch{return json({error:"Body must be valid JSON"},400,cors)}
+    expectedRevision=typeof payload?.expected_revision==="string"?payload.expected_revision:"";
+    if(payload?.keys!==undefined){
+      if(!Array.isArray(payload.keys)||!payload.keys.length){
+        return json({error:"Keine Entwürfe zur Veröffentlichung ausgewählt."},400,cors);
       }
-      await env.DB.prepare("DELETE FROM content_drafts WHERE key LIKE ? OR key = ?")
-        .bind(childPrefix+"%",mediaLayoutKey).run();
+      if(payload.keys.some(key=>typeof key!=="string"||!key.trim()||key.length>240)){
+        return json({error:"Ungültige Entwurfs-Auswahl."},400,cors);
+      }
+      requestedKeys=[...new Set(payload.keys)];
     }
   }
-  if(suppressedDraftKeys.size)drafts=drafts.filter(draft=>!suppressedDraftKeys.has(draft.key));
 
-  const published=[];
+  if(!/^[a-f0-9]{64}$/.test(expectedRevision)){
+    return json({error:"Vor Veröffentlichung bitte die aktuelle Entwurfsliste laden."},428,cors);
+  }
+  const revisionRows=(await env.DB.prepare(
+    "SELECT key,value FROM content_drafts ORDER BY key"
+  ).all()).results||[];
+  const currentRevision=await draftRevisionFromRows(revisionRows);
+  if(currentRevision!==expectedRevision){
+    return json({error:"Die Entwürfe wurden zwischenzeitlich geändert. Bitte aktualisieren und erneut prüfen."},409,cors);
+  }
+  let drafts=[];
+  if(requestedKeys){
+    const placeholders=requestedKeys.map(()=>"?").join(",");
+    const result=await env.DB.prepare(
+      "SELECT key,value FROM content_drafts WHERE key IN ("+placeholders+") ORDER BY key"
+    ).bind(...requestedKeys).all();
+    drafts=result.results||[];
+    if(drafts.length!==requestedKeys.length){
+      return json({error:"Ein ausgewählter Entwurf existiert nicht mehr. Bitte Liste aktualisieren."},409,cors);
+    }
+  }else{
+    const result=await env.DB.prepare("SELECT key,value FROM content_drafts ORDER BY key").all();
+    drafts=result.results||[];
+  }
+
+  // Validate the complete publication before writing any live content.
+  const nextValues=new Map();
+  for(const draft of drafts){
+    let value;
+    try{value=JSON.parse(draft.value)}catch{
+      return json({error:"Entwurf enthält ungültiges JSON.",key:draft.key},422,cors);
+    }
+    const validationError=cmsPublicationValueError(draft.key,value);
+    if(validationError)return json({error:validationError,key:draft.key},422,cors);
+    nextValues.set(draft.key,value);
+  }
+
+  const previousValues=new Map();
   for(const draft of drafts){
     const previous=await env.DB.prepare("SELECT value FROM content WHERE key = ?").bind(draft.key).first();
-    let previousParsed=null,nextParsed=null,historyId=0;
-    if(previous&&previous.value!==draft.value){historyId=await recordContentHistory(env,principal,draft.key,previous.value,"draft_publish");try{previousParsed=JSON.parse(previous.value)}catch{}}
-    try{nextParsed=JSON.parse(draft.value)}catch{}
-    await env.DB.prepare(
-      `INSERT INTO content (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP)
-       ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP`
-    ).bind(draft.key,draft.value).run();
-    await env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(draft.key).run();
-    const auditDetail=historyId?"history_id="+historyId:(previous?"keine_aenderung":"neu");
-    await writeAudit(env,principal,"entwurf_veroeffentlicht",auditAreaFromTarget(draft.key),draft.key,auditDetail);
-    if(isCollectionManifestKey(draft.key))await writeCollectionManifestAudit(env,principal,draft.key,previousParsed,nextParsed);
+    previousValues.set(draft.key,previous?.value??null);
+  }
+
+  // A removed project/equipment item must not be re-created by a child draft.
+  // Deletion of its stale child drafts is part of the same transaction.
+  const suppressedDraftKeys=new Set();
+  const removedChildren=[];
+  for(const draft of drafts.filter(item=>isCollectionManifestKey(item.key))){
+    const config=draft.key==="projekte/index"
+      ?{contentPrefix:"projekte/",mediaPrefix:"media-layout/projects/"}
+      :{contentPrefix:"technik/",mediaPrefix:"media-layout/equipment/"};
+    let previousManifest=null;
+    try{previousManifest=JSON.parse(previousValues.get(draft.key))}catch{}
+    const previousSlugs=manifestSlugSet(previousManifest);
+    const nextSlugs=manifestSlugSet(nextValues.get(draft.key));
+    if(!previousSlugs||!nextSlugs)continue;
+    for(const slug of previousSlugs){
+      if(nextSlugs.has(slug))continue;
+      const childPrefix=config.contentPrefix+slug+"/";
+      const mediaKey=config.mediaPrefix+slug;
+      removedChildren.push({childPrefix,mediaKey});
+      for(const child of drafts){
+        if(child.key.startsWith(childPrefix)||child.key===mediaKey){
+          suppressedDraftKeys.add(child.key);
+        }
+      }
+    }
+  }
+  drafts=drafts.filter(draft=>!suppressedDraftKeys.has(draft.key));
+
+  const actor=cleanSingleLine(principal?.email||principal?.mode||"",240);
+  const audit=(action,area,target,details)=>env.DB.prepare(
+    "INSERT INTO audit_log (actor_email,action,area,target,details,created_at) VALUES (?,?,?,?,?,CURRENT_TIMESTAMP)"
+  ).bind(actor,cleanSingleLine(action,80),cleanSingleLine(area,80),
+    cleanSingleLine(target,240),cleanSingleLine(details,500));
+  const statements=[];
+  const published=[];
+  for(const draft of drafts){
+    const previous=previousValues.get(draft.key);
+    const changed=previous!==null&&previous!==draft.value;
+    if(changed){
+      statements.push(env.DB.prepare(
+        "INSERT INTO content_history (key,value,operation,actor_email,created_at) VALUES (?,?, 'draft_publish', ?,CURRENT_TIMESTAMP)"
+      ).bind(cleanSingleLine(draft.key,240),previous,actor));
+      // last_insert_rowid() still points to the history row here.
+      statements.push(env.DB.prepare(
+        "INSERT INTO audit_log (actor_email,action,area,target,details,created_at) VALUES (?,?,?,?,'history_id=' || last_insert_rowid(),CURRENT_TIMESTAMP)"
+      ).bind(actor,"entwurf_veroeffentlicht",
+        cleanSingleLine(auditAreaFromTarget(draft.key),80),cleanSingleLine(draft.key,240)));
+    }else{
+      statements.push(audit("entwurf_veroeffentlicht",auditAreaFromTarget(draft.key),
+        draft.key,previous===null?"neu":"keine_aenderung"));
+    }
+    statements.push(env.DB.prepare(
+      "INSERT INTO content (key,value,updated_at) VALUES (?,?,CURRENT_TIMESTAMP) "+
+      "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=CURRENT_TIMESTAMP"
+    ).bind(draft.key,draft.value));
+    statements.push(env.DB.prepare("DELETE FROM content_drafts WHERE key = ?").bind(draft.key));
+
+    if(isCollectionManifestKey(draft.key)){
+      let previousManifest=null;
+      try{previousManifest=JSON.parse(previous)}catch{}
+      const nextSlugs=manifestSlugSet(nextValues.get(draft.key));
+      const oldSlugs=manifestSlugSet(previousManifest);
+      const area=draft.key==="projekte/index"?"projekte":"technik";
+      const noun=area==="projekte"?"projekt":"technik";
+      if(!oldSlugs){
+        statements.push(audit(noun+"_geaendert",area,draft.key,"manifest_initialisiert"));
+      }else{
+        const added=[...nextSlugs].filter(slug=>!oldSlugs.has(slug));
+        const removed=[...oldSlugs].filter(slug=>!nextSlugs.has(slug));
+        for(const slug of added)statements.push(audit(noun+"_angelegt",area,area+"/"+slug,"manifest"));
+        for(const slug of removed)statements.push(audit(noun+"_geloescht",area,area+"/"+slug,"manifest"));
+        if(!added.length&&!removed.length){
+          statements.push(audit(noun+"_geaendert",area,draft.key,"manifest"));
+        }
+      }
+    }
     published.push(draft.key);
   }
-  return json({ok:true,published,count:published.length},200,cors);
+  for(const child of removedChildren){
+    const where="substr(key,1,length(?)) = ? OR key = ?";
+    // Persist removed child values for a later version restore.
+    statements.push(env.DB.prepare(
+      "INSERT INTO content_history (key,value,operation,actor_email,created_at) "+
+      "SELECT key,value,'draft_publish_delete',?,CURRENT_TIMESTAMP FROM content WHERE "+where
+    ).bind(actor,child.childPrefix,child.childPrefix,child.mediaKey));
+    statements.push(env.DB.prepare("DELETE FROM content WHERE "+where)
+      .bind(child.childPrefix,child.childPrefix,child.mediaKey));
+    statements.push(env.DB.prepare("DELETE FROM content_drafts WHERE "+where)
+      .bind(child.childPrefix,child.childPrefix,child.mediaKey));
+  }
+  if(published.length){
+    statements.push(env.DB.prepare(
+      "DELETE FROM content_history WHERE id NOT IN (SELECT id FROM content_history ORDER BY id DESC LIMIT ?)"
+    ).bind(CONTENT_HISTORY_LIMIT));
+  }
+  // Cloudflare D1 batch() rolls the whole transaction back on any failure.
+  if(statements.length)await env.DB.batch(statements);
+  // R2 is not part of D1 transactions; delete files only AFTER commit.
+  // Report failures without misreporting the already committed publish as failed.
+  const mediaCleanupFailed=[];
+  for(const child of removedChildren){
+    const key=child.mediaKey.replace(/^media-layout\//,"");
+    try{await env.MEDIA.delete(key)}catch(error){
+      console.error("Veröffentlicht, aber R2-Aufräumen fehlgeschlagen:",key,error);
+      mediaCleanupFailed.push(key);
+    }
+  }
+  return json({ok:true,published,count:published.length,media_cleanup_failed:mediaCleanupFailed},200,cors);
 }
 
 async function handleAdminBackup(env){

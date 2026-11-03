@@ -566,6 +566,16 @@ function shouldTrackAdminField(target){
 }
 document.addEventListener("input",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
 document.addEventListener("change",event=>{if(shouldTrackAdminField(event.target))markAdminDirty(event.target,"fields")},true);
+// R2-Dateien lassen sich noch nicht gemeinsam mit D1-Entwürfen veröffentlichen.
+document.addEventListener("click",event=>{
+  if(!cmsDraftMode)return;
+  const button=event.target.closest?.("button.upload,button.reset");
+  if(!button||!button.closest(".equipment-card,.project-editor-card,.technik-editor-card"))return;
+  const verb=button.classList.contains("upload")?"Hochladen":"Löschen";
+  if(confirm("Achtung: "+verb+" einer Bilddatei verändert die öffentliche Website SOFORT – auch bei aktivem Entwurfsmodus. Diese Medienänderung lässt sich nicht über „Entwürfe verwerfen“ rückgängig machen. Trotzdem fortfahren?"))return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+},true);
 document.addEventListener("cms-crop-dirty-change",event=>{
   if(event.detail?.dirty)markAdminDirty(event.target,"crop");
   else clearAdminDirty(event.target,"crop");
@@ -600,7 +610,8 @@ document.addEventListener("click",event=>{
 });
 ensureAdminDirtyUi();
 
-let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")==="1"&&draftToolbarPages.has(currentAdminPage);
+// Neue Admin-Sitzungen starten sicher im Entwurfsmodus; Live-Bearbeitung bleibt eine bewusste Ausnahme.
+let cmsDraftMode=sessionStorage.getItem("gudelius-cms-draft-mode")!=="0"&&draftToolbarPages.has(currentAdminPage);
 ensureAdminSaveDock();
 function draftContentUrl(key){return getApi()+"/api/admin/drafts/"+key.split("/").map(encodeURIComponent).join("/")}
 let draftToolbarRefreshTimer=null;
@@ -958,9 +969,11 @@ async function refreshDraftToolbar(toolbar){
       knownDraftKeys.clear();
       knownDraftRecords.clear();
     }
+    toolbar.dataset.draftRevision=typeof data.revision==="string"?data.revision:"";
     const serverCount=Array.isArray(data.drafts)?drafts.length:Number(data.count||0);
     renderDraftToolbarCount(toolbar,Math.max(serverCount,knownDraftKeys.size));
   }catch{
+    delete toolbar.dataset.draftRevision;
     if(count&&knownDraftKeys.size===0)count.textContent="?";
     else renderDraftToolbarCount(toolbar);
   }
@@ -982,7 +995,14 @@ function ensureDraftToolbar(){
   else header.prepend(toolbar);
   const toggle=toolbar.querySelector("[data-draft-toggle]");
   toggle.checked=cmsDraftMode;
-  toggle.addEventListener("change",()=>{sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");location.reload()});
+  toggle.addEventListener("change",()=>{
+    if(!toggle.checked&&!confirm("Direkte Änderungen wirken sofort auf der öffentlichen Website und umgehen Entwurf und Vorschau. Wirklich in den Direktmodus wechseln?")){
+      toggle.checked=true;
+      return;
+    }
+    sessionStorage.setItem("gudelius-cms-draft-mode",toggle.checked?"1":"0");
+    location.reload();
+  });
   toolbar.querySelector("[data-draft-preview]").addEventListener("click",async event=>{
     const button=event.currentTarget;
     button.disabled=true;
@@ -1009,12 +1029,22 @@ function ensureDraftToolbar(){
     }
   });
   toolbar.querySelector("[data-draft-publish]").addEventListener("click",async event=>{
+    if(hasAdminDirty()||hasPendingMediaCrops()){
+      alert("Es gibt noch ungespeicherte Änderungen. Bitte zuerst alle Änderungen speichern und die Vorschau prüfen, bevor du veröffentlichst.");
+      return;
+    }
+    const revision=toolbar.dataset.draftRevision||"";
+    if(!revision){
+      alert("Die aktuelle Entwurfsliste konnte nicht geprüft werden. Bitte Seite neu laden.");
+      return;
+    }
     if(!confirm("Alle gespeicherten Entwürfe jetzt veröffentlichen?"))return;
     const button=event.currentTarget;button.disabled=true;
     try{
-      const r=await fetch(getApi()+"/api/admin/drafts/publish",{method:"POST",headers:adminHeaders({"content-type":"application/json"}),credentials:"include",body:"{}"});
+      const r=await fetch(getApi()+"/api/admin/drafts/publish",{method:"POST",headers:adminHeaders({"content-type":"application/json"}),credentials:"include",body:JSON.stringify({expected_revision:revision})});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
-      alert((data.count||0)+" Entwürfe veröffentlicht.");
+      const failedMedia=Array.isArray(data.media_cleanup_failed)?data.media_cleanup_failed:[];
+      alert((data.count||0)+" Entwürfe veröffentlicht."+(failedMedia.length?" ACHTUNG: "+failedMedia.length+" Medien konnten nicht bereinigt werden: "+failedMedia.join(", "):""));
       await refreshDraftToolbar(toolbar);
       if(cmsDraftMode)location.reload();
     }catch(error){alert("Veröffentlichen fehlgeschlagen: "+error.message)}finally{button.disabled=false}
@@ -1818,6 +1848,7 @@ function renderProjectEditor(item){
   up.addEventListener("click",()=>move(-1));down.addEventListener("click",()=>move(1));
   remove.addEventListener("click",async()=>{
     if(!item.archived||!getApi()||!hasAdminAuth())return;
+    if(!cmsDraftMode)return setStatus(status,"Zum sicheren Löschen zuerst den Entwurfsmodus aktivieren.",false);
     if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;
     remove.disabled=true;
     const previousProjects=projects.slice();
@@ -1829,18 +1860,21 @@ function renderProjectEditor(item){
       return setStatus(projectEditor.querySelector(".project-status"),"Löschen abgebrochen: Projekt-Manifest konnte nicht gespeichert werden: "+error.message,false);
     }
     const cleanupErrors=[];
+    // Draft deletion must not remove live R2 images or live content rows.
+    if(!cmsDraftMode){
     try{
       const mr=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       if(!mr.ok&&mr.status!==404){const d=await mr.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mr.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteProjectContent(item)}catch(error){cleanupErrors.push("Texte")}
+    }
     projectFields.forEach(f=>delete projectContentCache[projectContentKey(item,f)]);
     activeProjectSlug=projects[0]?.slug||"";refreshProjectSelect();
     if(projects.length){
       renderProjectEditor(projects[0]);
-      setStatus(projectEditor.querySelector(".project-status"),cleanupErrors.length?"Projekt entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Projekt endgültig entfernt.",cleanupErrors.length===0);
+      setStatus(projectEditor.querySelector(".project-status"),cmsDraftMode?"Projekt-Löschung als Entwurf gespeichert; erst „Alle veröffentlichen“ löscht es live.":cleanupErrors.length?"Projekt entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Projekt endgültig entfernt.",cleanupErrors.length===0);
     }else{
-      projectEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Lege die erste Referenz an.</p></div>';
+      projectEditor.innerHTML=cmsDraftMode?'<div class="cms-subpanel empty-state"><h3>Projekte zum Löschen vorgemerkt</h3><p>Die bisherigen Projekte bleiben bis zur Veröffentlichung live.</p></div>':'<div class="cms-subpanel empty-state"><h3>Noch keine Projekte</h3><p>Lege die erste Referenz an.</p></div>';
     }
   });
   projectEditor.appendChild(node);
@@ -3348,7 +3382,7 @@ function renderTechniqueEditor(item){
     if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const copiedName=(techniqueValue(item,"name")||item.name||item.slug)+" Kopie";
     const slug=uniqueTechniqueSlug(copiedName);
-    const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:false,archived:false,order:equipment.length+1};
+    const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:cmsDraftMode===true,archived:false,order:equipment.length+1};
     duplicateButton.disabled=true;
     try{
       equipment.push(copy);
@@ -3373,6 +3407,7 @@ function renderTechniqueEditor(item){
   permanentDelete.addEventListener("click",async()=>{
     if(!item.archived) return;
     if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    if(!cmsDraftMode)return setStatus(textStatus,"Zum sicheren Löschen zuerst den Entwurfsmodus aktivieren.",false);
     if(!confirm("„"+displayName+"“ endgültig aus dem CMS entfernen? Dieser Schritt kann nicht rückgängig gemacht werden.")) return;
     permanentDelete.disabled=true;
     const previousEquipment=equipment.slice();
@@ -3384,18 +3419,21 @@ function renderTechniqueEditor(item){
       return setStatus(technikEditor.querySelector(".technik-text-status"),"Löschen abgebrochen: Technik-Manifest konnte nicht gespeichert werden: "+error.message,false);
     }
     const cleanupErrors=[];
+    // Keep published assets intact until the draft manifest is released.
+    if(!cmsDraftMode){
     try{
       const mediaResponse=await fetch(getApi()+"/api/admin/media/"+item.key.split("/").map(encodeURIComponent).join("/"),{method:"DELETE",headers:adminHeaders()});
       if(!mediaResponse.ok&&mediaResponse.status!==404){const d=await mediaResponse.json().catch(()=>({}));throw new Error(d.error||("Medien-HTTP "+mediaResponse.status))}
     }catch(error){cleanupErrors.push("Bild")}
     try{await deleteTechniqueContent(item)}catch(error){cleanupErrors.push("Texte")}
+    }
     techniqueTextFields.forEach(field=>delete technikContentCache[techniqueContentKey(item,field)]);
     activeTechnikSlug=equipment[0]?.slug||"";populateTechniqueSelect();
     if(equipment.length){
       renderTechniqueEditor(equipment[0]);
-      setStatus(technikEditor.querySelector(".technik-text-status"),cleanupErrors.length?"Technik-Eintrag entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Technik-Eintrag endgültig entfernt.",cleanupErrors.length===0);
+      setStatus(technikEditor.querySelector(".technik-text-status"),cmsDraftMode?"Technik-Löschung als Entwurf gespeichert; erst „Alle veröffentlichen“ löscht sie live.":cleanupErrors.length?"Technik-Eintrag entfernt. Einzelne Cloudflare-Daten konnten nicht vollständig bereinigt werden.":"Technik-Eintrag endgültig entfernt.",cleanupErrors.length===0);
     }else{
-      technikEditor.innerHTML='<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Lege ein neues Gerät oder eine Software an.</p></div>';
+      technikEditor.innerHTML=cmsDraftMode?'<div class="cms-subpanel empty-state"><h3>Technik-Löschungen vorgemerkt</h3><p>Die bisherigen Technik-Einträge bleiben bis zur Veröffentlichung live.</p></div>':'<div class="cms-subpanel empty-state"><h3>Noch keine Technik-Einträge</h3><p>Lege ein neues Gerät oder eine Software an.</p></div>';
     }
   });
   technikEditor.appendChild(node);

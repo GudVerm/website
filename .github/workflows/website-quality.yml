@@ -25,6 +25,8 @@ jobs:
         run: node quality/environment-check.mjs
       - name: CMS-/Admin-Verträge prüfen
         run: node quality/admin-contract-check.mjs
+      - name: CMS D1-Veröffentlichung und Transaktions-Rollback testen
+        run: node --experimental-sqlite quality/cms-publication-d1-test.mjs
       - name: Medien-Integrität prüfen
         run: node quality/media-integrity-check.mjs
 

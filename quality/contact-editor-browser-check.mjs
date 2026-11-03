@@ -14,13 +14,15 @@ for(const draftMode of [false,true]){
   const drafts={};
   const writes=[];
   const errors=[];
+  const dialogs=[];
+  let publishCalls=0;
+  const revision="a".repeat(64);
+  page.on("dialog",async dialog=>{dialogs.push(dialog.message());await dialog.accept()});
   let stage="initial";
   page.on("pageerror",error=>errors.push(error.message));
   page.on("requestfailed",request=>errors.push("Request: "+request.url()+" "+request.failure()?.errorText));
 
-  if(draftMode){
-    await page.addInitScript(()=>sessionStorage.setItem("gudelius-cms-draft-mode","1"));
-  }
+  await page.addInitScript(mode=>sessionStorage.setItem("gudelius-cms-draft-mode",mode?"1":"0"),draftMode);
   // On production the Worker serves /admin/kontakt/ with scripts resolved
   // from /admin/. Reproduce that mapping in the local test server.
   await page.route("**/admin/kontakt/",async route=>{
@@ -44,9 +46,17 @@ for(const draftMode of [false,true]){
     if(method==="GET"&&path==="/api/site")return json({content:{...live}});
     if(method==="GET"&&path==="/api/admin/preview-site")return json({content:{...live,...drafts}});
     if(method==="GET"&&path==="/api/admin/drafts"){
-      return json({count:Object.keys(drafts).length,drafts:Object.keys(drafts).map(key=>({key}))});
+      return json({count:Object.keys(drafts).length,drafts:Object.keys(drafts).map(key=>({key})),revision});
     }
     if(method==="GET"&&path==="/api/admin/session")return json({ok:true,auth_mode:"access",token_fallback_enabled:false});
+    if(method==="POST"&&path==="/api/admin/drafts/publish"){
+      publishCalls++;
+      const payload=route.request().postDataJSON();
+      if(payload.expected_revision!==revision)return json({error:"Überholter Entwurfsstand"},409);
+      const published=Object.keys(drafts);
+      for(const key of published){live[key]=drafts[key];delete drafts[key]}
+      return json({ok:true,published,count:published.length,media_cleanup_failed:[]});
+    }
     if(method==="GET"&&path==="/api/admin/media")return json({objects:[]});
     const draftPrefix="/api/admin/drafts/",livePrefix="/api/admin/content/";
     if(method==="PUT"&&(path.startsWith(draftPrefix)||path.startsWith(livePrefix))){
@@ -82,6 +92,21 @@ for(const draftMode of [false,true]){
     if(draftMode){
       if(live["kontakt/email"]!==initialEmail||drafts["kontakt/email"]!==email){
         throw new Error("Entwurf wurde fälschlich live oder nicht als Entwurf gespeichert.");
+      }
+      stage="Ungespeicherte Änderung blockiert Veröffentlichung";
+      await page.locator("#contactEmail").fill("offen@example.org");
+      await page.locator("[data-draft-publish]").click();
+      if(publishCalls!==0||!dialogs.some(message=>message.includes("ungespeicherte Änderungen"))){
+        throw new Error("Veröffentlichen war trotz ungespeicherter Felder möglich.");
+      }
+      stage="Erfolgreiches Veröffentlichen nach erneutem Speichern";
+      await page.locator("[data-admin-save-all]").click();
+      await page.waitForFunction(()=>document.querySelector("[data-admin-save-status]")?.textContent==="Alles gespeichert",null,{timeout:11000});
+      await page.waitForFunction(()=>document.querySelector(".cms-draft-toolbar")?.dataset?.draftRevision==="a".repeat(64),null,{timeout:11000});
+      await page.locator("[data-draft-publish]").click();
+      await page.waitForFunction(()=>document.querySelector("[data-draft-count]")?.textContent==="0",null,{timeout:11000});
+      if(publishCalls!==1||live["kontakt/email"]!=="offen@example.org"){
+        throw new Error("Veröffentlichung wurde nicht korrekt übernommen.");
       }
     }else{
       await page.goto(new URL("kontakt/",base).href,{waitUntil:"load",timeout:25000});
