@@ -7,14 +7,14 @@
     "enabled": true
   },
   "vars": {
-    "ALLOWED_ORIGIN": "https://gudverm.github.io",
+    "ALLOWED_ORIGIN": "https://gudeliusvermessung.de",
     "BREVO_FROM_EMAIL": "gudeliusvermessung@web.de",
     "BREVO_FROM_NAME": "GudeliusVermessung",
     "CONTACT_EMAIL_TO": "gudeliusvermessung@web.de",
     "PUBLIC_MEDIA_ENABLED": "true",
     "ADMIN_TOKEN_FALLBACK_ENABLED": "false",
     "ADMIN_ALLOWED_EMAILS": "gudeliusvermessung@web.de,jost@gudeliusvermessung.de",
-    "PUBLIC_SITE_URL": "https://gudverm.github.io/website/",
+    "PUBLIC_SITE_URL": "https://gudeliusvermessung.de/",
     "ADMIN_APP_URL": "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/"
   },
   "d1_databases": [
