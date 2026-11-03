@@ -1350,3 +1350,13 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
     text-shadow:0 2px 14px rgba(0,0,0,.30);
   }
 }
+
+/* Unternehmensseite: das zweite Portraet nur auf Mobilgeraeten ausblenden. */
+@media (max-width:650px){
+  .subpage-main #team .about-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .subpage-main #team .portrait-wrap{
+    display:none;
+  }
+}

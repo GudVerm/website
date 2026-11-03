@@ -1,5 +1,5 @@
 name: Visual baseline initialize
-# refresh: unternehmen-mobil-bild-fallback-20261103
+# refresh: unternehmen-mobile-portrait-hide-20261103
 
 on:
   push:
