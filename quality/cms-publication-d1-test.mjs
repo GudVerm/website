@@ -66,6 +66,7 @@ const revision=async()=>{const d=await api("/api/admin/drafts");assert.equal(d.s
 const publish=async(keys,expected_revision)=>api("/api/admin/drafts/publish","POST",{keys,expected_revision});
 
 assert.equal((await api("/api/admin/drafts","GET",undefined,false)).status,403,"Admin muss geschützt sein");
+assert.equal((await api("/api/admin/drafts")).status,200,"Test-Datenbank muss initialisiert werden");
 assert.equal((await draft("kontakt/email","keine-email")).status,422,"Ungültige E-Mail darf nicht gespeichert werden");
 assert.equal((await api("/api/admin/content/kontakt/email","PUT",123)).status,422,"Falscher Typ darf nicht live gespeichert werden");
 assert.equal((await draft("projekte/index",[{slug:"duplikat"},{slug:"duplikat"}])).status,422);
