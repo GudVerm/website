@@ -635,6 +635,14 @@ body.modal-open{overflow:hidden}
 }
 
 
+/* Platzhalter-Logo in den Geraetevorschauen vollstaendig sichtbar halten. */
+.equip-preview-strip img[src*="gudelius-logo.png"],
+.equip-preview-trigger img[src*="gudelius-logo.png"]{
+  object-fit:contain;
+  padding:4px;
+  background:#fff;
+}
+
 /* Hersteller-/Produktbilder als Beta-Platzhalter */
 .equip-preview-strip{
   grid-template-columns:repeat(auto-fit,minmax(54px,1fr));
