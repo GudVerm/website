@@ -205,7 +205,7 @@ const externalTechniqueImages=[...publicSiteJs.matchAll(/image:'(https?:\/\/[^']
 check(externalTechniqueImages.length===0,"Technik enthält fremde Laufzeit-Bilder: "+externalTechniqueImages.join(", "));
 // Die redaktionell festgelegten Geräte-Dummybilder verwenden das Gudelius-Logo.
 const equipmentDefaults=publicSiteJs.split("const equipmentFallbackBySlug")[0].split("const equipmentData")[1]||"";
-const deviceImages=[...equipmentDefaults.matchAll(/image:\\s*'([^']+)'/g)].map(match=>match[1]);
+const deviceImages=[...equipmentDefaults.matchAll(/image:\s*'([^']+)'/g)].map(match=>match[1]);
 check(deviceImages.length===13,"Technik muss weiterhin 13 Geräte-/Software-Fallbackbilder besitzen.");
 check(deviceImages.every(image=>image==="assets/media/gudelius-logo.png"),
   "Geräte-Fallbackbilder müssen das abgestimmte Gudelius-Logo verwenden.");
