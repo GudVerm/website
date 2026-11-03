@@ -958,9 +958,11 @@ async function refreshDraftToolbar(toolbar){
       knownDraftKeys.clear();
       knownDraftRecords.clear();
     }
+    toolbar.dataset.draftRevision=typeof data.revision==="string"?data.revision:"";
     const serverCount=Array.isArray(data.drafts)?drafts.length:Number(data.count||0);
     renderDraftToolbarCount(toolbar,Math.max(serverCount,knownDraftKeys.size));
   }catch{
+    delete toolbar.dataset.draftRevision;
     if(count&&knownDraftKeys.size===0)count.textContent="?";
     else renderDraftToolbarCount(toolbar);
   }
@@ -1013,10 +1015,15 @@ function ensureDraftToolbar(){
       alert("Es gibt noch ungespeicherte Änderungen. Bitte zuerst alle Änderungen speichern und die Vorschau prüfen, bevor du veröffentlichst.");
       return;
     }
+    const revision=toolbar.dataset.draftRevision||"";
+    if(!revision){
+      alert("Die aktuelle Entwurfsliste konnte nicht geprüft werden. Bitte Seite neu laden.");
+      return;
+    }
     if(!confirm("Alle gespeicherten Entwürfe jetzt veröffentlichen?"))return;
     const button=event.currentTarget;button.disabled=true;
     try{
-      const r=await fetch(getApi()+"/api/admin/drafts/publish",{method:"POST",headers:adminHeaders({"content-type":"application/json"}),credentials:"include",body:"{}"});
+      const r=await fetch(getApi()+"/api/admin/drafts/publish",{method:"POST",headers:adminHeaders({"content-type":"application/json"}),credentials:"include",body:JSON.stringify({expected_revision:revision})});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||("HTTP "+r.status));
       const failedMedia=Array.isArray(data.media_cleanup_failed)?data.media_cleanup_failed:[];
       alert((data.count||0)+" Entwürfe veröffentlicht."+(failedMedia.length?" ACHTUNG: "+failedMedia.length+" Medien konnten nicht bereinigt werden: "+failedMedia.join(", "):""));
@@ -1823,6 +1830,7 @@ function renderProjectEditor(item){
   up.addEventListener("click",()=>move(-1));down.addEventListener("click",()=>move(1));
   remove.addEventListener("click",async()=>{
     if(!item.archived||!getApi()||!hasAdminAuth())return;
+    if(!cmsDraftMode)return setStatus(status,"Zum sicheren Löschen zuerst den Entwurfsmodus aktivieren.",false);
     if(!confirm("„"+displayTitle+"“ endgültig löschen? Dieser Schritt kann nicht rückgängig gemacht werden."))return;
     remove.disabled=true;
     const previousProjects=projects.slice();
@@ -3356,7 +3364,7 @@ function renderTechniqueEditor(item){
     if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
     const copiedName=(techniqueValue(item,"name")||item.name||item.slug)+" Kopie";
     const slug=uniqueTechniqueSlug(copiedName);
-    const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:false,archived:false,order:equipment.length+1};
+    const copy={...item,slug,key:"equipment/"+slug,name:copiedName,fallback:techniqueFallbackForGroup(item.group),visible:cmsDraftMode===true,archived:false,order:equipment.length+1};
     duplicateButton.disabled=true;
     try{
       equipment.push(copy);
@@ -3381,6 +3389,7 @@ function renderTechniqueEditor(item){
   permanentDelete.addEventListener("click",async()=>{
     if(!item.archived) return;
     if(!getApi()||!hasAdminAuth()) return setStatus(textStatus,"Worker-URL oder Admin-Anmeldung fehlt.",false);
+    if(!cmsDraftMode)return setStatus(textStatus,"Zum sicheren Löschen zuerst den Entwurfsmodus aktivieren.",false);
     if(!confirm("„"+displayName+"“ endgültig aus dem CMS entfernen? Dieser Schritt kann nicht rückgängig gemacht werden.")) return;
     permanentDelete.disabled=true;
     const previousEquipment=equipment.slice();
