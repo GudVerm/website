@@ -1,36 +1,42 @@
-# Staging und Produktion
+# Produktionsumstellung GudeliusVermessung
 
-Die aktive Website-Umgebung ist in `site.environments.json` deklariert.
+## Status
 
-## Aktueller Zustand
+Der Branch `production-cutover-20261103` enthält die **vorbereitete** Produktionskonfiguration.
+Dieser Branch ist **noch nicht** die live erreichbare Website. Die Domain- und Cloudflare-Umschaltung steht aus.
+`main` bleibt bis zur finalen Freigabe auf Staging.
 
-- **staging** ist aktiv: `https://gudverm.github.io/website/`
-- Staging bleibt per Meta-Robots und `robots.txt` auf **noindex / Disallow**
-- Der Worker verwendet aktuell die Staging-URL als `PUBLIC_SITE_URL` und `ALLOWED_ORIGIN`
-- `gudeliusvermessung.de` ist nur als vorbereitete Produktionsumgebung hinterlegt
-- DNS, Wix und Mailrecords werden durch keinen Workflow verändert
+## Vorbereitete Konfiguration
 
-## Produktionsziel
+- Geplante öffentliche Website: https://gudeliusvermessung.de/
+- GitHub Pages: `CNAME` mit `gudeliusvermessung.de`
+- CMS: https://gudelius-cms.gudeliusvermessung.workers.dev/
+- Cloudflare-Worker `PUBLIC_SITE_URL` = `https://gudeliusvermessung.de/`
+- Cloudflare-Worker `ALLOWED_ORIGIN` = `https://gudeliusvermessung.de`
+- Produktion erlaubt Suchmaschinen das Crawling; `sitemap.xml` nutzt Produktions-URLs
+- 404-Seite und geschütztes CMS bleiben weiterhin `noindex`
 
-Die Produktionskonfiguration ist in `site.environments.json` vollständig beschrieben:
+## Kritische Schritte vor dem Zusammenführen in main
 
-- Public Base: `https://gudeliusvermessung.de/`
-- Allowed Origin: `https://gudeliusvermessung.de`
-- Robots: `robots.production.txt`
-- Sitemap: `https://gudeliusvermessung.de/sitemap.xml`
+1. DNS-Zone der vorhandenen Domain sichern (inklusive A, AAAA, CNAME, MX, TXT, CAA und DNSSEC); Mailkonfiguration unverändert lassen.
+2. Cloudflare-Worker anhand dieser Branch-Konfiguration mit `wrangler deploy` veröffentlichen. Erst danach wird die Domain im Kontaktformular korrekt als Origin akzeptiert.
+3. Produktions-Origin per Preflight `OPTIONS /api/contact` und öffentlichen CMS-Zugriff `GET /api/site` prüfen.
+4. GitHub Pages mit der Domain `gudeliusvermessung.de` verknüpfen, sobald die Worker-Seite bereit ist.
+5. Nur die **Website-DNS-Einträge** umstellen:
+   - `@` A: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - optional `@` AAAA nach den GitHub-Pages-Werten
+   - `www` CNAME: `gudverm.github.io`
+   - alte Wix-A/AAAA/CNAME-Einträge für dieselben Hosts durch die neuen Werte **ersetzen**, nicht zusätzlich widersprüchliche Einträge stehen lassen
+   - MX, SPF, DKIM, DMARC und andere Mail-Einträge **nicht ändern**
+6. Branch erst nach den obigen Schritten freigeben und in `main` übernehmen, damit die Produktionsdatei `CNAME` aktiviert wird.
+7. Bei GitHub Pages `Enforce HTTPS` aktivieren und sowohl Apex als auch `www` prüfen.
+8. Browsercheck auf Mobil/Tablet/Desktop, alle Unterseiten, Kontaktformular, CMS-R2-Bilder, Admin-Vorschau, `robots.txt` und `sitemap.xml` prüfen.
 
-Die HTML-Dateien tragen bereits Produktions-Canonicals, bleiben im Staging jedoch durch `noindex` nicht indexierbar.
+## Rollback
 
-## Späterer Cutover
+- Bisherige Wix-Seite bis zur abgeschlossenen Abnahme erhalten.
+- DNS-Änderungen schriftlich protokollieren; bei einem Fehler die zuvor gesicherten Website-DNS-Einträge wiederherstellen.
+- Cloudflare-Worker bei Bedarf wieder auf den Staging-Origin konfigurieren.
+- Änderungen am Code regulär revertieren, keine Force-Pushes.
 
-Erst beim bewusst manuellen Produktivstart werden nacheinander:
-
-1. Domain verifiziert und DNS-/Mailrecords gesichert.
-2. GitHub Pages Custom Domain gesetzt.
-3. ausschließlich Website-DNS umgestellt.
-4. Worker `PUBLIC_SITE_URL` und `ALLOWED_ORIGIN` auf Produktion gesetzt.
-5. `robots.production.txt` als aktive `robots.txt` verwendet.
-6. Staging-`noindex` aus den Produktionsartefakten entfernt.
-7. Release-Preflight und Browser-/SEO-Checks ausgeführt.
-
-Der aktuelle Quality-Workflow blockiert versehentliche Mischzustände über `quality/environment-check.mjs`.
+**Wichtig:** Eine `CNAME`-Datei allein schaltet die Domain nicht um. DNS, HTTPS und der tatsächlich deployte Cloudflare-Worker müssen zusammenpassen.
