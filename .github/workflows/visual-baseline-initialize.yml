@@ -1,5 +1,5 @@
 name: Visual baseline initialize
-# refresh: leistungskacheln-bildausschnitt-20261103
+# refresh: unternehmen-hero-jost-portrait-mobile-20261103
 
 on:
   push:

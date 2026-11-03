@@ -1311,3 +1311,34 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
 @media(max-width:650px){
   .home-page .services .service-card .pic-frame{height:205px}
 }
+
+/* Unternehmens-Hero: auf Smartphones Jost zeigen, Desktop unveraendert lassen. */
+.company-directory-hero > .company-directory-hero-mobile-media{
+  display:none;
+}
+@media (max-width:650px){
+  .company-directory-hero{
+    min-height:700px;
+    height:auto;
+    padding:clamp(285px,43vh,365px) 0 42px;
+    display:flex;
+    align-items:flex-end;
+  }
+  .company-directory-hero > .directory-hero-media:not(.company-directory-hero-mobile-media){
+    display:none;
+  }
+  .company-directory-hero > .company-directory-hero-mobile-media{
+    display:block;
+    object-fit:cover;
+    object-position:center 20% !important;
+    transform:none !important;
+    transform-origin:center !important;
+  }
+  .company-directory-hero::before{
+    background:linear-gradient(180deg,
+      rgba(13,20,24,.04) 0%,
+      rgba(13,20,24,.10) 27%,
+      rgba(13,20,24,.72) 48%,
+      rgba(13,20,24,.96) 100%);
+  }
+}
