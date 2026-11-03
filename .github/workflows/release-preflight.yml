@@ -33,6 +33,8 @@ jobs:
         run: node quality/environment-check.mjs
       - name: CMS-/Admin-Verträge prüfen
         run: node quality/admin-contract-check.mjs
+      - name: Entwurfs-Veröffentlichung und D1-Rollback prüfen
+        run: node --experimental-sqlite quality/cms-publication-d1-test.mjs
       - name: Erwartete Releasekennung bestimmen
         id: release
         env:
