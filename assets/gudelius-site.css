@@ -1323,6 +1323,8 @@ footer .footer-credit-logo{display:block;width:150px;height:auto;max-width:100%;
     padding:clamp(285px,43vh,365px) 0 42px;
     display:flex;
     align-items:flex-end;
+    /* Direktes Portraet-Fallback, solange das CMS-Medium noch laedt. */
+    background:#172026 url('media/jost-gudelius.jpg') center 20% / cover no-repeat;
   }
   .company-directory-hero > .directory-hero-media:not(.company-directory-hero-mobile-media){
     display:none;
