@@ -46,7 +46,7 @@ jobs:
       - name: GitHub Pages prüfen
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 20 https://gudverm.github.io/website/ -o /tmp/site.html
+          curl --fail --silent --show-error --location --max-time 20 https://gudeliusvermessung.de/ -o /tmp/site.html
           grep -q "Gudelius" /tmp/site.html
       - name: Deployten Worker abgleichen
         env:

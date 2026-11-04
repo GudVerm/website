@@ -1,5 +1,5 @@
 {
-  "active_environment": "staging",
+  "active_environment": "production",
   "cms_api": "https://gudelius-cms.gudeliusvermessung.workers.dev",
   "admin_url": "https://gudelius-cms.gudeliusvermessung.workers.dev/admin/",
   "environments": {

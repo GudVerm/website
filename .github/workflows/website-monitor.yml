@@ -19,7 +19,7 @@ jobs:
       - name: Öffentliche Website prüfen
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location --max-time 20 https://gudverm.github.io/website/ -o /tmp/site.html
+          curl --fail --silent --show-error --location --max-time 20 https://gudeliusvermessung.de/ -o /tmp/site.html
           grep -q "Gudelius" /tmp/site.html
       - name: Worker-Healthcheck prüfen
         run: |
@@ -35,6 +35,6 @@ jobs:
         if: always()
         run: |
           echo "### Gudelius Website Monitor" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Website: https://gudverm.github.io/website/" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Website: https://gudeliusvermessung.de/" >> "$GITHUB_STEP_SUMMARY"
           echo "- Worker: https://gudelius-cms.gudeliusvermessung.workers.dev/api/health" >> "$GITHUB_STEP_SUMMARY"
           echo "- Intervall: alle 6 Stunden" >> "$GITHUB_STEP_SUMMARY"

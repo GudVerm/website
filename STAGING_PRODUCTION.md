@@ -1,36 +1,51 @@
-# Staging und Produktion
+# Staging und Produktion – Cloudflare Pages
 
-Die aktive Website-Umgebung ist in `site.environments.json` deklariert.
+## Architektur
 
-## Aktueller Zustand
+- **Staging:** `main` → GitHub Pages: https://gudverm.github.io/website/ (weiterhin noindex)
+- **Vorbereitete Produktion:** Branch `production-cutover-20261103` → **Cloudflare Pages**, zunächst `*.pages.dev`, später https://gudeliusvermessung.de/
+- **Öffentliche Website:** reine statische HTML-, CSS-, JS- und Mediendateien; Buildskript `scripts/build-cloudflare-pages.mjs`
+- **Ausgabeverzeichnis:** `dist`; enthält weder `admin/`, `cloudflare/`, `quality/` noch `.github/`
+- **CMS/Admin:** bestehender Cloudflare-Worker https://gudelius-cms.gudeliusvermessung.workers.dev/admin/
+- **Daten:** bestehende D1-Datenbank, R2-Bucket und Brevo bleiben unverändert.
+- **Kein GitHub-Pages-CNAME:** Die Domain wird ausschließlich in **Cloudflare Pages → Custom domains** eingerichtet.
 
-- **staging** ist aktiv: `https://gudverm.github.io/website/`
-- Staging bleibt per Meta-Robots und `robots.txt` auf **noindex / Disallow**
-- Der Worker verwendet aktuell die Staging-URL als `PUBLIC_SITE_URL` und `ALLOWED_ORIGIN`
-- `gudeliusvermessung.de` ist nur als vorbereitete Produktionsumgebung hinterlegt
-- DNS, Wix und Mailrecords werden durch keinen Workflow verändert
+Die Konfiguration auf dem Produktions-Branch veröffentlicht **noch keine** Änderung an der Domain, am Worker oder an den DNS-Einträgen.
 
-## Produktionsziel
+## Cloudflare-Pages-Projekt einrichten
 
-Die Produktionskonfiguration ist in `site.environments.json` vollständig beschrieben:
+1. Bei Cloudflare anmelden und **Workers & Pages → Create application → Pages → Import an existing Git repository** öffnen.
+2. GitHub mit dem vorhandenen Repository `GudVerm/website` verbinden.
+3. Folgende Werte verwenden:
 
-- Public Base: `https://gudeliusvermessung.de/`
-- Allowed Origin: `https://gudeliusvermessung.de`
-- Robots: `robots.production.txt`
-- Sitemap: `https://gudeliusvermessung.de/sitemap.xml`
+   - Framework-Preset: **None**
+   - Production branch: `production-cutover-20261103`
+   - Root directory: Repository-Wurzel `/`
+   - Build command: `node scripts/build-cloudflare-pages.mjs`
+   - Build output directory: `dist`
 
-Die HTML-Dateien tragen bereits Produktions-Canonicals, bleiben im Staging jedoch durch `noindex` nicht indexierbar.
+4. **Save and Deploy** ausführen. Zuerst die von Cloudflare angezeigte `*.pages.dev`-Adresse auf Inhalt, Bilder, Navigation und Responsiveness prüfen. CMS-/Formular-Zugriffe über die neue Pages-Domain benötigen bei Bedarf eine zusätzliche explizite Origin-Freigabe – niemals CORS `*` setzen.
+5. Vor Umstellung der Bestandsdomain den Worker-Stand, DNS und E-Mail vollständig prüfen.
 
-## Späterer Cutover
+Cloudflare Pages übernimmt nach der GitHub-Verbindung neue Commits auf dem gewählten Produktions-Branch automatisch.
 
-Erst beim bewusst manuellen Produktivstart werden nacheinander:
+## Domain-Umschaltung
 
-1. Domain verifiziert und DNS-/Mailrecords gesichert.
-2. GitHub Pages Custom Domain gesetzt.
-3. ausschließlich Website-DNS umgestellt.
-4. Worker `PUBLIC_SITE_URL` und `ALLOWED_ORIGIN` auf Produktion gesetzt.
-5. `robots.production.txt` als aktive `robots.txt` verwendet.
-6. Staging-`noindex` aus den Produktionsartefakten entfernt.
-7. Release-Preflight und Browser-/SEO-Checks ausgeführt.
+1. Bestehende DNS-Zone vollständig sichern: Nameserver, A/AAAA/CNAME, MX, SPF, DKIM, DMARC, TXT, SRV, CAA und DNSSEC.
+2. Domain `gudeliusvermessung.de` als Zone in Cloudflare hinterlegen. Für die **Apex-Domain** verlangt Cloudflare Pages eine Cloudflare-DNS-Zone mit passenden Nameservern.
+3. Vor der Nameserverumstellung ALLE E-Mail-, Verifizierungs- und anderen weiterhin benötigten Records korrekt bei Cloudflare anlegen und vergleichen. Kein Mailrecord darf fehlen oder geändert werden.
+4. Bei Cloudflare Pages im Projekt **Custom domains → Set up a domain** `gudeliusvermessung.de` hinzufügen. Cloudflare richtet den erforderlichen DNS-Bezug ein.
+5. Optional `www.gudeliusvermessung.de` als weitere Custom Domain hinzufügen und eine kanonische HTTPS-Weiterleitung von www auf Apex konfigurieren.
+6. Nach dem erforderlichen Cloudflare-Worker-Deploy prüfen, dass `ALLOWED_ORIGIN` die neue Domain enthält und `PUBLIC_SITE_URL` die neue öffentliche URL hat.
+7. Alle Unterseiten, Kontaktformular, CMS, Medien, 404, SSL, Sitemap und Suchmaschinenfreigabe über die echte Domain testen.
 
-Der aktuelle Quality-Workflow blockiert versehentliche Mischzustände über `quality/environment-check.mjs`.
+**Keine** GitHub-Pages-A-Records (185.199.*), kein `www → gudverm.github.io` und keine GitHub-Pages-CNAME-Datei verwenden.
+
+## Rollback
+
+- Die bisherige Wix-Seite während des Cutovers mindestens 48 Stunden als Rückfalloption erhalten.
+- Vorherige Website-DNS-Einträge sichern und bei Bedarf wiederherstellen; E-Mail-DNS dabei unangetastet lassen.
+- Worker-Konfiguration bei Bedarf auf die vorherige funktionierende Version zurückstellen.
+- GitHub-Branch `main` bleibt als Staging-/Rollback-Referenz erhalten.
+
+**Status:** Cloudflare Pages und Domain-DNS müssen vom autorisierten Cloudflare-Konto aus eingerichtet werden. Dieser Branch allein schaltet noch nichts live.
